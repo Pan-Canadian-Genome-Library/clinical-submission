@@ -21,7 +21,7 @@ app.use(helmet());
 app.use(requestLogger);
 
 // Routes
-app.use('/health-check', healthCheckRouter);
+app.use('/health', healthCheckRouter);
 
 // Lyric routes
 app.use('/dictionary', lyricProvider.routers.dictionary);

@@ -1,11 +1,11 @@
-import express, { Request, Response, Router } from 'express';
+import express, { Router } from 'express';
+
+import healthController from '@/controllers/healthController.js';
 
 export const healthCheckRouter: Router = (() => {
 	const router = express.Router();
 
-	router.get('/', (_req: Request, res: Response) => {
-		return res.status(200).send('Service is healthy');
-	});
+	router.get('/', healthController.health);
 
 	return router;
 })();

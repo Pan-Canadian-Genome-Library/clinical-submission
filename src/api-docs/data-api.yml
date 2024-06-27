@@ -119,11 +119,12 @@
           type: integer
         description: Optional query parameter to specify the number of results per page. Default value is 20
     requestBody:
+      description: Custom filter SQON Notation to provide a flexible system for combining filters in a JSON object format. Find more documentation on https://github.com/overture-stack/sqon-builder
+      required: true
       content:
         application/json:
           schema:
             type: object
-            description: A SQON object
             example:
               op: 'and'
               content:
