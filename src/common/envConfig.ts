@@ -1,6 +1,9 @@
 import dotenv from 'dotenv';
 import { z } from 'zod';
 
+const NodeEnvOptions = ['development', 'production'] as const;
+const LogLeveOptions = ['error', 'warn', 'info', 'debug'] as const;
+
 dotenv.config();
 
 const envSchema = z.object({
@@ -9,12 +12,9 @@ const envSchema = z.object({
 	DB_PASSWORD: z.string(),
 	DB_PORT: z.coerce.number().min(100),
 	DB_USER: z.string(),
-	ID_CUSTOM_ALPHABET: z.string().default('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'),
-	ID_CUSTOM_SIZE: z.coerce.number().default(21),
-	ID_USELOCAL: z.coerce.boolean().default(true),
-	LECTERN_URL: z.string(),
-	LOG_LEVEL: z.string().default('info'),
-	NODE_ENV: z.union([z.literal('development'), z.literal('production')]).default('development'),
+	LECTERN_URL: z.string().url(),
+	LOG_LEVEL: z.enum(LogLeveOptions).default('info'),
+	NODE_ENV: z.enum(NodeEnvOptions).default('development'),
 	SERVER_HOST: z.string().default('localhost'),
 	SERVER_PORT: z.coerce.number().min(100).default(3000),
 	SERVER_UPLOAD_LIMIT: z.string().default('10mb'),

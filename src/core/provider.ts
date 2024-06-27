@@ -11,9 +11,10 @@ const appConfig: AppConfig = {
 		password: env.DB_PASSWORD,
 	},
 	idService: {
-		customAlphabet: env.ID_CUSTOM_ALPHABET,
-		customSize: env.ID_CUSTOM_SIZE,
-		useLocal: env.ID_USELOCAL,
+		// Hardcoded values to keep consistency on PCGL
+		customAlphabet: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+		customSize: 21,
+		useLocal: true,
 	},
 	limits: {
 		fileSize: env.SERVER_UPLOAD_LIMIT,
