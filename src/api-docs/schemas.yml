@@ -84,7 +84,7 @@ components:
           description: Description of uploading Submission files
         batchErrors:
           type: array
-          description: list of all batch related errors, should be empty on success
+          description: List of all batch related errors, should be empty on success
           items:
             $ref: '#/components/schemas/BatchError'
         inProcessEntities:
@@ -120,7 +120,7 @@ components:
       properties:
         id:
           type: number
-          description: Id of the Submission
+          description: ID of the Submission
         data:
           type: object
           additionalProperties:
@@ -128,7 +128,7 @@ components:
             properties:
               creator:
                 type: string
-                description: User name who created the submission
+                description: Name of user who created the submission
               records:
                 type: array
                 items:
@@ -136,7 +136,7 @@ components:
                   description: Content of the file in JSON format
               batchName:
                 type: string
-                description: Original filename  of the submission
+                description: Original filename of the submission
         dictionary:
           type: object
           description: Dictionary used to validate the submission
@@ -171,20 +171,20 @@ components:
           description: Date and time of creation
         createdBy:
           type: string
-          description: User name who created the submission
+          description: Name of user who created the submission
         udpatedAt:
           type: string
           description: Date and time of latest update
         updatedBy:
           type: string
-          description: User name who last updated the submission
+          description: Name of user who last updated the submission
 
     ActiveSubmissionSummary:
       type: object
       properties:
         id:
           type: number
-          description: Id of the Submission
+          description: ID of the Submission
         data:
           type: object
           additionalProperties:
@@ -192,13 +192,13 @@ components:
             properties:
               batchName:
                 type: string
-                description: Original filename  of the submission
+                description: Original filename of the submission
               creator:
                 type: string
-                description: User name who created the submission
+                description: Name of user who created the submission
               recordsCount:
                 type: number
-                description: Number Of Records
+                description: Number of Records
         dictionary:
           type: object
           description: Dictionary used to validate the submission
@@ -233,13 +233,13 @@ components:
           description: Date and time of creation
         createdBy:
           type: string
-          description: User name who created the submission
+          description: Name of user who created the submission
         udpatedAt:
           type: string
           description: Date and time of latest update
         updatedBy:
           type: string
-          description: User name who last updated the submission
+          description: Name of user who last updated the submission
 
     ActiveSubmissionsSummaryResult:
       type: array
@@ -289,14 +289,14 @@ components:
       properties:
         fieldName:
           type: string
-          description: the field name that the error is related to
+          description: The field name that the error is related to
         info:
           type: object
-          description: contains context information related to the error
+          description: Contains context information related to the error
           properties:
             value:
               type: array
-              description: the faulty value
+              description: The faulty value
               items:
                 type: string
         index:
@@ -305,7 +305,7 @@ components:
           description: Index of the row for this error (starting from 0)
         errorType:
           type: string
-          description: the type of error
+          description: The type of error
           enum:
             - INVALID_BY_RANGE
             - INVALID_BY_REGEX
@@ -322,10 +322,10 @@ components:
       properties:
         message:
           type: string
-          description: a message describing the error
+          description: A message describing the error
         type:
           type: string
-          description: the type of error
+          description: The type of error
           enum:
             - INCORRECT_SECTION
             - INVALID_FILE_EXTENSION
@@ -336,6 +336,6 @@ components:
             - UNRECOGNIZED_HEADER
         batchName:
           type: array
-          description: list of batch names causing error
+          description: List of batch names causing error
           items:
             type: string
