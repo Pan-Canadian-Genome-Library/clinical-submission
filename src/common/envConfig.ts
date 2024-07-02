@@ -7,6 +7,7 @@ const LogLeveOptions = ['error', 'warn', 'info', 'debug'] as const;
 dotenv.config();
 
 const envSchema = z.object({
+	ALLOWED_ORIGINS: z.string().optional(),
 	DB_HOST: z.string(),
 	DB_NAME: z.string(),
 	DB_PASSWORD: z.string(),
