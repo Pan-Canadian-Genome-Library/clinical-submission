@@ -1,5 +1,5 @@
 import { errorHandler } from '@overture-stack/lyric';
-import express, { Express } from 'express';
+import express from 'express';
 import helmet from 'helmet';
 import { pino } from 'pino';
 
@@ -9,10 +9,7 @@ import { healthCheckRouter } from '@/routes/healthCheck.js';
 import { openAPIRouter } from '@/routes/openApi.js';
 
 const logger = pino({ name: 'server start' });
-const app: Express = express();
-
-// Set the application to trust the reverse proxy
-app.set('trust proxy', true);
+const app = express();
 
 // Middlewares
 app.use(helmet());

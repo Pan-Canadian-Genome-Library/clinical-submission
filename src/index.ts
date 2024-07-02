@@ -1,10 +1,14 @@
 import { env } from '@/common/envConfig.js';
 import { app, logger } from '@/server.js';
 
-const { NODE_ENV, SERVER_HOST, SERVER_PORT } = env;
+const { NODE_ENV, SERVER_PORT } = env;
 
 const server = app.listen(SERVER_PORT, () => {
-	logger.info(`Server (${NODE_ENV}) running on port http://${SERVER_HOST}:${SERVER_PORT}`);
+	logger.info(`Server started. Running in "${NODE_ENV}" mode. Listening to port ${SERVER_PORT}`);
+
+	if (NODE_ENV === 'development') {
+		logger.info(`Swagger API Docs are available at http://localhost:${SERVER_PORT}/api-docs`);
+	}
 });
 
 const onCloseSignal = () => {

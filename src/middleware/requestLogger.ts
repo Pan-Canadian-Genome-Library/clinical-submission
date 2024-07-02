@@ -1,10 +1,13 @@
 import { Request, Response } from 'express';
 import { pinoHttp } from 'pino-http';
 
-import { logger } from '@/common/logger.js';
-
 export const requestLogger = pinoHttp({
-	logger,
+	autoLogging: {
+		ignore(req) {
+			// disable Swagger UI logs
+			return req.url?.startsWith('/api-docs') ?? false;
+		},
+	},
 	serializers: {
 		req: (req: Request) => ({
 			id: req.id,
