@@ -1,0 +1,28 @@
+# Description of Dictionary API
+
+/dictionary/register:
+  post:
+    summary: Register new dictionary
+    tags:
+      - dictionary
+    requestBody:
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            properties:
+              categoryName:
+                type: string
+                description: A user-defined classification to group and organize data based on shared characteristics or criteria
+                required: true
+              dictionaryName:
+                type: string
+                description: A matching Dictionary Name defined on Dictionary Manager (Lectern)
+                required: true
+              version:
+                type: string
+                description: A matching Dictionary Version defined on Dictionary Manager (Lectern)
+                required: true
+    responses:
+      200:
+        description: Dictionary info
