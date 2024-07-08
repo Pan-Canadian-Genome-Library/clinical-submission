@@ -10,9 +10,12 @@
 		} /* Specify a set of entries that re-map imports to additional lookup locations. */,
 		"resolveJsonModule": true /* Enable importing .json files. */,
 
+		/* JavaScript Support */
+		"allowJs": true,                                  /* Allow JavaScript files to be a part of your program. Use the 'checkJS' option to get errors from these files. */
+
 		/* Emit */
 		"outDir": "dist" /* Specify an output folder for all emitted files. */,
-		"noEmit": true /* Disable emitting files from a compilation. */,
+		"noEmit": false /* Disable emitting files from a compilation. */,
 
 		/* Interop Constraints */
 		"forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
@@ -23,5 +26,7 @@
 
 		/* Completeness */
 		"skipLibCheck": true /* Skip type checking all .d.ts files. */
-	}
+	},
+	"include": ["."],
+	"exclude": ["dist", "node_modules", "**/*.spec.ts", "*.config.js"]
 }
