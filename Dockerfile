@@ -14,6 +14,9 @@ ARG WORKDIR
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 
+# install pnpm as root user, before updating node ownership
+RUN npm i -g pnpm
+
 # create our own user to run node, don't run node in production as root
 ENV APP_UID=9999
 ENV APP_GID=9999
@@ -38,9 +41,9 @@ ARG WORKDIR
 
 COPY --chown=clinical:clinical . ./
 
-RUN npm ci
+RUN pnpm install --ignore-scripts
 
-RUN npm run build:all
+RUN pnpm build:all
 
 
 ######################
@@ -56,8 +59,8 @@ WORKDIR ${WORKDIR}
 
 USER ${APP_USER}:${APP_USER}
 
-# npm will not install any package listed in devDependencies
-RUN npm ci --omit=dev
+# pnpm will not install any package listed in devDependencies
+RUN pnpm install --prod
 
 
 ######################
@@ -80,4 +83,4 @@ EXPOSE 3000
 ENV COMMIT_SHA=${COMMIT}
 ENV NODE_ENV=production
 
-CMD [ "npm", "run", "start:prod" ]
+CMD [ "pnpm", "start:prod" ]

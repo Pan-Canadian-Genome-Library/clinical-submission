@@ -7,7 +7,7 @@
 		"\n==================  Build  ==================": "",
 		"build:compile": "rimraf dist && tsc",
 		"build:copy": "copyfiles src/api-docs/**/*.yml dist/",
-		"build:all": "npm run build:compile && npm run build:copy",
+		"build:all": "pnpm build:compile && pnpm build:copy",
 		"\n=============  Dev environment  =============": "",
 		"lint": "eslint .",
 		"lint:fix": "eslint --fix .",
