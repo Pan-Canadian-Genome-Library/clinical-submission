@@ -11,7 +11,7 @@
 		"resolveJsonModule": true /* Enable importing .json files. */,
 
 		/* JavaScript Support */
-		"allowJs": true,                                  /* Allow JavaScript files to be a part of your program. Use the 'checkJS' option to get errors from these files. */
+		"allowJs": true /* Allow JavaScript files to be a part of your program. Use the 'checkJS' option to get errors from these files. */,
 
 		/* Emit */
 		"outDir": "dist" /* Specify an output folder for all emitted files. */,
@@ -27,6 +27,6 @@
 		/* Completeness */
 		"skipLibCheck": true /* Skip type checking all .d.ts files. */
 	},
-	"include": ["."],
+	"include": ["./src/**/*.ts", "register.js"],
 	"exclude": ["dist", "node_modules", "**/*.spec.ts", "*.config.js"]
 }
