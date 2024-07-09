@@ -12,7 +12,7 @@
 
 		/* Emit */
 		"outDir": "dist" /* Specify an output folder for all emitted files. */,
-		"noEmit": true /* Disable emitting files from a compilation. */,
+		"noEmit": false /* Disable emitting files from a compilation. */,
 
 		/* Interop Constraints */
 		"forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
@@ -23,5 +23,7 @@
 
 		/* Completeness */
 		"skipLibCheck": true /* Skip type checking all .d.ts files. */
-	}
+	},
+	"include": ["./src/**/*.ts", "./register.ts"],
+	"exclude": ["dist", "node_modules", "**/*.spec.ts", "*.config.js"]
 }
