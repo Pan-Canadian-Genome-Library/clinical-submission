@@ -20,7 +20,7 @@
 	"license": "AGPL-3.0-or-later",
 	"type": "module",
 	"dependencies": {
-		"@overture-stack/lyric": "^0.1.2",
+		"@overture-stack/lyric": "^0.7.0",
 		"cors": "^2.8.5",
 		"dotenv": "^16.4.5",
 		"esm-module-alias": "^2.2.0",
