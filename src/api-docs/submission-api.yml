@@ -2,9 +2,9 @@
 
 /submission/{submissionId}:
   get:
-    summary: Get Active Submission by ID
+    summary: Get submission by ID
     tags:
-      - submission
+      - Submission
     parameters:
       - name: submissionId
         in: path
@@ -12,11 +12,11 @@
         required: true
     responses:
       200:
-        description: Active Submission
+        description: Submission details
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ActiveSubmissionResult'
+              $ref: '#/components/schemas/SubmissionResult'
 
       401:
         $ref: '#/components/responses/UnauthorizedError'
@@ -30,7 +30,7 @@
   delete:
     summary: Clear an Active Submission by ID
     tags:
-      - submission
+      - Submission
     parameters:
       - name: submissionId
         in: path
@@ -42,7 +42,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ActiveSubmissionResult'
+              $ref: '#/components/schemas/SubmissionResult'
       400:
         $ref: '#/components/responses/BadRequest'
       401:
@@ -56,27 +56,42 @@
       503:
         $ref: '#/components/responses/ServiceUnavailableError'
 
-/submission/{submissionId}/{entityName}:
+/submission/{submissionId}/{actionType}:
   delete:
     summary: Clear Active Submission by entity name
     tags:
-      - submission
+      - Submission
     parameters:
       - name: submissionId
         in: path
         type: string
         required: true
-      - name: entityName
+        description: The ID of the Submission
+      - name: actionType
         in: path
+        required: true
+        schema:
+          type: string
+          enum: [inserts, updates, deletes]
+        description: Parameter to specify the type of record to remove from the Submission. Must be one of `inserts`, `updates`, or `deletes` (case insensitive)
+      - name: entityName
+        in: query
         type: string
         required: true
+        description: The name of the entity
+      - name: index
+        in: query
+        required: false
+        schema:
+          type: integer
+        description: An optional query parameter used to specify the index of the item within the submission type to be deleted. <br />If not provided all the items within the submission type will be deleted.
     responses:
       200:
         description: Submission cleared successfully. Returns the current Active Submission
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ActiveSubmissionResult'
+              $ref: '#/components/schemas/SubmissionResult'
       400:
         $ref: '#/components/responses/BadRequest'
       401:
@@ -92,98 +107,27 @@
 
 /submission/category/{categoryId}:
   get:
-    summary: List Active Submissions for a category
+    summary: Retrieve the Submissions for a category in this user session
     tags:
-      - submission
+      - Submission
     parameters:
-      - name: categoryId
-        in: path
-        type: string
-        required: true
+      - $ref: '#/components/parameters/path/CategoryId'
+      - $ref: '#/components/parameters/query/Page'
+      - $ref: '#/components/parameters/query/PageSize'
+      - $ref: '#/components/parameters/query/OnlyActive'
+      - $ref: '#/components/parameters/query/Organization'
     responses:
       200:
-        description: Active Submissions
+        description: Submissions details
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ActiveSubmissionsSummaryResult'
+              $ref: '#/components/schemas/SubmissionsSummaryResult'
 
       401:
         $ref: '#/components/responses/UnauthorizedError'
       404:
         $ref: '#/components/responses/NotFound'
-      500:
-        $ref: '#/components/responses/ServerError'
-      503:
-        $ref: '#/components/responses/ServiceUnavailableError'
-
-/submission/category/{categoryId}/organization/{organization}:
-  get:
-    summary: List Active Submissions for a category and organization
-    tags:
-      - submission
-    parameters:
-      - name: categoryId
-        in: path
-        type: string
-        required: true
-      - name: organization
-        in: path
-        type: string
-        required: true
-    responses:
-      200:
-        description: Active Submissions
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ActiveSubmissionSummaryResult'
-
-      401:
-        $ref: '#/components/responses/UnauthorizedError'
-      404:
-        $ref: '#/components/responses/NotFound'
-      500:
-        $ref: '#/components/responses/ServerError'
-      503:
-        $ref: '#/components/responses/ServiceUnavailableError'
-
-/submission/category/{categoryId}/upload:
-  post:
-    summary: Upload submission files
-    tags:
-      - submission
-    consumes:
-      - multipart/form-data
-    parameters:
-      - name: categoryId
-        in: path
-        type: string
-        required: true
-    requestBody:
-      content:
-        multipart/form-data:
-          schema:
-            type: object
-            properties:
-              files:
-                type: array
-                items:
-                  type: string
-                  format: binary
-              organization:
-                type: string
-    responses:
-      200:
-        description: Submission accepted
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateSubmissionResult'
-      400:
-        $ref: '#/components/responses/BadRequest'
-      401:
-        $ref: '#/components/responses/UnauthorizedError'
       500:
         $ref: '#/components/responses/ServerError'
       503:
@@ -193,12 +137,9 @@
   post:
     summary: Commit Active Submission
     tags:
-      - submission
+      - Submission
     parameters:
-      - name: categoryId
-        in: path
-        type: file
-        required: true
+      - $ref: '#/components/parameters/path/CategoryId'
       - name: submissionId
         in: path
         type: string
@@ -214,6 +155,119 @@
         $ref: '#/components/responses/BadRequest'
       401:
         $ref: '#/components/responses/UnauthorizedError'
+      409:
+        $ref: '#/components/responses/StatusConflict'
+      500:
+        $ref: '#/components/responses/ServerError'
+      503:
+        $ref: '#/components/responses/ServiceUnavailableError'
+
+/submission/category/{categoryId}/data:
+  post:
+    summary: Add new data to a submission for the specified category. Returns an Active Submission containing the newly created records
+    tags:
+      - Submission
+    consumes:
+      - multipart/form-data
+    parameters:
+      - $ref: '#/components/parameters/path/CategoryId'
+    requestBody:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              files:
+                type: array
+                items:
+                  type: string
+                  format: binary
+              organization:
+                type: string
+            required:
+              - files
+              - organization
+    responses:
+      200:
+        description: Submission accepted
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubmissionResult'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/UnauthorizedError'
+      500:
+        $ref: '#/components/responses/ServerError'
+      503:
+        $ref: '#/components/responses/ServiceUnavailableError'
+  put:
+    summary: Modifies existing data for a submission. Returns an Active Submission containing the records that will be updated
+    tags:
+      - Submission
+    consumes:
+      - multipart/form-data
+    parameters:
+      - $ref: '#/components/parameters/path/CategoryId'
+    requestBody:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              files:
+                type: array
+                items:
+                  type: string
+                  format: binary
+              organization:
+                type: string
+            required:
+              - files
+              - organization
+    responses:
+      200:
+        description: Edit Data request accepted
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubmissionResult'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/UnauthorizedError'
+      500:
+        $ref: '#/components/responses/ServerError'
+      503:
+        $ref: '#/components/responses/ServiceUnavailableError'
+
+/submission/category/{categoryId}/data/{systemId}:
+  delete:
+    summary: Removes data from a submission using the System ID. Returns an Active Submission containing the records that will be deleted
+    tags:
+      - Submission
+    parameters:
+      - $ref: '#/components/parameters/path/CategoryId'
+      - name: systemId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: The unique system ID of the data to be deleted
+    responses:
+      200:
+        description: Delete Data request accepted
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubmissionResult'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/UnauthorizedError'
+      404:
+        $ref: '#/components/responses/NotFound'
       409:
         $ref: '#/components/responses/StatusConflict'
       500:

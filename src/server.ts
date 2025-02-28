@@ -38,6 +38,8 @@ app.use(requestLogger);
 app.use('/health', healthCheckRouter);
 
 // Lyric routes
+app.use('/audit', lyricProvider.routers.audit);
+app.use('/category', lyricProvider.routers.category);
 app.use('/dictionary', lyricProvider.routers.dictionary);
 app.use('/submission', lyricProvider.routers.submission);
 app.use('/data', lyricProvider.routers.submittedData);

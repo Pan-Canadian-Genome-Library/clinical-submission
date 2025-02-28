@@ -9,8 +9,32 @@ components:
           schema:
             $ref: '#/components/responses/Error'
 
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error type
+        message:
+          type: string
+          decription: Description of the error
+
     NotFound:
       description: Requested resource could not be found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/responses/Error'
+
+    ServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/responses/Error'
+
+    ServiceUnavailableError:
+      description: Error message indicating the server is currently unable to handle the request, often due to maintenance, overload, or temporary issues
       content:
         application/json:
           schema:
@@ -30,68 +54,338 @@ components:
           schema:
             $ref: '#/components/responses/Error'
 
-    ServerError:
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/responses/Error'
-
-    ServiceUnavailableError:
-      description: Unable to complete the request due to an issue with an external service.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/responses/Error'
-
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-          description: Error type
-        message:
-          type: string
-          decription: Description of the error
-
   schemas:
-    Health:
+    SubmissionResult:
       type: object
       properties:
-        uptime:
+        id:
           type: number
-          description: Number of seconds the current process has been running
-        message:
+          description: ID of the Submission
+        data:
+          type: object
+          properties:
+            inserts:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  records:
+                    type: array
+                    items:
+                      type: object
+                      description: Content of the file in JSON format
+                  batchName:
+                    type: string
+                    description: Original filename  of the submission
+            updates:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    systemId:
+                      type: string
+                    old:
+                      type: object
+                      description: Old Content
+                    new:
+                      type: object
+                      description: New content
+            deletes:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    systemId:
+                      type: string
+                    data:
+                      type: object
+                      description: Content to be deleted
+        dictionary:
+          type: object
+          description: Dictionary used to validate the submission
+          properties:
+            name:
+              type: string
+            version:
+              type: string
+        dictionaryCategory:
+          type: object
+          description: Category this dictionary belongs in
+          properties:
+            id:
+              type: number
+            name:
+              type: string
+        errors:
+          type: object
+          properties:
+            inserts:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ValidationError'
+            updates:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ValidationError'
+            deletes:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ValidationError'
+        organization:
           type: string
-          description: Status of the service
-        timestamp:
-          type: number
-          description: Current system time in Unix time, represented in milliseconds
-    CreateSubmissionResult:
-      required:
-        - status
-        - description
-        - batchErrors
-        - inProcessEntities
-      type: object
-      properties:
+          description: Organization the Submission belongs to
         status:
           type: string
-          description: Result of uploading Submission files
-          enum: ['PROCESSING', 'INVALID_SUBMISSION', 'PARTIAL_SUBMISSION']
-        description:
+          description: Status of the Submission
+          enum: ['OPEN', 'VALID', 'INVALID', 'CLOSED', 'COMMITED']
+        createdAt:
           type: string
-          description: Description of uploading Submission files
-        batchErrors:
+          description: Date and time of creation
+        createdBy:
+          type: string
+          description: User name who created the submission
+        udpatedAt:
+          type: string
+          description: Date and time of latest update
+        updatedBy:
+          type: string
+          description: User name who last updated the submission
+
+    SubmissionsSummaryResult:
+      type: object
+      properties:
+        pagination:
+          type: object
+          properties:
+            currentPage:
+              type: number
+            pageSize:
+              type: number
+            totalPages:
+              type: number
+            totalRecords:
+              type: number
+        records:
           type: array
-          description: List of all batch related errors, should be empty on success
           items:
-            $ref: '#/components/schemas/BatchError'
-        inProcessEntities:
+            $ref: '#/components/schemas/SubmissionSummary'
+
+    SubmissionSummary:
+      type: object
+      properties:
+        id:
+          type: number
+          description: ID of the Submission
+        data:
+          type: object
+          properties:
+            inserts:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  batchName:
+                    type: string
+                    description: Original filename  of the submission
+                  recordsCount:
+                    type: number
+                    description: Number Of Records
+            updates:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  recordsCount:
+                    type: number
+            deletes:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  recordsCount:
+                    type: number
+        dictionary:
+          type: object
+          description: Dictionary used to validate the submission
+          properties:
+            name:
+              type: string
+            version:
+              type: string
+        dictionaryCategory:
+          type: object
+          description: Category this dictionary belongs in
+          properties:
+            id:
+              type: number
+            name:
+              type: string
+        errors:
+          type: object
+          properties:
+            inserts:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ValidationError'
+            updates:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ValidationError'
+            deletes:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ValidationError'
+        organization:
+          type: string
+          description: Organization the Submission belongs to
+        status:
+          type: string
+          description: Status of the Submission
+          enum: ['OPEN', 'VALID', 'INVALID', 'CLOSED', 'COMMITED']
+        createdAt:
+          type: string
+          description: Date and time of creation
+        createdBy:
+          type: string
+          description: Name of user who created the submission
+        udpatedAt:
+          type: string
+          description: Date and time of latest update
+        updatedBy:
+          type: string
+          description: Name of user who last updated the submission
+
+    ActiveSubmissionSummaryResult:
+      $ref: '#/components/schemas/SubmissionSummary'
+
+    BatchError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: A message describing the error
+        type:
+          type: string
+          description: The type of error
+          enum:
+            - INCORRECT_SECTION
+            - INVALID_FILE_EXTENSION
+            - INVALID_FILE_NAME
+            - MISSING_REQUIRED_HEADER
+            - MULTIPLE_TYPED_FILES
+            - TSV_PARSING_FAILED
+            - UNRECOGNIZED_HEADER
+        batchName:
           type: array
-          description: Names of the entities that will be processed
+          description: List of batch names causing error
           items:
             type: string
+
+    CategoryDetails:
+      type: object
+      properties:
+        id:
+          type: number
+          description: ID of the Category
+        dictionary:
+          type: object
+          description: Dictionary used to validate the submission
+          properties:
+            name:
+              type: string
+            version:
+              type: string
+        name:
+          type: string
+          description: Name of the Category
+        organizations:
+          type: array
+          items:
+            type: string
+            description: List of organizations on this category
+        createdAt:
+          type: string
+          description: Date and time of creation
+        createdBy:
+          type: string
+          description: User name who created the submission
+        udpatedAt:
+          type: string
+          description: Date and time of latest update
+        updatedBy:
+          type: string
+          description: User name who last updated the submission
+
+    ChangeHistorySummaryResult:
+      type: object
+      properties:
+        pagination:
+          type: object
+          properties:
+            currentPage:
+              type: number
+            pageSize:
+              type: number
+            totalPages:
+              type: number
+            totalRecords:
+              type: number
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChangeHistoryRecord'
+
+    ChangeHistoryRecord:
+      type: object
+      properties:
+        entityName:
+          type: string
+          description: Name of the Entity
+        event:
+          type: string
+          description: Type of event
+          enum: ['UPDATE', 'DELETE']
+        dataDiff:
+          type: object
+          description: Captures the state of the data before the change as `old` and after the change as `new`
+        newIsValid:
+          type: boolean
+          description: New  data isValid value
+        oldIsValid:
+          type: boolean
+          description: Old data isValid value
+        organization:
+          type: string
+          description: Name of the Organization
+        submissionId:
+          type: string
+          description: Submission ID the change belongs to
+        systemId:
+          type: string
+          description: The unique identifier of the record changed
+        createdAt:
+          type: string
+          description: Date and time of creation
+        createdBy:
+          type: string
+          description: User name who updated the submission
+
     CommitSubmissionResult:
       required:
         - status
@@ -115,139 +409,35 @@ components:
           description: Names of the entities that will be processed
           items:
             type: string
-    ActiveSubmissionResult:
+
+    CreateSubmissionResult:
+      required:
+        - status
+        - description
+        - batchErrors
+        - inProcessEntities
       type: object
       properties:
-        id:
-          type: number
-          description: ID of the Submission
-        data:
-          type: object
-          additionalProperties:
-            type: object
-            properties:
-              creator:
-                type: string
-                description: Name of user who created the submission
-              records:
-                type: array
-                items:
-                  type: object
-                  description: Content of the file in JSON format
-              batchName:
-                type: string
-                description: Original filename of the submission
-        dictionary:
-          type: object
-          description: Dictionary used to validate the submission
-          properties:
-            name:
-              type: string
-            version:
-              type: string
-        dictionaryCategory:
-          type: object
-          description: Category this dictionary belongs in
-          properties:
-            id:
-              type: number
-            name:
-              type: string
-        errors:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/ValidationError'
-        organization:
+        batchErrors:
+          type: array
+          description: List of all batch related errors, should be empty on success
+          items:
+            $ref: '#/components/schemas/BatchError'
+        description:
           type: string
-          description: Organization the Submission belongs to
+          description: Description of uploading Submission files
+        inProcessEntities:
+          type: array
+          description: Names of the entities that will be processed
+          items:
+            type: string
         status:
           type: string
-          description: Status of the Submission
-          enum: ['OPEN', 'VALID', 'INVALID', 'CLOSED', 'COMMITED']
-        createdAt:
+          description: Result of uploading Submission files
+          enum: ['PROCESSING', 'INVALID_SUBMISSION', 'PARTIAL_SUBMISSION']
+        submissionId:
           type: string
-          description: Date and time of creation
-        createdBy:
-          type: string
-          description: Name of user who created the submission
-        udpatedAt:
-          type: string
-          description: Date and time of latest update
-        updatedBy:
-          type: string
-          description: Name of user who last updated the submission
-
-    ActiveSubmissionSummary:
-      type: object
-      properties:
-        id:
-          type: number
           description: ID of the Submission
-        data:
-          type: object
-          additionalProperties:
-            type: object
-            properties:
-              batchName:
-                type: string
-                description: Original filename of the submission
-              creator:
-                type: string
-                description: Name of user who created the submission
-              recordsCount:
-                type: number
-                description: Number of Records
-        dictionary:
-          type: object
-          description: Dictionary used to validate the submission
-          properties:
-            name:
-              type: string
-            version:
-              type: string
-        dictionaryCategory:
-          type: object
-          description: Category this dictionary belongs in
-          properties:
-            id:
-              type: number
-            name:
-              type: string
-        errors:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/ValidationError'
-        organization:
-          type: string
-          description: Organization the Submission belongs to
-        status:
-          type: string
-          description: Status of the Submission
-          enum: ['OPEN', 'VALID', 'INVALID', 'CLOSED', 'COMMITED']
-        createdAt:
-          type: string
-          description: Date and time of creation
-        createdBy:
-          type: string
-          description: Name of user who created the submission
-        udpatedAt:
-          type: string
-          description: Date and time of latest update
-        updatedBy:
-          type: string
-          description: Name of user who last updated the submission
-
-    ActiveSubmissionsSummaryResult:
-      type: array
-      items:
-        $ref: '#/components/schemas/ActiveSubmissionSummary'
-
-    ActiveSubmissionSummaryResult:
-      $ref: '#/components/schemas/ActiveSubmissionSummary'
 
     GetSubmittedDataResult:
       type: object
@@ -266,19 +456,66 @@ components:
         records:
           type: array
           items:
-            type: object
-            properties:
-              data:
-                type: array
-                items:
-                  type: object
-                  description: Content of the file in JSON format
-              entityName:
-                type: string
-              isValid:
-                type: boolean
-              organization:
-                type: string
+            $ref: '#/components/schemas/SubmittedDataRecord'
+
+    Health:
+      type: object
+      properties:
+        uptime:
+          type: string
+          description: Number of seconds the current Node.js process has been running
+        message:
+          type: string
+          description: Status of the service
+        timestamp:
+          type: string
+          description: Current system's time in milliseconds since the Unix epoch
+
+    ListAllCategories:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: number
+            description: ID of the Submission
+          name:
+            type: string
+            description: Name of the Category
+
+    RegisterDictionaryResult:
+      type: object
+      properties:
+        categoryId:
+          type: number
+          description: ID of the Category
+        categoryName:
+          type: string
+          description: Name of the Category
+        dictionary:
+          type: object
+          description: Schema of the Dictionary
+        name:
+          type: string
+          description: Name of the Dictionary
+        version:
+          type: string
+          description: Version of the Dictionary
+
+    SubmittedDataRecord:
+      type: object
+      properties:
+        data:
+          type: object
+          description: Content of the record in JSON format
+        entityName:
+          type: string
+        isValid:
+          type: boolean
+        organization:
+          type: string
+        systemId:
+          type: string
 
     ValidationError:
       type: object
@@ -317,25 +554,3 @@ components:
         message:
           type: string
           description: Details of the error
-    BatchError:
-      type: object
-      properties:
-        message:
-          type: string
-          description: A message describing the error
-        type:
-          type: string
-          description: The type of error
-          enum:
-            - INCORRECT_SECTION
-            - INVALID_FILE_EXTENSION
-            - INVALID_FILE_NAME
-            - MISSING_REQUIRED_HEADER
-            - MULTIPLE_TYPED_FILES
-            - TSV_PARSING_FAILED
-            - UNRECOGNIZED_HEADER
-        batchName:
-          type: array
-          description: List of batch names causing error
-          items:
-            type: string
