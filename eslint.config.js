@@ -26,10 +26,23 @@ export default tseslint.config(
 	{
 		// parser: "@typescript-eslint/parser",
 		rules: {
+			'@typescript-eslint/consistent-type-assertions': [
+				'warn',
+				{
+					assertionStyle: 'never',
+				},
+			],
 			'@typescript-eslint/no-explicit-any': 'off',
+			'@typescript-eslint/no-unused-vars': [
+				'warn',
+				{
+					argsIgnorePattern: '^_',
+				},
+			],
 			'simple-import-sort/imports': 'error',
 			'simple-import-sort/exports': 'error',
 			'prettier/prettier': 'error',
+			curly: ['warn', 'all'],
 		},
 		languageOptions: {
 			parserOptions: {

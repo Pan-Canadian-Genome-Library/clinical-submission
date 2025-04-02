@@ -2,11 +2,14 @@ import { LoggerOptions, pino } from 'pino';
 
 import { env } from './envConfig.js';
 
-const pinoConfig = {
+const pinoConfig: LoggerOptions = {
 	level: env.LOG_LEVEL,
-	transport: {
-		target: 'pino-pretty',
+	formatters: {
+		level: (label) => {
+			return { level: label.toUpperCase() };
+		},
 	},
-} as LoggerOptions;
+	timestamp: pino.stdTimeFunctions.isoTime,
+};
 
 export const logger = pino(pinoConfig);

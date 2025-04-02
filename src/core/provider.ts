@@ -11,13 +11,17 @@ const appConfig: AppConfig = {
 		password: env.DB_PASSWORD,
 	},
 	idService: {
-		// Hardcoded values to keep consistency on PCGL
-		customAlphabet: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-		customSize: 21,
-		useLocal: true,
+		customAlphabet: env.ID_CUSTOMALPHABET,
+		customSize: env.ID_CUSTOMSIZE,
+		useLocal: env.ID_USELOCAL,
 	},
-	limits: {
-		fileSize: env.SERVER_UPLOAD_LIMIT,
+	features: {
+		audit: {
+			enabled: env.AUDIT_ENABLED,
+		},
+		recordHierarchy: {
+			pluralizeSchemasName: env.PLURALIZE_SCHEMAS_ENABLED,
+		},
 	},
 	logger: {
 		level: env.LOG_LEVEL,

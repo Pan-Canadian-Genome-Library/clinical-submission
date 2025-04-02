@@ -16,6 +16,20 @@ components:
           type: string
         description: Organization name
     query:
+      OnlyActive:
+        description: Optional query parameter to filter results to include only active submissions. Default value is false
+        name: onlyActive
+        in: query
+        schema:
+          type: boolean
+        required: false
+      OrganizationFilter:
+        description: Optional query parameter to filter results to include only submissions associated to an specific organization. By default, returns submissions from all organizations
+        name: organization
+        in: query
+        schema:
+          type: string
+        required: false
       Page:
         name: page
         in: query
@@ -38,17 +52,3 @@ components:
           type: string
           enum: ['flat', 'compound']
         description: Optional query parameter to define the data format. Choose 'flat' for a simple, single-level collection of records, or 'compound' for a nested, schema-centric structure. The default value is 'flat'
-      OnlyActive:
-        description: Optional query parameter to filter results to include only active submissions. Default value is false
-        name: onlyActive
-        in: query
-        schema:
-          type: boolean
-        required: false
-      Organization:
-        description: Optional query parameter to filter results to include only submissions associated to an specific organization. By default, returns submissions from all organizations
-        name: organization
-        in: query
-        schema:
-          type: string
-        required: false

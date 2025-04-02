@@ -271,9 +271,6 @@ components:
           type: string
           description: Name of user who last updated the submission
 
-    ActiveSubmissionSummaryResult:
-      $ref: '#/components/schemas/SubmissionSummary'
-
     BatchError:
       type: object
       properties:
@@ -413,7 +410,6 @@ components:
     CreateSubmissionResult:
       required:
         - status
-        - description
         - batchErrors
         - inProcessEntities
       type: object
@@ -423,9 +419,6 @@ components:
           description: List of all batch related errors, should be empty on success
           items:
             $ref: '#/components/schemas/BatchError'
-        description:
-          type: string
-          description: Description of uploading Submission files
         inProcessEntities:
           type: array
           description: Names of the entities that will be processed
