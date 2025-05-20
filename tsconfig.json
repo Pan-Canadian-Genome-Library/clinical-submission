@@ -12,7 +12,8 @@
 
 		/* Emit */
 		"outDir": "dist" /* Specify an output folder for all emitted files. */,
-		"noEmit": false /* Disable emitting files from a compilation. */,
+		"noEmit": true /* Enable emitting files from a compilation. */,
+		"allowImportingTsExtensions": true,
 
 		/* Interop Constraints */
 		"forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
@@ -24,6 +25,6 @@
 		/* Completeness */
 		"skipLibCheck": true /* Skip type checking all .d.ts files. */
 	},
-	"include": ["./src/**/*.ts", "./register.ts"],
+	"include": ["./src/**/*.ts", "./register.ts", "drizzle.config.ts"],
 	"exclude": ["dist", "node_modules", "**/*.spec.ts", "*.config.js"]
 }
