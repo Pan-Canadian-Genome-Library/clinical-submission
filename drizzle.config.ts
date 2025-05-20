@@ -25,7 +25,6 @@ const PG_PASSWORD = process.env.DB_PASSWORD;
 const PG_HOST = process.env.DB_HOST;
 const PG_PORT = process.env.DB_PORT;
 
-// PG Connection String: postgres://postgres:mypassword@localhost:5432/postgres
 export const connectionString = `postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DATABASE}`;
 
 export default defineConfig({
