@@ -18,6 +18,7 @@
  */
 
 import { drizzle } from 'drizzle-orm/node-postgres';
+import { pgSchema } from 'drizzle-orm/pg-core';
 
 import { setStatus, Status } from '@/app-health.ts';
 import { logger } from '@/common/logger.ts';
@@ -53,3 +54,6 @@ export const connectToDb = (connectionString: string): PostgresDb => {
 		throw err;
 	}
 };
+
+// define schema to be used for creating tables
+export const pcglSchema = pgSchema('pcgl');

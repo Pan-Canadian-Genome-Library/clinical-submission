@@ -17,10 +17,12 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { bigint, pgTable, timestamp } from 'drizzle-orm/pg-core';
+import { bigint, timestamp } from 'drizzle-orm/pg-core';
+
+import { pcglSchema } from '@/db/index.ts';
 
 // TODO: This is a test table, remove when we have it defined properly
-export const study = pgTable('study', {
+export const study = pcglSchema.table('study', {
 	id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
 	created_at: timestamp().notNull().defaultNow(),
 	approved_at: timestamp(),
