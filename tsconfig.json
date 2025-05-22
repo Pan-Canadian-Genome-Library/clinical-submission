@@ -12,8 +12,7 @@
 
 		/* Emit */
 		"outDir": "dist" /* Specify an output folder for all emitted files. */,
-		"noEmit": true /* Enable emitting files from a compilation. */,
-		"allowImportingTsExtensions": true,
+		"noEmit": false /* disable emitting files from a compilation. */,
 
 		/* Interop Constraints */
 		"forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,

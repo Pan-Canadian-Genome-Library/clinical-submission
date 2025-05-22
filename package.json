@@ -4,6 +4,9 @@
 	"description": "",
 	"main": "dist/index.js",
 	"scripts": {
+		"studio": "NODE_OPTIONS='--import tsx' drizzle-kit studio",
+		"clinical:generate": "NODE_OPTIONS='--import tsx' drizzle-kit generate",
+		"clinical:migrate": "NODE_OPTIONS='--import tsx' drizzle-kit migrate",
 		"\n==================  Build  ==================": "",
 		"build:compile": "rimraf dist && tsc",
 		"build:copy": "copyfiles src/api-docs/**/*.yml dist/",

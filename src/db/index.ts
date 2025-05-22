@@ -18,11 +18,11 @@
  */
 
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { pgSchema } from 'drizzle-orm/pg-core';
 
-import { setStatus, Status } from '@/app-health.ts';
-import { logger } from '@/common/logger.ts';
-import * as schema from '@/db/schemas/index.ts';
+import { setStatus, Status } from '@/app-health.js';
+import { logger } from '@/common/logger.js';
+
+import * as schema from './schemas/index.js';
 
 export type PostgresDb = ReturnType<typeof drizzle<typeof schema>>;
 
@@ -54,6 +54,3 @@ export const connectToDb = (connectionString: string): PostgresDb => {
 		throw err;
 	}
 };
-
-// define schema to be used for creating tables
-export const pcglSchema = pgSchema('pcgl');
