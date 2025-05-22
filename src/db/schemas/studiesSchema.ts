@@ -17,10 +17,9 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { bigint, pgSchema, timestamp } from 'drizzle-orm/pg-core';
+import { bigint, timestamp } from 'drizzle-orm/pg-core';
 
-// define schema to be used for creating tables
-export const pcglSchema = pgSchema('pcgl');
+import { pcglSchema } from './generate.js';
 
 // TODO: This is a test table, remove when we have it defined properly
 export const study = pcglSchema.table('study', {
