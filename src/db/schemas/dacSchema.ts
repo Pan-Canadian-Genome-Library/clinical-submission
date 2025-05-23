@@ -17,28 +17,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { bigint, pgEnum, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { bigint, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { pcglSchema } from './generate.js';
 
-const studyStatus = pgEnum('status', ['ONGOING', 'COMPLETED']);
-const studyContext = pgEnum('context', ['CLINICAL', 'RESEARCH']);
-
-export const study = pcglSchema.table('study', {
+export const dac = pcglSchema.table('dac', {
 	id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
-	study_name: varchar({ length: 255 }).notNull(),
-	study_description: text().notNull(), // Assuming the description is large
-	program_name: varchar({ length: 255 }),
-	keywords: varchar({ length: 255 }),
-	status: studyStatus().notNull(),
-	context: studyContext().notNull(),
-	domain: text().array().notNull(),
-	participant_criteria: varchar({ length: 255 }),
-	principal_investigators: text().array().notNull(),
-	lead_organizations: text().array().notNull(),
-	collaborator: text().array(),
-	funding_sources: text().array().notNull(),
-	publication_links: text().array(),
+	dac_name: varchar({ length: 255 }).notNull(),
+	dac_description: text().notNull(),
+	contact_name: varchar({ length: 255 }).notNull(),
+	contact_email: varchar({ length: 255 }).notNull(),
 
 	created_at: timestamp().notNull().defaultNow(),
 	updated_at: timestamp(),
