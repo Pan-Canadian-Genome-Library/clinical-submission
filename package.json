@@ -5,12 +5,13 @@
 	"main": "dist/index.js",
 	"scripts": {
 		"studio": "NODE_OPTIONS='--import tsx' drizzle-kit studio",
-		"db:generate": "NODE_OPTIONS='--import tsx' drizzle-kit generate && pnpm build:all",
+		"db:generate": "NODE_OPTIONS='--import tsx' drizzle-kit generate",
 		"db:migrate": "NODE_OPTIONS='--import tsx' drizzle-kit migrate",
 		"\n==================  Build  ==================": "",
 		"build:compile": "rimraf dist && tsc",
 		"build:copy": "copyfiles src/api-docs/**/*.yml dist/",
-		"build:all": "pnpm build:compile && pnpm build:copy",
+		"build:copy:db": "copyfiles -u 1 \"src/db/drizzle/**/*\" dist/src/",
+		"build:all": "pnpm build:compile && pnpm build:copy && pnpm db:generate && pnpm build:copy:db",
 		"\n=============  Dev environment  =============": "",
 		"lint": "eslint .",
 		"lint:fix": "eslint --fix .",
@@ -18,7 +19,7 @@
 		"start:dev": "pnpm migrate:db:dev && tsx watch --clear-screen=false src/index.ts | pino-pretty",
 		"\n========  Prod environment (compiled) =======": "",
 		"migrate:db:prod": "node --import=./register.js src/scripts/migration.js",
-		"start:prod": "pnpm migrate:db:prod && NODE_ENV=production node --import=./register.js src/index.js"
+		"start:prod": "pnpm migrate:db:prod && pnpm db:migrate && NODE_ENV=production node --import=./register.js src/index.js"
 	},
 	"private": true,
 	"author": "Leonardo Rivera <lrivera@oicr.com>",
