@@ -16,10 +16,18 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-export * from './dacSchema.js';
-export * from './demographicSchema.js';
-export * from './diagnosisSchema.js';
-export * from './generate.js';
-export * from './participantSchema.js';
-export * from './sociodemographicSchema.js';
-export * from './studiesSchema.js';
+
+import { bigint, integer, timestamp, varchar } from 'drizzle-orm/pg-core';
+
+import { pcglSchema } from './generate.js';
+
+export const diagnosis = pcglSchema.table('diagnosis', {
+	id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+	submitter_participant_id: varchar({ length: 255 }).notNull(),
+	submitter_diagnosis_id: varchar({ length: 255 }).notNull(),
+	age_at_diagnosis: integer(),
+	disease_code: varchar({ length: 255 }).notNull(),
+	disease_term: varchar({ length: 255 }).notNull(),
+	created_at: timestamp().notNull().defaultNow(),
+	updated_at: timestamp(),
+});
