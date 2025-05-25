@@ -16,14 +16,20 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-export * from './dacSchema.js';
-export * from './demographicSchema.js';
-export * from './diagnosisSchema.js';
-export * from './generate.js';
-export * from './medicationSchema.js';
-export * from './participantSchema.js';
-export * from './procedureSchema.js';
-export * from './radiationSchema.js';
-export * from './sociodemographicSchema.js';
-export * from './studiesSchema.js';
-export * from './treatmentSchema.js';
+
+import { bigint, integer, timestamp, varchar } from 'drizzle-orm/pg-core';
+
+import { pcglSchema } from './generate.js';
+
+export const radiation = pcglSchema.table('radiation', {
+	id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+	submitter_treatment_id: varchar({ length: 255 }).notNull(),
+	radiation_modality_code: varchar({ length: 255 }).notNull(),
+	radiation_modality_term: varchar({ length: 255 }),
+	radiation_fractions: integer(),
+	radiation_dosage: integer(),
+	anatomical_site_irradiated_code: varchar({ length: 255 }).notNull(),
+	anatomical_site_irradiated_term: varchar({ length: 255 }),
+	created_at: timestamp().notNull().defaultNow(),
+	updated_at: timestamp(),
+});
