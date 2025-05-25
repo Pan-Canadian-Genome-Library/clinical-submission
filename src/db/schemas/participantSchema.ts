@@ -21,7 +21,13 @@ import { bigint, pgEnum, text, varchar } from 'drizzle-orm/pg-core';
 
 import { pcglSchema } from './generate.js';
 
-const duoPermissions = pgEnum('status', ['DUO:0000042', 'DUO:0000006', 'DUO:0000007', 'DUO:0000011', 'DUO:0000004']);
+export const duoPermissions = pgEnum('duo', [
+	'DUO:0000042',
+	'DUO:0000006',
+	'DUO:0000007',
+	'DUO:0000011',
+	'DUO:0000004',
+]);
 
 export const participant = pcglSchema.table('participant', {
 	id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),

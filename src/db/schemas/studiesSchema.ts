@@ -21,8 +21,8 @@ import { bigint, pgEnum, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { pcglSchema } from './generate.js';
 
-const studyStatus = pgEnum('status', ['ONGOING', 'COMPLETED']);
-const studyContext = pgEnum('context', ['CLINICAL', 'RESEARCH']);
+export const studyStatus = pgEnum('study_status', ['ONGOING', 'COMPLETED']);
+export const studyContext = pgEnum('study_context', ['CLINICAL', 'RESEARCH']);
 
 export const study = pcglSchema.table('study', {
 	id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
