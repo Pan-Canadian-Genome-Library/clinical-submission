@@ -17,14 +17,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export * from './dacSchema.js';
-export * from './demographicSchema.js';
-export * from './diagnosisSchema.js';
-export * from './generate.js';
-export * from './medicationSchema.js';
-export * from './participantSchema.js';
-export * from './procedureSchema.js';
-export * from './radiationSchema.js';
-export * from './sociodemographicSchema.js';
-export * from './studiesSchema.js';
-export * from './treatmentSchema.js';
+import { bigint, integer, pgEnum, timestamp, varchar } from 'drizzle-orm/pg-core';
+
+import { pcglSchema } from './generate.js';
+
+export const diseaseStatusFollowup = pgEnum('disease_status', [
+	'Complete remission',
+	'Distant progression',
+	'Loco-regional progression',
+	'No evidence of disease',
+	'Partial remission',
+	'Progression NOS',
+	'Relapse or recurrence',
+	'Stable',
+]);
+
+export const followup = pcglSchema.table('followup', {
+	id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+	submitter_participant_id: varchar({ length: 255 }).notNull(),
+	age_at_followup: integer(),
+	disease_status_at_followup: diseaseStatusFollowup().notNull(),
+	created_at: timestamp().notNull().defaultNow(),
+	updated_at: timestamp(),
+});
