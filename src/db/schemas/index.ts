@@ -17,6 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 export * from './dacSchema.js';
+export * from './demographicSchema.js';
 export * from './generate.js';
 export * from './participantSchema.js';
 export * from './sociodemographicSchema.js';

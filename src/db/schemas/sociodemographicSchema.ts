@@ -219,4 +219,6 @@ export const sociodemographic = pcglSchema.table('sociodemographic', {
 	sociodem_question: sociodemQuestion().notNull(),
 	sociodem_question_detail: varchar({ length: 255 }),
 	sociodem_notes: varchar({ length: 255 }),
+	created_at: timestamp().notNull().defaultNow(),
+	updated_at: timestamp(),
 });

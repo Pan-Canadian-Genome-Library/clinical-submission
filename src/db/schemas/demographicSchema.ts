@@ -17,24 +17,37 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { bigint, pgEnum, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { bigint, integer, pgEnum, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { pcglSchema } from './generate.js';
 
-export const duoPermissions = pgEnum('duo', [
-	'DUO:0000042',
-	'DUO:0000006',
-	'DUO:0000007',
-	'DUO:0000011',
-	'DUO:0000004',
+export const vitalStatusEnum = pgEnum('vital', [
+	'Alive',
+	'Deceased',
+	'Missing - Not collected',
+	'Missing - Not provided',
+	'Missing - Restricted access',
+	'Missing - Unknown',
+	'Not applicable',
 ]);
 
-export const participant = pcglSchema.table('participant', {
+export const causeOfDeathEnum = pgEnum('cause_of_death', [
+	'Died of cancer',
+	'Died of other reasons',
+	'Missing - Not collected',
+	'Missing - Not provided',
+	'Missing - Restricted access',
+	'Missing - Unknown',
+	'Not applicable',
+]);
+
+export const demographic = pcglSchema.table('demographic', {
 	id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
 	submitter_participant_id: varchar({ length: 255 }).notNull(),
-	duo_permission: duoPermissions().notNull(),
-	duo_modifier: text().array().notNull(),
-	disease_specific_modifier: text().array().notNull(),
+	age_at_enrollment: integer(),
+	vital_status: vitalStatusEnum(),
+	cause_of_death: causeOfDeathEnum(),
+	age_at_death: integer(),
 	created_at: timestamp().notNull().defaultNow(),
 	updated_at: timestamp(),
 });
