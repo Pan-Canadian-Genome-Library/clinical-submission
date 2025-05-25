@@ -17,18 +17,32 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export * from './comorbiditySchema.js';
-export * from './dacSchema.js';
-export * from './demographicSchema.js';
-export * from './diagnosisSchema.js';
-export * from './exposureSchema.js';
-export * from './generate.js';
-export * from './measurementSchema.js';
-export * from './medicationSchema.js';
-export * from './participantSchema.js';
-export * from './phenotypeSchema.js';
-export * from './procedureSchema.js';
-export * from './radiationSchema.js';
-export * from './sociodemographicSchema.js';
-export * from './studiesSchema.js';
-export * from './treatmentSchema.js';
+import { bigint, integer, pgEnum, timestamp, varchar } from 'drizzle-orm/pg-core';
+
+import { pcglSchema } from './generate.js';
+
+export const exposureStatus = pgEnum('exposure_status', [
+	'Current',
+	'Former',
+	'Never',
+	'Exposed - Current Unknown',
+	'Missing - Not collected',
+	'Missing - Not provided',
+	'Missing - Restricted access',
+	'Missing - Unknown',
+	'Not applicable',
+]);
+
+export const exposure = pcglSchema.table('exposure', {
+	id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+	submitter_participant_id: varchar({ length: 255 }).notNull(),
+	exposure_code: varchar({ length: 255 }).notNull(),
+	exposure_term: varchar({ length: 255 }),
+	exposure_status: exposureStatus().notNull(),
+	age_at_exposure: integer(),
+	exposure_duration: integer(),
+	exposure_amount: integer(),
+	exposure_unit: varchar({ length: 255 }),
+	created_at: timestamp().notNull().defaultNow(),
+	updated_at: timestamp(),
+});
