@@ -23,3 +23,4 @@ export * from './generate.js';
 export * from './participantSchema.js';
 export * from './sociodemographicSchema.js';
 export * from './studiesSchema.js';
+export * from './treatmentSchema.js';
