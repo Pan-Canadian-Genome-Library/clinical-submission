@@ -17,25 +17,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export * from './analysisSchema.js';
-export * from './comorbiditySchema.js';
-export * from './dacSchema.js';
-export * from './demographicSchema.js';
-export * from './diagnosisSchema.js';
-export * from './experimentSchema.js';
-export * from './exposureSchema.js';
-export * from './fileSchema.js';
-export * from './generate.js';
-export * from './measurementSchema.js';
-export * from './medicationSchema.js';
-export * from './participantSchema.js';
-export * from './phenotypeSchema.js';
-export * from './procedureSchema.js';
-export * from './radiationSchema.js';
-export * from './readGroupSchema.js';
-export * from './sampleSchema.js';
-export * from './sociodemographicSchema.js';
-export * from './specimenSchema.js';
-export * from './studiesSchema.js';
-export * from './treatmentSchema.js';
-export * from './workflowSchema.js';
+import { bigint, timestamp, varchar } from 'drizzle-orm/pg-core';
+
+import { pcglSchema } from './generate.js';
+
+export const workflow = pcglSchema.table('workflow', {
+	id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+	submitter_workflow_id: varchar({ length: 255 }).notNull(),
+	submitter_analysis_id: varchar({ length: 255 }).notNull(),
+	workflow_name: varchar({ length: 255 }).notNull(),
+	workflow_version: varchar({ length: 255 }),
+	workflow_url: varchar({ length: 255 }),
+	created_at: timestamp().notNull().defaultNow(),
+	updated_at: timestamp(),
+});
