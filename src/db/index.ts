@@ -17,34 +17,40 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { env } from '@/common/envConfig.js';
+import { drizzle } from 'drizzle-orm/node-postgres';
+
+import { setStatus, Status } from '@/app-health.js';
 import { logger } from '@/common/logger.js';
-import { app } from '@/server.js';
 
-import { dbConfig } from './config/dbConfig.js';
-import { connectToDb } from './db/index.js';
+import * as schema from './schemas/index.js';
 
-const { NODE_ENV, SERVER_PORT } = env;
+export type PostgresDb = ReturnType<typeof drizzle<typeof schema>>;
 
-// Connect drizzle
-connectToDb(dbConfig.connectionString);
+let pgDatabase: PostgresDb;
 
-const server = app.listen(SERVER_PORT, () => {
-	logger.info(`Server started. Running in "${NODE_ENV}" mode. Listening to port ${SERVER_PORT}`);
-
-	if (NODE_ENV === 'development') {
-		logger.info(`Swagger API Docs are available at http://localhost:${SERVER_PORT}/api-docs`);
+export const getDbInstance = (): PostgresDb => {
+	if (!pgDatabase) {
+		throw new Error('Not connected to Postgres database');
 	}
-});
 
-const onCloseSignal = () => {
-	logger.info('sigint received, shutting down');
-	server.close(() => {
-		logger.info('server closed');
-		process.exit();
-	});
-	setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
+	return pgDatabase;
 };
 
-process.on('SIGINT', onCloseSignal);
-process.on('SIGTERM', onCloseSignal);
+export const connectToDb = (connectionString: string): PostgresDb => {
+	try {
+		const db = drizzle<typeof schema>(connectionString);
+		pgDatabase = db;
+
+		setStatus('db', { status: Status.OK });
+		return db;
+	} catch (err) {
+		logger.error('Error on Database startup: \n', err);
+
+		if (err instanceof Error) {
+			setStatus('db', { status: Status.ERROR, info: { err: err.message } });
+		} else {
+			setStatus('db', { status: Status.ERROR, info: { err: String(err) } });
+		}
+		throw err;
+	}
+};

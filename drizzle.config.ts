@@ -17,34 +17,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { env } from '@/common/envConfig.js';
-import { logger } from '@/common/logger.js';
-import { app } from '@/server.js';
+import { defineConfig } from 'drizzle-kit';
 
-import { dbConfig } from './config/dbConfig.js';
-import { connectToDb } from './db/index.js';
+const PG_DATABASE = process.env.DB_NAME;
+const PG_USER = process.env.DB_USER;
+const PG_PASSWORD = process.env.DB_PASSWORD;
+const PG_HOST = process.env.DB_HOST;
+const PG_PORT = process.env.DB_PORT;
 
-const { NODE_ENV, SERVER_PORT } = env;
+// NOTE: sinces the drizzle.config lives in the root, it does not have access to the connection string via dbConfig from src/config/dbConfig.ts. So redefine the connection string
+export const connectionString = `postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DATABASE}`;
 
-// Connect drizzle
-connectToDb(dbConfig.connectionString);
-
-const server = app.listen(SERVER_PORT, () => {
-	logger.info(`Server started. Running in "${NODE_ENV}" mode. Listening to port ${SERVER_PORT}`);
-
-	if (NODE_ENV === 'development') {
-		logger.info(`Swagger API Docs are available at http://localhost:${SERVER_PORT}/api-docs`);
-	}
+export default defineConfig({
+	out: './src/db/drizzle',
+	schema: ['./src/db/schemas/index.ts'],
+	dialect: 'postgresql',
+	migrations: {
+		table: '_drizzle_migrations',
+		schema: 'pcgl_drizzle',
+	},
+	dbCredentials: {
+		url: connectionString!,
+	},
 });
-
-const onCloseSignal = () => {
-	logger.info('sigint received, shutting down');
-	server.close(() => {
-		logger.info('server closed');
-		process.exit();
-	});
-	setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
-};
-
-process.on('SIGINT', onCloseSignal);
-process.on('SIGTERM', onCloseSignal);

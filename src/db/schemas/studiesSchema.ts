@@ -17,34 +17,15 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { env } from '@/common/envConfig.js';
-import { logger } from '@/common/logger.js';
-import { app } from '@/server.js';
+import { bigint, timestamp } from 'drizzle-orm/pg-core';
 
-import { dbConfig } from './config/dbConfig.js';
-import { connectToDb } from './db/index.js';
+import { pcglSchema } from './generate.js';
 
-const { NODE_ENV, SERVER_PORT } = env;
-
-// Connect drizzle
-connectToDb(dbConfig.connectionString);
-
-const server = app.listen(SERVER_PORT, () => {
-	logger.info(`Server started. Running in "${NODE_ENV}" mode. Listening to port ${SERVER_PORT}`);
-
-	if (NODE_ENV === 'development') {
-		logger.info(`Swagger API Docs are available at http://localhost:${SERVER_PORT}/api-docs`);
-	}
+// TODO: This is a test table, remove when we have it defined properly
+export const study = pcglSchema.table('study', {
+	id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+	created_at: timestamp().notNull().defaultNow(),
+	approved_at: timestamp(),
+	updated_at: timestamp(),
+	expires_at: timestamp(),
 });
-
-const onCloseSignal = () => {
-	logger.info('sigint received, shutting down');
-	server.close(() => {
-		logger.info('server closed');
-		process.exit();
-	});
-	setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
-};
-
-process.on('SIGINT', onCloseSignal);
-process.on('SIGTERM', onCloseSignal);

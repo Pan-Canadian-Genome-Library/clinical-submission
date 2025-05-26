@@ -17,34 +17,15 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { env } from '@/common/envConfig.js';
-import { logger } from '@/common/logger.js';
-import { app } from '@/server.js';
+import { ZodError } from 'zod';
 
-import { dbConfig } from './config/dbConfig.js';
-import { connectToDb } from './db/index.js';
+class EnvironmentConfigError extends Error {
+	constructor(configName: string, zodError?: ZodError) {
+		super();
+		const standardMessage = `Error parsing environment variables for "${configName}" config!`;
 
-const { NODE_ENV, SERVER_PORT } = env;
-
-// Connect drizzle
-connectToDb(dbConfig.connectionString);
-
-const server = app.listen(SERVER_PORT, () => {
-	logger.info(`Server started. Running in "${NODE_ENV}" mode. Listening to port ${SERVER_PORT}`);
-
-	if (NODE_ENV === 'development') {
-		logger.info(`Swagger API Docs are available at http://localhost:${SERVER_PORT}/api-docs`);
+		this.message = zodError ? `${standardMessage} ${zodError.message}` : standardMessage;
+		this.name = 'EnvironmentConfigError';
 	}
-});
-
-const onCloseSignal = () => {
-	logger.info('sigint received, shutting down');
-	server.close(() => {
-		logger.info('server closed');
-		process.exit();
-	});
-	setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
-};
-
-process.on('SIGINT', onCloseSignal);
-process.on('SIGTERM', onCloseSignal);
+}
+export default EnvironmentConfigError;

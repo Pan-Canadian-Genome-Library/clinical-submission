@@ -24,6 +24,6 @@
 		/* Completeness */
 		"skipLibCheck": true /* Skip type checking all .d.ts files. */
 	},
-	"include": ["./src/**/*.ts", "./register.ts"],
+	"include": ["./src/**/*.ts", "./register.ts", "drizzle.config.ts"],
 	"exclude": ["dist", "node_modules", "**/*.spec.ts", "*.config.js"]
 }
