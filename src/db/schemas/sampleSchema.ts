@@ -17,20 +17,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export * from './comorbiditySchema.js';
-export * from './dacSchema.js';
-export * from './demographicSchema.js';
-export * from './diagnosisSchema.js';
-export * from './exposureSchema.js';
-export * from './generate.js';
-export * from './measurementSchema.js';
-export * from './medicationSchema.js';
-export * from './participantSchema.js';
-export * from './phenotypeSchema.js';
-export * from './procedureSchema.js';
-export * from './radiationSchema.js';
-export * from './sampleSchema.js';
-export * from './sociodemographicSchema.js';
-export * from './specimenSchema.js';
-export * from './studiesSchema.js';
-export * from './treatmentSchema.js';
+import { bigint, pgEnum, timestamp, varchar } from 'drizzle-orm/pg-core';
+
+import { pcglSchema } from './generate.js';
+
+export const sampleStatus = pgEnum('sample_status', ['Case', 'Control', 'Not applicable']);
+
+export const sample = pcglSchema.table('sample', {
+	id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+	submitter_sample_id: varchar({ length: 255 }).notNull(),
+	submitter_specimen_id: varchar({ length: 255 }).notNull(),
+	molecule_type_code: varchar({ length: 255 }).notNull(),
+	molecule_type_term: varchar({ length: 255 }),
+	sample_status: sampleStatus().notNull(),
+	created_at: timestamp().notNull().defaultNow(),
+	updated_at: timestamp(),
+});
