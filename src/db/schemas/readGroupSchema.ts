@@ -17,22 +17,30 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export * from './comorbiditySchema.js';
-export * from './dacSchema.js';
-export * from './demographicSchema.js';
-export * from './diagnosisSchema.js';
-export * from './experimentSchema.js';
-export * from './exposureSchema.js';
-export * from './generate.js';
-export * from './measurementSchema.js';
-export * from './medicationSchema.js';
-export * from './participantSchema.js';
-export * from './phenotypeSchema.js';
-export * from './procedureSchema.js';
-export * from './radiationSchema.js';
-export * from './readGroupSchema.js';
-export * from './sampleSchema.js';
-export * from './sociodemographicSchema.js';
-export * from './specimenSchema.js';
-export * from './studiesSchema.js';
-export * from './treatmentSchema.js';
+import { bigint, integer, pgEnum, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+
+import { pcglSchema } from './generate.js';
+
+export const libraryLayout = pgEnum('library_layout', [
+	'OBI:0000722 (paired-end library)',
+	'OBI:0000736 (single fragment library)',
+	'Not applicable',
+]);
+
+export const readGroup = pcglSchema.table('read_group', {
+	id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+	submitter_read_group_id: varchar({ length: 255 }).notNull(),
+	submitter_experiment_id: varchar({ length: 255 }).notNull(),
+	file_r1: varchar({ length: 255 }).notNull(),
+	file_r2: varchar({ length: 255 }),
+	library_name: varchar({ length: 255 }).notNull(),
+	library_layout: libraryLayout().notNull(),
+	platform_unit: varchar({ length: 255 }).notNull(),
+	library_description: text(),
+	read_group_id_in_bam: varchar({ length: 255 }),
+	read_length_r1: integer(),
+	read_length_r2: integer(),
+	insert_size: integer(),
+	created_at: timestamp().notNull().defaultNow(),
+	updated_at: timestamp(),
+});
