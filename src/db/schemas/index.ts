@@ -21,6 +21,7 @@ export * from './comorbiditySchema.js';
 export * from './dacSchema.js';
 export * from './demographicSchema.js';
 export * from './diagnosisSchema.js';
+export * from './experimentSchema.js';
 export * from './exposureSchema.js';
 export * from './generate.js';
 export * from './measurementSchema.js';
