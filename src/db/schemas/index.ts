@@ -30,5 +30,6 @@ export * from './phenotypeSchema.js';
 export * from './procedureSchema.js';
 export * from './radiationSchema.js';
 export * from './sociodemographicSchema.js';
+export * from './specimenSchema.js';
 export * from './studiesSchema.js';
 export * from './treatmentSchema.js';
