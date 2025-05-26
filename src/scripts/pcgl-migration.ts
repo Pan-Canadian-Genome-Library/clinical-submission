@@ -19,9 +19,13 @@
 
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 import { dbConfig } from '@/config/dbConfig.js';
-const migrationsFolder = __dirname + './drizzle';
+
+const currentDir = fileURLToPath(new URL('.', import.meta.url));
+const migrationsFolder = path.join(currentDir, '..', 'db', 'drizzle');
 
 const db = drizzle(dbConfig.connectionString);
 await migrate(db, { migrationsFolder });
