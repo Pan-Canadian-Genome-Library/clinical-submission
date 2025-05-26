@@ -18,8 +18,9 @@
 		"migrate:db:dev": "tsx src/scripts/migration.ts && pnpm db:migrate",
 		"start:dev": "pnpm migrate:db:dev && tsx watch --clear-screen=false src/index.ts | pino-pretty",
 		"\n========  Prod environment (compiled) =======": "",
+		"migrate:pcgl:db:prod": "node --import=./register.js src/scripts/pcgl-migration.js",
 		"migrate:db:prod": "node --import=./register.js src/scripts/migration.js",
-		"start:prod": "pnpm migrate:db:prod && pnpm db:migrate && NODE_ENV=production node --import=./register.js src/index.js"
+		"start:prod": "pnpm migrate:db:prod && pnpm migrate:pcgl:db:prod && NODE_ENV=production node --import=./register.js src/index.js"
 	},
 	"private": true,
 	"author": "Leonardo Rivera <lrivera@oicr.com>",
