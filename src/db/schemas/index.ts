@@ -17,25 +17,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export * from './analysisSchema.js';
-export * from './comorbiditySchema.js';
 export * from './dacSchema.js';
-export * from './demographicSchema.js';
-export * from './diagnosisSchema.js';
-export * from './experimentSchema.js';
-export * from './exposureSchema.js';
-export * from './fileSchema.js';
 export * from './generate.js';
-export * from './measurementSchema.js';
-export * from './medicationSchema.js';
-export * from './participantSchema.js';
-export * from './phenotypeSchema.js';
-export * from './procedureSchema.js';
-export * from './radiationSchema.js';
-export * from './readGroupSchema.js';
-export * from './sampleSchema.js';
-export * from './sociodemographicSchema.js';
-export * from './specimenSchema.js';
 export * from './studiesSchema.js';
-export * from './treatmentSchema.js';
-export * from './workflowSchema.js';
