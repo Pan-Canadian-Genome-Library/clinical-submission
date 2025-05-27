@@ -25,7 +25,7 @@ import { ResponseWithData } from '@/common/validation-utils/types.js';
 import { getDacSchema } from '@/common/validation-utils/validation/routes/dac.js';
 
 const dacRouter = express.Router();
-
+// Just a test endpoint for validation, likely to be changed or removed
 dacRouter.get(
 	'/:dacId',
 	withParamsSchemaValidation(
