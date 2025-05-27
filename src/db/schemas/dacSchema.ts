@@ -17,17 +17,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { bigint, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { pcglSchema } from './generate.js';
 
 export const dac = pcglSchema.table('dac', {
-	id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+	dac_id: varchar({ length: 255 }).notNull().primaryKey(),
 	dac_name: varchar({ length: 255 }).notNull(),
 	dac_description: text().notNull(),
 	contact_name: varchar({ length: 255 }).notNull(),
 	contact_email: varchar({ length: 255 }).notNull(),
-
 	created_at: timestamp().notNull().defaultNow(),
 	updated_at: timestamp(),
 });

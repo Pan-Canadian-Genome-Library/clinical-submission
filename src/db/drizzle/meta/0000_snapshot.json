@@ -1,5 +1,5 @@
 {
-  "id": "5847c380-fbb9-49f2-891f-af26f1523fa0",
+  "id": "e581a454-7bf3-4145-9280-335ed94216ea",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -8,22 +8,11 @@
       "name": "dac",
       "schema": "pcgl",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "bigint",
+        "dac_id": {
+          "name": "dac_id",
+          "type": "varchar(255)",
           "primaryKey": true,
-          "notNull": true,
-          "identity": {
-            "type": "always",
-            "name": "dac_id_seq",
-            "schema": "pcgl",
-            "increment": "1",
-            "startWith": "1",
-            "minValue": "1",
-            "maxValue": "9223372036854775807",
-            "cache": "1",
-            "cycle": false
-          }
+          "notNull": true
         },
         "dac_name": {
           "name": "dac_name",
@@ -75,26 +64,15 @@
       "name": "study",
       "schema": "pcgl",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "bigint",
+        "study_id": {
+          "name": "study_id",
+          "type": "varchar(255)",
           "primaryKey": true,
-          "notNull": true,
-          "identity": {
-            "type": "always",
-            "name": "study_id_seq",
-            "schema": "pcgl",
-            "increment": "1",
-            "startWith": "1",
-            "minValue": "1",
-            "maxValue": "9223372036854775807",
-            "cache": "1",
-            "cycle": false
-          }
+          "notNull": true
         },
         "dac_id": {
           "name": "dac_id",
-          "type": "bigint",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
         },
@@ -144,7 +122,7 @@
         },
         "participant_criteria": {
           "name": "participant_criteria",
-          "type": "varchar(255)",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
