@@ -17,31 +17,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import express from 'express';
+// types
+export type Success<T> = { success: true; data: T };
+export type Failure<TErrorCode extends string = string> = {
+	success: false;
+	error: TErrorCode;
+	message: string;
+};
+export type Result<TSuccessData, TFailureCodes extends string = string> =
+	| Success<TSuccessData>
+	| Failure<TFailureCodes>;
+export type AsyncResult<TSuccessData, TFailureCodes extends string = string> = Promise<
+	Result<TSuccessData, TFailureCodes>
+>;
 
-import { withParamsSchemaValidation } from '@/common/validation-utils/request-utils/validation.js';
-import { apiZodErrorMapping } from '@/common/validation-utils/request-utils/zodErrorMapping.js';
-import { ResponseWithData } from '@/common/validation-utils/types.js';
-import { getDacSchema } from '@/common/validation-utils/validation/routes/dac.js';
-
-const dacRouter = express.Router();
-
-dacRouter.get(
-	'/:dacId',
-	withParamsSchemaValidation(
-		getDacSchema,
-		apiZodErrorMapping,
-		async (_, response: ResponseWithData<any, ['INVALID_REQUEST']>) => {
-			try {
-				console.log('test');
-				response.status(200).json({});
-				return;
-			} catch (e) {
-				response.status(500).json({ error: 'INVALID_REQUEST', message: 'Application not found.' }).send();
-				return;
-			}
-		},
-	),
-);
-
-export default dacRouter;
+// helpers
+export const success = <T>(data: T): Success<T> => ({ success: true, data });
+export const failure = <TErrorCode extends string>(error: TErrorCode, message: string): Failure<TErrorCode> => ({
+	success: false,
+	error,
+	message,
+});
