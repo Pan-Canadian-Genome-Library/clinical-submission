@@ -17,31 +17,8 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import express from 'express';
+import { z } from 'zod';
 
-import { withParamsSchemaValidation } from '@/common/validation-utils/request-utils/validation.js';
-import { apiZodErrorMapping } from '@/common/validation-utils/request-utils/zodErrorMapping.js';
-import { ResponseWithData } from '@/common/validation-utils/types.js';
-import { getDacSchema } from '@/common/validation-utils/validation/routes/dac.js';
-
-const dacRouter = express.Router();
-
-dacRouter.get(
-	'/:dacId',
-	withParamsSchemaValidation(
-		getDacSchema,
-		apiZodErrorMapping,
-		async (_, response: ResponseWithData<any, ['INVALID_REQUEST']>) => {
-			try {
-				console.log('test');
-				response.status(200).json({});
-				return;
-			} catch (e) {
-				response.status(500).json({ error: 'INVALID_REQUEST', message: 'Application not found.' }).send();
-				return;
-			}
-		},
-	),
-);
-
-export default dacRouter;
+export const getDacSchema = z.object({
+	dacId: z.coerce.number().nonnegative().min(1).int(),
+});
