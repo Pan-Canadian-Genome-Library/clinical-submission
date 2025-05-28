@@ -17,38 +17,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { relations } from 'drizzle-orm';
-import { bigint, pgEnum, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { bigint, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
-import { dac } from './dacSchema.js';
 import { pcglSchema } from './generate.js';
 
-export const studyStatus = pgEnum('study_status', ['ONGOING', 'COMPLETED']);
-export const studyContext = pgEnum('study_context', ['CLINICAL', 'RESEARCH']);
-
-export const study = pcglSchema.table('study', {
-	study_id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
-	dac_id: bigint({ mode: 'number' }).notNull(),
-	study_name: varchar({ length: 255 }).notNull(),
-	study_description: text().notNull(), // Assuming the description is large
-	program_name: varchar({ length: 255 }),
-	keywords: text().array(),
-	status: studyStatus().notNull(),
-	context: studyContext().notNull(),
-	domain: text().array().notNull(),
-	participant_criteria: text(),
-	principal_investigators: text().array().notNull(),
-	lead_organizations: text().array().notNull(),
-	collaborator: text().array(),
-	funding_sources: text().array().notNull(),
-	publication_links: text().array(),
+export const dac = pcglSchema.table('dac', {
+	dac_id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+	dac_name: varchar({ length: 255 }).notNull(),
+	dac_description: text().notNull(),
+	contact_name: varchar({ length: 255 }).notNull(),
+	contact_email: varchar({ length: 255 }).notNull(),
 	created_at: timestamp().notNull().defaultNow(),
 	updated_at: timestamp(),
 });
-
-export const studyRelations = relations(study, ({ one }) => ({
-	dac_id: one(dac, {
-		fields: [study.dac_id],
-		references: [dac.dac_id],
-	}),
-}));
