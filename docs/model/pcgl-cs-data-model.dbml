@@ -5,7 +5,7 @@
 ***/
 
 /*
-* Indicate if the study is completed or ongoing.
+  Indicate if the study is completed or ongoing.
 */
 enum STUDY_STATUS {
   Ongoing
@@ -13,7 +13,7 @@ enum STUDY_STATUS {
 }
 
 /*
-* Indicate if the study was conducted in a clinical setting or as part of a research project.
+  Indicate if the study was conducted in a clinical setting or as part of a research project.
 */
 enum STUDY_CONTEXT {
   Clinical
@@ -21,28 +21,32 @@ enum STUDY_CONTEXT {
 }
 
 table study {
-  study_id text [pk, not null, unique] //Unique identifier of the study in PCGL.
-  study_name text [not null] //The official name of the study
+  study_id bingint [pk, not null, unique, increment] //Unique identifier of the study in PCGL.
+  study_name varchar(255) [not null] //The official name of the study
   study_description text [not null] // A detailed description of the study’s purpose, hypothesis, and design.
   program_name varchar(255) //Indicate the overarching program the study belongs to (if applicable)
   keywords text[] //List of specific terms that describe the focus and content of the study. In case there are several, place each on separate line.
   status STUDY_STATUS [not null] //Indicate if the study is completed or ongoing.
   context STUDY_CONTEXT [not null] //Indicate if the study was conducted in a clinical setting or as part of a research project.
   domain text[] [not null] //List of specific scientific or clinical domains addressed by the study. In case there are several, place each on separate line.
-  dac_id text [not null, ref: < dac.dac_id] //Unique identifier of the Data Access Committee (DAC) in PCGL to which the study is assigned.
+  dac_id bingint [not null, ref: < dac.dac_id] //Unique identifier of the Data Access Committee (DAC) in PCGL to which the study is assigned.
   participant_criteria text // Inclusion/exclusion criteria for participants (e.g., specific cancer type, age range).
   principal_investigators text[] [not null] // List of lead researchers responsible for the study. In case there are several, please list each investigator on a separate line in the format: FirstName LastName, Affiliation E.g, John Doe, Example Research Institute
   lead_organizations text[] [not null] //List of institutions or organizations leading the study. In case there are several, please list each lead organization on a separate line using its full official name.
   collaborators text[] //List of researchers, institutions or companies involved in the study. In case there are several, please list each collaborator on a separate line in the format: FirstName LastName (if individula) or Organization full official name, Role E.g, Biotech Inc., Industry Partner
   funding_sources text[] [not null] //List of organizations or agencies funding the study. In case there are several, please list each funding source on a separate line in the format: Funder name, Grant number E.g, National Example Foundation, NEF-12345 \nExample Health Research Council
   publication_links text[] //List of URL links to academic papers or reports associated with the study. In case there are several, please list each publication on a separate line by providing a DOI URL formatted as https://doi.org/ followed by the DOI number.
+  created_at datetime [not null]
+  updated_at datetitme [null]
 }
 
 table dac {
-  dac_id text [pk, not null, unique]
-  dac_name text [not null] // Full name of the DAC
+  dac_id bingint [pk, not null, unique, increment]
+  dac_name varchar(255) [not null] // Full name of the DAC
   dac_description text [not null] //An in-depth description of the DAC, including its overall purpose, scope and responsibilities.
   contact_name varchar(255) [not null] //The full name of the primary contact person. Please provide in the format: FirstName LastName E,g Jone Smith
   contact_email varchar(255) [not null] //Contact email for communication
+  created_at datetime [not null]
+  updated_at datetitme [null]
 }
 

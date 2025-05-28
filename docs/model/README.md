@@ -2,12 +2,12 @@
 
 ![Data Model](pcgl-cs-data-model.png)
 
-> [!NOTE]
-> This Data Model, while interacting with the [Lyric](https://github.com/overture-stack/lyric/) service is a separate entity generated within its own schema, and application specific to the PCGL submission process.
-
 ## Entities
 
-This README _only_ describes the data model which is specifically used by the PCGL data model in Clinical Submission. For information on other tables within the Clinical Submission process, please take a look at the [Lyric](https://github.com/overture-stack/lyric) repository in the [Overture Stack](https://github.com/overture-stack/lyric), the product Clinical Submission is based upon.
+> [!NOTE]
+> This README _only_ describes the data model which is specifically used by the PCGL data model in Clinical Submission.
+>
+> For information on other tables within the Clinical Submission process, please take a look at the [Lyric](https://github.com/overture-stack/lyric) repository in the [Overture Stack](https://www.overture.bio/), the product Clinical Submission is based upon.
 
 ### Study
 
