@@ -18,7 +18,7 @@ CREATE TABLE "pcgl"."study" (
 	"study_name" varchar(255) NOT NULL,
 	"study_description" text NOT NULL,
 	"program_name" varchar(255),
-	"keywords" varchar(255),
+	"keywords" text[],
 	"status" "study_status" NOT NULL,
 	"context" "study_context" NOT NULL,
 	"domain" text[] NOT NULL,

@@ -1,5 +1,5 @@
 {
-  "id": "063e0409-01d4-4707-a9d5-ade41ab7b344",
+  "id": "072fa76e-7efe-4dca-8fdc-e3ea8d03befa",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -118,7 +118,7 @@
         },
         "keywords": {
           "name": "keywords",
-          "type": "varchar(255)",
+          "type": "text[]",
           "primaryKey": false,
           "notNull": false
         },
