@@ -18,7 +18,7 @@
  */
 
 import { relations } from 'drizzle-orm';
-import { pgEnum, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { bigint, pgEnum, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { dac } from './dacSchema.js';
 import { pcglSchema } from './generate.js';
@@ -27,8 +27,8 @@ export const studyStatus = pgEnum('study_status', ['ONGOING', 'COMPLETED']);
 export const studyContext = pgEnum('study_context', ['CLINICAL', 'RESEARCH']);
 
 export const study = pcglSchema.table('study', {
-	study_id: varchar({ length: 255 }).notNull().primaryKey(),
-	dac_id: varchar({ length: 255 }).notNull(),
+	study_id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+	dac_id: bigint({ mode: 'number' }).notNull(),
 	study_name: varchar({ length: 255 }).notNull(),
 	study_description: text().notNull(), // Assuming the description is large
 	program_name: varchar({ length: 255 }),
