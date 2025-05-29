@@ -23,9 +23,24 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { dbConfig } from '@/config/dbConfig.js';
+import drizzleConfig from '@/db/drizzle.config.js';
 
 const currentDir = fileURLToPath(new URL('.', import.meta.url));
 const migrationsFolder = path.join(currentDir, '..', 'db', 'drizzle');
 
 const db = drizzle(dbConfig.connectionString);
-await migrate(db, { migrationsFolder });
+
+try {
+	if (!drizzleConfig.migrations?.schema || drizzleConfig.migrations?.table) {
+		console.error('Schema:', drizzleConfig.migrations?.schema, 'Table:', drizzleConfig.migrations?.table);
+		throw new Error('There is an error with the drizzle migration variables.');
+	}
+
+	await migrate(db, {
+		migrationsFolder,
+		migrationsSchema: drizzleConfig.migrations?.schema,
+		migrationsTable: drizzleConfig.migrations?.table,
+	});
+} catch (error) {
+	process.exit(1);
+}
