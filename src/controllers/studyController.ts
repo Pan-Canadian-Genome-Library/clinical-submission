@@ -18,6 +18,7 @@
  */
 
 import { isValidIDNumber } from "@/common/utils/utils.js";
+import { lyricProvider } from "@/core/provider.js";
 import { getDbInstance } from "@/db/index.js";
 import {
   type RequestValidation,
@@ -53,7 +54,9 @@ export const getStudyById = validateRequest(getStudyData, async (req, res) => {
   const studyRepo = studyService(db);
 
   if (!isValidIDNumber(studyId)) {
-    throw new BadRequest("Study ID must be a positive number");
+    throw new lyricProvider.utils.errors.BadRequest(
+      "Study ID must be a positive number"
+    );
   }
 
   try {

@@ -1,4 +1,5 @@
 import { logger } from "@/common/logger.js";
+import { lyricProvider } from "@/core/provider.js";
 import { PostgresDb } from "@/db/index.js";
 import { study } from "@/db/schemas/studiesSchema.js";
 import {
@@ -18,14 +19,16 @@ const studyService = (db: PostgresDb) => ({
     } catch (exception) {
       logger.error("Error at getStudyById", exception);
 
-      throw new InternalServerError(
+      throw new lyricProvider.utils.errors.InternalServerError(
         "Something went wrong while fetching studies."
       );
     }
     if (studyRecords[0]) {
       return studyRecords;
     } else {
-      throw new NotFound(`No study with studyId - ${studyId} found.`);
+      throw new lyricProvider.utils.errors.NotFound(
+        `No study with studyId - ${studyId} found.`
+      );
     }
   },
 });

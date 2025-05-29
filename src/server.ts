@@ -10,7 +10,6 @@ import { healthCheckRouter } from "@/routes/healthCheck.js";
 import { openAPIRouter } from "@/routes/openApi.js";
 import { submissionRouter } from "@/routes/submission.js";
 import { studyRouter } from "./routes/study.js";
-import { NotFound } from "@overture-stack/lyric/dist/src/utils/errors.js";
 
 const app = express();
 
