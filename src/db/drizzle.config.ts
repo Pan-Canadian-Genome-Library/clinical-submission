@@ -19,14 +19,9 @@
 
 import { defineConfig } from 'drizzle-kit';
 
-const PG_DATABASE = process.env.DB_NAME;
-const PG_USER = process.env.DB_USER;
-const PG_PASSWORD = process.env.DB_PASSWORD;
-const PG_HOST = process.env.DB_HOST;
-const PG_PORT = process.env.DB_PORT;
+import { dbConfig } from '@/config/dbConfig.js';
 
-// NOTE: sinces the drizzle.config lives in the root, it does not have access to the connection string via dbConfig from src/config/dbConfig.ts. So redefine the connection string
-export const connectionString = `postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DATABASE}`;
+const { connectionString } = dbConfig;
 
 export default defineConfig({
 	out: './src/db/drizzle',

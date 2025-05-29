@@ -4,9 +4,9 @@
 	"description": "",
 	"main": "dist/index.js",
 	"scripts": {
-		"studio": "NODE_OPTIONS='--import tsx' drizzle-kit studio",
-		"db:generate": "NODE_OPTIONS='--import tsx' drizzle-kit generate",
-		"db:migrate": "NODE_OPTIONS='--import tsx' drizzle-kit migrate",
+		"studio": "NODE_OPTIONS='--import tsx' drizzle-kit studio --config=src/db/drizzle.config.ts",
+		"db:generate": "NODE_OPTIONS='--import tsx' drizzle-kit generate --config=src/db/drizzle.config.ts",
+		"db:migrate": "NODE_OPTIONS='--import tsx' drizzle-kit migrate --config=src/db/drizzle.config.ts",
 		"\n==================  Build  ==================": "",
 		"build:compile": "rimraf dist && tsc",
 		"build:copy": "copyfiles src/api-docs/**/*.yml dist/",
