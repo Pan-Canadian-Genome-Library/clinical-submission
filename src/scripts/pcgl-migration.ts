@@ -31,6 +31,10 @@ const migrationsFolder = path.join(currentDir, '..', 'db', 'drizzle');
 const db = drizzle(dbConfig.connectionString);
 
 try {
+	if (!drizzleConfig.migrations?.schema || drizzleConfig.migrations?.table) {
+		throw new Error('There is an error with the drizzle migration variables.');
+	}
+
 	await migrate(db, {
 		migrationsFolder,
 		migrationsSchema: drizzleConfig.migrations?.schema,
