@@ -32,7 +32,7 @@ export default defineConfig({
 	schema: ['./src/db/schemas/index.ts'],
 	dialect: 'postgresql',
 	migrations: {
-		table: '_drizzle_migrations',
+		table: '__drizzle_migrations',
 		schema: 'pcgl_drizzle',
 	},
 	dbCredentials: {
