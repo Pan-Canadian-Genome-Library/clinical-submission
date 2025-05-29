@@ -28,13 +28,5 @@ export const apiZodErrorMapping: z.ZodErrorMap = (issue, ctx) => {
 		}
 	}
 
-	if (issue.code === z.ZodIssueCode.custom) {
-		if (issue.params?.violation === 'noEmptyObject') {
-			return {
-				message: `Object is empty or only contains unrecognized keys. Object may not be empty.`,
-			};
-		}
-	}
-
 	return { message: ctx.defaultError };
 };
