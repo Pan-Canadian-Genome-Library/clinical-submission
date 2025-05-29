@@ -23,6 +23,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { dbConfig } from '@/config/dbConfig.js';
+import drizzleConfig from '@/db/drizzle.config.js';
 
 const currentDir = fileURLToPath(new URL('.', import.meta.url));
 const migrationsFolder = path.join(currentDir, '..', 'db', 'drizzle');
