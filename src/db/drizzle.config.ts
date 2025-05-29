@@ -19,9 +19,13 @@
 
 import { defineConfig } from 'drizzle-kit';
 
-import { dbConfig } from '@/config/dbConfig.js';
+const PG_DATABASE = process.env.DB_NAME;
+const PG_USER = process.env.DB_USER;
+const PG_PASSWORD = process.env.DB_PASSWORD;
+const PG_HOST = process.env.DB_HOST;
+const PG_PORT = process.env.DB_PORT;
 
-const { connectionString } = dbConfig;
+export const connectionString = `postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DATABASE}`;
 
 export default defineConfig({
 	out: './src/db/drizzle',
