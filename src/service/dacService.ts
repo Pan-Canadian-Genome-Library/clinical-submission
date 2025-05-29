@@ -17,18 +17,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { Request, Response } from 'express';
+import { PostgresDb } from '@/db/index.js';
 
-import { getDbInstance } from '@/db/index.js';
-import dacService from '@/service/dacService.js';
-
-const getDacById = async (req: Request, res: Response) => {
-	const database = getDbInstance();
-	const dacSvc = await dacService(database);
-
-	console.log(await dacSvc.getDacById(1));
-
-	res.send('hello');
+const dacService = (db: PostgresDb) => {
+	return {
+		getDacById: async (dacId: number): Promise<any | undefined> => {
+			return undefined;
+		},
+	};
 };
 
-export default { getDacById };
+export default dacService;
