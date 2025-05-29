@@ -32,6 +32,7 @@ const db = drizzle(dbConfig.connectionString);
 
 try {
 	if (!drizzleConfig.migrations?.schema || drizzleConfig.migrations?.table) {
+		console.error('Schema:', drizzleConfig.migrations?.schema, 'Table:', drizzleConfig.migrations?.table);
 		throw new Error('There is an error with the drizzle migration variables.');
 	}
 
