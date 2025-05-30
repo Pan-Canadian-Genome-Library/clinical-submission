@@ -27,8 +27,6 @@ const serverConfigSchema = z.object({
 	DB_HOST: z.string(),
 	DB_NAME: z.string(),
 	DB_PORT: z.string(),
-	DB_TABLE: z.string().optional().default('__drizzle_migrations'),
-	DB_SCHEMA: z.string().optional().default('pcgl_drizzle'),
 });
 
 const parseResult = serverConfigSchema.safeParse(process.env);

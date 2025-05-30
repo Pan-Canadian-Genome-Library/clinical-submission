@@ -22,6 +22,7 @@ import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { logger } from '@/common/logger.js';
 import { dbConfig } from '@/config/dbConfig.js';
 
 const currentDir = fileURLToPath(new URL('.', import.meta.url));
@@ -30,11 +31,16 @@ const migrationsFolder = path.join(currentDir, '..', 'db', 'drizzle');
 const db = drizzle(dbConfig.connectionString);
 
 try {
+	/**
+	 * Migration table and schemas are hardcoded and need to be identical to the values in drizzle.config.ts due to issues with deployment.
+	 * Cannot import drizzle.config.ts values into pcgl-migration script
+	 */
 	await migrate(db, {
 		migrationsFolder,
-		migrationsTable: dbConfig.DB_TABLE,
-		migrationsSchema: dbConfig.DB_SCHEMA,
+		migrationsTable: '__drizzle_migrations',
+		migrationsSchema: 'pcgl_drizzle',
 	});
 } catch (error) {
+	logger.error(`Error processing PCGL migrations`, error);
 	process.exit(1);
 }
