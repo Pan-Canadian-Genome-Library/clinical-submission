@@ -22,8 +22,8 @@ import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { logger } from '@/common/logger.js';
 import { dbConfig } from '@/config/dbConfig.js';
-import drizzleConfig from '@/db/drizzle.config.js';
 
 const currentDir = fileURLToPath(new URL('.', import.meta.url));
 const migrationsFolder = path.join(currentDir, '..', 'db', 'drizzle');
@@ -31,16 +31,16 @@ const migrationsFolder = path.join(currentDir, '..', 'db', 'drizzle');
 const db = drizzle(dbConfig.connectionString);
 
 try {
-	if (!drizzleConfig.migrations?.schema || drizzleConfig.migrations?.table) {
-		console.error('Schema:', drizzleConfig.migrations?.schema, 'Table:', drizzleConfig.migrations?.table);
-		throw new Error('There is an error with the drizzle migration variables.');
-	}
-
+	/**
+	 * Migration table and schemas are hardcoded and need to be identical to the values in drizzle.config.ts due to issues with deployment.
+	 * Cannot import drizzle.config.ts values into pcgl-migration script
+	 */
 	await migrate(db, {
 		migrationsFolder,
-		migrationsSchema: drizzleConfig.migrations?.schema,
-		migrationsTable: drizzleConfig.migrations?.table,
+		migrationsTable: '__drizzle_migrations',
+		migrationsSchema: 'pcgl_drizzle',
 	});
 } catch (error) {
+	logger.error(`Error processing PCGL migrations`, error);
 	process.exit(1);
 }
