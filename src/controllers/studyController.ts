@@ -25,11 +25,6 @@ import {
   validateRequest,
 } from "@/middleware/requestValidation.js";
 import { studyService } from "@/services/studyService.js";
-import {
-  BadRequest,
-  InternalServerError,
-  NotFound,
-} from "@overture-stack/lyric/dist/src/utils/errors.js";
 import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
 import { z } from "zod";
