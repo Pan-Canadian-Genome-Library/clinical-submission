@@ -27,7 +27,7 @@ export const studyStatus = pcglSchema.enum('study_status', ['ONGOING', 'COMPLETE
 export const studyContext = pcglSchema.enum('study_context', ['CLINICAL', 'RESEARCH']);
 
 export const study = pcglSchema.table('study', {
-	study_id: text().primaryKey(),
+	study_id: text().primaryKey().notNull(),
 	dac_id: text().notNull(),
 	study_name: varchar({ length: 255 }).notNull(),
 	study_description: text().notNull(), // Assuming the description is large
