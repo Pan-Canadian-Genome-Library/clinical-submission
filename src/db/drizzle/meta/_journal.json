@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1748871075613,
+      "tag": "0000_dac_study_tables_init",
+      "breakpoints": true
+    }
+  ]
+}
