@@ -1,9 +1,9 @@
 CREATE SCHEMA "pcgl";
 --> statement-breakpoint
-CREATE TYPE "public"."study_context" AS ENUM('CLINICAL', 'RESEARCH');--> statement-breakpoint
-CREATE TYPE "public"."study_status" AS ENUM('ONGOING', 'COMPLETED');--> statement-breakpoint
+CREATE TYPE "pcgl"."study_context" AS ENUM('CLINICAL', 'RESEARCH');--> statement-breakpoint
+CREATE TYPE "pcgl"."study_status" AS ENUM('ONGOING', 'COMPLETED');--> statement-breakpoint
 CREATE TABLE "pcgl"."dac" (
-	"dac_id" bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "pcgl"."dac_dac_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1 CACHE 1),
+	"dac_id" text PRIMARY KEY NOT NULL,
 	"dac_name" varchar(255) NOT NULL,
 	"dac_description" text NOT NULL,
 	"contact_name" varchar(255) NOT NULL,
@@ -13,14 +13,14 @@ CREATE TABLE "pcgl"."dac" (
 );
 --> statement-breakpoint
 CREATE TABLE "pcgl"."study" (
-	"study_id" bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "pcgl"."study_study_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1 CACHE 1),
-	"dac_id" bigint NOT NULL,
+	"study_id" text PRIMARY KEY NOT NULL,
+	"dac_id" text NOT NULL,
 	"study_name" varchar(255) NOT NULL,
 	"study_description" text NOT NULL,
 	"program_name" varchar(255),
 	"keywords" text[],
-	"status" "study_status" NOT NULL,
-	"context" "study_context" NOT NULL,
+	"status" "pcgl"."study_status" NOT NULL,
+	"context" "pcgl"."study_context" NOT NULL,
 	"domain" text[] NOT NULL,
 	"participant_criteria" text,
 	"principal_investigators" text[] NOT NULL,
