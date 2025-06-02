@@ -1,5 +1,5 @@
 {
-  "id": "054d0198-b13d-4f96-b69a-ed0f0bbabc97",
+  "id": "c8786621-3c30-4cee-8417-b740398dbaaa",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -103,14 +103,14 @@
         "status": {
           "name": "status",
           "type": "study_status",
-          "typeSchema": "public",
+          "typeSchema": "pcgl",
           "primaryKey": false,
           "notNull": true
         },
         "context": {
           "name": "context",
           "type": "study_context",
-          "typeSchema": "public",
+          "typeSchema": "pcgl",
           "primaryKey": false,
           "notNull": true
         },
@@ -180,17 +180,17 @@
     }
   },
   "enums": {
-    "public.study_context": {
+    "pcgl.study_context": {
       "name": "study_context",
-      "schema": "public",
+      "schema": "pcgl",
       "values": [
         "CLINICAL",
         "RESEARCH"
       ]
     },
-    "public.study_status": {
+    "pcgl.study_status": {
       "name": "study_status",
-      "schema": "public",
+      "schema": "pcgl",
       "values": [
         "ONGOING",
         "COMPLETED"

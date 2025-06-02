@@ -1,7 +1,7 @@
 CREATE SCHEMA "pcgl";
 --> statement-breakpoint
-CREATE TYPE "public"."study_context" AS ENUM('CLINICAL', 'RESEARCH');--> statement-breakpoint
-CREATE TYPE "public"."study_status" AS ENUM('ONGOING', 'COMPLETED');--> statement-breakpoint
+CREATE TYPE "pcgl"."study_context" AS ENUM('CLINICAL', 'RESEARCH');--> statement-breakpoint
+CREATE TYPE "pcgl"."study_status" AS ENUM('ONGOING', 'COMPLETED');--> statement-breakpoint
 CREATE TABLE "pcgl"."dac" (
 	"dac_id" text PRIMARY KEY NOT NULL,
 	"dac_name" varchar(255) NOT NULL,
@@ -19,8 +19,8 @@ CREATE TABLE "pcgl"."study" (
 	"study_description" text NOT NULL,
 	"program_name" varchar(255),
 	"keywords" text[],
-	"status" "study_status" NOT NULL,
-	"context" "study_context" NOT NULL,
+	"status" "pcgl"."study_status" NOT NULL,
+	"context" "pcgl"."study_context" NOT NULL,
 	"domain" text[] NOT NULL,
 	"participant_criteria" text,
 	"principal_investigators" text[] NOT NULL,
