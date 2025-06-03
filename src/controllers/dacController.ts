@@ -32,10 +32,6 @@ const getDacById = validateRequest(getDacByIdData, async (req, res, next) => {
 
 		const dacId = req.params.dacId;
 
-		if (!dacId) {
-			throw new lyricProvider.utils.errors.BadRequest(`No dacId has been provided`);
-		}
-
 		const result = await dacSvc.getDacById(dacId);
 
 		if (!result) {
