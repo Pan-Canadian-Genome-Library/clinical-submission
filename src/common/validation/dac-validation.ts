@@ -17,32 +17,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { Request, Response } from 'express';
+import { ParamsDictionary } from 'express-serve-static-core';
+import { ParsedQs } from 'qs';
+import { z } from 'zod';
 
-import { getDacByIdData } from '@/common/validation/dac-validation.js';
-import { lyricProvider } from '@/core/provider.js';
-import { getDbInstance } from '@/db/index.js';
-import { validateRequest } from '@/middleware/requestValidation.js';
-import dacService from '@/service/dacService.js';
+import { RequestValidation } from '@/middleware/requestValidation.js';
 
-const getDacById = validateRequest(getDacByIdData, async (req: Request, res: Response, next) => {
-	try {
-		const database = getDbInstance();
-		const dacSvc = await dacService(database);
+interface GetDacParams extends ParamsDictionary {
+	dacId: string;
+}
 
-		const dacId = req.params.dacId;
-
-		if (!dacId) {
-			throw new lyricProvider.utils.errors.BadRequest(`No dacId has been provided`);
-		}
-
-		const result = await dacSvc.getDacById(dacId);
-
-		res.status(200).send(result);
-		return;
-	} catch (err) {
-		next(err);
-	}
-});
-
-export default { getDacById };
+export const getDacByIdData: RequestValidation<{ dacId: string }, ParsedQs, GetDacParams> = {
+	pathParams: z.object({
+		dacId: z.string(),
+	}),
+};
