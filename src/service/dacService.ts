@@ -21,14 +21,14 @@ import { ServiceUnavailable } from '@overture-stack/lyric/dist/src/utils/errors.
 import { eq } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
-import { GetDACByIdResponse } from '@/common/types/dac.js';
+import { DACFields } from '@/common/types/dac.js';
 import { PostgresDb } from '@/db/index.js';
 import { dac } from '@/db/schemas/dacSchema.js';
 
 const dacService = (db: PostgresDb) => {
 	return {
-		getDacById: async (dacId: string): Promise<GetDACByIdResponse | undefined> => {
-			let dacRecord: GetDACByIdResponse[];
+		getDacById: async (dacId: string): Promise<DACFields | undefined> => {
+			let dacRecord: DACFields[];
 			try {
 				dacRecord = await db
 					.select({

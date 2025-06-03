@@ -29,7 +29,7 @@ interface GetDacParams extends ParamsDictionary {
 	dacId: string;
 }
 
-export const getDacByIdData: RequestValidation<{ dacId: string }, ParsedQs, GetDacParams> = {
+export const getDacByIdData: RequestValidation<object, ParsedQs, GetDacParams> = {
 	pathParams: z.object({
 		dacId: stringNotEmpty,
 	}),

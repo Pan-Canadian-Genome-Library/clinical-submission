@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export type GetDACByIdResponse = {
+export type DACFields = {
 	dacId: string;
 	dacName: string;
 	dacDescription: string;
