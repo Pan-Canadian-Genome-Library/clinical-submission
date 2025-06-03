@@ -18,17 +18,44 @@
  */
 
 import { Request, Response } from 'express';
+import { ParamsDictionary } from 'express-serve-static-core';
+import { ParsedQs } from 'qs';
+import { z } from 'zod';
 
 import { getDbInstance } from '@/db/index.js';
+import { RequestValidation, validateRequest } from '@/middleware/requestValidation.js';
 import dacService from '@/service/dacService.js';
+import { lyricProvider } from '@/core/provider.js';
 
-const getDacById = async (req: Request, res: Response) => {
-	const database = getDbInstance();
-	const dacSvc = await dacService(database);
+interface GetDacParams extends ParamsDictionary {
+	dacId: string;
+}
 
-	console.log(await dacSvc.getDacById(1));
-
-	res.send('hello');
+export const getDacByIdData: RequestValidation<{ dacId: string }, ParsedQs, GetDacParams> = {
+	pathParams: z.object({
+		dacId: z.string(),
+	}),
 };
+
+const getDacById = validateRequest(getDacByIdData, async (req: Request, res: Response, next) => {
+	try {
+		const database = getDbInstance();
+		const dacSvc = await dacService(database);
+
+		const dacId = req.params.dacId;
+
+		// TODO: Something wrong with the error handling in lyric
+		if (!dacId) {
+			throw new lyricProvider.utils.errors.BadRequest(`No dacId has been provided`);
+		}
+
+		const resp = await dacSvc.getDacById(dacId);
+
+		res.status(200).send(resp);
+		return;
+	} catch (err) {
+		next(err);
+	}
+});
 
 export default { getDacById };

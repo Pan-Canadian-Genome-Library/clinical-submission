@@ -17,12 +17,41 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { eq } from 'drizzle-orm';
+
+import { logger } from '@/common/logger.js';
+import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
+import { dac } from '@/db/schemas/dacSchema.js';
 
 const dacService = (db: PostgresDb) => {
 	return {
-		getDacById: async (dacId: number): Promise<any | undefined> => {
-			return undefined;
+		getDacById: async (dacId: string): Promise<any | undefined> => {
+			let dacRecord;
+			try {
+				dacRecord = await db
+					.select({
+						dacId: dac.dac_id,
+						dacName: dac.dac_name,
+						dacDescription: dac.dac_description,
+						contactName: dac.contact_name,
+						contactEmail: dac.contact_email,
+						createdAt: dac.created_at,
+						updatedAt: dac.updated_at,
+					})
+					.from(dac)
+					.where(eq(dac.dac_id, dacId));
+
+				if (dacRecord[0]) {
+					return dacRecord;
+				} else {
+					throw new lyricProvider.utils.errors.NotFound(`No dac with dacId - ${dacId} found.`);
+				}
+			} catch (error) {
+				logger.error('Error at getDacById', error);
+
+				throw new lyricProvider.utils.errors.InternalServerError('Something went wrong while fetching studies.');
+			}
 		},
 	};
 };
