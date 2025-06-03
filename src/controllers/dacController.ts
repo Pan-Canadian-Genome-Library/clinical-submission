@@ -17,24 +17,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { Request, Response } from 'express';
-
 import { createDacData, getDacByIdData } from '@/common/validation/dac-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import dacService from '@/service/dacService.js';
 
-const getDacById = validateRequest(getDacByIdData, async (req: Request, res: Response, next) => {
+const getDacById = validateRequest(getDacByIdData, async (req, res, next) => {
 	try {
 		const database = getDbInstance();
 		const dacSvc = await dacService(database);
 
 		const dacId = req.params.dacId;
-
-		if (!dacId) {
-			throw new lyricProvider.utils.errors.BadRequest(`No dacId has been provided`);
-		}
 
 		const result = await dacSvc.getDacById(dacId);
 

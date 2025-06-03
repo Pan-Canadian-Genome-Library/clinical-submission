@@ -11,3 +11,5 @@ tags:
     description: Service status monitoring
   - name: Submission
     description: Create, View, Edit and Commit a Submission. A Submission represents a collection of data that is staged for validation before finalization
+  - name: DAC
+    description: Create, View and Edit a DAC user. A DAC user is always associated with a study.
