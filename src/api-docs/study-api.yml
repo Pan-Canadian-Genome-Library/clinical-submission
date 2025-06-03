@@ -1,4 +1,4 @@
-/{studyId}:
+/study/{studyId}:
   get:
     summary: Get a Study by Study ID
     parameters:

@@ -24,7 +24,7 @@ import { study } from "@/db/schemas/studiesSchema.js";
 import { eq } from "drizzle-orm";
 
 const studyService = (db: PostgresDb) => ({
-  getStudyById: async (studyId: number) => {
+  getStudyById: async (studyId: string) => {
     let studyRecords;
     try {
       studyRecords = await db

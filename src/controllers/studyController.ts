@@ -44,13 +44,13 @@ export const getStudyData: RequestValidation<
 };
 
 export const getStudyById = validateRequest(getStudyData, async (req, res) => {
-  const studyId = Number(req.params.studyId);
+  const studyId = req.params.studyId;
   const db = getDbInstance();
   const studyRepo = studyService(db);
 
-  if (!isValidIDNumber(studyId)) {
+  if (!studyId || !studyId.length) {
     throw new lyricProvider.utils.errors.BadRequest(
-      "Study ID must be a positive number"
+      "Study ID must be included in path and must be a valid string."
     );
   }
 
