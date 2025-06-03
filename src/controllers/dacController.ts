@@ -17,8 +17,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { Request, Response } from 'express';
-
 import { getDacByIdData } from '@/common/validation/dac-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
