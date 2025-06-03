@@ -11,3 +11,5 @@ tags:
     description: Service status monitoring
   - name: Submission
     description: Create, View, Edit and Commit a Submission. A Submission represents a collection of data that is staged for validation before finalization
+  - name: Study
+    description: Create, View, and Edit a Study. Study refers to a specific research project conducted as part of a larger program. It involves data collection, analysis, and interpretation related to the program's goals. Each study is focused on particular research questions related to set of objectives.

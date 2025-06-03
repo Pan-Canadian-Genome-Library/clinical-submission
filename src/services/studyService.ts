@@ -18,13 +18,14 @@
  */
 
 import { logger } from "@/common/logger.js";
+import type { StudyFields } from "@/common/types/study.js";
 import { lyricProvider } from "@/core/provider.js";
 import { PostgresDb } from "@/db/index.js";
 import { study } from "@/db/schemas/studiesSchema.js";
 import { eq } from "drizzle-orm";
 
 const studyService = (db: PostgresDb) => ({
-  getStudyById: async (studyId: string) => {
+  getStudyById: async (studyId: string): Promise<StudyFields | undefined> => {
     let studyRecords;
     try {
       studyRecords = await db
