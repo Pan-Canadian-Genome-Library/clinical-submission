@@ -27,8 +27,25 @@ interface GetDacParams extends ParamsDictionary {
 	dacId: string;
 }
 
-export const getDacByIdData: RequestValidation<{ dacId: string }, ParsedQs, GetDacParams> = {
+export const getDacByIdData: RequestValidation<object, ParsedQs, GetDacParams> = {
 	pathParams: z.object({
 		dacId: z.string(),
 	}),
+};
+
+interface CreateDac {
+	dacName: string;
+	dacDescription: string;
+	contactName: string;
+	contactEmail: string;
+}
+
+export const createDacData: RequestValidation<CreateDac, ParsedQs, GetDacParams> = {
+	pathParams: z.object({
+		dacId: z.string(),
+	}),
+	// body: z.object({
+	// 	dacName: z.string(),
+	// 	dacDes,
+	// }),
 };

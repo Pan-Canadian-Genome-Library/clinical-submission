@@ -45,4 +45,24 @@ const getDacById = validateRequest(getDacByIdData, async (req: Request, res: Res
 	}
 });
 
-export default { getDacById };
+const createDac = validateRequest(getDacByIdData, async (req: Request, res: Response, next) => {
+	try {
+		const database = getDbInstance();
+		const dacSvc = await dacService(database);
+
+		const dacId = req.params.dacId;
+
+		if (!dacId) {
+			throw new lyricProvider.utils.errors.BadRequest(`No dacId has been provided`);
+		}
+
+		const result = await dacSvc.getDacById(dacId);
+
+		res.status(200).send(result);
+		return;
+	} catch (err) {
+		next(err);
+	}
+});
+
+export default { getDacById, createDac };
