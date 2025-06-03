@@ -1,0 +1,29 @@
+/{studyId}:
+  get:
+    summary: Get a Study by Study ID
+    parameters:
+      - name: studyId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique identifier of the study in PCGL.
+    tags:
+      - Study
+    responses:
+      200:
+        description: Gets a study by a Study ID.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudyResult"
+      400:
+        $ref: "#/components/responses/BadRequest"
+      401:
+        $ref: "#/components/responses/UnauthorizedError"
+      404:
+        $ref: "#/components/responses/NotFound"
+      500:
+        $ref: "#/components/responses/ServerError"
+      503:
+        $ref: "#/components/responses/ServiceUnavailableError"

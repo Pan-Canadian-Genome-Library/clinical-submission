@@ -7,7 +7,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/responses/Error'
+            $ref: "#/components/responses/Error"
 
     Error:
       type: object
@@ -24,35 +24,35 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/responses/Error'
+            $ref: "#/components/responses/Error"
 
     ServerError:
       description: Internal Server Error
       content:
         application/json:
           schema:
-            $ref: '#/components/responses/Error'
+            $ref: "#/components/responses/Error"
 
     ServiceUnavailableError:
       description: Error message indicating the server is currently unable to handle the request, often due to maintenance, overload, or temporary issues
       content:
         application/json:
           schema:
-            $ref: '#/components/responses/Error'
+            $ref: "#/components/responses/Error"
 
     StatusConflict:
       description: Error response indicating the requested action could not be performed on the entity in its current state.
       content:
         application/json:
           schema:
-            $ref: '#/components/responses/Error'
+            $ref: "#/components/responses/Error"
 
     UnauthorizedError:
       description: Access token is missing or invalid
       content:
         application/json:
           schema:
-            $ref: '#/components/responses/Error'
+            $ref: "#/components/responses/Error"
 
   schemas:
     SubmissionResult:
@@ -128,26 +128,26 @@ components:
               additionalProperties:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ValidationError'
+                  $ref: "#/components/schemas/ValidationError"
             updates:
               type: object
               additionalProperties:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ValidationError'
+                  $ref: "#/components/schemas/ValidationError"
             deletes:
               type: object
               additionalProperties:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ValidationError'
+                  $ref: "#/components/schemas/ValidationError"
         organization:
           type: string
           description: Organization the Submission belongs to
         status:
           type: string
           description: Status of the Submission
-          enum: ['OPEN', 'VALID', 'INVALID', 'CLOSED', 'COMMITED']
+          enum: ["OPEN", "VALID", "INVALID", "CLOSED", "COMMITED"]
         createdAt:
           type: string
           description: Date and time of creation
@@ -178,7 +178,7 @@ components:
         records:
           type: array
           items:
-            $ref: '#/components/schemas/SubmissionSummary'
+            $ref: "#/components/schemas/SubmissionSummary"
 
     SubmissionSummary:
       type: object
@@ -238,26 +238,26 @@ components:
               additionalProperties:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ValidationError'
+                  $ref: "#/components/schemas/ValidationError"
             updates:
               type: object
               additionalProperties:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ValidationError'
+                  $ref: "#/components/schemas/ValidationError"
             deletes:
               type: object
               additionalProperties:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ValidationError'
+                  $ref: "#/components/schemas/ValidationError"
         organization:
           type: string
           description: Organization the Submission belongs to
         status:
           type: string
           description: Status of the Submission
-          enum: ['OPEN', 'VALID', 'INVALID', 'CLOSED', 'COMMITED']
+          enum: ["OPEN", "VALID", "INVALID", "CLOSED", "COMMITED"]
         createdAt:
           type: string
           description: Date and time of creation
@@ -346,7 +346,7 @@ components:
         records:
           type: array
           items:
-            $ref: '#/components/schemas/ChangeHistoryRecord'
+            $ref: "#/components/schemas/ChangeHistoryRecord"
 
     ChangeHistoryRecord:
       type: object
@@ -357,7 +357,7 @@ components:
         event:
           type: string
           description: Type of event
-          enum: ['UPDATE', 'DELETE']
+          enum: ["UPDATE", "DELETE"]
         dataDiff:
           type: object
           description: Captures the state of the data before the change as `old` and after the change as `new`
@@ -392,7 +392,7 @@ components:
         status:
           type: string
           description: Result of Commiting Submission
-          enum: ['PROCESSING']
+          enum: ["PROCESSING"]
         dictionary:
           type: object
           description: The dictionary used to validate the submission
@@ -418,7 +418,7 @@ components:
           type: array
           description: List of all batch related errors, should be empty on success
           items:
-            $ref: '#/components/schemas/BatchError'
+            $ref: "#/components/schemas/BatchError"
         inProcessEntities:
           type: array
           description: Names of the entities that will be processed
@@ -427,7 +427,7 @@ components:
         status:
           type: string
           description: Result of uploading Submission files
-          enum: ['PROCESSING', 'INVALID_SUBMISSION', 'PARTIAL_SUBMISSION']
+          enum: ["PROCESSING", "INVALID_SUBMISSION", "PARTIAL_SUBMISSION"]
         submissionId:
           type: string
           description: ID of the Submission
@@ -449,7 +449,7 @@ components:
         records:
           type: array
           items:
-            $ref: '#/components/schemas/SubmittedDataRecord'
+            $ref: "#/components/schemas/SubmittedDataRecord"
 
     Health:
       type: object
@@ -547,3 +547,72 @@ components:
         message:
           type: string
           description: Details of the error
+
+    StudyResult:
+      type: object
+      properties:
+        studyId:
+          type: string
+          description: Unique identifier of the study in PCGL.
+        dacId:
+          type: string
+          description: Unique identifier of the Data Access Committee (DAC) in PCGL to which the study is assigned.
+        studyName:
+          type: string
+          description: The official name of the study
+        studyDescription:
+          type: string
+          description: A detailed description of the study’s purpose, hypothesis, and design.
+        programName:
+          type: string
+          nullable: true
+          description: Indicate the overarching program the study belongs to (if applicable).
+        keywords:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: List of specific terms that describe the focus and content of the study.
+        status:
+          type: string
+          enum: [COMPLETED, ONGOING]
+          description: Indicate if the study is completed or ongoing.
+        context:
+          type: string
+          enum: [CLINICAL, RESEARCH]
+          description: Indicate if the study was conducted in a clinical setting or as part of a research project.
+        domain:
+          type: array
+          items:
+            type: string
+          description: List of specific scientific or clinical domains addressed by the study.
+        participantCriteria:
+          type: string
+          nullable: true
+          description: Inclusion/exclusion criteria for participants (e.g., specific cancer type, age range).
+        principalInvestigators:
+          type: array
+          items:
+            type: string
+          description: "List of lead researchers responsible for the study. Ex. John Doe, Example Research Institute"
+        leadOrganizations:
+          type: array
+          items:
+            type: string
+          description: List of institutions or organizations leading the study.
+        collaborators:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: List of researchers, institutions or companies involved in the study. Ex. FirstName LastName (if individual) or Organization full official name, Role.
+        fundingSources:
+          type: array
+          items:
+            type: string
+          description: List of organizations or agencies funding the study. Ex. Funder name, Grant number
+        publicationLinks:
+          type: array
+          items:
+            type: string
+          description: List of URL links to academic papers or reports associated with the study.
