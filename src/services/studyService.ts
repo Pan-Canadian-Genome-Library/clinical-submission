@@ -50,18 +50,11 @@ const studyService = (db: PostgresDb) => ({
         .where(eq(study.study_id, studyId));
     } catch (exception) {
       logger.error("Error at getStudyById", exception);
-
-      throw new lyricProvider.utils.errors.InternalServerError(
-        "Something went wrong while fetching studies."
+      throw new lyricProvider.utils.errors.ServiceUnavailable(
+        "Something went wrong while fetching studies. Please try again later."
       );
     }
-    if (studyRecords[0]) {
-      return studyRecords;
-    } else {
-      throw new lyricProvider.utils.errors.NotFound(
-        `No study with studyId - ${studyId} found.`
-      );
-    }
+    return studyRecords[0];
   },
 });
 

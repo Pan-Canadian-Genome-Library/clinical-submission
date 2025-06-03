@@ -43,22 +43,30 @@ export const getStudyData: RequestValidation<
   }),
 };
 
-export const getStudyById = validateRequest(getStudyData, async (req, res) => {
-  const studyId = req.params.studyId;
-  const db = getDbInstance();
-  const studyRepo = studyService(db);
+export const getStudyById = validateRequest(
+  getStudyData,
+  async (req, res, next) => {
+    const studyId = req.params.studyId;
+    const db = getDbInstance();
+    const studyRepo = studyService(db);
 
-  if (!studyId || !studyId.length) {
-    throw new lyricProvider.utils.errors.BadRequest(
-      "Study ID must be included in path and must be a valid string."
-    );
-  }
+    try {
+      if (!studyId || !studyId.length) {
+        throw new lyricProvider.utils.errors.BadRequest(
+          "Study ID must be included in path and must be a valid string."
+        );
+      }
 
-  try {
-    const results = await studyRepo.getStudyById(studyId);
-    res.status(200).send(results);
-    return;
-  } catch (exception) {
-    throw exception;
+      const results = await studyRepo.getStudyById(studyId);
+      if (!results) {
+        throw new lyricProvider.utils.errors.NotFound(
+          `No Study with ID - ${studyId} found.`
+        );
+      }
+      res.status(200).send(results);
+      return;
+    } catch (exception) {
+      next(exception);
+    }
   }
-});
+);
