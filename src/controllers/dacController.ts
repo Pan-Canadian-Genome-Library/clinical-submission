@@ -25,7 +25,7 @@ import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import dacService from '@/service/dacService.js';
 
-const getDacById = validateRequest(getDacByIdData, async (req: Request, res: Response, next) => {
+const getDacById = validateRequest(getDacByIdData, async (req, res, next) => {
 	try {
 		const database = getDbInstance();
 		const dacSvc = await dacService(database);
