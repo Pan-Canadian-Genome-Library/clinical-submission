@@ -3,6 +3,8 @@
     summary: Get DAC by their ID
     tags:
       - DAC
+    parameters:
+      - $ref: '#/components/parameters/path/DacId'
     responses:
       200:
         description: Returns DAC data
@@ -10,3 +12,13 @@
           application/json:
             schema:
               $ref: '#/components/schemas/DAC'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/UnauthorizedError'
+      404:
+        $ref: '#/components/responses/NotFound'
+      500:
+        $ref: '#/components/responses/ServerError'
+      503:
+        $ref: '#/components/responses/ServiceUnavailableError'
