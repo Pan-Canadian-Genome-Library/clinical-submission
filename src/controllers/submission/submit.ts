@@ -28,85 +28,89 @@ const CREATE_SUBMISSION_STATUS = {
 	PARTIAL_SUBMISSION: 'PARTIAL_SUBMISSION',
 } as const;
 
-export const submit = validateRequest(submitRequestSchema, async (req, res) => {
-	const categoryId = Number(req.params.categoryId);
-	const files = Array.isArray(req.files) ? req.files : [];
-	const organization = req.body.organization;
+export const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
+	try {
+		const categoryId = Number(req.params.categoryId);
+		const files = Array.isArray(req.files) ? req.files : [];
+		const organization = req.body.organization;
 
-	// TODO: get userName from auth
-	const userName = '';
+		// TODO: get userName from auth
+		const userName = '';
 
-	logger.info(
-		`Upload Submission Request: categoryId '${categoryId}'`,
-		` organization '${organization}'`,
-		` files: '${files?.map((f) => f.originalname)}'`,
-	);
-
-	if (!files || files.length == 0) {
-		throw new lyricProvider.utils.errors.BadRequest(
-			'The "files" parameter is missing or empty. Please include files in the request for processing.',
+		logger.info(
+			`Upload Submission Request: categoryId '${categoryId}'`,
+			` organization '${organization}'`,
+			` files: '${files?.map((f) => f.originalname)}'`,
 		);
-	}
 
-	// get the current dictionary
-	const currentDictionary = await lyricProvider.services.dictionary.getActiveDictionaryByCategory(categoryId);
-
-	if (!currentDictionary) {
-		throw new lyricProvider.utils.errors.BadRequest(`Dictionary in category '${categoryId}' not found`);
-	}
-
-	const fileErrors: BatchError[] = [];
-	let submissionId: number | undefined;
-	const entityList: string[] = [];
-
-	for (const file of files) {
-		try {
-			// // validate if entity name is present in the dictionary
-			const entityName = file.originalname.split('.')[0]?.toLowerCase();
-			const schema = currentDictionary.dictionary.find((schema) => schema.name.toLowerCase() === entityName);
-			if (!schema || !entityName) {
-				fileErrors.push({
-					type: BATCH_ERROR_TYPE.INVALID_FILE_NAME,
-					message: `Invalid entity name for submission`,
-					batchName: file.originalname,
-				});
-				continue;
-			}
-
-			const { file: prevalidatedFile, error } = await prevalidateNewDataFile(file, schema);
-			if (error) {
-				fileErrors.push(error);
-				continue;
-			}
-
-			const extractedData = await parseFileToRecords(prevalidatedFile, schema);
-
-			const uploadResult = await lyricProvider.services.submission.submit({
-				records: extractedData,
-				entityName,
-				categoryId,
-				organization,
-				userName,
-			});
-
-			submissionId = uploadResult.submissionId;
-			entityList.push(entityName);
-		} catch (error) {
-			logger.error(`Error processing file`, error);
+		if (!files || files.length == 0) {
+			throw new lyricProvider.utils.errors.BadRequest(
+				'The "files" parameter is missing or empty. Please include files in the request for processing.',
+			);
 		}
-	}
 
-	let status: string = CREATE_SUBMISSION_STATUS.PROCESSING;
-	if (entityList.length === 0) {
-		logger.info('Unable to process the submission');
-		status = CREATE_SUBMISSION_STATUS.INVALID_SUBMISSION;
-	} else if (fileErrors.length > 0) {
-		logger.info('Submission processed with some errors');
-		status = CREATE_SUBMISSION_STATUS.PARTIAL_SUBMISSION;
-	} else {
-		logger.info(`Submission processed successfully`);
-	}
+		// get the current dictionary
+		const currentDictionary = await lyricProvider.services.dictionary.getActiveDictionaryByCategory(categoryId);
 
-	// This response provides the details of file Submission
-	return res.status(200).send({ submissionId, status, batchErrors: fileErrors, inProcessEntities: entityList });
+		if (!currentDictionary) {
+			throw new lyricProvider.utils.errors.BadRequest(`Dictionary in category '${categoryId}' not found`);
+		}
+
+		const fileErrors: BatchError[] = [];
+		let submissionId: number | undefined;
+		const entityList: string[] = [];
+
+		for (const file of files) {
+			try {
+				// // validate if entity name is present in the dictionary
+				const entityName = file.originalname.split('.')[0]?.toLowerCase();
+				const schema = currentDictionary.dictionary.find((schema) => schema.name.toLowerCase() === entityName);
+				if (!schema || !entityName) {
+					fileErrors.push({
+						type: BATCH_ERROR_TYPE.INVALID_FILE_NAME,
+						message: `Invalid entity name for submission`,
+						batchName: file.originalname,
+					});
+					continue;
+				}
+
+				const { file: prevalidatedFile, error } = await prevalidateNewDataFile(file, schema);
+				if (error) {
+					fileErrors.push(error);
+					continue;
+				}
+
+				const extractedData = await parseFileToRecords(prevalidatedFile, schema);
+
+				const uploadResult = await lyricProvider.services.submission.submit({
+					records: extractedData,
+					entityName,
+					categoryId,
+					organization,
+					userName,
+				});
+
+				submissionId = uploadResult.submissionId;
+				entityList.push(entityName);
+			} catch (error) {
+				logger.error(`Error processing file`, error);
+			}
+		}
+
+		let status: string = CREATE_SUBMISSION_STATUS.PROCESSING;
+		if (entityList.length === 0) {
+			logger.info('Unable to process the submission');
+			status = CREATE_SUBMISSION_STATUS.INVALID_SUBMISSION;
+		} else if (fileErrors.length > 0) {
+			logger.info('Submission processed with some errors');
+			status = CREATE_SUBMISSION_STATUS.PARTIAL_SUBMISSION;
+		} else {
+			logger.info(`Submission processed successfully`);
+		}
+
+		// This response provides the details of file Submission
+		return res.status(200).send({ submissionId, status, batchErrors: fileErrors, inProcessEntities: entityList });
+	} catch (error) {
+		next(error);
+	}
 });
