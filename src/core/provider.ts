@@ -11,7 +11,7 @@ const appConfig: AppConfig = {
     password: env.DB_PASSWORD,
   },
   auth: {
-    enabled: false,
+    enabled: env.AUTH_ENABLED,
   },
   idService: {
     customAlphabet: env.ID_CUSTOMALPHABET,
