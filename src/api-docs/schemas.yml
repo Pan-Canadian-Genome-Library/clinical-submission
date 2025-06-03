@@ -432,6 +432,25 @@ components:
           type: string
           description: ID of the Submission
 
+    DAC:
+      type: object
+      properties:
+        dacId:
+          type: string
+          description: DAC users ID
+        dacName:
+          type: string
+          description: DAC users name
+        dacDescription:
+          type: string
+          description: DAC description, affiliates and extra information
+        contactName:
+          type: string
+          description: DAC contact name
+        contactEmail:
+          type: string
+          description: DAC associated email address
+
     GetSubmittedDataResult:
       type: object
       properties:
@@ -463,25 +482,6 @@ components:
         timestamp:
           type: string
           description: Current system's time in milliseconds since the Unix epoch
-
-    DAC:
-      type: object
-      properties:
-        dacId:
-          type: string
-          description: DAC users ID
-        dacName:
-          type: string
-          description: DAC users name
-        dacDescription:
-          type: string
-          description: DAC description, affiliates and extra information
-        contactName:
-          type: string
-          description: DAC contact name
-        contactEmail:
-          type: string
-          description: DAC associated email address
 
     ListAllCategories:
       type: array
