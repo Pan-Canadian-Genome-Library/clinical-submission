@@ -20,14 +20,15 @@
 import { eq } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
+import { GetDACByIdResponse } from '@/common/types/dac.js';
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
 import { dac } from '@/db/schemas/dacSchema.js';
 
 const dacService = (db: PostgresDb) => {
 	return {
-		getDacById: async (dacId: string): Promise<any | undefined> => {
-			let dacRecord;
+		getDacById: async (dacId: string): Promise<GetDACByIdResponse> => {
+			let dacRecord: GetDACByIdResponse[];
 			try {
 				dacRecord = await db
 					.select({
@@ -42,11 +43,11 @@ const dacService = (db: PostgresDb) => {
 					.from(dac)
 					.where(eq(dac.dac_id, dacId));
 
-				if (dacRecord[0]) {
-					return dacRecord;
-				} else {
+				if (!dacRecord[0]) {
 					throw new lyricProvider.utils.errors.NotFound(`No dac with dacId - ${dacId} found.`);
 				}
+
+				return dacRecord[0];
 			} catch (error) {
 				logger.error('Error at getDacById', error);
 
