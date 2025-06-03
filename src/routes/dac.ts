@@ -25,7 +25,7 @@ export const dacRouter: Router = (() => {
 	const router = express.Router();
 
 	router.get('/:dacId', dacController.getDacById);
-	router.post('/:dacId', dacController.createDac);
+	router.post('/', dacController.createDac);
 
 	return router;
 })();

@@ -19,7 +19,7 @@
 
 import { Request, Response } from 'express';
 
-import { getDacByIdData } from '@/common/validation/dac-validation.js';
+import { createDacData, getDacByIdData } from '@/common/validation/dac-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
@@ -49,20 +49,16 @@ const getDacById = validateRequest(getDacByIdData, async (req: Request, res: Res
 	}
 });
 
-const createDac = validateRequest(getDacByIdData, async (req: Request, res: Response, next) => {
+const createDac = validateRequest(createDacData, async (req, res, next) => {
 	try {
 		const database = getDbInstance();
 		const dacSvc = await dacService(database);
 
-		const dacId = req.params.dacId;
+		const dacFields = req.body;
 
-		if (!dacId) {
-			throw new lyricProvider.utils.errors.BadRequest(`No dacId has been provided`);
-		}
+		console.log(dacFields);
 
-		const result = await dacSvc.getDacById(dacId);
-
-		res.status(200).send(result);
+		res.status(200).send({});
 		return;
 	} catch (err) {
 		next(err);

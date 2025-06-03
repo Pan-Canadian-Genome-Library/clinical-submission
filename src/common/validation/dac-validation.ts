@@ -23,6 +23,7 @@ import { z } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
+import { DACFields } from '../types/dac.js';
 import { stringNotEmpty } from './common.js';
 
 interface GetDacParams extends ParamsDictionary {
@@ -35,19 +36,15 @@ export const getDacByIdData: RequestValidation<object, ParsedQs, GetDacParams> =
 	}),
 };
 
-interface CreateDac {
-	dacName: string;
-	dacDescription: string;
-	contactName: string;
-	contactEmail: string;
-}
-
-export const createDacData: RequestValidation<CreateDac, ParsedQs, GetDacParams> = {
-	pathParams: z.object({
-		dacId: z.string(),
+export const createDacData: RequestValidation<
+	Omit<DACFields, 'dacId' | 'updatedAt' | 'createdAt'>,
+	ParsedQs,
+	GetDacParams
+> = {
+	body: z.object({
+		dacName: stringNotEmpty,
+		dacDescription: stringNotEmpty,
+		contactName: stringNotEmpty,
+		contactEmail: stringNotEmpty,
 	}),
-	// body: z.object({
-	// 	dacName: z.string(),
-	// 	dacDes,
-	// }),
 };
