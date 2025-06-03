@@ -1,0 +1,12 @@
+/dac/{dacId}:
+  get:
+    summary: Get DAC by their ID
+    tags:
+      - DAC
+    responses:
+      200:
+        description: Returns DAC data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DAC'
