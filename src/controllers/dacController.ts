@@ -38,6 +38,10 @@ const getDacById = validateRequest(getDacByIdData, async (req: Request, res: Res
 
 		const result = await dacSvc.getDacById(dacId);
 
+		if (!result) {
+			throw new lyricProvider.utils.errors.NotFound(`No dac with dacId - ${dacId} found.`);
+		}
+
 		res.status(200).send(result);
 		return;
 	} catch (err) {
