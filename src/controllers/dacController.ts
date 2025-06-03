@@ -22,10 +22,10 @@ import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
 import { z } from 'zod';
 
+import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { RequestValidation, validateRequest } from '@/middleware/requestValidation.js';
 import dacService from '@/service/dacService.js';
-import { lyricProvider } from '@/core/provider.js';
 
 interface GetDacParams extends ParamsDictionary {
 	dacId: string;
