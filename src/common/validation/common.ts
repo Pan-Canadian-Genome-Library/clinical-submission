@@ -17,20 +17,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { ParamsDictionary } from 'express-serve-static-core';
-import { ParsedQs } from 'qs';
 import { z } from 'zod';
 
-import { RequestValidation } from '@/middleware/requestValidation.js';
-
-import { stringNotEmpty } from './common.js';
-
-interface GetDacParams extends ParamsDictionary {
-	dacId: string;
-}
-
-export const getDacByIdData: RequestValidation<{ dacId: string }, ParsedQs, GetDacParams> = {
-	pathParams: z.object({
-		dacId: stringNotEmpty,
-	}),
-};
+export const stringNotEmpty = z.string().trim().min(1);
