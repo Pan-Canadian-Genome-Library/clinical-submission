@@ -26,11 +26,11 @@ import { RequestValidation } from '@/middleware/requestValidation.js';
 import { DACFields } from '../types/dac.js';
 import { stringNotEmpty } from './common.js';
 
-interface GetDacParams extends ParamsDictionary {
+interface DacIdParams extends ParamsDictionary {
 	dacId: string;
 }
 
-export const getDacByIdData: RequestValidation<object, ParsedQs, GetDacParams> = {
+export const getDacByIdData: RequestValidation<object, ParsedQs, DacIdParams> = {
 	pathParams: z.object({
 		dacId: stringNotEmpty,
 	}),
@@ -47,7 +47,7 @@ export const createDacData: RequestValidation<CreateDacDataFields, ParsedQs, Par
 	}),
 };
 
-export const deleteDacByIdData: RequestValidation<object, ParsedQs, GetDacParams> = {
+export const deleteDacByIdData: RequestValidation<object, ParsedQs, DacIdParams> = {
 	pathParams: z.object({
 		dacId: stringNotEmpty,
 	}),
