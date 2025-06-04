@@ -22,6 +22,7 @@ import { eq } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
 import { DACFields } from '@/common/types/dac.js';
+import { CreateDacDataFields } from '@/common/validation/dac-validation.js';
 import { PostgresDb } from '@/db/index.js';
 import { dac } from '@/db/schemas/dacSchema.js';
 
@@ -46,6 +47,43 @@ const dacService = (db: PostgresDb) => {
 				return dacRecord[0];
 			} catch (error) {
 				logger.error('Error at getDacById', error);
+
+				throw new ServiceUnavailable();
+			}
+		},
+		saveDac: async ({
+			contactEmail,
+			contactName,
+			dacDescription,
+			dacName,
+		}: CreateDacDataFields): Promise<DACFields | undefined> => {
+			let dacRecord: Partial<DACFields[]>;
+			try {
+				// TODO: Replace random id generator when ID manager is implemented
+				const uuid = crypto.randomUUID();
+
+				dacRecord = await db
+					.insert(dac)
+					.values({
+						dac_id: uuid,
+						dac_name: dacName,
+						dac_description: dacDescription,
+						contact_name: contactName,
+						contact_email: contactEmail,
+					})
+					.returning({
+						dacId: dac.dac_id,
+						dacName: dac.dac_name,
+						dacDescription: dac.dac_description,
+						contactName: dac.contact_name,
+						contactEmail: dac.contact_email,
+						createdAt: dac.created_at,
+						updatedAt: dac.updated_at,
+					});
+
+				return dacRecord[0];
+			} catch (error) {
+				logger.error('Error at createDac Service', error);
 
 				throw new ServiceUnavailable();
 			}

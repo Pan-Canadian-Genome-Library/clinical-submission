@@ -50,9 +50,9 @@ const createDac = validateRequest(createDacData, async (req, res, next) => {
 
 		const dacFields = req.body;
 
-		console.log(dacFields);
+		const result = await dacSvc.saveDac(dacFields);
 
-		res.status(200).send({});
+		res.status(200).send(result);
 		return;
 	} catch (err) {
 		next(err);
