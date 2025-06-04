@@ -28,6 +28,7 @@ export const dacRouter: Router = (() => {
 
 	router.get('/:dacId', dacController.getDacById);
 	router.post('/create', dacController.createDac);
+	router.delete('/:dacId', dacController.deleteDac);
 
 	return router;
 })();

@@ -46,7 +46,7 @@ const dacService = (db: PostgresDb) => {
 
 				return dacRecord[0];
 			} catch (error) {
-				logger.error('Error at getDacById', error);
+				logger.error('Error at getDacById service', error);
 
 				throw new ServiceUnavailable();
 			}
@@ -83,7 +83,18 @@ const dacService = (db: PostgresDb) => {
 
 				return dacRecord[0];
 			} catch (error) {
-				logger.error('Error at createDac Service', error);
+				logger.error('Error at saveDac Service', error);
+
+				throw new ServiceUnavailable();
+			}
+		},
+		deleteDacById: async (dacId: string): Promise<Pick<DACFields, 'dacId'> | undefined> => {
+			try {
+				const dacRecord = await db.delete(dac).where(eq(dac.dac_id, dacId)).returning({ dacId: dac.dac_id });
+
+				return dacRecord[0];
+			} catch (error) {
+				logger.error('Error at deleteDacById service', error);
 
 				throw new ServiceUnavailable();
 			}

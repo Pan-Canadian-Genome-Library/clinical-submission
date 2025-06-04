@@ -46,3 +46,9 @@ export const createDacData: RequestValidation<CreateDacDataFields, ParsedQs, Par
 		contactEmail: stringNotEmpty,
 	}),
 };
+
+export const deleteDacByIdData: RequestValidation<object, ParsedQs, GetDacParams> = {
+	pathParams: z.object({
+		dacId: stringNotEmpty,
+	}),
+};

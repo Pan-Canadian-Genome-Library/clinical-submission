@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { createDacData, getDacByIdData } from '@/common/validation/dac-validation.js';
+import { createDacData, deleteDacByIdData, getDacByIdData } from '@/common/validation/dac-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
@@ -59,4 +59,24 @@ const createDac = validateRequest(createDacData, async (req, res, next) => {
 	}
 });
 
-export default { getDacById, createDac };
+const deleteDac = validateRequest(deleteDacByIdData, async (req, res, next) => {
+	try {
+		const database = getDbInstance();
+		const dacSvc = await dacService(database);
+
+		const dacId = req.params.dacId;
+
+		const result = await dacSvc.deleteDacById(dacId);
+
+		if (!result) {
+			throw new lyricProvider.utils.errors.NotFound(`No dac with dacId - ${dacId} found to delete.`);
+		}
+
+		res.status(200).send(result);
+		return;
+	} catch (err) {
+		next(err);
+	}
+});
+
+export default { getDacById, createDac, deleteDac };
