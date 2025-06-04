@@ -30,7 +30,7 @@ interface GetStudyByIDParams extends ParamsDictionary {
 }
 
 export const getStudyDataById: RequestValidation<
-  { organization: string },
+  Object,
   ParsedQs,
   GetStudyByIDParams
 > = {

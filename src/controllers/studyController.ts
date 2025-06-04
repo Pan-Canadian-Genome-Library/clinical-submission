@@ -34,12 +34,6 @@ export const getStudyById = validateRequest(
     const studyRepo = studyService(db);
 
     try {
-      if (!studyId || !studyId.length) {
-        throw new lyricProvider.utils.errors.BadRequest(
-          "Study ID must be included in path and must be a valid string."
-        );
-      }
-
       const results = await studyRepo.getStudyById(studyId);
       if (!results) {
         throw new lyricProvider.utils.errors.NotFound(

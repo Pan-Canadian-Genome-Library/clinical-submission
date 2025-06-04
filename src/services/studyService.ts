@@ -44,6 +44,8 @@ const studyService = (db: PostgresDb) => ({
           collaborator: study.collaborator,
           fundingSources: study.funding_sources,
           publicationLinks: study.publication_links,
+          keywords: study.keywords,
+          collaborators: study.collaborator,
           createdAt: study.created_at,
           updatedAt: study.updated_at,
         })

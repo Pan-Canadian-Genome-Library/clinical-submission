@@ -9,6 +9,7 @@ dotenv.config();
 const envSchema = z.object({
   ALLOWED_ORIGINS: z.string().optional(),
   AUDIT_ENABLED: z.coerce.boolean().default(true),
+  AUTH_ENABLED: z.coerce.boolean(),
   DB_HOST: z.string(),
   DB_NAME: z.string(),
   DB_PASSWORD: z.string(),
@@ -19,7 +20,6 @@ const envSchema = z.object({
   ID_CUSTOMSIZE: z.coerce.number().default(21),
   LECTERN_URL: z.string().url(),
   LOG_LEVEL: z.enum(LogLeveOptions).default("info"),
-  AUTH_ENABLED: z.coerce.boolean(),
   NODE_ENV: z.enum(NodeEnvOptions).default("development"),
   PLURALIZE_SCHEMAS_ENABLED: z.coerce.boolean().default(true),
   SERVER_PORT: z.coerce.number().min(100).default(3030),
