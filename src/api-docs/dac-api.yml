@@ -23,14 +23,14 @@
       503:
         $ref: '#/components/responses/ServiceUnavailableError'
   delete:
-    summary: Get DAC by their ID
+    summary: Delete DAC by their ID
     tags:
       - DAC
     parameters:
       - $ref: '#/components/parameters/path/DacId'
     responses:
       200:
-        description: Returns DAC data
+        description: Returns DAC Id
         content:
           application/json:
             schema:
