@@ -52,6 +52,7 @@ const dacService = (db: PostgresDb) => {
 			}
 		},
 		saveDac: async ({
+			dacId,
 			contactEmail,
 			contactName,
 			dacDescription,
@@ -59,13 +60,10 @@ const dacService = (db: PostgresDb) => {
 		}: CreateDacDataFields): Promise<DACFields | undefined> => {
 			let dacRecord: DACFields[];
 			try {
-				// TODO: Replace random id generator when ID manager is implemented
-				const uuid = crypto.randomUUID();
-
 				dacRecord = await db
 					.insert(dac)
 					.values({
-						dac_id: uuid,
+						dac_id: dacId,
 						dac_name: dacName,
 						dac_description: dacDescription,
 						contact_name: contactName,

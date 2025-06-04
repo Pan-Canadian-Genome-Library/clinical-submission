@@ -61,6 +61,9 @@
           schema:
             type: object
             properties:
+              dacId:
+                type: string
+                description: 'Username of the DAC'
               dacName:
                 type: string
                 description: 'Full name of the DAC'
