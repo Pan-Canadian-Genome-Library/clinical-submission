@@ -1,3 +1,4 @@
+import { BadRequest, InternalServerError } from '@overture-stack/lyric/dist/src/utils/errors.js';
 import { RequestHandler } from 'express-serve-static-core';
 import { ZodError, ZodSchema } from 'zod';
 
@@ -36,10 +37,10 @@ export function validateRequest<TBody, TQuery, TParams>(
 			if (error instanceof ZodError) {
 				const errorMessages = error.errors.map((issue) => `${issue.path.join('.')} is ${issue.message}`).join(' | ');
 				console.log(LOG_MODULE, req.method, req.url, JSON.stringify(errorMessages));
-				res.status(400).send({ error: error.name, message: error.message, details: error.cause });
+				next(new BadRequest(errorMessages));
 			} else {
 				console.error(LOG_MODULE, req.method, req.url, 'Internal Server Error');
-				res.status(500).send({ error: 'Internal Server Error', message: 'An unexpected error occurred' });
+				next(new InternalServerError());
 			}
 		}
 	};
