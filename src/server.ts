@@ -10,6 +10,8 @@ import { healthCheckRouter } from '@/routes/healthCheck.js';
 import { openAPIRouter } from '@/routes/openApi.js';
 import { submissionRouter } from '@/routes/submission.js';
 
+import { dacRouter } from './routes/dac.js';
+
 const app = express();
 
 // Middlewares
@@ -38,6 +40,7 @@ app.use(requestLogger);
 
 // Routes
 app.use('/health', healthCheckRouter);
+app.use('/dac', dacRouter);
 
 // Lyric routes
 app.use('/audit', lyricProvider.routers.audit);
