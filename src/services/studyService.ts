@@ -17,48 +17,49 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { logger } from "@/common/logger.js";
-import type { StudyFields } from "@/common/types/study.js";
-import { lyricProvider } from "@/core/provider.js";
-import { PostgresDb } from "@/db/index.js";
-import { study } from "@/db/schemas/studiesSchema.js";
-import { eq } from "drizzle-orm";
+import { eq } from 'drizzle-orm';
+
+import { logger } from '@/common/logger.js';
+import type { StudyFields } from '@/common/types/study.js';
+import { lyricProvider } from '@/core/provider.js';
+import { PostgresDb } from '@/db/index.js';
+import { study } from '@/db/schemas/studiesSchema.js';
 
 const studyService = (db: PostgresDb) => ({
-  getStudyById: async (studyId: string): Promise<StudyFields | undefined> => {
-    let studyRecords;
-    try {
-      studyRecords = await db
-        .select({
-          studyId: study.study_id,
-          dacId: study.dac_id,
-          studyName: study.study_name,
-          studyDescription: study.study_description,
-          programName: study.program_name,
-          status: study.status,
-          context: study.context,
-          domain: study.domain,
-          participantCriteria: study.participant_criteria,
-          principalInvestigators: study.principal_investigators,
-          leadOrganizations: study.lead_organizations,
-          collaborator: study.collaborator,
-          fundingSources: study.funding_sources,
-          publicationLinks: study.publication_links,
-          keywords: study.keywords,
-          collaborators: study.collaborator,
-          createdAt: study.created_at,
-          updatedAt: study.updated_at,
-        })
-        .from(study)
-        .where(eq(study.study_id, studyId));
-    } catch (exception) {
-      logger.error("Error at getStudyById", exception);
-      throw new lyricProvider.utils.errors.ServiceUnavailable(
-        "Something went wrong while fetching studies. Please try again later."
-      );
-    }
-    return studyRecords[0];
-  },
+	getStudyById: async (studyId: string): Promise<StudyFields | undefined> => {
+		let studyRecords;
+		try {
+			studyRecords = await db
+				.select({
+					studyId: study.study_id,
+					dacId: study.dac_id,
+					studyName: study.study_name,
+					studyDescription: study.study_description,
+					programName: study.program_name,
+					status: study.status,
+					context: study.context,
+					domain: study.domain,
+					participantCriteria: study.participant_criteria,
+					principalInvestigators: study.principal_investigators,
+					leadOrganizations: study.lead_organizations,
+					collaborator: study.collaborator,
+					fundingSources: study.funding_sources,
+					publicationLinks: study.publication_links,
+					keywords: study.keywords,
+					collaborators: study.collaborator,
+					createdAt: study.created_at,
+					updatedAt: study.updated_at,
+				})
+				.from(study)
+				.where(eq(study.study_id, studyId));
+		} catch (exception) {
+			logger.error('Error at getStudyById', exception);
+			throw new lyricProvider.utils.errors.ServiceUnavailable(
+				'Something went wrong while fetching studies. Please try again later.',
+			);
+		}
+		return studyRecords[0];
+	},
 });
 
 export { studyService };

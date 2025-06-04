@@ -18,19 +18,19 @@
  */
 
 export type StudyFields = {
-  studyId: string;
-  dacId: string;
-  studyName: string;
-  studyDescription: string;
-  programName?: string | null;
-  keywords?: string[] | null;
-  status: "ONGOING" | "COMPLETED";
-  context: "CLINICAL" | "RESEARCH";
-  domain: string[];
-  participantCriteria?: string | null;
-  principalInvestigators: string[];
-  leadOrganizations: string[];
-  collaborators?: string[] | null;
-  fundingSources: string[];
-  publicationLinks?: string[] | null;
+	studyId: string;
+	dacId: string;
+	studyName: string;
+	studyDescription: string;
+	programName?: string | null;
+	keywords?: string[] | null;
+	status: 'ONGOING' | 'COMPLETED';
+	context: 'CLINICAL' | 'RESEARCH';
+	domain: string[];
+	participantCriteria?: string | null;
+	principalInvestigators: string[];
+	leadOrganizations: string[];
+	collaborators?: string[] | null;
+	fundingSources: string[];
+	publicationLinks?: string[] | null;
 };

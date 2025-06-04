@@ -17,24 +17,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { ParamsDictionary } from "express-serve-static-core";
-import { ParsedQs } from "qs";
-import { z } from "zod";
+import { ParamsDictionary } from 'express-serve-static-core';
+import { ParsedQs } from 'qs';
+import { z } from 'zod';
 
-import { RequestValidation } from "@/middleware/requestValidation.js";
+import { RequestValidation } from '@/middleware/requestValidation.js';
 
-import { stringNotEmpty } from "./common.js";
+import { stringNotEmpty } from './common.js';
 
 interface GetStudyByIDParams extends ParamsDictionary {
-  studyId: string;
+	studyId: string;
 }
 
-export const getStudyDataById: RequestValidation<
-  Object,
-  ParsedQs,
-  GetStudyByIDParams
-> = {
-  pathParams: z.object({
-    studyId: stringNotEmpty,
-  }),
+export const getStudyDataById: RequestValidation<object, ParsedQs, GetStudyByIDParams> = {
+	pathParams: z.object({
+		studyId: stringNotEmpty,
+	}),
 };

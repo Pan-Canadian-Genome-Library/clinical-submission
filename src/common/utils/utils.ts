@@ -23,13 +23,9 @@
  * @returns `Boolean` - `true` if it is, `false` if not
  */
 export function isValidIDNumber(id: string | number) {
-  let validatedNumber = Number(id);
-  if (
-    !Number.isNaN(validatedNumber) &&
-    Number.isInteger(validatedNumber) &&
-    validatedNumber >= 0
-  ) {
-    return true;
-  }
-  return false;
+	const validatedNumber = Number(id);
+	if (!Number.isNaN(validatedNumber) && Number.isInteger(validatedNumber) && validatedNumber >= 0) {
+		return true;
+	}
+	return false;
 }

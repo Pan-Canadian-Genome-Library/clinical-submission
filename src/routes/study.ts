@@ -17,13 +17,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { getStudyById } from "@/controllers/studyController.js";
-import express, { Router } from "express";
+import express, { Router } from 'express';
+
+import { getStudyById } from '@/controllers/studyController.js';
 
 export const studyRouter: Router = (() => {
-  const router = express.Router();
+	const router = express.Router();
 
-  router.get("/:studyId", getStudyById);
+	router.get('/:studyId', getStudyById);
 
-  return router;
+	return router;
 })();
