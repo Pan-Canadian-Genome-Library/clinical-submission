@@ -8,6 +8,13 @@ components:
         schema:
           type: string
         description: ID of the category to which the data belongs
+      DacId:
+        name: dacId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ID of the DAC user
       Organization:
         name: organization
         in: path
@@ -17,10 +24,6 @@ components:
         description: Organization name
       StudyId:
         name: studyId
-        in: path
-        required: true
-        schema:
-          type: string
         description: The Unique identifier of the study in PCGL.
     query:
       OnlyActive:

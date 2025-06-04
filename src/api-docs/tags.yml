@@ -3,6 +3,8 @@ tags:
     description: Retrieves a list of changes made to Submitted Data records
   - name: Category
     description: Operations related to Categories management. Categories are used to organize and clasify Dictionaries
+  - name: DAC
+    description: Create, View and Edit a DAC user. A DAC is a group of individuals responsible for reviewing and approving or denying access requests to datasets based on established policies. A DAC user is always associated with a study.
   - name: Data
     description: Retrieve Submitted Data using filters and pagination
   - name: Dictionary

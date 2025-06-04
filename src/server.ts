@@ -30,6 +30,8 @@ import { openAPIRouter } from "@/routes/openApi.js";
 import { submissionRouter } from "@/routes/submission.js";
 import { studyRouter } from "./routes/study.js";
 
+import { dacRouter } from "./routes/dac.js";
+
 const app = express();
 
 // Middlewares
@@ -61,6 +63,7 @@ app.use(
 app.use(requestLogger);
 
 //PCGL Specific Routes
+app.use("/dac", dacRouter);
 app.use("/health", healthCheckRouter);
 app.use("/study", studyRouter);
 
