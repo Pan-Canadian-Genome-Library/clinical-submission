@@ -22,6 +22,33 @@
         $ref: '#/components/responses/ServerError'
       503:
         $ref: '#/components/responses/ServiceUnavailableError'
+  delete:
+    summary: Get DAC by their ID
+    tags:
+      - DAC
+    parameters:
+      - $ref: '#/components/parameters/path/DacId'
+    responses:
+      200:
+        description: Returns DAC data
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dacId:
+                  type: string
+                  description: DAC users ID
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/UnauthorizedError'
+      404:
+        $ref: '#/components/responses/NotFound'
+      500:
+        $ref: '#/components/responses/ServerError'
+      503:
+        $ref: '#/components/responses/ServiceUnavailableError'
 
 /dac/create:
   post:
