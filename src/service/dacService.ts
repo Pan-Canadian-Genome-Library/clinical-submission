@@ -57,7 +57,7 @@ const dacService = (db: PostgresDb) => {
 			dacDescription,
 			dacName,
 		}: CreateDacDataFields): Promise<DACFields | undefined> => {
-			let dacRecord: Partial<DACFields[]>;
+			let dacRecord: DACFields[];
 			try {
 				// TODO: Replace random id generator when ID manager is implemented
 				const uuid = crypto.randomUUID();

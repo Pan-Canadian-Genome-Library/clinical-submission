@@ -22,3 +22,49 @@
         $ref: '#/components/responses/ServerError'
       503:
         $ref: '#/components/responses/ServiceUnavailableError'
+
+/dac/create:
+  post:
+    summary: Create DAC user
+    tags:
+      - DAC
+    requestBody:
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            properties:
+              dacName:
+                type: string
+                description: 'Full name of the DAC'
+              dacDescription:
+                type: string
+                description: 'An in-depth description of the DAC, including its overall purpose, scope and responsibilities.'
+              contactName:
+                type: string
+                description: 'The full name of the primary contact person. Please provide in the format: FirstName LastName E,g Jones Smith'
+              contactEmail:
+                type: string
+                description: 'Contact email for communication'
+            required:
+              - dacName
+              - dacDescription
+              - contactName
+              - contactEmail
+    responses:
+      200:
+        description: Returns DAC data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DAC'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/UnauthorizedError'
+      404:
+        $ref: '#/components/responses/NotFound'
+      500:
+        $ref: '#/components/responses/ServerError'
+      503:
+        $ref: '#/components/responses/ServiceUnavailableError'
