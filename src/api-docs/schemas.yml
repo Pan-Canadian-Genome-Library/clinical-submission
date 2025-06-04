@@ -17,7 +17,7 @@ components:
           description: Error type
         message:
           type: string
-          decription: Description of the error
+          description: Description of the error
 
     NotFound:
       description: Requested resource could not be found
