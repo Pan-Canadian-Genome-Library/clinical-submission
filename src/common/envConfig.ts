@@ -9,6 +9,7 @@ dotenv.config();
 const envSchema = z.object({
 	ALLOWED_ORIGINS: z.string().optional(),
 	AUDIT_ENABLED: z.coerce.boolean().default(true),
+	AUTH_ENABLED: z.coerce.boolean(),
 	DB_HOST: z.string(),
 	DB_NAME: z.string(),
 	DB_PASSWORD: z.string(),

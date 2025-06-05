@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@overture-stack/lyric':
-        specifier: ^0.8.1
-        version: 0.8.1(@types/pg@8.15.2)
+        specifier: ^0.9.1
+        version: 0.9.1(@types/pg@8.15.2)
       bytes:
         specifier: ^3.1.2
         version: 3.1.2
@@ -63,6 +63,9 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
+      '@eslint/js':
+        specifier: ^9.28.0
+        version: 9.28.0
       '@types/bytes':
         specifier: ^3.1.5
         version: 3.1.5
@@ -603,6 +606,10 @@ packages:
     resolution: {integrity: sha512-Ys+3g2TaW7gADOJzPt83SJtCDhMjndcDMFVQ/Tj9iA1BfJzFKD9mAUXT3OenpuPHbI6P/myECxRJrofUsDx/5g==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
+  '@eslint/js@9.28.0':
+    resolution: {integrity: sha512-fnqSjGWd/CoIp4EXIxWVK/sHA6DOHN4+8Ix2cX5ycOY7LG0UY8nHCU5pIp2eaE1Mc7Qd8kHspYNzYXT2ojPLzg==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
   '@humanwhocodes/config-array@0.11.14':
     resolution: {integrity: sha512-3T8LkOmg45BV5FICb15QQMsyUSWrQ8AygVfC7ZG32zOalnqrilm018ZVCw0eapXux8FtA33q8PSRSstjee3jSg==}
     engines: {node: '>=10.10.0'}
@@ -644,11 +651,11 @@ packages:
   '@overture-stack/lectern-validation@2.0.0-beta.3':
     resolution: {integrity: sha512-C4lDANEMV+MbRSeWugp06wab2fGwUV6HWXZxArnvaK5b14vjm1DXRMT11jKjlUSFt2gf/BkGWYn1c3acgGPCfQ==}
 
-  '@overture-stack/lyric-data-model@0.8.1':
-    resolution: {integrity: sha512-b0b9GwQ2KYX2YOSb6VJbo+bFu4DTFTEzzzH1HS6l3TRB8f4kZU22+XM9crY2IqIDXe2fbF2Pj77SElb/Ijwf2A==}
+  '@overture-stack/lyric-data-model@0.9.1':
+    resolution: {integrity: sha512-32OcI2Je6jxTjaIZGnePHej0ZAodNXf6SLJm/cxmZpksVjVJDZKNS7eqELrmEy5NRHBpNZSZgTIE03KfOfOg6w==}
 
-  '@overture-stack/lyric@0.8.1':
-    resolution: {integrity: sha512-B3e+TmqZH+PwUJPm8Wh8HCU2p/gRpD/4OPrH/gOWaN4qnh880la5i7Se0I4DeHreljv96abvg3DDmq1vJCDi3g==}
+  '@overture-stack/lyric@0.9.1':
+    resolution: {integrity: sha512-++ysOmj1syRwgk50ywJ/H5F2b1pArbwRdNTVBFmr3fhmzdCrvHZ75OckEjyN3GgiT7Pp0WdSSPQ9W3n1cc+RnA==}
     engines: {node: '>=20.0.0'}
 
   '@overture-stack/sqon-builder@1.1.0':
@@ -2583,6 +2590,8 @@ snapshots:
 
   '@eslint/js@8.57.0': {}
 
+  '@eslint/js@9.28.0': {}
+
   '@humanwhocodes/config-array@0.11.14':
     dependencies:
       '@humanwhocodes/object-schema': 2.0.3
@@ -2642,7 +2651,7 @@ snapshots:
       lodash: 4.17.21
       zod: 3.23.8
 
-  '@overture-stack/lyric-data-model@0.8.1(@types/pg@8.15.2)':
+  '@overture-stack/lyric-data-model@0.9.1(@types/pg@8.15.2)':
     dependencies:
       '@overture-stack/lectern-client': 2.0.0-beta.3
       copyfiles: 2.4.1
@@ -2674,10 +2683,10 @@ snapshots:
       - sql.js
       - sqlite3
 
-  '@overture-stack/lyric@0.8.1(@types/pg@8.15.2)':
+  '@overture-stack/lyric@0.9.1(@types/pg@8.15.2)':
     dependencies:
       '@overture-stack/lectern-client': 2.0.0-beta.3
-      '@overture-stack/lyric-data-model': 0.8.1(@types/pg@8.15.2)
+      '@overture-stack/lyric-data-model': 0.9.1(@types/pg@8.15.2)
       '@overture-stack/sqon-builder': 1.1.0
       dotenv: 16.4.5
       drizzle-orm: 0.29.5(@types/pg@8.15.2)(pg@8.16.0)
