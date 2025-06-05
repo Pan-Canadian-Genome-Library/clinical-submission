@@ -17,7 +17,7 @@ components:
           description: Error type
         message:
           type: string
-          decription: Description of the error
+          description: Description of the error
 
     NotFound:
       description: Requested resource could not be found
@@ -55,222 +55,6 @@ components:
             $ref: '#/components/responses/Error'
 
   schemas:
-    SubmissionResult:
-      type: object
-      properties:
-        id:
-          type: number
-          description: ID of the Submission
-        data:
-          type: object
-          properties:
-            inserts:
-              type: object
-              additionalProperties:
-                type: object
-                properties:
-                  records:
-                    type: array
-                    items:
-                      type: object
-                      description: Content of the file in JSON format
-                  batchName:
-                    type: string
-                    description: Original filename  of the submission
-            updates:
-              type: object
-              additionalProperties:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    systemId:
-                      type: string
-                    old:
-                      type: object
-                      description: Old Content
-                    new:
-                      type: object
-                      description: New content
-            deletes:
-              type: object
-              additionalProperties:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    systemId:
-                      type: string
-                    data:
-                      type: object
-                      description: Content to be deleted
-        dictionary:
-          type: object
-          description: Dictionary used to validate the submission
-          properties:
-            name:
-              type: string
-            version:
-              type: string
-        dictionaryCategory:
-          type: object
-          description: Category this dictionary belongs in
-          properties:
-            id:
-              type: number
-            name:
-              type: string
-        errors:
-          type: object
-          properties:
-            inserts:
-              type: object
-              additionalProperties:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ValidationError'
-            updates:
-              type: object
-              additionalProperties:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ValidationError'
-            deletes:
-              type: object
-              additionalProperties:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ValidationError'
-        organization:
-          type: string
-          description: Organization the Submission belongs to
-        status:
-          type: string
-          description: Status of the Submission
-          enum: ['OPEN', 'VALID', 'INVALID', 'CLOSED', 'COMMITED']
-        createdAt:
-          type: string
-          description: Date and time of creation
-        createdBy:
-          type: string
-          description: User name who created the submission
-        udpatedAt:
-          type: string
-          description: Date and time of latest update
-        updatedBy:
-          type: string
-          description: User name who last updated the submission
-
-    SubmissionsSummaryResult:
-      type: object
-      properties:
-        pagination:
-          type: object
-          properties:
-            currentPage:
-              type: number
-            pageSize:
-              type: number
-            totalPages:
-              type: number
-            totalRecords:
-              type: number
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/SubmissionSummary'
-
-    SubmissionSummary:
-      type: object
-      properties:
-        id:
-          type: number
-          description: ID of the Submission
-        data:
-          type: object
-          properties:
-            inserts:
-              type: object
-              additionalProperties:
-                type: object
-                properties:
-                  batchName:
-                    type: string
-                    description: Original filename  of the submission
-                  recordsCount:
-                    type: number
-                    description: Number Of Records
-            updates:
-              type: object
-              additionalProperties:
-                type: object
-                properties:
-                  recordsCount:
-                    type: number
-            deletes:
-              type: object
-              additionalProperties:
-                type: object
-                properties:
-                  recordsCount:
-                    type: number
-        dictionary:
-          type: object
-          description: Dictionary used to validate the submission
-          properties:
-            name:
-              type: string
-            version:
-              type: string
-        dictionaryCategory:
-          type: object
-          description: Category this dictionary belongs in
-          properties:
-            id:
-              type: number
-            name:
-              type: string
-        errors:
-          type: object
-          properties:
-            inserts:
-              type: object
-              additionalProperties:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ValidationError'
-            updates:
-              type: object
-              additionalProperties:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ValidationError'
-            deletes:
-              type: object
-              additionalProperties:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ValidationError'
-        organization:
-          type: string
-          description: Organization the Submission belongs to
-        status:
-          type: string
-          description: Status of the Submission
-          enum: ['OPEN', 'VALID', 'INVALID', 'CLOSED', 'COMMITED']
-        createdAt:
-          type: string
-          description: Date and time of creation
-        createdBy:
-          type: string
-          description: Name of user who created the submission
-        udpatedAt:
-          type: string
-          description: Date and time of latest update
-        updatedBy:
-          type: string
-          description: Name of user who last updated the submission
-
     BatchError:
       type: object
       properties:
@@ -519,6 +303,291 @@ components:
         version:
           type: string
           description: Version of the Dictionary
+
+    StudyResult:
+      type: object
+      properties:
+        context:
+          type: string
+          enum: ['CLINICAL', 'RESEARCH']
+          description: Indicate if the study was conducted in a clinical setting or as part of a research project.
+        collaborators:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: List of researchers, institutions or companies involved in the study. Ex. FirstName LastName (if individual) or Organization full official name, Role.
+        dacId:
+          type: string
+          description: Unique identifier of the Data Access Committee (DAC) in PCGL to which the study is assigned.
+        domain:
+          type: array
+          items:
+            type: string
+          description: List of specific scientific or clinical domains addressed by the study.
+        fundingSources:
+          type: array
+          items:
+            type: string
+          description: List of organizations or agencies funding the study. Ex. Funder name, Grant number
+        keywords:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: List of specific terms that describe the focus and content of the study.
+        leadOrganizations:
+          type: array
+          items:
+            type: string
+          description: List of institutions or organizations leading the study.
+        participantCriteria:
+          type: string
+          nullable: true
+          description: Inclusion/exclusion criteria for participants (e.g., specific cancer type, age range).
+        principalInvestigators:
+          type: array
+          items:
+            type: string
+          description: 'List of lead researchers responsible for the study. Ex. John Doe, Example Research Institute'
+        programName:
+          type: string
+          nullable: true
+          description: Indicate the overarching program the study belongs to (if applicable).
+        publicationLinks:
+          type: array
+          items:
+            type: string
+          description: List of URL links to academic papers or reports associated with the study.
+        studyId:
+          type: string
+          description: Unique identifier of the study in PCGL.
+        studyName:
+          type: string
+          description: The official name of the study
+        studyDescription:
+          type: string
+          description: A detailed description of the study’s purpose, hypothesis, and design.
+        status:
+          type: string
+          enum: ['COMPLETED', 'ONGOING']
+          description: Indicate if the study is completed or ongoing.
+
+    SubmissionResult:
+      type: object
+      properties:
+        id:
+          type: number
+          description: ID of the Submission
+        data:
+          type: object
+          properties:
+            inserts:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  records:
+                    type: array
+                    items:
+                      type: object
+                      description: Content of the file in JSON format
+                  batchName:
+                    type: string
+                    description: Original filename  of the submission
+            updates:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    systemId:
+                      type: string
+                    old:
+                      type: object
+                      description: Old Content
+                    new:
+                      type: object
+                      description: New content
+            deletes:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    systemId:
+                      type: string
+                    data:
+                      type: object
+                      description: Content to be deleted
+        dictionary:
+          type: object
+          description: Dictionary used to validate the submission
+          properties:
+            name:
+              type: string
+            version:
+              type: string
+        dictionaryCategory:
+          type: object
+          description: Category this dictionary belongs in
+          properties:
+            id:
+              type: number
+            name:
+              type: string
+        errors:
+          type: object
+          properties:
+            inserts:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ValidationError'
+            updates:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ValidationError'
+            deletes:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ValidationError'
+        organization:
+          type: string
+          description: Organization the Submission belongs to
+        status:
+          type: string
+          description: Status of the Submission
+          enum: ['OPEN', 'VALID', 'INVALID', 'CLOSED', 'COMMITED']
+        createdAt:
+          type: string
+          description: Date and time of creation
+        createdBy:
+          type: string
+          description: User name who created the submission
+        updatedAt:
+          type: string
+          description: Date and time of latest update
+        updatedBy:
+          type: string
+          description: User name who last updated the submission
+
+    SubmissionsSummaryResult:
+      type: object
+      properties:
+        pagination:
+          type: object
+          properties:
+            currentPage:
+              type: number
+            pageSize:
+              type: number
+            totalPages:
+              type: number
+            totalRecords:
+              type: number
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionSummary'
+
+    SubmissionSummary:
+      type: object
+      properties:
+        id:
+          type: number
+          description: ID of the Submission
+        data:
+          type: object
+          properties:
+            inserts:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  batchName:
+                    type: string
+                    description: Original filename  of the submission
+                  recordsCount:
+                    type: number
+                    description: Number Of Records
+            updates:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  recordsCount:
+                    type: number
+            deletes:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  recordsCount:
+                    type: number
+        dictionary:
+          type: object
+          description: Dictionary used to validate the submission
+          properties:
+            name:
+              type: string
+            version:
+              type: string
+        dictionaryCategory:
+          type: object
+          description: Category this dictionary belongs in
+          properties:
+            id:
+              type: number
+            name:
+              type: string
+        errors:
+          type: object
+          properties:
+            inserts:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ValidationError'
+            updates:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ValidationError'
+            deletes:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ValidationError'
+        organization:
+          type: string
+          description: Organization the Submission belongs to
+        status:
+          type: string
+          description: Status of the Submission
+          enum: ['OPEN', 'VALID', 'INVALID', 'CLOSED', 'COMMITED']
+        createdAt:
+          type: string
+          description: Date and time of creation
+        createdBy:
+          type: string
+          description: Name of user who created the submission
+        udpatedAt:
+          type: string
+          description: Date and time of latest update
+        updatedBy:
+          type: string
+          description: Name of user who last updated the submission
 
     SubmittedDataRecord:
       type: object

@@ -10,6 +10,9 @@ const appConfig: AppConfig = {
 		user: env.DB_USER,
 		password: env.DB_PASSWORD,
 	},
+	auth: {
+		enabled: env.AUTH_ENABLED,
+	},
 	idService: {
 		customAlphabet: env.ID_CUSTOMALPHABET,
 		customSize: env.ID_CUSTOMSIZE,
