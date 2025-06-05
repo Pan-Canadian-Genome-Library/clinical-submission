@@ -7,7 +7,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/responses/Error"
+            $ref: '#/components/responses/Error'
 
     Error:
       type: object
@@ -24,35 +24,35 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/responses/Error"
+            $ref: '#/components/responses/Error'
 
     ServerError:
       description: Internal Server Error
       content:
         application/json:
           schema:
-            $ref: "#/components/responses/Error"
+            $ref: '#/components/responses/Error'
 
     ServiceUnavailableError:
       description: Error message indicating the server is currently unable to handle the request, often due to maintenance, overload, or temporary issues
       content:
         application/json:
           schema:
-            $ref: "#/components/responses/Error"
+            $ref: '#/components/responses/Error'
 
     StatusConflict:
       description: Error response indicating the requested action could not be performed on the entity in its current state.
       content:
         application/json:
           schema:
-            $ref: "#/components/responses/Error"
+            $ref: '#/components/responses/Error'
 
     UnauthorizedError:
       description: Access token is missing or invalid
       content:
         application/json:
           schema:
-            $ref: "#/components/responses/Error"
+            $ref: '#/components/responses/Error'
 
   schemas:
     BatchError:
@@ -130,7 +130,7 @@ components:
         records:
           type: array
           items:
-            $ref: "#/components/schemas/ChangeHistoryRecord"
+            $ref: '#/components/schemas/ChangeHistoryRecord'
 
     ChangeHistoryRecord:
       type: object
@@ -141,7 +141,7 @@ components:
         event:
           type: string
           description: Type of event
-          enum: ["UPDATE", "DELETE"]
+          enum: ['UPDATE', 'DELETE']
         dataDiff:
           type: object
           description: Captures the state of the data before the change as `old` and after the change as `new`
@@ -176,7 +176,7 @@ components:
         status:
           type: string
           description: Result of Commiting Submission
-          enum: ["PROCESSING"]
+          enum: ['PROCESSING']
         dictionary:
           type: object
           description: The dictionary used to validate the submission
@@ -202,7 +202,7 @@ components:
           type: array
           description: List of all batch related errors, should be empty on success
           items:
-            $ref: "#/components/schemas/BatchError"
+            $ref: '#/components/schemas/BatchError'
         inProcessEntities:
           type: array
           description: Names of the entities that will be processed
@@ -211,7 +211,7 @@ components:
         status:
           type: string
           description: Result of uploading Submission files
-          enum: ["PROCESSING", "INVALID_SUBMISSION", "PARTIAL_SUBMISSION"]
+          enum: ['PROCESSING', 'INVALID_SUBMISSION', 'PARTIAL_SUBMISSION']
         submissionId:
           type: string
           description: ID of the Submission
@@ -252,7 +252,7 @@ components:
         records:
           type: array
           items:
-            $ref: "#/components/schemas/SubmittedDataRecord"
+            $ref: '#/components/schemas/SubmittedDataRecord'
 
     Health:
       type: object
@@ -343,7 +343,7 @@ components:
           type: array
           items:
             type: string
-          description: "List of lead researchers responsible for the study. Ex. John Doe, Example Research Institute"
+          description: 'List of lead researchers responsible for the study. Ex. John Doe, Example Research Institute'
         programName:
           type: string
           nullable: true
@@ -440,26 +440,26 @@ components:
               additionalProperties:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ValidationError"
+                  $ref: '#/components/schemas/ValidationError'
             updates:
               type: object
               additionalProperties:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ValidationError"
+                  $ref: '#/components/schemas/ValidationError'
             deletes:
               type: object
               additionalProperties:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ValidationError"
+                  $ref: '#/components/schemas/ValidationError'
         organization:
           type: string
           description: Organization the Submission belongs to
         status:
           type: string
           description: Status of the Submission
-          enum: ["OPEN", "VALID", "INVALID", "CLOSED", "COMMITED"]
+          enum: ['OPEN', 'VALID', 'INVALID', 'CLOSED', 'COMMITED']
         createdAt:
           type: string
           description: Date and time of creation
@@ -490,7 +490,7 @@ components:
         records:
           type: array
           items:
-            $ref: "#/components/schemas/SubmissionSummary"
+            $ref: '#/components/schemas/SubmissionSummary'
 
     SubmissionSummary:
       type: object
@@ -550,26 +550,26 @@ components:
               additionalProperties:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ValidationError"
+                  $ref: '#/components/schemas/ValidationError'
             updates:
               type: object
               additionalProperties:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ValidationError"
+                  $ref: '#/components/schemas/ValidationError'
             deletes:
               type: object
               additionalProperties:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ValidationError"
+                  $ref: '#/components/schemas/ValidationError'
         organization:
           type: string
           description: Organization the Submission belongs to
         status:
           type: string
           description: Status of the Submission
-          enum: ["OPEN", "VALID", "INVALID", "CLOSED", "COMMITED"]
+          enum: ['OPEN', 'VALID', 'INVALID', 'CLOSED', 'COMMITED']
         createdAt:
           type: string
           description: Date and time of creation
