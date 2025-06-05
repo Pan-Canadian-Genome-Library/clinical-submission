@@ -23,6 +23,7 @@ import { asc, desc, eq } from 'drizzle-orm';
 import { logger } from '@/common/logger.js';
 import { DACFields } from '@/common/types/dac.js';
 import { CreateDacDataFields, UpdateDacDataFields } from '@/common/validation/dac-validation.js';
+import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
 import { dac } from '@/db/schemas/dacSchema.js';
 
@@ -82,7 +83,7 @@ const dacService = (db: PostgresDb) => {
 			} catch (error) {
 				logger.error('Error at getDacById service', error);
 
-				throw new ServiceUnavailable();
+				throw new lyricProvider.utils.errors.InternalServerError();
 			}
 		},
 		saveDac: async ({
@@ -117,7 +118,7 @@ const dacService = (db: PostgresDb) => {
 			} catch (error) {
 				logger.error('Error at saveDac service', error);
 
-				throw new ServiceUnavailable();
+				throw new lyricProvider.utils.errors.InternalServerError();
 			}
 		},
 		deleteDacById: async (dacId: string): Promise<Pick<DACFields, 'dacId'> | undefined> => {
@@ -128,7 +129,7 @@ const dacService = (db: PostgresDb) => {
 			} catch (error) {
 				logger.error('Error at deleteDacById service', error);
 
-				throw new ServiceUnavailable();
+				throw new lyricProvider.utils.errors.InternalServerError();
 			}
 		},
 		updateDacById: async (
@@ -161,7 +162,7 @@ const dacService = (db: PostgresDb) => {
 			} catch (error) {
 				logger.error('Error at updateDacById service', error);
 
-				throw new ServiceUnavailable();
+				throw new lyricProvider.utils.errors.InternalServerError();
 			}
 		},
 	};
