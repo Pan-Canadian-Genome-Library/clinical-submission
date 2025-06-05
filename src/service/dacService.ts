@@ -28,6 +28,28 @@ import { dac } from '@/db/schemas/dacSchema.js';
 
 const dacService = (db: PostgresDb) => {
 	return {
+		listAllDac: async (): Promise<DACFields[] | undefined> => {
+			let dacRecord: DACFields[];
+			try {
+				dacRecord = await db
+					.select({
+						dacId: dac.dac_id,
+						dacName: dac.dac_name,
+						dacDescription: dac.dac_description,
+						contactName: dac.contact_name,
+						contactEmail: dac.contact_email,
+						createdAt: dac.created_at,
+						updatedAt: dac.updated_at,
+					})
+					.from(dac);
+
+				return dacRecord;
+			} catch (error) {
+				logger.error('Error at getAllDac service', error);
+
+				throw new ServiceUnavailable();
+			}
+		},
 		getDacById: async (dacId: string): Promise<DACFields | undefined> => {
 			let dacRecord: DACFields[];
 			try {

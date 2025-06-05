@@ -17,11 +17,28 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { Request, Response } from 'express';
+import { NextFunction } from 'express-serve-static-core';
+
 import { createDacData, deleteDacByIdData, getDacByIdData } from '@/common/validation/dac-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import dacService from '@/service/dacService.js';
+
+const getAllDac = async (_: Request, res: Response, next: NextFunction) => {
+	try {
+		const database = getDbInstance();
+		const dacSvc = await dacService(database);
+
+		const result = await dacSvc.listAllDac();
+
+		res.status(200).send(result);
+		return;
+	} catch (err) {
+		next(err);
+	}
+};
 
 const getDacById = validateRequest(getDacByIdData, async (req, res, next) => {
 	try {
@@ -79,4 +96,4 @@ const deleteDac = validateRequest(deleteDacByIdData, async (req, res, next) => {
 	}
 });
 
-export default { getDacById, createDac, deleteDac };
+export default { getAllDac, getDacById, createDac, deleteDac };
