@@ -23,20 +23,20 @@ import { z } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
-import { StudyContext, StudyFields, StudyStatus } from '../types/study.js';
+import { StudyContext, StudyDTO, StudyStatus } from '../types/study.js';
 import { stringNotEmpty } from './common.js';
 
 interface GetStudyByIDParams extends ParamsDictionary {
 	studyId: string;
 }
 
-export const getStudyDataById: RequestValidation<object, ParsedQs, GetStudyByIDParams> = {
+export const StudyIDParams: RequestValidation<object, ParsedQs, GetStudyByIDParams> = {
 	pathParams: z.object({
 		studyId: stringNotEmpty,
 	}),
 };
 
-export type CreateStudyFields = Omit<StudyFields, 'createdAt' | 'updatedAt'>;
+export type CreateStudyFields = Omit<StudyDTO, 'createdAt' | 'updatedAt'>;
 
 export const createStudy: RequestValidation<CreateStudyFields, ParsedQs, ParamsDictionary> = {
 	body: z.object({

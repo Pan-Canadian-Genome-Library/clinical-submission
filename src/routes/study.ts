@@ -19,7 +19,7 @@
 
 import express, { json, Router, urlencoded } from 'express';
 
-import { createNewStudy, getStudyById } from '@/controllers/studyController.js';
+import { createNewStudy, deleteStudyById, getStudyById } from '@/controllers/studyController.js';
 
 export const studyRouter: Router = (() => {
 	const router = express.Router();
@@ -28,7 +28,9 @@ export const studyRouter: Router = (() => {
 	router.use(urlencoded({ extended: false }));
 
 	router.post('/', createNewStudy);
+
 	router.get('/:studyId', getStudyById);
+	router.delete('/:studyId', deleteStudyById);
 
 	return router;
 })();

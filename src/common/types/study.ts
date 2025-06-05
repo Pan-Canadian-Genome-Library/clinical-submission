@@ -17,6 +17,8 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { study } from '@/db/schemas/studiesSchema.js';
+
 export const StudyStatus = {
 	ONGOING: 'ONGOING',
 	COMPLETED: 'COMPLETED',
@@ -31,7 +33,7 @@ export const StudyContext = {
 
 export type StudyContextValues = (typeof StudyContext)[keyof typeof StudyContext];
 
-export type StudyFields = {
+export type StudyDTO = {
 	studyId: string;
 	dacId: string;
 	studyName: string;
@@ -47,4 +49,9 @@ export type StudyFields = {
 	collaborators?: string[] | null;
 	fundingSources: string[];
 	publicationLinks?: string[] | null;
+	createdAt: Date;
+	updatedAt?: Date | null;
 };
+
+export type StudyRecord = typeof study.$inferSelect;
+export type StudyModel = typeof study.$inferInsert;
