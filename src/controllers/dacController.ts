@@ -20,7 +20,12 @@
 import { Request, Response } from 'express';
 import { NextFunction } from 'express-serve-static-core';
 
-import { createDacData, deleteDacByIdData, getDacByIdData } from '@/common/validation/dac-validation.js';
+import {
+	createDacData,
+	deleteDacByIdData,
+	getDacByIdData,
+	updateDacByIdData,
+} from '@/common/validation/dac-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
@@ -96,4 +101,25 @@ const deleteDac = validateRequest(deleteDacByIdData, async (req, res, next) => {
 	}
 });
 
-export default { getAllDac, getDacById, createDac, deleteDac };
+const updateDac = validateRequest(updateDacByIdData, async (req, res, next) => {
+	try {
+		const database = getDbInstance();
+		const dacSvc = await dacService(database);
+
+		const dacId = req.params.dacId;
+		const dacFields = req.body;
+
+		const result = await dacSvc.updateDacById(dacId, dacFields);
+
+		if (!result) {
+			throw new lyricProvider.utils.errors.NotFound(`No dac with dacId - ${dacId} found to update.`);
+		}
+
+		res.status(200).send(result);
+		return;
+	} catch (err) {
+		next(err);
+	}
+});
+
+export default { getAllDac, getDacById, createDac, deleteDac, updateDac };

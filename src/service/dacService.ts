@@ -22,7 +22,7 @@ import { eq } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
 import { DACFields } from '@/common/types/dac.js';
-import { CreateDacDataFields } from '@/common/validation/dac-validation.js';
+import { CreateDacDataFields, UpdateDacDataFields } from '@/common/validation/dac-validation.js';
 import { PostgresDb } from '@/db/index.js';
 import { dac } from '@/db/schemas/dacSchema.js';
 
@@ -115,6 +115,39 @@ const dacService = (db: PostgresDb) => {
 				return dacRecord[0];
 			} catch (error) {
 				logger.error('Error at deleteDacById service', error);
+
+				throw new ServiceUnavailable();
+			}
+		},
+		updateDacById: async (
+			dacId: string,
+			{ dacName, contactEmail, contactName, dacDescription }: UpdateDacDataFields,
+		): Promise<DACFields | undefined> => {
+			let dacRecord: DACFields[];
+
+			try {
+				dacRecord = await db
+					.update(dac)
+					.set({
+						dac_name: dacName,
+						dac_description: dacDescription,
+						contact_name: contactName,
+						contact_email: contactEmail,
+					})
+					.where(eq(dac.dac_id, dacId))
+					.returning({
+						dacId: dac.dac_id,
+						dacName: dac.dac_name,
+						dacDescription: dac.dac_description,
+						contactName: dac.contact_name,
+						contactEmail: dac.contact_email,
+						createdAt: dac.created_at,
+						updatedAt: dac.updated_at,
+					});
+
+				return dacRecord[0];
+			} catch (error) {
+				logger.error('Error at updateDacById service', error);
 
 				throw new ServiceUnavailable();
 			}
