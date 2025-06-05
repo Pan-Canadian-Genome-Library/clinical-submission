@@ -34,8 +34,8 @@ export const editData = validateRequest(editDataRequestSchema, async (req, res, 
 		const files = Array.isArray(req.files) ? req.files : [];
 		const organization = req.body.organization;
 
-		// TODO: get userName from auth
-		const userName = '';
+		// TODO: get username from auth
+		const username = '';
 
 		logger.info(
 			`Edit Data Submission Request: categoryId '${categoryId}'`,
@@ -87,7 +87,7 @@ export const editData = validateRequest(editDataRequestSchema, async (req, res, 
 					entityName,
 					categoryId,
 					organization,
-					userName,
+					username,
 				});
 
 				submissionId = uploadResult.submissionId;
@@ -109,7 +109,12 @@ export const editData = validateRequest(editDataRequestSchema, async (req, res, 
 		}
 
 		// This response provides the details of file Submission
-		return res.status(200).send({ submissionId, status, batchErrors: fileErrors, inProcessEntities: entityList });
+		return res.status(200).send({
+			submissionId,
+			status,
+			batchErrors: fileErrors,
+			inProcessEntities: entityList,
+		});
 	} catch (error) {
 		next(error);
 	}

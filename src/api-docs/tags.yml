@@ -3,6 +3,8 @@ tags:
     description: Retrieves a list of changes made to Submitted Data records
   - name: Category
     description: Operations related to Categories management. Categories are used to organize and clasify Dictionaries
+  - name: DAC
+    description: Create, View and Edit a DAC user. A DAC is a group of individuals responsible for reviewing and approving or denying access requests to datasets based on established policies. A DAC user is always associated with a study.
   - name: Data
     description: Retrieve Submitted Data using filters and pagination
   - name: Dictionary
@@ -11,5 +13,5 @@ tags:
     description: Service status monitoring
   - name: Submission
     description: Create, View, Edit and Commit a Submission. A Submission represents a collection of data that is staged for validation before finalization
-  - name: DAC
-    description: Create, View and Edit a DAC user. A DAC is a group of individuals responsible for reviewing and approving or denying access requests to datasets based on established policies. A DAC user is always associated with a study.
+  - name: Study
+    description: Create, View, and Edit a Study. Study refers to a specific research project conducted as part of a larger program. It involves data collection, analysis, and interpretation related to the program's goals. Each study is focused on particular research questions related to set of objectives.
