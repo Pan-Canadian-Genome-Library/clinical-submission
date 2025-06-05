@@ -51,6 +51,13 @@ components:
         schema:
           type: integer
         description: Optional query parameter to specify the number of results per page. Default value is 20
+      OrderBy:
+        name: orderBy
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Optional query parameter to specify the order direction. Default value is asc
       View:
         name: view
         in: query

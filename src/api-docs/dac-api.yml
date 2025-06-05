@@ -145,6 +145,10 @@
     summary: Get all DAC users
     tags:
       - DAC
+    parameters:
+      - $ref: '#/components/parameters/query/OrderBy'
+      - $ref: '#/components/parameters/query/Page'
+      - $ref: '#/components/parameters/query/PageSize'
     responses:
       200:
         description: Returns a list of all the DAC users
