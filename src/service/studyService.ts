@@ -46,7 +46,6 @@ const studyService = (db: PostgresDb) => ({
 					fundingSources: study.funding_sources,
 					publicationLinks: study.publication_links,
 					keywords: study.keywords,
-					collaborators: study.collaborator,
 					createdAt: study.created_at,
 					updatedAt: study.updated_at,
 				})
@@ -59,6 +58,55 @@ const studyService = (db: PostgresDb) => ({
 			);
 		}
 		return studyRecords[0];
+	},
+
+	createStudy: async (studyData: StudyFields): Promise<StudyFields | undefined> => {
+		try {
+			const newStudyRecord = await db
+				.insert(study)
+				.values({
+					study_id: studyData.studyId,
+					dac_id: studyData.dacId,
+					study_name: studyData.studyName,
+					study_description: studyData.studyDescription,
+					program_name: studyData.programName,
+					status: studyData.status,
+					context: studyData.context,
+					domain: studyData.domain,
+					participant_criteria: studyData.participantCriteria,
+					principal_investigators: studyData.principalInvestigators,
+					lead_organizations: studyData.leadOrganizations,
+					collaborator: studyData.collaborators,
+					funding_sources: studyData.fundingSources,
+					publication_links: studyData.publicationLinks,
+					keywords: studyData.keywords,
+				})
+				.returning({
+					studyId: study.study_id,
+					dacId: study.dac_id,
+					studyName: study.study_name,
+					studyDescription: study.study_description,
+					programName: study.program_name,
+					status: study.status,
+					context: study.context,
+					domain: study.domain,
+					participantCriteria: study.participant_criteria,
+					principalInvestigators: study.principal_investigators,
+					leadOrganizations: study.lead_organizations,
+					collaborator: study.collaborator,
+					fundingSources: study.funding_sources,
+					publicationLinks: study.publication_links,
+					keywords: study.keywords,
+					createdAt: study.created_at,
+					updatedAt: study.updated_at,
+				});
+			return newStudyRecord[0];
+		} catch (error) {
+			logger.error('Error at createStudy in StudyService', error);
+			throw new lyricProvider.utils.errors.ServiceUnavailable(
+				'Something went wrong while creating a new study. Please try again later.',
+			);
+		}
 	},
 });
 
