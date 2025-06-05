@@ -303,7 +303,7 @@ components:
       properties:
         context:
           type: string
-          enum: [CLINICAL, RESEARCH]
+          enum: ['CLINICAL', 'RESEARCH']
           description: Indicate if the study was conducted in a clinical setting or as part of a research project.
         collaborators:
           type: array
@@ -364,7 +364,7 @@ components:
           description: A detailed description of the study’s purpose, hypothesis, and design.
         status:
           type: string
-          enum: [COMPLETED, ONGOING]
+          enum: ['COMPLETED', 'ONGOING']
           description: Indicate if the study is completed or ongoing.
 
     SubmissionResult:
