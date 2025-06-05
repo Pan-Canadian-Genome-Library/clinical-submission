@@ -17,13 +17,13 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { createStudy, StudyIDParams } from '@/common/validation/study-validation.js';
+import { createStudy, getOrDeleteStudyByID } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import { studyService } from '@/service/studyService.js';
 
-export const getStudyById = validateRequest(StudyIDParams, async (req, res, next) => {
+export const getStudyById = validateRequest(getOrDeleteStudyByID, async (req, res, next) => {
 	const studyId = req.params.studyId;
 	const db = getDbInstance();
 	const studyRepo = studyService(db);
@@ -57,7 +57,7 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 	}
 });
 
-export const deleteStudyById = validateRequest(StudyIDParams, async (req, res, next) => {
+export const deleteStudyById = validateRequest(getOrDeleteStudyByID, async (req, res, next) => {
 	const studyId = req.params.studyId;
 	const db = getDbInstance();
 	const studyRepo = studyService(db);

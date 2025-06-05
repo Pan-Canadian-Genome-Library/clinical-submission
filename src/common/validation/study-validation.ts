@@ -26,11 +26,11 @@ import { RequestValidation } from '@/middleware/requestValidation.js';
 import { StudyContext, StudyDTO, StudyStatus } from '../types/study.js';
 import { stringNotEmpty } from './common.js';
 
-interface GetStudyByIDParams extends ParamsDictionary {
+interface StudyIDParams extends ParamsDictionary {
 	studyId: string;
 }
 
-export const StudyIDParams: RequestValidation<object, ParsedQs, GetStudyByIDParams> = {
+export const getOrDeleteStudyByID: RequestValidation<object, ParsedQs, StudyIDParams> = {
 	pathParams: z.object({
 		studyId: stringNotEmpty,
 	}),
