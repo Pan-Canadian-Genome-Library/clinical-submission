@@ -52,7 +52,7 @@ const createDac = validateRequest(createDacData, async (req, res, next) => {
 
 		const result = await dacSvc.saveDac(dacFields);
 
-		res.status(200).send(result);
+		res.status(201).send(result);
 		return;
 	} catch (err) {
 		next(err);
@@ -72,7 +72,7 @@ const deleteDac = validateRequest(deleteDacByIdData, async (req, res, next) => {
 			throw new lyricProvider.utils.errors.NotFound(`No dac with dacId - ${dacId} found to delete.`);
 		}
 
-		res.status(200).send(result);
+		res.status(204).send();
 		return;
 	} catch (err) {
 		next(err);
