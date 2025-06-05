@@ -21,7 +21,7 @@ import { getStudyDataById } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
-import { studyService } from '@/services/studyService.js';
+import { studyService } from '@/service/studyService.js';
 
 export const getStudyById = validateRequest(getStudyDataById, async (req, res, next) => {
 	const studyId = req.params.studyId;
