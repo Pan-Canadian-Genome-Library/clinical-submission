@@ -24,6 +24,7 @@ import type { StudyFields } from '@/common/types/study.js';
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
 import { study } from '@/db/schemas/studiesSchema.js';
+import { isPostgresError, PostgresErrors } from '@/db/utils.js';
 
 const studyService = (db: PostgresDb) => ({
 	getStudyById: async (studyId: string): Promise<StudyFields | undefined> => {
@@ -102,7 +103,16 @@ const studyService = (db: PostgresDb) => ({
 				});
 			return newStudyRecord[0];
 		} catch (error) {
+			const postgressError = isPostgresError(error);
+
+			if (postgressError && postgressError.code === PostgresErrors.UNIQUE_KEY_VIOLATION) {
+				throw new lyricProvider.utils.errors.BadRequest(
+					`${studyData.studyId} already exists in studies. Study name must be unique.`,
+				);
+			}
+
 			logger.error('Error at createStudy in StudyService', error);
+
 			throw new lyricProvider.utils.errors.ServiceUnavailable(
 				'Something went wrong while creating a new study. Please try again later.',
 			);

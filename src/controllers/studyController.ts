@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { getStudyDataById } from '@/common/validation/study-validation.js';
+import { createStudy, getStudyDataById } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
@@ -34,6 +34,23 @@ export const getStudyById = validateRequest(getStudyDataById, async (req, res, n
 			throw new lyricProvider.utils.errors.NotFound(`No Study with ID - ${studyId} found.`);
 		}
 		res.status(200).send(results);
+		return;
+	} catch (exception) {
+		next(exception);
+	}
+});
+
+export const createNewStudy = validateRequest(createStudy, async (req, res, next) => {
+	const studyData = req.body;
+	const db = getDbInstance();
+	const studyRepo = studyService(db);
+
+	try {
+		const results = await studyRepo.createStudy(studyData);
+		if (!results) {
+			throw new lyricProvider.utils.errors.BadRequest(`Unable to create study with provided data.`);
+		}
+		res.status(201).send(results);
 		return;
 	} catch (exception) {
 		next(exception);

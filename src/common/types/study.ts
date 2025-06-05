@@ -17,6 +17,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+export const StudyStatus = {
+	ONGOING: 'ONGOING',
+	COMPLETED: 'COMPLETED',
+} as const;
+
+export type StudyStatusValues = (typeof StudyStatus)[keyof typeof StudyStatus];
+
+export const StudyContext = {
+	CLINICAL: 'CLINICAL',
+	RESEARCH: 'RESEARCH',
+} as const;
+
+export type StudyContextValues = (typeof StudyContext)[keyof typeof StudyContext];
+
 export type StudyFields = {
 	studyId: string;
 	dacId: string;
@@ -24,8 +38,8 @@ export type StudyFields = {
 	studyDescription: string;
 	programName?: string | null;
 	keywords?: string[] | null;
-	status: 'ONGOING' | 'COMPLETED';
-	context: 'CLINICAL' | 'RESEARCH';
+	status: StudyStatusValues;
+	context: StudyContextValues;
 	domain: string[];
 	participantCriteria?: string | null;
 	principalInvestigators: string[];
