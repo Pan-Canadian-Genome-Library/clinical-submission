@@ -24,11 +24,19 @@ import { z } from 'zod';
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
 import { DACFields } from '../types/dac.js';
-import { stringNotEmpty, stringNotEmptyOptional } from './common.js';
+import { PaginationParams, positiveInteger, stringNotEmpty, stringNotEmptyOptional } from './common.js';
 
 interface DacIdParams extends ParamsDictionary {
 	dacId: string;
 }
+
+export const getAllDacData: RequestValidation<object, PaginationParams, ParamsDictionary> = {
+	query: z.object({
+		orderBy: stringNotEmptyOptional,
+		page: positiveInteger.optional(),
+		pageSize: positiveInteger.optional(),
+	}),
+};
 
 export const getDacByIdData: RequestValidation<object, ParsedQs, DacIdParams> = {
 	pathParams: z.object({

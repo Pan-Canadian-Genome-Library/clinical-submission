@@ -23,6 +23,7 @@ import { NextFunction } from 'express-serve-static-core';
 import {
 	createDacData,
 	deleteDacByIdData,
+	getAllDacData,
 	getDacByIdData,
 	updateDacByIdData,
 } from '@/common/validation/dac-validation.js';
@@ -31,19 +32,21 @@ import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import dacService from '@/service/dacService.js';
 
-const getAllDac = async (_: Request, res: Response, next: NextFunction) => {
+const getAllDac = validateRequest(getAllDacData, async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const database = getDbInstance();
 		const dacSvc = await dacService(database);
 
-		const result = await dacSvc.listAllDac();
+		const params = req.query;
+
+		const result = await dacSvc.listAllDac({ ...params, page: Number(params.page), pageSize: Number(params.pageSize) });
 
 		res.status(200).send(result);
 		return;
 	} catch (err) {
 		next(err);
 	}
-};
+});
 
 const getDacById = validateRequest(getDacByIdData, async (req, res, next) => {
 	try {

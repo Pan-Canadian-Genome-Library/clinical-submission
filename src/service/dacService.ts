@@ -18,7 +18,7 @@
  */
 
 import { ServiceUnavailable } from '@overture-stack/lyric/dist/src/utils/errors.js';
-import { eq } from 'drizzle-orm';
+import { asc, desc, eq } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
 import { DACFields } from '@/common/types/dac.js';
@@ -28,8 +28,17 @@ import { dac } from '@/db/schemas/dacSchema.js';
 
 const dacService = (db: PostgresDb) => {
 	return {
-		listAllDac: async (): Promise<DACFields[] | undefined> => {
+		listAllDac: async ({
+			orderBy = 'asc',
+			page = 1,
+			pageSize = 20,
+		}: {
+			orderBy?: string;
+			page?: number;
+			pageSize?: number;
+		}): Promise<DACFields[] | undefined> => {
 			let dacRecord: DACFields[];
+
 			try {
 				dacRecord = await db
 					.select({
@@ -41,7 +50,10 @@ const dacService = (db: PostgresDb) => {
 						createdAt: dac.created_at,
 						updatedAt: dac.updated_at,
 					})
-					.from(dac);
+					.from(dac)
+					.orderBy(orderBy === 'asc' ? asc(dac.dac_name) : desc(dac.dac_name))
+					.limit(pageSize)
+					.offset((page - 1) * pageSize);
 
 				return dacRecord;
 			} catch (error) {
@@ -103,7 +115,7 @@ const dacService = (db: PostgresDb) => {
 
 				return dacRecord[0];
 			} catch (error) {
-				logger.error('Error at saveDac Service', error);
+				logger.error('Error at saveDac service', error);
 
 				throw new ServiceUnavailable();
 			}
