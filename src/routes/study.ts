@@ -17,14 +17,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import express, { Router } from 'express';
+import express, { json, Router, urlencoded } from 'express';
 
-import { getStudyById } from '@/controllers/studyController.js';
+import { createNewStudy, deleteStudyById, getStudyById } from '@/controllers/studyController.js';
 
 export const studyRouter: Router = (() => {
 	const router = express.Router();
 
+	router.use(json());
+	router.use(urlencoded({ extended: false }));
+
+	router.post('/', createNewStudy);
+
 	router.get('/:studyId', getStudyById);
+	router.delete('/:studyId', deleteStudyById);
 
 	return router;
 })();
