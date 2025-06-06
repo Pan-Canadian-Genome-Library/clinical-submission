@@ -20,3 +20,4 @@
 import { z } from 'zod';
 
 export const stringNotEmpty = z.string().trim().min(1);
+export const stringNotEmptyOptional = stringNotEmpty.optional();

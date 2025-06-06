@@ -17,7 +17,8 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { getDacByIdData } from '@/common/validation/dac-validation.js';
+import { logger } from '@/common/logger.js';
+import { createDacData, deleteDacByIdData, getDacByIdData } from '@/common/validation/dac-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
@@ -33,7 +34,9 @@ const getDacById = validateRequest(getDacByIdData, async (req, res, next) => {
 		const result = await dacSvc.getDacById(dacId);
 
 		if (!result) {
-			throw new lyricProvider.utils.errors.NotFound(`No dac with dacId - ${dacId} found.`);
+			const message = `No dac with dacId - ${dacId} found.`;
+			logger.error(message);
+			throw new lyricProvider.utils.errors.NotFound(message);
 		}
 
 		res.status(200).send(result);
@@ -43,4 +46,42 @@ const getDacById = validateRequest(getDacByIdData, async (req, res, next) => {
 	}
 });
 
-export default { getDacById };
+const createDac = validateRequest(createDacData, async (req, res, next) => {
+	try {
+		const database = getDbInstance();
+		const dacSvc = await dacService(database);
+
+		const dacFields = req.body;
+
+		const result = await dacSvc.saveDac(dacFields);
+
+		res.status(201).send(result);
+		return;
+	} catch (err) {
+		next(err);
+	}
+});
+
+const deleteDac = validateRequest(deleteDacByIdData, async (req, res, next) => {
+	try {
+		const database = getDbInstance();
+		const dacSvc = await dacService(database);
+
+		const dacId = req.params.dacId;
+
+		const result = await dacSvc.deleteDacById(dacId);
+
+		if (!result) {
+			const message = `No dac with dacId - ${dacId} found to delete.`;
+			logger.error(message);
+			throw new lyricProvider.utils.errors.NotFound(`No dac with dacId - ${dacId} found to delete.`);
+		}
+
+		res.status(204).send();
+		return;
+	} catch (err) {
+		next(err);
+	}
+});
+
+export default { getDacById, createDac, deleteDac };

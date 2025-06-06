@@ -234,6 +234,12 @@ components:
         contactEmail:
           type: string
           description: DAC associated email address
+        createdAt:
+          type: string
+          description: Created date of the DAC record
+        updatedAt:
+          type: string
+          description: Last Updated date of the DAC record
 
     GetSubmittedDataResult:
       type: object

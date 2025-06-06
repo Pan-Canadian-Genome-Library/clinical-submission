@@ -17,14 +17,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import express, { Router } from 'express';
+import express, { json, Router, urlencoded } from 'express';
 
 import dacController from '@/controllers/dacController.js';
 
 export const dacRouter: Router = (() => {
 	const router = express.Router();
+	router.use(json());
+	router.use(urlencoded({ extended: false }));
 
 	router.get('/:dacId', dacController.getDacById);
+	router.post('/create', dacController.createDac);
+	router.delete('/:dacId', dacController.deleteDac);
 
 	return router;
 })();

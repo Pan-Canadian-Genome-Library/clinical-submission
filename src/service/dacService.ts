@@ -17,11 +17,12 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { ServiceUnavailable } from '@overture-stack/lyric/dist/src/utils/errors.js';
 import { eq } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
 import { DACFields } from '@/common/types/dac.js';
+import { CreateDacDataFields } from '@/common/validation/dac-validation.js';
+import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
 import { dac } from '@/db/schemas/dacSchema.js';
 
@@ -45,9 +46,56 @@ const dacService = (db: PostgresDb) => {
 
 				return dacRecord[0];
 			} catch (error) {
-				logger.error('Error at getDacById', error);
+				logger.error('Error at getDacById service', error);
 
-				throw new ServiceUnavailable();
+				throw new lyricProvider.utils.errors.InternalServerError();
+			}
+		},
+		saveDac: async ({
+			dacId,
+			contactEmail,
+			contactName,
+			dacDescription,
+			dacName,
+		}: CreateDacDataFields): Promise<DACFields | undefined> => {
+			let dacRecord: DACFields[];
+			try {
+				dacRecord = await db
+					.insert(dac)
+					.values({
+						dac_id: dacId,
+						dac_name: dacName,
+						dac_description: dacDescription,
+						contact_name: contactName,
+						contact_email: contactEmail,
+					})
+					.returning({
+						dacId: dac.dac_id,
+						dacName: dac.dac_name,
+						dacDescription: dac.dac_description,
+						contactName: dac.contact_name,
+						contactEmail: dac.contact_email,
+						createdAt: dac.created_at,
+						updatedAt: dac.updated_at,
+					});
+
+				return dacRecord[0];
+			} catch (error) {
+				logger.error('Error at saveDac Service', error);
+				// TODO: once postgres pattern is in, check for duplicate key error
+
+				throw new lyricProvider.utils.errors.InternalServerError();
+			}
+		},
+		deleteDacById: async (dacId: string): Promise<Pick<DACFields, 'dacId'> | undefined> => {
+			try {
+				const dacRecord = await db.delete(dac).where(eq(dac.dac_id, dacId)).returning({ dacId: dac.dac_id });
+
+				return dacRecord[0];
+			} catch (error) {
+				logger.error('Error at deleteDacById service', error);
+
+				throw new lyricProvider.utils.errors.InternalServerError();
 			}
 		},
 	};

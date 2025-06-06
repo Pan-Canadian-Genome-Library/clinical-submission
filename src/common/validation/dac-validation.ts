@@ -23,13 +23,32 @@ import { z } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
+import { DACFields } from '../types/dac.js';
 import { stringNotEmpty } from './common.js';
 
-interface GetDacParams extends ParamsDictionary {
+interface DacIdParams extends ParamsDictionary {
 	dacId: string;
 }
 
-export const getDacByIdData: RequestValidation<object, ParsedQs, GetDacParams> = {
+export const getDacByIdData: RequestValidation<object, ParsedQs, DacIdParams> = {
+	pathParams: z.object({
+		dacId: stringNotEmpty,
+	}),
+};
+
+export type CreateDacDataFields = Omit<DACFields, 'updatedAt' | 'createdAt'>;
+
+export const createDacData: RequestValidation<CreateDacDataFields, ParsedQs, ParamsDictionary> = {
+	body: z.object({
+		dacId: stringNotEmpty,
+		dacName: stringNotEmpty,
+		dacDescription: stringNotEmpty,
+		contactName: stringNotEmpty,
+		contactEmail: stringNotEmpty,
+	}),
+};
+
+export const deleteDacByIdData: RequestValidation<object, ParsedQs, DacIdParams> = {
 	pathParams: z.object({
 		dacId: stringNotEmpty,
 	}),
