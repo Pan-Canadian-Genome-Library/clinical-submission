@@ -29,16 +29,8 @@
     parameters:
       - $ref: '#/components/parameters/path/DacId'
     responses:
-      200:
-        description: Returns DAC Id
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                dacId:
-                  type: string
-                  description: DAC users ID
+      204:
+        description: Successfully deleted a DAC.
       400:
         $ref: '#/components/responses/BadRequest'
       401:
@@ -124,7 +116,7 @@
               - contactName
               - contactEmail
     responses:
-      200:
+      201:
         description: Returns DAC data
         content:
           application/json:
