@@ -23,14 +23,37 @@ import { z } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
+import { StudyContext, StudyDTO, StudyStatus } from '../types/study.js';
 import { stringNotEmpty } from './common.js';
 
-interface GetStudyByIDParams extends ParamsDictionary {
+interface StudyIDParams extends ParamsDictionary {
 	studyId: string;
 }
 
-export const getStudyDataById: RequestValidation<object, ParsedQs, GetStudyByIDParams> = {
+export const getOrDeleteStudyByID: RequestValidation<object, ParsedQs, StudyIDParams> = {
 	pathParams: z.object({
 		studyId: stringNotEmpty,
+	}),
+};
+
+export type CreateStudyFields = Omit<StudyDTO, 'createdAt' | 'updatedAt'>;
+
+export const createStudy: RequestValidation<CreateStudyFields, ParsedQs, ParamsDictionary> = {
+	body: z.object({
+		studyId: stringNotEmpty,
+		dacId: stringNotEmpty,
+		studyName: stringNotEmpty,
+		studyDescription: stringNotEmpty,
+		programName: z.string().optional(),
+		keywords: z.array(z.string()).optional(),
+		status: z.nativeEnum(StudyStatus),
+		context: z.nativeEnum(StudyContext),
+		domain: z.array(z.string()),
+		participantCriteria: z.string().optional(),
+		principalInvestigators: z.array(z.string()),
+		leadOrganizations: z.array(z.string()),
+		collaborators: z.array(z.string()).optional(),
+		fundingSources: z.array(z.string()),
+		publicationLinks: z.array(z.string()).optional(),
 	}),
 };

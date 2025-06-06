@@ -18,7 +18,7 @@
  */
 
 import { relations } from 'drizzle-orm';
-import { text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { foreignKey, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { dac } from './dacSchema.js';
 import { pcglSchema } from './generate.js';
@@ -26,25 +26,35 @@ import { pcglSchema } from './generate.js';
 export const studyStatus = pcglSchema.enum('study_status', ['ONGOING', 'COMPLETED']);
 export const studyContext = pcglSchema.enum('study_context', ['CLINICAL', 'RESEARCH']);
 
-export const study = pcglSchema.table('study', {
-	study_id: text().primaryKey().notNull(),
-	dac_id: text().notNull(),
-	study_name: varchar({ length: 255 }).notNull(),
-	study_description: text().notNull(), // Assuming the description is large
-	program_name: varchar({ length: 255 }),
-	keywords: text().array(),
-	status: studyStatus().notNull(),
-	context: studyContext().notNull(),
-	domain: text().array().notNull(),
-	participant_criteria: text(),
-	principal_investigators: text().array().notNull(),
-	lead_organizations: text().array().notNull(),
-	collaborator: text().array(),
-	funding_sources: text().array().notNull(),
-	publication_links: text().array(),
-	created_at: timestamp().notNull().defaultNow(),
-	updated_at: timestamp(),
-});
+export const study = pcglSchema.table(
+	'study',
+	{
+		study_id: text().primaryKey().notNull(),
+		dac_id: text().notNull(),
+		study_name: varchar({ length: 255 }).notNull(),
+		study_description: text().notNull(), // Assuming the description is large
+		program_name: varchar({ length: 255 }),
+		keywords: text().array(),
+		status: studyStatus().notNull(),
+		context: studyContext().notNull(),
+		domain: text().array().notNull(),
+		participant_criteria: text(),
+		principal_investigators: text().array().notNull(),
+		lead_organizations: text().array().notNull(),
+		collaborators: text().array(),
+		funding_sources: text().array().notNull(),
+		publication_links: text().array(),
+		created_at: timestamp().notNull().defaultNow(),
+		updated_at: timestamp(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.dac_id],
+			foreignColumns: [dac.dac_id],
+			name: 'dac_id_fk',
+		}),
+	],
+);
 
 export const studyRelations = relations(study, ({ one }) => ({
 	dac_id: one(dac, {

@@ -82,6 +82,7 @@ const dacService = (db: PostgresDb) => {
 				return dacRecord[0];
 			} catch (error) {
 				logger.error('Error at getDacById service', error);
+				logger.error('Error at getDacById service', error);
 
 				throw new lyricProvider.utils.errors.InternalServerError();
 			}

@@ -20,45 +20,121 @@
 import { eq } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
-import type { StudyFields } from '@/common/types/study.js';
+import type { StudyDTO, StudyModel, StudyRecord } from '@/common/types/study.js';
+import { CreateStudyFields } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
 import { study } from '@/db/schemas/studiesSchema.js';
+import { isPostgresError, PostgresErrors } from '@/db/utils.js';
+
+const convertToStudyDTO = (study: StudyRecord): StudyDTO => {
+	return {
+		studyId: study.study_id,
+		dacId: study.dac_id,
+		studyName: study.study_name,
+		studyDescription: study.study_description,
+		programName: study.program_name,
+		status: study.status,
+		context: study.context,
+		domain: study.domain,
+		participantCriteria: study.participant_criteria,
+		principalInvestigators: study.principal_investigators,
+		leadOrganizations: study.lead_organizations,
+		collaborators: study.collaborators,
+		fundingSources: study.funding_sources,
+		publicationLinks: study.publication_links,
+		keywords: study.keywords,
+		createdAt: study.created_at,
+		updatedAt: study.updated_at,
+	};
+};
+
+const convertFromStudyDTO = (
+	studyData: Omit<StudyDTO, 'updatedAt' | 'createdAt'>,
+): Omit<StudyModel, 'created_at' | 'updated_at'> => {
+	return {
+		study_id: studyData.studyId,
+		dac_id: studyData.dacId,
+		study_name: studyData.studyName,
+		study_description: studyData.studyDescription,
+		program_name: studyData.programName,
+		status: studyData.status,
+		context: studyData.context,
+		domain: studyData.domain,
+		participant_criteria: studyData.participantCriteria,
+		principal_investigators: studyData.principalInvestigators,
+		lead_organizations: studyData.leadOrganizations,
+		collaborators: studyData.collaborators,
+		funding_sources: studyData.fundingSources,
+		publication_links: studyData.publicationLinks,
+		keywords: studyData.keywords,
+	};
+};
 
 const studyService = (db: PostgresDb) => ({
-	getStudyById: async (studyId: string): Promise<StudyFields | undefined> => {
+	getStudyById: async (studyId: string): Promise<StudyDTO | undefined> => {
 		let studyRecords;
 		try {
-			studyRecords = await db
-				.select({
-					studyId: study.study_id,
-					dacId: study.dac_id,
-					studyName: study.study_name,
-					studyDescription: study.study_description,
-					programName: study.program_name,
-					status: study.status,
-					context: study.context,
-					domain: study.domain,
-					participantCriteria: study.participant_criteria,
-					principalInvestigators: study.principal_investigators,
-					leadOrganizations: study.lead_organizations,
-					collaborator: study.collaborator,
-					fundingSources: study.funding_sources,
-					publicationLinks: study.publication_links,
-					keywords: study.keywords,
-					collaborators: study.collaborator,
-					createdAt: study.created_at,
-					updatedAt: study.updated_at,
-				})
-				.from(study)
-				.where(eq(study.study_id, studyId));
+			studyRecords = await db.select().from(study).where(eq(study.study_id, studyId));
 		} catch (exception) {
 			logger.error('Error at getStudyById', exception);
-			throw new lyricProvider.utils.errors.ServiceUnavailable(
-				'Something went wrong while fetching studies. Please try again later.',
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'Something went wrong while fetching your requested study. Please try again later.',
 			);
 		}
+
+		if (studyRecords[0]) {
+			return convertToStudyDTO(studyRecords[0]);
+		}
+
 		return studyRecords[0];
+	},
+
+	createStudy: async (studyData: CreateStudyFields): Promise<StudyDTO | undefined> => {
+		try {
+			const newStudyRecord = await db.insert(study).values(convertFromStudyDTO(studyData)).returning();
+
+			if (newStudyRecord[0]) {
+				return convertToStudyDTO(newStudyRecord[0]);
+			}
+
+			return newStudyRecord[0];
+		} catch (error) {
+			const postgresError = isPostgresError(error);
+
+			switch (postgresError?.code) {
+				case PostgresErrors.UNIQUE_KEY_VIOLATION:
+					throw new lyricProvider.utils.errors.BadRequest(
+						`${studyData.studyId} already exists in studies. Study name must be unique.`,
+					);
+				case PostgresErrors.FOREIGN_KEY_VIOLATION:
+					throw new lyricProvider.utils.errors.BadRequest(
+						`${studyData.dacId} does not appear to be a valid DAC ID, please ensure this DAC record exists prior to creating a study.`,
+					);
+				default:
+					logger.error('Error at createStudy in StudyService', error);
+					throw new lyricProvider.utils.errors.InternalServerError(
+						'Something went wrong while creating a new study. Please try again later.',
+					);
+			}
+		}
+	},
+
+	deleteStudy: async (studyId: string): Promise<StudyDTO | undefined> => {
+		try {
+			const deletedRecord = await db.delete(study).where(eq(study.study_id, studyId)).returning();
+			if (deletedRecord[0]) {
+				return convertToStudyDTO(deletedRecord[0]);
+			}
+
+			return deletedRecord[0];
+		} catch (error) {
+			logger.error('Error at deleteStudy in StudyService', error);
+
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'Something went wrong while deleting this requested study. Please try again later.',
+			);
+		}
 	},
 });
 
