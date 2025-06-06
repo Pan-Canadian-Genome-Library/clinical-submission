@@ -74,6 +74,21 @@
                 type: string
                 enum: ['COMPLETED', 'ONGOING']
                 description: Indicate if the study is completed or ongoing.
+    responses:
+      201:
+        description: Successfully created a study.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudyResult'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/UnauthorizedError'
+      404:
+        $ref: '#/components/responses/NotFound'
+      500:
+        $ref: '#/components/responses/ServerError'
 
 /study/{studyId}:
   get:
@@ -102,8 +117,7 @@
         $ref: '#/components/responses/NotFound'
       500:
         $ref: '#/components/responses/ServerError'
-      503:
-        $ref: '#/components/responses/ServiceUnavailableError'
+
   delete:
     summary: Delete a Study by Study ID
     parameters:
@@ -126,5 +140,3 @@
         $ref: '#/components/responses/NotFound'
       500:
         $ref: '#/components/responses/ServerError'
-      503:
-        $ref: '#/components/responses/ServiceUnavailableError'
