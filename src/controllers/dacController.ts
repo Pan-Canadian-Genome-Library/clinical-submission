@@ -99,7 +99,7 @@ const deleteDac = validateRequest(deleteDacByIdData, async (req, res, next) => {
 		if (!result) {
 			const message = `No dac with dacId - ${dacId} found to delete.`;
 			logger.error(message);
-			throw new lyricProvider.utils.errors.NotFound(`No dac with dacId - ${dacId} found to delete.`);
+			throw new lyricProvider.utils.errors.NotFound(message);
 		}
 
 		res.status(204).send();
@@ -120,7 +120,9 @@ const updateDac = validateRequest(updateDacByIdData, async (req, res, next) => {
 		const result = await dacSvc.updateDacById(dacId, dacFields);
 
 		if (!result) {
-			throw new lyricProvider.utils.errors.NotFound(`No dac with dacId - ${dacId} found to update.`);
+			const message = `No dac with dacId - ${dacId} found to update.`;
+			logger.error(message);
+			throw new lyricProvider.utils.errors.NotFound(message);
 		}
 
 		res.status(200).send(result);

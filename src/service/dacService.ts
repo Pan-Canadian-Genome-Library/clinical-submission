@@ -17,7 +17,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { ServiceUnavailable } from '@overture-stack/lyric/dist/src/utils/errors.js';
 import { asc, desc, eq, sql } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
@@ -60,7 +59,7 @@ const dacService = (db: PostgresDb) => {
 			} catch (error) {
 				logger.error('Error at getAllDac service', error);
 
-				throw new ServiceUnavailable();
+				throw new lyricProvider.utils.errors.InternalServerError();
 			}
 		},
 		getDacById: async (dacId: string): Promise<DACFields | undefined> => {
@@ -81,7 +80,6 @@ const dacService = (db: PostgresDb) => {
 
 				return dacRecord[0];
 			} catch (error) {
-				logger.error('Error at getDacById service', error);
 				logger.error('Error at getDacById service', error);
 
 				throw new lyricProvider.utils.errors.InternalServerError();
