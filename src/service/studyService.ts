@@ -100,21 +100,23 @@ const studyService = (db: PostgresDb) => ({
 
 			return newStudyRecord[0];
 		} catch (error) {
-			const postgressError = isPostgresError(error);
-			if (postgressError && postgressError.code === PostgresErrors.UNIQUE_KEY_VIOLATION) {
-				throw new lyricProvider.utils.errors.BadRequest(
-					`${studyData.studyId} already exists in studies. Study name must be unique.`,
-				);
-			} else if (postgressError && postgressError.code === PostgresErrors.FOREIGN_KEY_VIOLATION) {
-				throw new lyricProvider.utils.errors.BadRequest(
-					`${studyData.dacId} does not appear to be a valid DAC ID, please ensure this DAC record exists prior to creating a study.`,
-				);
-			}
+			const postgresError = isPostgresError(error);
 
-			logger.error('Error at createStudy in StudyService', error);
-			throw new lyricProvider.utils.errors.InternalServerError(
-				'Something went wrong while creating a new study. Please try again later.',
-			);
+			switch (postgresError?.code) {
+				case PostgresErrors.UNIQUE_KEY_VIOLATION:
+					throw new lyricProvider.utils.errors.BadRequest(
+						`${studyData.studyId} already exists in studies. Study name must be unique.`,
+					);
+				case PostgresErrors.FOREIGN_KEY_VIOLATION:
+					throw new lyricProvider.utils.errors.BadRequest(
+						`${studyData.dacId} does not appear to be a valid DAC ID, please ensure this DAC record exists prior to creating a study.`,
+					);
+				default:
+					logger.error('Error at createStudy in StudyService', error);
+					throw new lyricProvider.utils.errors.InternalServerError(
+						'Something went wrong while creating a new study. Please try again later.',
+					);
+			}
 		}
 	},
 
