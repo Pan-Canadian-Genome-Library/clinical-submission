@@ -82,6 +82,7 @@ const dacService = (db: PostgresDb) => {
 				return dacRecord[0];
 			} catch (error) {
 				logger.error('Error at saveDac Service', error);
+				// TODO: once postgres pattern is in, check for duplicate key error
 
 				throw new lyricProvider.utils.errors.InternalServerError();
 			}
