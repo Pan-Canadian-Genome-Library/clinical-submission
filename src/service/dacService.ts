@@ -18,7 +18,7 @@
  */
 
 import { ServiceUnavailable } from '@overture-stack/lyric/dist/src/utils/errors.js';
-import { asc, desc, eq } from 'drizzle-orm';
+import { asc, desc, eq, sql } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
 import { DACFields } from '@/common/types/dac.js';
@@ -146,6 +146,7 @@ const dacService = (db: PostgresDb) => {
 						dac_description: dacDescription,
 						contact_name: contactName,
 						contact_email: contactEmail,
+						updated_at: sql`NOW()`,
 					})
 					.where(eq(dac.dac_id, dacId))
 					.returning({
