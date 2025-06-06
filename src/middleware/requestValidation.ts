@@ -1,6 +1,7 @@
-import { BadRequest, InternalServerError } from '@overture-stack/lyric/dist/src/utils/errors.js';
 import { RequestHandler } from 'express-serve-static-core';
 import { ZodError, ZodSchema } from 'zod';
+
+import { lyricProvider } from '@/core/provider.js';
 
 export declare type RequestValidation<TBody, TQuery, TParams> = {
 	body?: ZodSchema<TBody>;
@@ -37,10 +38,10 @@ export function validateRequest<TBody, TQuery, TParams>(
 			if (error instanceof ZodError) {
 				const errorMessages = error.errors.map((issue) => `${issue.path.join('.')} is ${issue.message}`).join(' | ');
 				console.log(LOG_MODULE, req.method, req.url, JSON.stringify(errorMessages));
-				next(new BadRequest(errorMessages));
+				next(new lyricProvider.utils.errors.BadRequest(errorMessages));
 			} else {
 				console.error(LOG_MODULE, req.method, req.url, 'Internal Server Error');
-				next(new InternalServerError());
+				next(new lyricProvider.utils.errors.InternalServerError());
 			}
 		}
 	};
