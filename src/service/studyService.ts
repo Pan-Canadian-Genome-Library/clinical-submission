@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { eq, sql } from 'drizzle-orm';
+import { asc, desc, eq, sql } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
 import type { StudyDTO, StudyModel, StudyRecord } from '@/common/types/study.js';
@@ -93,10 +93,23 @@ const convertFromPartialStudyDTO = (
 };
 
 const studyService = (db: PostgresDb) => ({
-	listStudies: async (): Promise<StudyDTO[]> => {
+	listStudies: async ({
+		orderBy = 'asc',
+		page = 1,
+		pageSize = 20,
+	}: {
+		orderBy?: string;
+		page?: number;
+		pageSize?: number;
+	}): Promise<StudyDTO[]> => {
 		let studyRecords;
 		try {
-			studyRecords = await db.select().from(study);
+			studyRecords = await db
+				.select()
+				.from(study)
+				.orderBy(orderBy === 'desc' ? desc(study.created_at) : asc(study.created_at))
+				.limit(pageSize)
+				.offset((page - 1) * pageSize);
 		} catch (exception) {
 			logger.error('Error at listStudies', exception);
 			throw new lyricProvider.utils.errors.InternalServerError(

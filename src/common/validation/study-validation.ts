@@ -24,7 +24,7 @@ import { z } from 'zod';
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
 import { StudyContext, StudyDTO, StudyStatus } from '../types/study.js';
-import { stringNotEmpty } from './common.js';
+import { orderByString, PaginationParams, positiveInteger, stringNotEmpty, stringNotEmptyOptional } from './common.js';
 
 const ALLOWED_DOMAINS = [
 	'AGING',
@@ -94,5 +94,13 @@ export const updateStudy: RequestValidation<
 	body: createStudyProperties.omit({ studyId: true }).partial().strict({
 		message:
 			'Unrecognized keys in object. Updating the following properties: studyId, updatedAt, or createdAt is disallowed.',
+	}),
+};
+
+export const listAllStudies: RequestValidation<object, PaginationParams, ParamsDictionary> = {
+	query: z.object({
+		orderBy: orderByString.optional(),
+		page: positiveInteger.optional(),
+		pageSize: positiveInteger.optional(),
 	}),
 };

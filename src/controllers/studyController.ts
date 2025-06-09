@@ -17,26 +17,30 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import type { NextFunction, Request, Response } from 'express';
-
-import { createStudy, getOrDeleteStudyByID, updateStudy } from '@/common/validation/study-validation.js';
+import {
+	createStudy,
+	getOrDeleteStudyByID,
+	listAllStudies,
+	updateStudy,
+} from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import { studyService } from '@/service/studyService.js';
 
-export const getAllStudies = async (req: Request, res: Response, next: NextFunction) => {
+export const getAllStudies = validateRequest(listAllStudies, async (req, res, next) => {
 	const db = getDbInstance();
+	const { page, orderBy, pageSize } = req.query;
 	const studyRepo = studyService(db);
 
 	try {
-		const results = await studyRepo.listStudies();
+		const results = await studyRepo.listStudies({ page: Number(page), orderBy, pageSize: Number(pageSize) });
 		res.status(200).send(results);
 		return;
 	} catch (exception) {
 		next(exception);
 	}
-};
+});
 
 export const getStudyById = validateRequest(getOrDeleteStudyByID, async (req, res, next) => {
 	const studyId = req.params.studyId;

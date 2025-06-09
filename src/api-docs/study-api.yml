@@ -1,6 +1,10 @@
 /study:
   get:
     summary: Gets all available studies.
+    parameters:
+      - $ref: '#/components/parameters/query/OrderBy'
+      - $ref: '#/components/parameters/query/Page'
+      - $ref: '#/components/parameters/query/PageSize'
     tags:
       - Study
     responses:

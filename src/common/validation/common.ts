@@ -17,7 +17,35 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { ParsedQs } from 'qs';
 import { z } from 'zod';
 
 export const stringNotEmpty = z.string().trim().min(1);
 export const stringNotEmptyOptional = stringNotEmpty.optional();
+export const orderByString = z.literal('asc').or(z.literal('desc'));
+
+export const positiveInteger = z.string().superRefine((value, ctx) => {
+	const parsed = parseInt(value);
+	if (isNaN(parsed)) {
+		ctx.addIssue({
+			code: z.ZodIssueCode.invalid_type,
+			expected: 'number',
+			received: 'nan',
+		});
+	}
+
+	if (parsed < 1) {
+		ctx.addIssue({
+			code: z.ZodIssueCode.too_small,
+			minimum: 1,
+			inclusive: true,
+			type: 'number',
+		});
+	}
+});
+
+export interface PaginationParams extends ParsedQs {
+	orderBy?: string;
+	page?: string;
+	pageSize?: string;
+}
