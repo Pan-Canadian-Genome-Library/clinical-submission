@@ -93,6 +93,19 @@ const convertFromPartialStudyDTO = (
 };
 
 const studyService = (db: PostgresDb) => ({
+	listStudies: async (): Promise<StudyDTO[]> => {
+		let studyRecords;
+		try {
+			studyRecords = await db.select().from(study);
+		} catch (exception) {
+			logger.error('Error at listStudies', exception);
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'Something went wrong while fetching studies. Please try again later.',
+			);
+		}
+		return studyRecords.map((studies) => convertToStudyDTO(studies));
+	},
+
 	getStudyById: async (studyId: string): Promise<StudyDTO | undefined> => {
 		let studyRecords;
 		try {
