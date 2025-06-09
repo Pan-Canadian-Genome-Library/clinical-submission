@@ -85,7 +85,9 @@ const dacService = (db: PostgresDb) => {
 			} catch (error) {
 				logger.error('Error at getDacById service', error);
 
-				throw new lyricProvider.utils.errors.InternalServerError();
+				throw new lyricProvider.utils.errors.InternalServerError(
+					'Something went wrong while fetching your dac user. Please try again later.',
+				);
 			}
 		},
 		saveDac: async ({
