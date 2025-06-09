@@ -142,7 +142,7 @@ const dacService = (db: PostgresDb) => {
 
 				return dacRecord[0];
 			} catch (error) {
-				logger.error('Error at saveDac service', error);
+				logger.error('Error at deleteDac service', error);
 
 				throw new lyricProvider.utils.errors.InternalServerError(
 					'Something went wrong while deleting your dac user. Please try again later.',
