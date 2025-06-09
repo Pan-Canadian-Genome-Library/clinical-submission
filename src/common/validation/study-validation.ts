@@ -26,20 +26,8 @@ import { RequestValidation } from '@/middleware/requestValidation.js';
 import { StudyContext, StudyDTO, StudyStatus } from '../types/study.js';
 import { stringNotEmpty } from './common.js';
 
-interface StudyIDParams extends ParamsDictionary {
-	studyId: string;
-}
-
-export const getOrDeleteStudyByID: RequestValidation<object, ParsedQs, StudyIDParams> = {
-	pathParams: z.object({
-		studyId: stringNotEmpty,
-	}),
-};
-
-export type CreateStudyFields = Omit<StudyDTO, 'createdAt' | 'updatedAt'>;
-
-export const createStudy: RequestValidation<CreateStudyFields, ParsedQs, ParamsDictionary> = {
-	body: z.object({
+const createStudyProperties = z
+	.object({
 		studyId: stringNotEmpty,
 		dacId: stringNotEmpty,
 		studyName: stringNotEmpty,
@@ -55,5 +43,33 @@ export const createStudy: RequestValidation<CreateStudyFields, ParsedQs, ParamsD
 		collaborators: z.array(z.string()).optional(),
 		fundingSources: z.array(z.string()),
 		publicationLinks: z.array(z.string()).optional(),
+	})
+	.strict();
+interface StudyIDParams extends ParamsDictionary {
+	studyId: string;
+}
+
+export const getOrDeleteStudyByID: RequestValidation<object, ParsedQs, StudyIDParams> = {
+	pathParams: z.object({
+		studyId: stringNotEmpty,
+	}),
+};
+
+export type CreateStudyFields = Omit<StudyDTO, 'createdAt' | 'updatedAt'>;
+export const createStudy: RequestValidation<CreateStudyFields, ParsedQs, ParamsDictionary> = {
+	body: createStudyProperties,
+};
+
+export const updateStudy: RequestValidation<
+	Partial<Omit<StudyDTO, 'studyId' | 'updatedAt' | 'createdAt'>>,
+	ParsedQs,
+	StudyIDParams
+> = {
+	pathParams: z.object({
+		studyId: stringNotEmpty,
+	}),
+	body: createStudyProperties.omit({ studyId: true }).partial().strict({
+		message:
+			'Unrecognized keys in object. Updating the following properties: studyId, updatedAt, or createdAt is disallowed.',
 	}),
 };

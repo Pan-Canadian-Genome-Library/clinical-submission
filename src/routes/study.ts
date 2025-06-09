@@ -19,7 +19,7 @@
 
 import express, { json, Router, urlencoded } from 'express';
 
-import { createNewStudy, deleteStudyById, getStudyById } from '@/controllers/studyController.js';
+import { createNewStudy, deleteStudyById, getStudyById, updateStudyById } from '@/controllers/studyController.js';
 
 export const studyRouter: Router = (() => {
 	const router = express.Router();
@@ -31,6 +31,7 @@ export const studyRouter: Router = (() => {
 
 	router.get('/:studyId', getStudyById);
 	router.delete('/:studyId', deleteStudyById);
+	router.patch('/:studyId', updateStudyById);
 
 	return router;
 })();
