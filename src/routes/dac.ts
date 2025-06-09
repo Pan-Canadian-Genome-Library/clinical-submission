@@ -25,8 +25,6 @@ export const dacRouter: Router = (() => {
 	const router = express.Router();
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
-	router.use(json());
-	router.use(urlencoded({ extended: false }));
 
 	// TODO: Auth
 	router.get('/:dacId', dacController.getDacById);
