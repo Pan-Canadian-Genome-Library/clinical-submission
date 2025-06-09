@@ -25,6 +25,7 @@ import { CreateDacDataFields, UpdateDacDataFields } from '@/common/validation/da
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
 import { dac } from '@/db/schemas/dacSchema.js';
+import { isPostgresError, PostgresErrors } from '@/db/utils.js';
 
 const dacService = (db: PostgresDb) => {
 	return {
@@ -59,7 +60,9 @@ const dacService = (db: PostgresDb) => {
 			} catch (error) {
 				logger.error('Error at getAllDac service', error);
 
-				throw new lyricProvider.utils.errors.InternalServerError();
+				throw new lyricProvider.utils.errors.InternalServerError(
+					'Something went wrong while fetching your dac users. Please try again later.',
+				);
 			}
 		},
 		getDacById: async (dacId: string): Promise<DACFields | undefined> => {
@@ -117,7 +120,18 @@ const dacService = (db: PostgresDb) => {
 			} catch (error) {
 				logger.error('Error at saveDac service', error);
 
-				throw new lyricProvider.utils.errors.InternalServerError();
+				const postgresError = isPostgresError(error);
+
+				switch (postgresError?.code) {
+					case PostgresErrors.UNIQUE_KEY_VIOLATION:
+						throw new lyricProvider.utils.errors.BadRequest(
+							`${dacId} already exists in DAC. DAC Id name must be unique.`,
+						);
+					default:
+						throw new lyricProvider.utils.errors.InternalServerError(
+							'Something went wrong while creating your dac user. Please try again later.',
+						);
+				}
 			}
 		},
 		deleteDacById: async (dacId: string): Promise<Pick<DACFields, 'dacId'> | undefined> => {
@@ -126,9 +140,11 @@ const dacService = (db: PostgresDb) => {
 
 				return dacRecord[0];
 			} catch (error) {
-				logger.error('Error at deleteDacById service', error);
+				logger.error('Error at saveDac service', error);
 
-				throw new lyricProvider.utils.errors.InternalServerError();
+				throw new lyricProvider.utils.errors.InternalServerError(
+					'Something went wrong while deleting your dac user. Please try again later.',
+				);
 			}
 		},
 		updateDacById: async (
@@ -162,7 +178,18 @@ const dacService = (db: PostgresDb) => {
 			} catch (error) {
 				logger.error('Error at updateDacById service', error);
 
-				throw new lyricProvider.utils.errors.InternalServerError();
+				const postgresError = isPostgresError(error);
+
+				switch (postgresError?.code) {
+					case PostgresErrors.UNIQUE_KEY_VIOLATION:
+						throw new lyricProvider.utils.errors.BadRequest(
+							`${dacId} already exists in studies. DAC id must be unique.`,
+						);
+					default:
+						throw new lyricProvider.utils.errors.InternalServerError(
+							'Something went wrong while updating your dac user. Please try again later.',
+						);
+				}
 			}
 		},
 	};
