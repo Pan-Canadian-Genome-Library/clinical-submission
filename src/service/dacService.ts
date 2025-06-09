@@ -52,7 +52,7 @@ const dacService = (db: PostgresDb) => {
 						updatedAt: dac.updated_at,
 					})
 					.from(dac)
-					.orderBy(orderBy === 'asc' ? asc(dac.dac_name) : desc(dac.dac_name))
+					.orderBy(orderBy === 'desc' ? desc(dac.created_at) : asc(dac.created_at))
 					.limit(pageSize)
 					.offset((page - 1) * pageSize);
 
