@@ -180,18 +180,9 @@ const dacService = (db: PostgresDb) => {
 			} catch (error) {
 				logger.error('Error at updateDacById service', error);
 
-				const postgresError = isPostgresError(error);
-
-				switch (postgresError?.code) {
-					case PostgresErrors.UNIQUE_KEY_VIOLATION:
-						throw new lyricProvider.utils.errors.BadRequest(
-							`${dacId} already exists in studies. DAC id must be unique.`,
-						);
-					default:
-						throw new lyricProvider.utils.errors.InternalServerError(
-							'Something went wrong while updating your dac user. Please try again later.',
-						);
-				}
+				throw new lyricProvider.utils.errors.InternalServerError(
+					'Something went wrong while updating your dac user. Please try again later.',
+				);
 			}
 		},
 	};
