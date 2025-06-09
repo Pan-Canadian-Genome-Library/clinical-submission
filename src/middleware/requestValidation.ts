@@ -37,7 +37,11 @@ export function validateRequest<TBody, TQuery, TParams>(
 		} catch (error) {
 			if (error instanceof ZodError) {
 				const errorMessages = error.errors
-					.map((issue) => `${!issue.path.length ? '' : issue.path.join('.') + ' is '}${issue.message}`)
+					.map((issue) =>
+						issue.code === 'custom'
+							? `${issue.message}`
+							: `${!issue.path.length ? '' : issue.path.join('.') + ' is '}${issue.message}`,
+					)
 					.join(' | ');
 				console.log(LOG_MODULE, req.method, req.url, JSON.stringify(errorMessages));
 				next(new lyricProvider.utils.errors.BadRequest(errorMessages));

@@ -26,6 +26,22 @@ import { RequestValidation } from '@/middleware/requestValidation.js';
 import { StudyContext, StudyDTO, StudyStatus } from '../types/study.js';
 import { stringNotEmpty } from './common.js';
 
+const ALLOWED_DOMAINS = [
+	'AGING',
+	'BIRTH DEFECTS',
+	'CANCER',
+	'CIRCULATORY AND RESPIRATORY HEALTH',
+	'GENERAL HEALTH',
+	'INFECTION AND IMMUNITY',
+	'MUSCULOSKELETAL HEALTH AND ARTHRITIS',
+	'NEURODEVELOPMENTAL CONDITIONS',
+	'NEUROSCIENCES, MENTAL HEALTH AND ADDICTION',
+	'NUTRITION, METABOLISM AND DIABETES',
+	'POPULATION GENOMICS',
+	'RARE DISEASES',
+	'OTHER',
+];
+
 const createStudyProperties = z
 	.object({
 		studyId: stringNotEmpty,
@@ -36,7 +52,14 @@ const createStudyProperties = z
 		keywords: z.array(z.string()).optional(),
 		status: z.nativeEnum(StudyStatus),
 		context: z.nativeEnum(StudyContext),
-		domain: z.array(z.string()),
+		domain: z.array(
+			z
+				.string()
+				.refine(
+					(domainString) => ALLOWED_DOMAINS.includes(domainString.trim().toUpperCase()),
+					`Only domains from the following list are allowed: [${ALLOWED_DOMAINS.join(', ')}]`,
+				),
+		),
 		participantCriteria: z.string().optional(),
 		principalInvestigators: z.array(z.string()),
 		leadOrganizations: z.array(z.string()),
