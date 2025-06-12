@@ -221,7 +221,7 @@
         description: Unique identifier of the study in PCGL.
     responses:
       200:
-        description: Successfully created a study.
+        description: Successfully updated the requested study.
         content:
           application/json:
             schema:
