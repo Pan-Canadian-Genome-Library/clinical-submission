@@ -24,8 +24,50 @@ import { z } from 'zod';
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
 import { StudyContext, StudyDTO, StudyStatus } from '../types/study.js';
-import { stringNotEmpty } from './common.js';
+import { orderByString, PaginationParams, positiveInteger, stringNotEmpty } from './common.js';
 
+const ALLOWED_DOMAINS = [
+	'AGING',
+	'BIRTH DEFECTS',
+	'CANCER',
+	'CIRCULATORY AND RESPIRATORY HEALTH',
+	'GENERAL HEALTH',
+	'INFECTION AND IMMUNITY',
+	'MUSCULOSKELETAL HEALTH AND ARTHRITIS',
+	'NEURODEVELOPMENTAL CONDITIONS',
+	'NEUROSCIENCES, MENTAL HEALTH AND ADDICTION',
+	'NUTRITION, METABOLISM AND DIABETES',
+	'POPULATION GENOMICS',
+	'RARE DISEASES',
+	'OTHER',
+];
+
+const createStudyProperties = z
+	.object({
+		studyId: stringNotEmpty,
+		dacId: stringNotEmpty,
+		studyName: stringNotEmpty,
+		studyDescription: stringNotEmpty,
+		programName: z.string().optional(),
+		keywords: z.array(z.string()).optional(),
+		status: z.nativeEnum(StudyStatus),
+		context: z.nativeEnum(StudyContext),
+		domain: z.array(
+			z
+				.string()
+				.refine(
+					(domainString) => ALLOWED_DOMAINS.includes(domainString.trim().toUpperCase()),
+					`Only domains from the following list are allowed: [${ALLOWED_DOMAINS.join(', ')}]`,
+				),
+		),
+		participantCriteria: z.string().optional(),
+		principalInvestigators: z.array(z.string()),
+		leadOrganizations: z.array(z.string()),
+		collaborators: z.array(z.string()).optional(),
+		fundingSources: z.array(z.string()),
+		publicationLinks: z.array(z.string()).optional(),
+	})
+	.strict();
 interface StudyIDParams extends ParamsDictionary {
 	studyId: string;
 }
@@ -37,23 +79,28 @@ export const getOrDeleteStudyByID: RequestValidation<object, ParsedQs, StudyIDPa
 };
 
 export type CreateStudyFields = Omit<StudyDTO, 'createdAt' | 'updatedAt'>;
-
 export const createStudy: RequestValidation<CreateStudyFields, ParsedQs, ParamsDictionary> = {
-	body: z.object({
+	body: createStudyProperties,
+};
+
+export const updateStudy: RequestValidation<
+	Partial<Omit<StudyDTO, 'studyId' | 'updatedAt' | 'createdAt'>>,
+	ParsedQs,
+	StudyIDParams
+> = {
+	pathParams: z.object({
 		studyId: stringNotEmpty,
-		dacId: stringNotEmpty,
-		studyName: stringNotEmpty,
-		studyDescription: stringNotEmpty,
-		programName: z.string().optional(),
-		keywords: z.array(z.string()).optional(),
-		status: z.nativeEnum(StudyStatus),
-		context: z.nativeEnum(StudyContext),
-		domain: z.array(z.string()),
-		participantCriteria: z.string().optional(),
-		principalInvestigators: z.array(z.string()),
-		leadOrganizations: z.array(z.string()),
-		collaborators: z.array(z.string()).optional(),
-		fundingSources: z.array(z.string()),
-		publicationLinks: z.array(z.string()).optional(),
+	}),
+	body: createStudyProperties.omit({ studyId: true }).partial().strict({
+		message:
+			'Unrecognized keys in object. Updating the following properties: studyId, updatedAt, or createdAt is disallowed.',
+	}),
+};
+
+export const listAllStudies: RequestValidation<object, PaginationParams, ParamsDictionary> = {
+	query: z.object({
+		orderBy: orderByString.optional(),
+		page: positiveInteger.optional(),
+		pageSize: positiveInteger.optional(),
 	}),
 };
