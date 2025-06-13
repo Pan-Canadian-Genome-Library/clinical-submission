@@ -22,6 +22,7 @@ import { z } from 'zod';
 
 export const stringNotEmpty = z.string().trim().min(1);
 export const stringNotEmptyOptional = stringNotEmpty.optional();
+export const orderByString = z.literal('asc').or(z.literal('desc'));
 
 export const positiveInteger = z.string().superRefine((value, ctx) => {
 	const parsed = parseInt(value);

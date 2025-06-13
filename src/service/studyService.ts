@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { eq } from 'drizzle-orm';
+import { asc, desc, eq, sql } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
 import type { StudyDTO, StudyModel, StudyRecord } from '@/common/types/study.js';
@@ -60,7 +60,28 @@ const convertFromStudyDTO = (
 		program_name: studyData.programName,
 		status: studyData.status,
 		context: studyData.context,
-		domain: studyData.domain,
+		domain: studyData.domain.map((domains) => domains.toUpperCase()),
+		participant_criteria: studyData.participantCriteria,
+		principal_investigators: studyData.principalInvestigators,
+		lead_organizations: studyData.leadOrganizations,
+		collaborators: studyData.collaborators,
+		funding_sources: studyData.fundingSources,
+		publication_links: studyData.publicationLinks,
+		keywords: studyData.keywords,
+	};
+};
+
+const convertFromPartialStudyDTO = (
+	studyData: Partial<Omit<StudyDTO, 'updatedAt' | 'createdAt' | 'studyId'>>,
+): Partial<Omit<StudyModel, 'created_at' | 'updated_at' | 'study_id'>> => {
+	return {
+		dac_id: studyData.dacId,
+		study_name: studyData.studyName,
+		study_description: studyData.studyDescription,
+		program_name: studyData.programName,
+		status: studyData.status,
+		context: studyData.context,
+		domain: studyData.domain?.map((domains) => domains.toUpperCase()),
 		participant_criteria: studyData.participantCriteria,
 		principal_investigators: studyData.principalInvestigators,
 		lead_organizations: studyData.leadOrganizations,
@@ -72,6 +93,32 @@ const convertFromStudyDTO = (
 };
 
 const studyService = (db: PostgresDb) => ({
+	listStudies: async ({
+		orderBy = 'asc',
+		page = 1,
+		pageSize = 20,
+	}: {
+		orderBy?: string;
+		page?: number;
+		pageSize?: number;
+	}): Promise<StudyDTO[]> => {
+		let studyRecords;
+		try {
+			studyRecords = await db
+				.select()
+				.from(study)
+				.orderBy(orderBy === 'desc' ? desc(study.created_at) : asc(study.created_at))
+				.limit(pageSize)
+				.offset((page - 1) * pageSize);
+		} catch (exception) {
+			logger.error('Error at listStudies', exception);
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'Something went wrong while fetching studies. Please try again later.',
+			);
+		}
+		return studyRecords.map((studies) => convertToStudyDTO(studies));
+	},
+
 	getStudyById: async (studyId: string): Promise<StudyDTO | undefined> => {
 		let studyRecords;
 		try {
@@ -133,6 +180,30 @@ const studyService = (db: PostgresDb) => ({
 
 			throw new lyricProvider.utils.errors.InternalServerError(
 				'Something went wrong while deleting this requested study. Please try again later.',
+			);
+		}
+	},
+
+	updateStudy: async (studyId: string, studyData: Partial<StudyDTO>): Promise<StudyDTO | undefined> => {
+		try {
+			const convertedStudyData = convertFromPartialStudyDTO(studyData);
+
+			const updatedRecord = await db
+				.update(study)
+				.set({ ...convertedStudyData, updated_at: sql`NOW()` })
+				.where(eq(study.study_id, studyId))
+				.returning();
+
+			if (updatedRecord[0]) {
+				return convertToStudyDTO(updatedRecord[0]);
+			}
+
+			return updatedRecord[0];
+		} catch (error) {
+			logger.error('Error at updateStudy in StudyService', error);
+
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'Something went wrong while updating the requested study. Please try again later.',
 			);
 		}
 	},

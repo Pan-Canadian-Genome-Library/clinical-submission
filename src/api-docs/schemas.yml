@@ -318,7 +318,8 @@ components:
             type: string
           description: List of researchers, institutions or companies involved in the study. Ex. FirstName LastName (if individual) or Organization full official name, Role.
         createdAt:
-          type: date
+          type: string
+          format: date-time
           description: Created date of the Study record
         dacId:
           type: string
@@ -376,7 +377,8 @@ components:
           enum: ['COMPLETED', 'ONGOING']
           description: Indicate if the study is completed or ongoing.
         updatedAt:
-          type: date
+          type: string
+          format: date-time
           nullable: true
           description: Last Updated date of the Study record, will be null if never updated.
 

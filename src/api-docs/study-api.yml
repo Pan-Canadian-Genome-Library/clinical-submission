@@ -1,6 +1,28 @@
 /study:
+  get:
+    summary: Gets all available studies.
+    parameters:
+      - $ref: '#/components/parameters/query/OrderBy'
+      - $ref: '#/components/parameters/query/Page'
+      - $ref: '#/components/parameters/query/PageSize'
+    tags:
+      - Study
+    responses:
+      200:
+        description: An array of all studies will be listed. Will return an empty array if no studies are present.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/StudyResult'
+      401:
+        $ref: '#/components/responses/UnauthorizedError'
+      500:
+        $ref: '#/components/responses/ServerError'
+
   post:
-    summary: Creates a new Study
+    summary: Creates a new study.
     tags:
       - Study
     requestBody:
@@ -76,7 +98,7 @@
                 description: Indicate if the study is completed or ongoing.
     responses:
       201:
-        description: Successfully created a study.
+        description: Successfully created a new study.
         content:
           application/json:
             schema:
@@ -92,7 +114,7 @@
 
 /study/{studyId}:
   get:
-    summary: Get a Study by Study ID
+    summary: Get a study by a study ID.
     parameters:
       - name: studyId
         in: path
@@ -104,7 +126,102 @@
       - Study
     responses:
       200:
-        description: Gets a study by a Study ID.
+        description: Returns a record containing all information available on the study.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudyResult'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/UnauthorizedError'
+      404:
+        $ref: '#/components/responses/NotFound'
+      500:
+        $ref: '#/components/responses/ServerError'
+
+  patch:
+    summary: Updates a study with new data, barring some properties such as studyId.
+    tags:
+      - Study
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              context:
+                type: string
+                enum: ['CLINICAL', 'RESEARCH']
+                description: Indicate if the study was conducted in a clinical setting or as part of a research project.
+              collaborators:
+                type: array
+                nullable: true
+                items:
+                  type: string
+                description: List of researchers, institutions or companies involved in the study. Ex. FirstName LastName (if individual) or Organization full official name, Role.
+              dacId:
+                type: string
+                description: Unique identifier of the Data Access Committee (DAC) in PCGL to which the study is assigned.
+              domain:
+                type: array
+                items:
+                  type: string
+                description: List of specific scientific or clinical domains addressed by the study.
+              fundingSources:
+                type: array
+                items:
+                  type: string
+                description: List of organizations or agencies funding the study. Ex. Funder name, Grant number
+              keywords:
+                type: array
+                nullable: true
+                items:
+                  type: string
+                description: List of specific terms that describe the focus and content of the study.
+              leadOrganizations:
+                type: array
+                items:
+                  type: string
+                description: List of institutions or organizations leading the study.
+              participantCriteria:
+                type: string
+                nullable: true
+                description: Inclusion/exclusion criteria for participants (e.g., specific cancer type, age range).
+              principalInvestigators:
+                type: array
+                items:
+                  type: string
+                description: 'List of lead researchers responsible for the study. Ex. John Doe, Example Research Institute'
+              programName:
+                type: string
+                nullable: true
+                description: Indicate the overarching program the study belongs to (if applicable).
+              publicationLinks:
+                type: array
+                items:
+                  type: string
+                description: List of URL links to academic papers or reports associated with the study.
+              studyName:
+                type: string
+                description: The official name of the study
+              studyDescription:
+                type: string
+                description: A detailed description of the study’s purpose, hypothesis, and design.
+              status:
+                type: string
+                enum: ['COMPLETED', 'ONGOING']
+                description: Indicate if the study is completed or ongoing.
+    parameters:
+      - name: studyId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique identifier of the study in PCGL.
+    responses:
+      200:
+        description: Successfully updated the requested study.
         content:
           application/json:
             schema:
@@ -119,7 +236,7 @@
         $ref: '#/components/responses/ServerError'
 
   delete:
-    summary: Delete a Study by Study ID
+    summary: Delete a study by study ID,
     parameters:
       - name: studyId
         in: path

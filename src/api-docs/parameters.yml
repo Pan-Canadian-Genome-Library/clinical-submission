@@ -40,6 +40,15 @@ components:
         schema:
           type: string
         required: false
+      OrderBy:
+        name: orderBy
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: ['asc', 'desc']
+          default: 'asc'
+        description: Optional query parameter to specify the order direction. Default value is asc
       Page:
         name: page
         in: query
@@ -67,5 +76,5 @@ components:
         required: false
         schema:
           type: string
-          enum: ["flat", "compound"]
+          enum: ['flat', 'compound']
         description: Optional query parameter to define the data format. Choose 'flat' for a simple, single-level collection of records, or 'compound' for a nested, schema-centric structure. The default value is 'flat'
