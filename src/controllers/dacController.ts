@@ -17,9 +17,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { Request, Response } from 'express';
-import { NextFunction } from 'express-serve-static-core';
-
 import { logger } from '@/common/logger.js';
 import {
 	createDacData,
@@ -33,14 +30,18 @@ import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import dacService from '@/service/dacService.js';
 
-const getAllDac = validateRequest(getAllDacData, async (req: Request, res: Response, next: NextFunction) => {
+const getAllDac = validateRequest(getAllDacData, async (req, res, next) => {
 	try {
 		const database = getDbInstance();
 		const dacSvc = await dacService(database);
 
 		const params = req.query;
 
-		const result = await dacSvc.listAllDac({ ...params, page: Number(params.page), pageSize: Number(params.pageSize) });
+		const result = await dacSvc.listAllDac({
+			orderBy: params.orderBy,
+			page: Number(params.page),
+			pageSize: Number(params.pageSize),
+		});
 
 		res.status(200).send(result);
 		return;
