@@ -26,9 +26,12 @@ export const dacRouter: Router = (() => {
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
 
+	// TODO: Auth
 	router.get('/:dacId', dacController.getDacById);
+	router.get('/', dacController.getAllDac);
 	router.post('/create', dacController.createDac);
 	router.delete('/:dacId', dacController.deleteDac);
+	router.patch('/:dacId', dacController.updateDac);
 
 	return router;
 })();

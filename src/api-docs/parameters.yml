@@ -48,7 +48,7 @@ components:
           type: string
           enum: ['asc', 'desc']
           default: 'asc'
-        description: Optional query parameter to specify the order direction. Default value is asc
+        description: Optional query parameter to specify the order direction based on created date. Default value is asc.
       Page:
         name: page
         in: query

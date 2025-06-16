@@ -17,17 +17,54 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { eq } from 'drizzle-orm';
+import { asc, desc, eq, sql } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
 import { DACFields } from '@/common/types/dac.js';
-import { CreateDacDataFields } from '@/common/validation/dac-validation.js';
+import { CreateDacDataFields, UpdateDacDataFields } from '@/common/validation/dac-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
 import { dac } from '@/db/schemas/dacSchema.js';
+import { isPostgresError, PostgresErrors } from '@/db/utils.js';
 
 const dacService = (db: PostgresDb) => {
 	return {
+		listAllDac: async ({
+			orderBy = 'asc',
+			page = 1,
+			pageSize = 20,
+		}: {
+			orderBy?: string;
+			page?: number;
+			pageSize?: number;
+		}): Promise<DACFields[] | undefined> => {
+			let dacRecord: DACFields[];
+
+			try {
+				dacRecord = await db
+					.select({
+						dacId: dac.dac_id,
+						dacName: dac.dac_name,
+						dacDescription: dac.dac_description,
+						contactName: dac.contact_name,
+						contactEmail: dac.contact_email,
+						createdAt: dac.created_at,
+						updatedAt: dac.updated_at,
+					})
+					.from(dac)
+					.orderBy(orderBy === 'desc' ? desc(dac.created_at) : asc(dac.created_at))
+					.limit(pageSize)
+					.offset((page - 1) * pageSize);
+
+				return dacRecord;
+			} catch (error) {
+				logger.error('Error at getAllDac service', error);
+
+				throw new lyricProvider.utils.errors.InternalServerError(
+					'Something went wrong while fetching your dac users. Please try again later.',
+				);
+			}
+		},
 		getDacById: async (dacId: string): Promise<DACFields | undefined> => {
 			let dacRecord: DACFields[];
 			try {
@@ -48,7 +85,9 @@ const dacService = (db: PostgresDb) => {
 			} catch (error) {
 				logger.error('Error at getDacById service', error);
 
-				throw new lyricProvider.utils.errors.InternalServerError();
+				throw new lyricProvider.utils.errors.InternalServerError(
+					'Something went wrong while fetching your dac user. Please try again later.',
+				);
 			}
 		},
 		saveDac: async ({
@@ -81,10 +120,20 @@ const dacService = (db: PostgresDb) => {
 
 				return dacRecord[0];
 			} catch (error) {
-				logger.error('Error at saveDac Service', error);
-				// TODO: once postgres pattern is in, check for duplicate key error
+				logger.error('Error at saveDac service', error);
 
-				throw new lyricProvider.utils.errors.InternalServerError();
+				const postgresError = isPostgresError(error);
+
+				switch (postgresError?.code) {
+					case PostgresErrors.UNIQUE_KEY_VIOLATION:
+						throw new lyricProvider.utils.errors.BadRequest(
+							`${dacId} already exists in DAC. DAC Id name must be unique.`,
+						);
+					default:
+						throw new lyricProvider.utils.errors.InternalServerError(
+							'Something went wrong while creating your dac user. Please try again later.',
+						);
+				}
 			}
 		},
 		deleteDacById: async (dacId: string): Promise<Pick<DACFields, 'dacId'> | undefined> => {
@@ -93,9 +142,47 @@ const dacService = (db: PostgresDb) => {
 
 				return dacRecord[0];
 			} catch (error) {
-				logger.error('Error at deleteDacById service', error);
+				logger.error('Error at deleteDac service', error);
 
-				throw new lyricProvider.utils.errors.InternalServerError();
+				throw new lyricProvider.utils.errors.InternalServerError(
+					'Something went wrong while deleting your dac user. Please try again later.',
+				);
+			}
+		},
+		updateDacById: async (
+			dacId: string,
+			{ dacName, contactEmail, contactName, dacDescription }: UpdateDacDataFields,
+		): Promise<DACFields | undefined> => {
+			let dacRecord: DACFields[];
+
+			try {
+				dacRecord = await db
+					.update(dac)
+					.set({
+						dac_name: dacName,
+						dac_description: dacDescription,
+						contact_name: contactName,
+						contact_email: contactEmail,
+						updated_at: sql`NOW()`,
+					})
+					.where(eq(dac.dac_id, dacId))
+					.returning({
+						dacId: dac.dac_id,
+						dacName: dac.dac_name,
+						dacDescription: dac.dac_description,
+						contactName: dac.contact_name,
+						contactEmail: dac.contact_email,
+						createdAt: dac.created_at,
+						updatedAt: dac.updated_at,
+					});
+
+				return dacRecord[0];
+			} catch (error) {
+				logger.error('Error at updateDacById service', error);
+
+				throw new lyricProvider.utils.errors.InternalServerError(
+					'Something went wrong while updating your dac user. Please try again later.',
+				);
 			}
 		},
 	};
