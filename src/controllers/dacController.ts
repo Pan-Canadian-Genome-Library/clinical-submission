@@ -17,7 +17,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { logger } from '@/common/logger.js';
 import {
 	createDacData,
 	deleteDacByIdData,
@@ -25,23 +24,16 @@ import {
 	getDacByIdData,
 	updateDacByIdData,
 } from '@/common/validation/dac-validation.js';
-import { lyricProvider } from '@/core/provider.js';
-import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import dacService from '@/service/dacService.js';
 
 const getAllDac = validateRequest(getAllDacData, async (req, res, next) => {
 	try {
-		const database = getDbInstance();
-		const dacSvc = await dacService(database);
+		const dacSvc = await dacService();
 
 		const params = req.query;
 
-		const result = await dacSvc.listAllDac({
-			orderBy: params.orderBy,
-			page: Number(params.page),
-			pageSize: Number(params.pageSize),
-		});
+		const result = await dacSvc.getAllDac(params.orderBy, Number(params.page), Number(params.pageSize));
 
 		res.status(200).send(result);
 		return;
@@ -52,18 +44,10 @@ const getAllDac = validateRequest(getAllDacData, async (req, res, next) => {
 
 const getDacById = validateRequest(getDacByIdData, async (req, res, next) => {
 	try {
-		const database = getDbInstance();
-		const dacSvc = await dacService(database);
+		const dacSvc = await dacService();
 
 		const dacId = req.params.dacId;
-
 		const result = await dacSvc.getDacById(dacId);
-
-		if (!result) {
-			const message = `No dac with dacId - ${dacId} found.`;
-			logger.error(message);
-			throw new lyricProvider.utils.errors.NotFound(message);
-		}
 
 		res.status(200).send(result);
 		return;
@@ -74,12 +58,10 @@ const getDacById = validateRequest(getDacByIdData, async (req, res, next) => {
 
 const createDac = validateRequest(createDacData, async (req, res, next) => {
 	try {
-		const database = getDbInstance();
-		const dacSvc = await dacService(database);
-
+		const dacSvc = await dacService();
 		const dacFields = req.body;
 
-		const result = await dacSvc.saveDac(dacFields);
+		const result = await dacSvc.createDac(dacFields);
 
 		res.status(201).send(result);
 		return;
@@ -90,18 +72,10 @@ const createDac = validateRequest(createDacData, async (req, res, next) => {
 
 const deleteDac = validateRequest(deleteDacByIdData, async (req, res, next) => {
 	try {
-		const database = getDbInstance();
-		const dacSvc = await dacService(database);
-
+		const dacSvc = await dacService();
 		const dacId = req.params.dacId;
 
-		const result = await dacSvc.deleteDacById(dacId);
-
-		if (!result) {
-			const message = `No dac with dacId - ${dacId} found to delete.`;
-			logger.error(message);
-			throw new lyricProvider.utils.errors.NotFound(message);
-		}
+		await dacSvc.deleteDac(dacId);
 
 		res.status(204).send();
 		return;
@@ -112,19 +86,12 @@ const deleteDac = validateRequest(deleteDacByIdData, async (req, res, next) => {
 
 const updateDac = validateRequest(updateDacByIdData, async (req, res, next) => {
 	try {
-		const database = getDbInstance();
-		const dacSvc = await dacService(database);
+		const dacSvc = await dacService();
 
 		const dacId = req.params.dacId;
 		const dacFields = req.body;
 
-		const result = await dacSvc.updateDacById(dacId, dacFields);
-
-		if (!result) {
-			const message = `No dac with ID ${dacId} found to update.`;
-			logger.error(message);
-			throw new lyricProvider.utils.errors.NotFound(message);
-		}
+		const result = await dacSvc.updateDac(dacId, dacFields);
 
 		res.status(200).send(result);
 		return;
