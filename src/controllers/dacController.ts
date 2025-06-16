@@ -121,7 +121,7 @@ const updateDac = validateRequest(updateDacByIdData, async (req, res, next) => {
 		const result = await dacSvc.updateDacById(dacId, dacFields);
 
 		if (!result) {
-			const message = `No dac with dacId - ${dacId} found to update.`;
+			const message = `No dac with ID ${dacId} found to update.`;
 			logger.error(message);
 			throw new lyricProvider.utils.errors.NotFound(message);
 		}
