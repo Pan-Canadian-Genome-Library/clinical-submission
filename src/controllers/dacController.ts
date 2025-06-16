@@ -18,11 +18,37 @@
  */
 
 import { logger } from '@/common/logger.js';
-import { createDacData, deleteDacByIdData, getDacByIdData } from '@/common/validation/dac-validation.js';
+import {
+	createDacData,
+	deleteDacByIdData,
+	getAllDacData,
+	getDacByIdData,
+	updateDacByIdData,
+} from '@/common/validation/dac-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import dacService from '@/service/dacService.js';
+
+const getAllDac = validateRequest(getAllDacData, async (req, res, next) => {
+	try {
+		const database = getDbInstance();
+		const dacSvc = await dacService(database);
+
+		const params = req.query;
+
+		const result = await dacSvc.listAllDac({
+			orderBy: params.orderBy,
+			page: Number(params.page),
+			pageSize: Number(params.pageSize),
+		});
+
+		res.status(200).send(result);
+		return;
+	} catch (err) {
+		next(err);
+	}
+});
 
 const getDacById = validateRequest(getDacByIdData, async (req, res, next) => {
 	try {
@@ -74,7 +100,7 @@ const deleteDac = validateRequest(deleteDacByIdData, async (req, res, next) => {
 		if (!result) {
 			const message = `No dac with dacId - ${dacId} found to delete.`;
 			logger.error(message);
-			throw new lyricProvider.utils.errors.NotFound(`No dac with dacId - ${dacId} found to delete.`);
+			throw new lyricProvider.utils.errors.NotFound(message);
 		}
 
 		res.status(204).send();
@@ -84,4 +110,27 @@ const deleteDac = validateRequest(deleteDacByIdData, async (req, res, next) => {
 	}
 });
 
-export default { getDacById, createDac, deleteDac };
+const updateDac = validateRequest(updateDacByIdData, async (req, res, next) => {
+	try {
+		const database = getDbInstance();
+		const dacSvc = await dacService(database);
+
+		const dacId = req.params.dacId;
+		const dacFields = req.body;
+
+		const result = await dacSvc.updateDacById(dacId, dacFields);
+
+		if (!result) {
+			const message = `No dac with ID ${dacId} found to update.`;
+			logger.error(message);
+			throw new lyricProvider.utils.errors.NotFound(message);
+		}
+
+		res.status(200).send(result);
+		return;
+	} catch (err) {
+		next(err);
+	}
+});
+
+export default { getAllDac, getDacById, createDac, deleteDac, updateDac };
