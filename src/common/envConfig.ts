@@ -18,6 +18,23 @@ const envSchema = z.object({
 	ID_USELOCAL: z.coerce.boolean().default(true),
 	ID_CUSTOMALPHABET: z.string().default('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'),
 	ID_CUSTOMSIZE: z.coerce.number().default(21),
+	ID_MANAGER_SECRET: z.string(),
+	ID_MANAGER_CONFIG: z.string().transform((str, ctx) => {
+		try {
+			const parsed = JSON.parse(str);
+			if (!Array.isArray(parsed)) {
+				throw new Error('Must be an array');
+			}
+			return parsed;
+		} catch (e) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'ID_MANAGER_CONFIG must be a valid JSON stringified array',
+			});
+			return z.NEVER;
+		}
+	}),
+
 	LECTERN_URL: z.string().url(),
 	LOG_LEVEL: z.enum(LogLeveOptions).default('info'),
 	NODE_ENV: z.enum(NodeEnvOptions).default('development'),

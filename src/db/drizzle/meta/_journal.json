@@ -15,6 +15,13 @@
       "when": 1749236350650,
       "tag": "0001_pluralise_collab_add_dac_fk",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1750696546401,
+      "tag": "0002_medical_miss_america",
+      "breakpoints": true
     }
   ]
 }

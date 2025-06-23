@@ -18,7 +18,7 @@
  */
 
 import { relations } from 'drizzle-orm';
-import { foreignKey, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { foreignKey, serial, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { dac } from './dacSchema.js';
 import { pcglSchema } from './generate.js';
@@ -29,6 +29,7 @@ export const studyContext = pcglSchema.enum('study_context', ['CLINICAL', 'RESEA
 export const study = pcglSchema.table(
 	'study',
 	{
+		id: serial('id').notNull(),
 		study_id: text().primaryKey().notNull(),
 		dac_id: text().notNull(),
 		study_name: varchar({ length: 255 }).notNull(),
