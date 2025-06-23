@@ -29,6 +29,7 @@ import { healthCheckRouter } from '@/routes/healthCheck.js';
 import { openAPIRouter } from '@/routes/openApi.js';
 import { submissionRouter } from '@/routes/submission.js';
 
+import { authRouter } from './routes/auth.js';
 import { dacRouter } from './routes/dac.js';
 import { studyRouter } from './routes/study.js';
 
@@ -62,6 +63,7 @@ app.use(requestLogger);
 app.use('/dac', dacRouter);
 app.use('/health', healthCheckRouter);
 app.use('/study', studyRouter);
+app.use('/auth', authRouter);
 
 // Lyric routes
 app.use('/audit', lyricProvider.routers.audit);

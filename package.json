@@ -28,6 +28,7 @@
 	"type": "module",
 	"dependencies": {
 		"@overture-stack/lyric": "^0.9.1",
+		"axios": "^1.10.0",
 		"bytes": "^3.1.2",
 		"cors": "^2.8.5",
 		"csv-parse": "^5.6.0",
@@ -44,6 +45,7 @@
 		"pino-http": "^10.1.0",
 		"swagger-jsdoc": "^6.2.8",
 		"swagger-ui-express": "^5.0.1",
+		"url-join": "^5.0.0",
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
