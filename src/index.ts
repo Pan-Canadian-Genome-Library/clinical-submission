@@ -17,8 +17,8 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { env } from '@/common/envConfig.js';
 import { logger } from '@/common/logger.js';
+import { env } from '@/config/envConfig.js';
 import { app } from '@/server.js';
 
 import { dbConfig } from './config/dbConfig.js';

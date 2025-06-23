@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 import multer from 'multer';
 
-import { env } from '@/common/envConfig.js';
+import { env } from '@/config/envConfig.js';
 import { editData } from '@/controllers/submission/editData.js';
 import { submit } from '@/controllers/submission/submit.js';
 import { lyricProvider } from '@/core/provider.js';

@@ -20,7 +20,7 @@
 import dotenv from 'dotenv';
 import { z } from 'zod';
 
-import { processCoercedBoolean } from './validation/common.js';
+import { processCoercedBoolean } from '@/common/validation/common.js';
 
 const NodeEnvOptions = ['development', 'production'] as const;
 const LogLevelOptions = ['error', 'warn', 'info', 'debug'] as const;

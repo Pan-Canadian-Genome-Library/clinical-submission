@@ -20,9 +20,9 @@
 import type { Request, Response } from 'express';
 import urlJoin from 'url-join';
 
-import { env } from '@/common/envConfig.js';
 import { OIDCCodeResponse } from '@/common/validation/auth-validation.js';
 import { authConfig } from '@/config/authConfig.js';
+import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { exchangeCodeForTokens, getOidcAuthorizeUrl, getUserInfo } from '@/external/oidcAuthenticationClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';

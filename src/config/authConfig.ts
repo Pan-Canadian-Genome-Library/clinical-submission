@@ -19,7 +19,7 @@
 
 import { z } from 'zod';
 
-import { env } from '@/common/envConfig.js';
+import { env } from '@/config/envConfig.js';
 
 import EnvironmentConfigError from './EnvironmentConfigError.js';
 

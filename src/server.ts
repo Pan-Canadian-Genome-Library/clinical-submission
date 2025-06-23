@@ -22,7 +22,7 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 
-import { env } from '@/common/envConfig.js';
+import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { requestLogger } from '@/middleware/requestLogger.js';
 import { healthCheckRouter } from '@/routes/healthCheck.js';
