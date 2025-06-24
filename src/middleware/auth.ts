@@ -17,22 +17,44 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import express, { json, Router, urlencoded } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
-import dacController from '@/controllers/dacController.js';
-import { authMiddleware } from '@/middleware/auth.js';
+import { UserData, UserGroups } from '@/common/types/auth.js';
+import { lyricProvider } from '@/core/provider.js';
+import { fetchUserData } from '@/external/authorizationClient.js';
 
-export const dacRouter: Router = (() => {
-	const router = express.Router();
-	router.use(json());
-	router.use(urlencoded({ extended: false }));
+/**
+ * Middleware to handle authentication
+ * @returns
+ */
+export const authMiddleware = () => {
+	return async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			// Parse token from request
+			const authHeader = req.headers['authorization'];
+			const token = authHeader && authHeader.split(' ')[1];
 
-	// TODO: Change roles
-	router.get('/:dacId', dacController.getDacById);
-	router.get('/', authMiddleware(), dacController.getAllDac);
-	router.post('/create', authMiddleware(), dacController.createDac);
-	router.delete('/:dacId', authMiddleware(), dacController.deleteDac);
-	router.patch('/:dacId', authMiddleware(), dacController.updateDac);
+			if (!token) {
+				throw new lyricProvider.utils.errors.Forbidden('Unauthorized request, no token was found');
+			}
 
-	return router;
-})();
+			// Grab the users data
+			// TODO: VALIDATE THE RESPONSE OBJECT
+			const resultMe: UserData = await fetchUserData(token);
+
+			// Check permissions, if admin let them pass
+			const hasAdmin = resultMe.groups.some((value) => value.name === UserGroups.ADMIN);
+			if (hasAdmin) {
+				next();
+			}
+
+			return next();
+		} catch (error) {
+			console.error(`Error verifying user: ${error}`);
+			console.log(error);
+
+			res.status(403).json({ message: `${error}` });
+			return;
+		}
+	};
+};

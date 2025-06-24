@@ -14,25 +14,42 @@
  * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
  * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ * ANY WAY OUT OF THE USE OF THIS SOF
+ * */
 
-import express, { json, Router, urlencoded } from 'express';
+import { z as zod } from 'zod';
 
-import dacController from '@/controllers/dacController.js';
-import { authMiddleware } from '@/middleware/auth.js';
+export const UserGroups = {
+	ADMIN: 'CO:admins',
+	DATA_SUBMITTER: 'CO:submitter', // TODO: Likely to change
+	DATA_EXTRACTOR: 'CO:extractor', // TODO: Likely to change
+} as const;
 
-export const dacRouter: Router = (() => {
-	const router = express.Router();
-	router.use(json());
-	router.use(urlencoded({ extended: false }));
+export type UserGroupsValue = (typeof UserGroups)[keyof typeof UserGroups];
 
-	// TODO: Change roles
-	router.get('/:dacId', dacController.getDacById);
-	router.get('/', authMiddleware(), dacController.getAllDac);
-	router.post('/create', authMiddleware(), dacController.createDac);
-	router.delete('/:dacId', authMiddleware(), dacController.deleteDac);
-	router.patch('/:dacId', authMiddleware(), dacController.updateDac);
+export const userRoleSchema = zod.enum([UserGroups.ADMIN, UserGroups.DATA_SUBMITTER, UserGroups.DATA_EXTRACTOR]);
+export type UserRole = zod.infer<typeof userRoleSchema>;
 
-	return router;
-})();
+export type UserData = {
+	emails: Email[];
+	pcgl_id: string | number;
+	study_authorizations: Record<string, StudyAuthorization>;
+	groups: Group[];
+};
+
+export type Email = {
+	address: string;
+	type: string;
+};
+
+export type StudyAuthorization = {
+	end_date: string;
+	start_date: string;
+	study_id: string;
+};
+
+export type Group = {
+	id: number | string;
+	description: string;
+	name: string;
+};

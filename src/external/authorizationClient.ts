@@ -17,22 +17,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import express, { json, Router, urlencoded } from 'express';
+import { lyricProvider } from '@/core/provider.js';
 
-import dacController from '@/controllers/dacController.js';
-import { authMiddleware } from '@/middleware/auth.js';
+export const fetchUserData = async (token: string) => {
+	// TODO: Make into .env variable
+	const url = 'https://auth.dev.pcgl.sd4h.ca/authz/user/me';
+	const headers = new Headers({
+		Authorization: `Bearer ${token}`,
+		'Content-Type': 'application/json',
+	});
 
-export const dacRouter: Router = (() => {
-	const router = express.Router();
-	router.use(json());
-	router.use(urlencoded({ extended: false }));
+	const response = await fetch(url, { headers });
 
-	// TODO: Change roles
-	router.get('/:dacId', dacController.getDacById);
-	router.get('/', authMiddleware(), dacController.getAllDac);
-	router.post('/create', authMiddleware(), dacController.createDac);
-	router.delete('/:dacId', authMiddleware(), dacController.deleteDac);
-	router.patch('/:dacId', authMiddleware(), dacController.updateDac);
+	if (!response.ok) {
+		switch (response.status) {
+			case 403:
+				throw new lyricProvider.utils.errors.Forbidden('Unauthorized request, token is invalid');
+			default:
+				throw new lyricProvider.utils.errors.InternalServerError('Authorization service failed');
+		}
+	}
 
-	return router;
-})();
+	return await response.json();
+};
