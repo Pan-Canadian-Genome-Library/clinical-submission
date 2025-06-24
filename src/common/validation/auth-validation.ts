@@ -13,12 +13,19 @@ export const oidcUserInfoResponseSchema = zod.object({
 });
 export type OIDCUserInfoResponse = zod.infer<typeof oidcUserInfoResponseSchema>;
 
-export const oidcTokenResponseSchema = zod.object({
-	access_token: zod.string(),
-	refresh_token: zod.string().optional(),
-	refresh_token_iat: zod.number().optional(),
-	id_token: zod.string(),
-});
+export const oidcTokenResponseSchema = zod
+	.object({
+		access_token: zod.string(),
+		refresh_token: zod.string().optional(),
+		refresh_token_iat: zod.number().optional(),
+		id_token: zod.string(),
+	})
+	.or(
+		zod.object({
+			error: zod.string(),
+			error_description: zod.string(),
+		}),
+	);
 export type OIDCTokenResponse = zod.infer<typeof oidcTokenResponseSchema>;
 
 export const OIDCCodeResponse: RequestValidation<object, ParsedQs, string> = {

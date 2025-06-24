@@ -59,14 +59,23 @@ export const exchangeCodeForTokens = async (
 	try {
 		const tokenResponse = await axios.get(oauth2TokenUrl, { params });
 		const parsedTokenResponse = oidcTokenResponseSchema.safeParse(tokenResponse.data);
+
 		if (!parsedTokenResponse.success) {
-			console.log(parsedTokenResponse.error.issues);
 			logger.error(`OIDC Provider returned tokens with unexpected format`, parsedTokenResponse.error.message);
 			throw new lyricProvider.utils.errors.InternalServerError(`Token response has unexpected format.`);
 		}
 		return parsedTokenResponse.data;
-	} catch (error) {
-		console.log(error);
+	} catch (error: unknown) {
+		/**
+		 * Check if we got back a valid error response. We use this because for certain errors we can recover.
+		 */
+		if (axios.isAxiosError(error) && error.status === 400 && error.response) {
+			const parsedTokenResponse = oidcTokenResponseSchema.safeParse(error.response.data);
+			if (parsedTokenResponse.success) {
+				return parsedTokenResponse.data;
+			}
+		}
+
 		logger.error(`Unexpected error exchanging auth code for tokens.`, error);
 		throw new lyricProvider.utils.errors.InternalServerError(`Unable to retrieve user tokens from OIDC provider.`);
 	}

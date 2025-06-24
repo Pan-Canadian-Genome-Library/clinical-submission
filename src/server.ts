@@ -21,6 +21,8 @@ import { errorHandler } from '@overture-stack/lyric';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
+import nunjucks from 'nunjucks';
+import path from 'path';
 
 import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
@@ -55,6 +57,19 @@ app.use(
 		},
 	}),
 );
+
+/**
+ * Nunjucks is the templating middleware we use for our temporary
+ * login page. We're setting the cache to be disabled since we
+ * want a re-render every hit since tokens could change.
+ *
+ * @see https://mozilla.github.io/nunjucks/api.html#express
+ */
+nunjucks.configure(path.join(import.meta.dirname, 'views'), {
+	noCache: true,
+	express: app,
+});
+app.use('/static', express.static(path.join(import.meta.dirname, 'views', 'static')));
 
 // Request logging
 app.use(requestLogger);

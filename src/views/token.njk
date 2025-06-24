@@ -1,0 +1,106 @@
+<!--
+ * Copyright (c) 2025 The Ontario Institute for Cancer Research. All rights reserved
+ *
+ * This program and the accompanying materials are made available under the terms of
+ * the GNU Affero General Public License v3.0. You should have received a copy of the
+ * GNU Affero General Public License along with this program.
+ *  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+ * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+
+<!DOCTYPE html>
+<html lang="en-CA">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>PCGL - Clinical Submission | Authentication Helper Tool</title>
+		<link rel="stylesheet" href="/static/css/base.css" />
+		<link rel="icon" type="image/png" href="/static/images/favicon.png" />
+		<script src="/static/js/tokenPage.js"></script>
+	</head>
+	<body>
+		<nav>
+			<div class="nav-container">
+				<ul>
+					<img class="logo" src="/static/images/pcgl-logo-colour.svg" alt="Pan-Canadian Genome Library" />
+				</ul>
+				<ul style="flex: 1; text-align: end">
+					<h1 class="h3">Clinical Submission&nbsp;&mdash;&nbsp;Authentication Helper Tool</h1>
+					<a class="external secondary" href="/api-docs" target="_blank">Open Swagger Docs</a>
+				</ul>
+			</div>
+		</nav>
+		<div class="content">
+			<div class="tool-container">
+				<div class="content-full">
+					<h2 class="h2">Access Token</h2>
+					<textarea readonly id="accessTokenArea">{{ accessToken }}</textarea>
+					<div class="tool-container__buttons">
+						<button class="secondary" id="refreshTokenButton">Refresh Token</button>
+						<button id="accessTokenButton">Copy</button>
+					</div>
+				</div>
+				<div>
+					<h2 class="h2">Token Information</h2>
+					<div class="info-row">
+						<p class="info-title">Valid For</p>
+						<p class="info-desc" id="validTilTime">{{ valid_till }}</p>
+					</div>
+					<div class="info-row">
+						<p class="info-title">Logged In With</p>
+						<p class="info-desc">{{ idp_name }}</p>
+					</div>
+					<div class="info-row">
+						<p class="info-title">Issued</p>
+						<p class="info-desc">{{ iat }}</p>
+					</div>
+					<div class="info-row">
+						<p class="info-title">Expires</p>
+						<p class="info-desc">{{ expires }}</p>
+					</div>
+				</div>
+				<details>
+					<summary class="">User Information</summary>
+					<div class="inner-details">
+						<div class="info-row">
+							<p class="info-title">Logged In As</p>
+							<p class="info-desc">{{ name }}</p>
+						</div>
+						<div class="info-row">
+							<p class="info-title">Given Name</p>
+							<p class="info-desc">{{ given_name }}</p>
+						</div>
+						<div class="info-row">
+							<p class="info-title">Family Name</p>
+							<p class="info-desc">{{ family_name }}</p>
+						</div>
+						<div class="info-row">
+							<p class="info-title">CILogon ID</p>
+							<p class="info-desc">{{ sub }}</p>
+						</div>
+						<div class="info-row">
+							<p class="info-title">Email Address</p>
+							<p class="info-desc">{{ email }}</p>
+						</div>
+						<div class="info-row">
+							<p class="info-title">Affiliation</p>
+							<p class="info-desc">{{ affiliation }}</p>
+						</div>
+					</div>
+				</details>
+			</div>
+		</div>
+		<footer>
+			<p>&copy; Pan-Canadian Genome Library {{ currentYear }}</p>
+		</footer>
+	</body>
+</html>
