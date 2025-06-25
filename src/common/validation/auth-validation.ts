@@ -17,40 +17,33 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { NextFunction, Request, Response } from 'express';
+import { z } from 'zod';
 
-import { UserGroups } from '@/common/types/auth.js';
-import { lyricProvider } from '@/core/provider.js';
-import { fetchUserData } from '@/external/authorizationClient.js';
-
-/**
- * Middleware to handle authentication
- * @returns
- */
-export const authMiddleware = () => {
-	return async (req: Request, res: Response, next: NextFunction) => {
-		try {
-			// Parse token from request
-			const authHeader = req.headers['authorization'];
-			const token = authHeader && authHeader.split(' ')[1];
-
-			if (!token) {
-				throw new lyricProvider.utils.errors.Forbidden('Unauthorized request, no token was found');
-			}
-
-			// Grab the users data
-			const resultMe = await fetchUserData(token);
-
-			// Check permissions, if admin let them pass
-			if (resultMe.groups.some((value) => value.name === UserGroups.ADMIN)) {
-				next();
-				return;
-			}
-
-			next();
-		} catch (error) {
-			next(error);
-			return;
-		}
-	};
-};
+export const userDataResponseSchema = z.object({
+	pcgl_id: z.string(),
+	groups: z.array(
+		z.object({
+			id: z.coerce.string(),
+			name: z.string(),
+			description: z.string(),
+		}),
+	),
+	emails: z.array(
+		z
+			.object({
+				type: z.string(),
+				address: z.string(),
+			})
+			.optional(),
+	),
+	study_authorizations: z
+		.record(
+			z.string(),
+			z.object({
+				end_date: z.string(),
+				start_date: z.string(),
+				study_id: z.string(),
+			}),
+		)
+		.optional(),
+});

@@ -17,10 +17,12 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { UserDataResponse, UserDataResponseErrorType } from '@/common/types/auth.js';
+import { userDataResponseSchema } from '@/common/validation/auth-validation.js';
 import { authEnvConfig } from '@/config/authEnvConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 
-export const fetchUserData = async (token: string) => {
+export const fetchUserData = async (token: string): Promise<UserDataResponse> => {
 	const { AUTHZ_URL } = authEnvConfig;
 	const url = `${AUTHZ_URL}/authz/user/me`;
 
@@ -32,13 +34,23 @@ export const fetchUserData = async (token: string) => {
 	const response = await fetch(url, { headers });
 
 	if (!response.ok) {
+		const errorResponse: UserDataResponseErrorType = await response.json();
+
 		switch (response.status) {
 			case 403:
-				throw new lyricProvider.utils.errors.Forbidden('Unauthorized request, token is invalid');
+				throw new lyricProvider.utils.errors.Forbidden(errorResponse.error);
 			default:
-				throw new lyricProvider.utils.errors.InternalServerError('Authorization service failed');
+				throw new lyricProvider.utils.errors.InternalServerError(errorResponse.error);
 		}
 	}
 
-	return await response.json();
+	const result = await response.json();
+
+	if (userDataResponseSchema.safeParse(result)) {
+		throw new lyricProvider.utils.errors.ServiceUnavailable(
+			'The required fields groups and pcgl_id were not returned in the response object',
+		);
+	}
+
+	return result;
 };

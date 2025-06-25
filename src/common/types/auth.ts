@@ -30,7 +30,7 @@ export type UserGroupsValue = (typeof UserGroups)[keyof typeof UserGroups];
 export const userRoleSchema = zod.enum([UserGroups.ADMIN, UserGroups.DATA_SUBMITTER, UserGroups.DATA_EXTRACTOR]);
 export type UserRole = zod.infer<typeof userRoleSchema>;
 
-export type UserData = {
+export type UserDataResponse = {
 	emails: Email[];
 	pcgl_id: string | number;
 	study_authorizations: Record<string, StudyAuthorization>;
@@ -52,4 +52,8 @@ export type Group = {
 	id: number | string;
 	description: string;
 	name: string;
+};
+
+export type UserDataResponseErrorType = {
+	error: string;
 };
