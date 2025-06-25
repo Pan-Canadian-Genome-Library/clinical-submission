@@ -17,28 +17,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { authEnvConfig } from '@/config/authEnvConfig.js';
-import { lyricProvider } from '@/core/provider.js';
+import { z } from 'zod';
 
-export const fetchUserData = async (token: string) => {
-	const { AUTHZ_URL } = authEnvConfig;
-	const url = `${AUTHZ_URL}/authz/user/me`;
+import EnvironmentConfigError from './EnvironmentConfigError.js';
 
-	const headers = new Headers({
-		Authorization: `Bearer ${token}`,
-		'Content-Type': 'application/json',
-	});
+const authEnvConfigSchema = z.object({
+	AUTHZ_URL: z.string(),
+});
 
-	const response = await fetch(url, { headers });
+const parseResult = authEnvConfigSchema.safeParse(process.env);
 
-	if (!response.ok) {
-		switch (response.status) {
-			case 403:
-				throw new lyricProvider.utils.errors.Forbidden('Unauthorized request, token is invalid');
-			default:
-				throw new lyricProvider.utils.errors.InternalServerError('Authorization service failed');
-		}
-	}
+if (!parseResult.success) {
+	throw new EnvironmentConfigError(`authEnv`, parseResult.error);
+}
 
-	return await response.json();
-};
+export const authEnvConfig = { ...parseResult.data };

@@ -50,9 +50,7 @@ export const authMiddleware = () => {
 
 			return next();
 		} catch (error) {
-			console.error(`Error verifying user: ${error}`);
-
-			res.status(403).json({ message: `${error}` });
+			next(error);
 			return;
 		}
 	};
