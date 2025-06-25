@@ -650,3 +650,12 @@ components:
         message:
           type: string
           description: Details of the error
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Access Token
+
+security:
+  - bearerAuth: []

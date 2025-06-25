@@ -26,7 +26,7 @@ import { OIDCCodeResponse } from '@/common/validation/auth-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
-import { exchangeCodeForTokens, getOidcAuthorizeUrl, getUserInfo } from '@/external/oidcAuthenticationClient.js';
+import { exchangeCodeForTokens, getOidcAuthorizeUrl } from '@/external/oidcAuthenticationClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 
 const login = async (request: Request, response: Response) => {
