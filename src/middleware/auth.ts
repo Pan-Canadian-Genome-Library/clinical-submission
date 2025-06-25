@@ -28,7 +28,7 @@ import { fetchUserData } from '@/external/authorizationClient.js';
  * @returns
  */
 export const authMiddleware = () => {
-	return async (req: Request, res: Response, next: NextFunction) => {
+	return async (req: Request, _: Response, next: NextFunction) => {
 		try {
 			// Parse token from request
 			const authHeader = req.headers['authorization'];
@@ -41,10 +41,9 @@ export const authMiddleware = () => {
 			// Grab the users data
 			const resultMe = await fetchUserData(token);
 
-			// Check permissions, if admin let them pass
+			// Check permissions from group, if they have the admin group, let them pass
 			if (resultMe.groups.some((value) => value.name === UserGroups.ADMIN)) {
 				next();
-				return;
 			}
 
 			next();
