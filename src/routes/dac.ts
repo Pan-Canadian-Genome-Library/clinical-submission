@@ -26,7 +26,7 @@ export const dacRouter: Router = (() => {
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
 
-	// TODO: Change roles
+	// TODO: Auth
 	router.get('/:dacId', dacController.getDacById);
 	router.get('/', dacController.getAllDac);
 	router.post('/create', dacController.createDac);
