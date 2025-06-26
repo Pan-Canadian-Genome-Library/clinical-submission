@@ -19,6 +19,16 @@
 
 import { z as zod } from 'zod';
 
+// NOTE: DELETE and UPDATE actions exists in docs as an enum but does not exist as a action via `/services` endpoint, added but not used
+export const ActionIDs = {
+	WRITE: 'WRITE',
+	READ: 'READ',
+	UPDATE: 'UPDATE',
+	DELETE: 'DELETE',
+} as const;
+
+export type ActionIDsValues = (typeof ActionIDs)[keyof typeof ActionIDs];
+
 export const UserGroups = {
 	ADMIN: 'CO:admins',
 	DATA_SUBMITTER: 'CO:submitter', // TODO: Likely to change

@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { UserDataResponse, UserDataResponseErrorType } from '@/common/types/auth.js';
+import { ActionIDs, ActionIDsValues, UserDataResponse, UserDataResponseErrorType } from '@/common/types/auth.js';
 import { userDataResponseSchema } from '@/common/validation/auth-validation.js';
 import { authEnvConfig } from '@/config/authEnvConfig.js';
 import { lyricProvider } from '@/core/provider.js';
@@ -53,4 +53,75 @@ export const fetchUserData = async (token: string): Promise<UserDataResponse> =>
 	}
 
 	return result;
+};
+
+export const verifyAllowedAccess = async (
+	token: string,
+	study: string,
+	action: ActionIDsValues,
+): Promise<UserDataResponse> => {
+	const { AUTHZ_URL } = authEnvConfig;
+	const url = `${AUTHZ_URL}/authz/allowed`;
+
+	const headers = new Headers({
+		Authorization: `Bearer ${token}`,
+		'Content-Type': 'application/json',
+	});
+
+	// determine method value
+	const methodResult = determineActionMethod(action);
+
+	if (!methodResult) {
+		throw new lyricProvider.utils.errors.BadRequest('Invalid action value');
+	}
+
+	const response = await fetch(url, {
+		method: 'POST',
+		headers,
+		body: JSON.stringify({
+			action: {
+				endpoint: action,
+				method: methodResult,
+			},
+			path: action,
+			method: methodResult,
+			studies: [study],
+		}),
+	});
+
+	if (!response.ok) {
+		const errorResponse: UserDataResponseErrorType = await response.json();
+
+		switch (response.status) {
+			case 403:
+				throw new lyricProvider.utils.errors.Forbidden(errorResponse.error);
+			default:
+				throw new lyricProvider.utils.errors.InternalServerError(errorResponse.error);
+		}
+	}
+
+	const result = await response.json();
+
+	if (userDataResponseSchema.safeParse(result)) {
+		throw new lyricProvider.utils.errors.ServiceUnavailable(
+			'The required fields groups and pcgl_id were not returned in the response object.',
+		);
+	}
+
+	return result;
+};
+
+const determineActionMethod = (action: ActionIDsValues) => {
+	switch (action) {
+		case ActionIDs.READ:
+			return 'GET';
+		case ActionIDs.WRITE:
+			return 'POST';
+		case ActionIDs.UPDATE: // NOTE: not an action returned from `/services`. Added just incase
+			return 'PUT';
+		case ActionIDs.DELETE: // NOTE: not an action returned from `/services`. Added just incase
+			return 'DELETE';
+		default:
+			return;
+	}
 };
