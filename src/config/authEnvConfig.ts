@@ -22,7 +22,10 @@ import { z } from 'zod';
 import EnvironmentConfigError from './EnvironmentConfigError.js';
 
 const authEnvConfigSchema = z.object({
-	AUTHZ_URL: z.string(),
+	AUTH_URL: z.string(),
+	AUTH_ENDPOINT: z.string(),
+	AUTH_METHOD_GET: z.string(),
+	AUTH_METHOD_POST: z.string(),
 });
 
 const parseResult = authEnvConfigSchema.safeParse(process.env);

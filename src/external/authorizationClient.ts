@@ -18,14 +18,14 @@
  */
 
 import { logger } from '@/common/logger.js';
-import { ActionIDs, ActionIDsValues, UserDataResponse, UserDataResponseErrorType } from '@/common/types/auth.js';
+import { ActionIDsValues, UserDataResponse, UserDataResponseErrorType } from '@/common/types/auth.js';
 import { userDataResponseSchema } from '@/common/validation/auth-validation.js';
 import { authEnvConfig } from '@/config/authEnvConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 
 export const fetchUserData = async (token: string): Promise<UserDataResponse> => {
-	const { AUTHZ_URL } = authEnvConfig;
-	const url = `${AUTHZ_URL}/authz/user/me`;
+	const { AUTH_URL } = authEnvConfig;
+	const url = `${AUTH_URL}/user/me`;
 
 	const headers = new Headers({
 		Authorization: `Bearer ${token}`,
@@ -62,31 +62,24 @@ export const fetchUserData = async (token: string): Promise<UserDataResponse> =>
 };
 
 export const verifyAllowedAccess = async (token: string, study: string, action: ActionIDsValues): Promise<boolean> => {
-	const { AUTHZ_URL } = authEnvConfig;
-	const url = `${AUTHZ_URL}/authz/allowed`;
+	const { AUTH_URL, AUTH_ENDPOINT, AUTH_METHOD_GET, AUTH_METHOD_POST } = authEnvConfig;
+	const url = `${AUTH_URL}/allowed`;
 
 	const headers = new Headers({
 		Authorization: `Bearer ${token}`,
 		'Content-Type': 'application/json',
 	});
 
-	// determine method value
-	const methodResult = determineActionMethod(action);
-
-	if (!methodResult) {
-		throw new lyricProvider.utils.errors.BadRequest('Invalid action value');
-	}
-
 	const response = await fetch(url, {
 		method: 'POST',
 		headers,
 		body: JSON.stringify({
 			action: {
-				endpoint: action,
-				method: methodResult,
+				endpoint: AUTH_ENDPOINT,
+				method: action === 'READ' ? AUTH_METHOD_GET : AUTH_METHOD_POST,
 			},
-			path: action,
-			method: methodResult,
+			path: AUTH_ENDPOINT,
+			method: action === 'READ' ? AUTH_METHOD_GET : AUTH_METHOD_POST,
 			studies: [study],
 		}),
 	});
@@ -107,19 +100,4 @@ export const verifyAllowedAccess = async (token: string, study: string, action: 
 	const result = await response.json();
 
 	return result[0];
-};
-
-const determineActionMethod = (action: ActionIDsValues) => {
-	switch (action) {
-		case ActionIDs.READ:
-			return 'GET';
-		case ActionIDs.WRITE:
-			return 'POST';
-		case ActionIDs.UPDATE: // NOTE: not an action returned from `/services`. Added just incase
-			return 'PUT';
-		case ActionIDs.DELETE: // NOTE: not an action returned from `/services`. Added just incase
-			return 'DELETE';
-		default:
-			return;
-	}
 };

@@ -19,9 +19,10 @@
 
 import { NextFunction, Request, Response } from 'express';
 
+import { logger } from '@/common/logger.js';
 import { UserGroups } from '@/common/types/auth.js';
 import { lyricProvider } from '@/core/provider.js';
-import { fetchUserData } from '@/external/authorizationClient.js';
+import { fetchUserData, verifyAllowedAccess } from '@/external/authorizationClient.js';
 
 /**
  * Middleware to handle authentication
@@ -44,6 +45,14 @@ export const authMiddleware = () => {
 			// Check permissions from group, if they have the admin group, let them pass
 			if (resultMe.groups.some((value) => value.name === UserGroups.ADMIN)) {
 				next();
+			}
+
+			const resultVerify = await verifyAllowedAccess(token, 'TEST:001', 'WRITE');
+
+			if (!resultVerify) {
+				logger.error('Forbidden resource, user does not have access to this study');
+
+				throw new lyricProvider.utils.errors.Forbidden('Forbidden resource, you do not have access to this study');
 			}
 
 			next();
