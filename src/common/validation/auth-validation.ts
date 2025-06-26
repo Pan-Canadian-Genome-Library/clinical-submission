@@ -47,7 +47,11 @@ export const oidcTokenResponseSchema = zod
 	);
 export type OIDCTokenResponse = zod.infer<typeof oidcTokenResponseSchema>;
 
-export const OIDCCodeResponse: RequestValidation<object, ParsedQs, string> = {
+export interface OIDCCodeParams extends ParsedQs {
+	code: string;
+}
+
+export const OIDCCodeResponse: RequestValidation<object, OIDCCodeParams, string> = {
 	query: zod.object({
 		code: stringNotEmpty,
 	}),

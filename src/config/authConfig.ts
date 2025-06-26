@@ -49,7 +49,12 @@ function getAuthConfig() {
 		throw new EnvironmentConfigError(`auth`, parseResult.error);
 	}
 
-	return { ...parseResult.data, enabled, loginRedirectPath: '/login/redirect', logoutRedirectPath: '/api-docs/' };
+	return {
+		...parseResult.data,
+		enabled,
+		loginRedirectPath: `${env.API_HOST}/auth/token`,
+		logoutRedirectPath: '/api-docs/',
+	};
 }
 
 export const authConfig = getAuthConfig();

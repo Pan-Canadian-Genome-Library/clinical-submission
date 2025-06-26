@@ -35,8 +35,7 @@ const login = async (request: Request, response: Response) => {
 		return;
 	}
 
-	const onSuccessRedirect = `${env.API_HOST}/auth/token`;
-	const redirectUrl = getOidcAuthorizeUrl(authConfig, onSuccessRedirect);
+	const redirectUrl = getOidcAuthorizeUrl(authConfig, authConfig.loginRedirectPath);
 	response.redirect(redirectUrl);
 };
 
@@ -59,14 +58,10 @@ const token = validateRequest(OIDCCodeResponse, async (request, response, next) 
 
 	const { code } = request.query;
 
-	if (typeof code !== 'string') {
-		throw new Error('Invalid Request. Must contain query parameter `code` with a single string value.');
-	}
-
 	try {
 		const tokenResponse = await exchangeCodeForTokens(authConfig, {
 			code,
-			redirectUrl: `${env.API_HOST}/auth/token`,
+			redirectUrl: authConfig.loginRedirectPath,
 		});
 
 		if (!tokenResponse) {
