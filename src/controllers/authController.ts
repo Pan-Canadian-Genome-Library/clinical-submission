@@ -105,7 +105,6 @@ const token = validateRequest(OIDCCodeResponse, async (request, response, next) 
 			app_title: 'Clinical Submission',
 			app_subheading: 'Authentication Helper Tool',
 			app_api_docs: '/api-docs/',
-
 			sub: tokenData.sub,
 			accessToken: tokenResponse.access_token,
 			expires: new Date(tokenTimeToLive).toLocaleString('en-CA', { dateStyle: 'short', timeStyle: 'medium' }),
