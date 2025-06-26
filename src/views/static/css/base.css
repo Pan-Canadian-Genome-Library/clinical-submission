@@ -27,7 +27,9 @@
 	--pcgl-colour-black: #000000;
 	--pcgl-colour-dark-grey: #939598;
 	--pcgl-colour-light-grey: #bcbec0;
+	--pcgl-colour-fuchsia: #c41d7f;
 	--pcgl-colour-white: #ffffff;
+
 	--grey-subtle: #f3f3f3;
 
 	/* Fonts */
@@ -89,23 +91,6 @@ footer {
 button,
 .button {
 	cursor: pointer;
-	background-color: var(--pcgl-colour-red);
-	color: var(--pcgl-colour-white);
-	padding: var(--standard-padding);
-	border: transparent 1px solid;
-	border-radius: var(--standard-border-radius);
-	&:hover,
-	&:focus {
-		transition: var(--standard-transition);
-		background-color: var(--pcgl-colour-white);
-		color: var(--pcgl-colour-red);
-		border: var(--pcgl-colour-red) 1px solid;
-	}
-}
-
-button.secondary,
-.button.secondary {
-	cursor: pointer;
 	background-color: var(--pcgl-colour-black);
 	color: var(--pcgl-colour-white);
 	padding: var(--standard-padding);
@@ -115,8 +100,47 @@ button.secondary,
 	&:focus {
 		transition: var(--standard-transition);
 		background-color: var(--pcgl-colour-white);
-		color: var(--pcgl-colour-red);
-		border: var(--pcgl-colour-red) 1px solid;
+		color: var(--pcgl-colour-black);
+		border: var(--pcgl-colour-black) 1px solid;
+	}
+	&.destructive {
+		background-color: var(--pcgl-colour-red);
+		color: var(--pcgl-colour-white);
+		&:focus,
+		&:hover {
+			transition: var(--standard-transition);
+			background-color: var(--pcgl-colour-white);
+			color: var(--pcgl-colour-red);
+			border: var(--pcgl-colour-red) 1px solid;
+		}
+	}
+}
+
+button.secondary,
+.button.secondary {
+	cursor: pointer;
+	background-color: var(--pcgl-colour-white);
+	color: var(--pcgl-colour-black);
+	padding: var(--standard-padding);
+	border: var(--pcgl-colour-black) 1px solid;
+	border-radius: var(--standard-border-radius);
+	&:hover,
+	&:focus {
+		transition: var(--standard-transition);
+		background-color: var(--pcgl-colour-black);
+		color: var(--pcgl-colour-white);
+		border: transparent 1px solid;
+	}
+	&.destructive {
+		background-color: var(--pcgl-colour-red);
+		color: var(--pcgl-colour-white);
+		&:focus,
+		&:hover {
+			transition: var(--standard-transition);
+			background-color: var(--pcgl-colour-white);
+			color: var(--pcgl-colour-red);
+			border: var(--pcgl-colour-red) 1px solid;
+		}
 	}
 }
 
