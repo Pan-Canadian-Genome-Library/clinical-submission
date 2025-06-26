@@ -17,6 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { logger } from '@/common/logger.js';
 import { ActionIDs, ActionIDsValues, UserDataResponse, UserDataResponseErrorType } from '@/common/types/auth.js';
 import { userDataResponseSchema } from '@/common/validation/auth-validation.js';
 import { authEnvConfig } from '@/config/authEnvConfig.js';
@@ -36,6 +37,7 @@ export const fetchUserData = async (token: string): Promise<UserDataResponse> =>
 	if (!response.ok) {
 		const errorResponse: UserDataResponseErrorType = await response.json();
 
+		logger.error(`Error retrieving user data.`, errorResponse.error);
 		switch (response.status) {
 			case 403:
 				throw new lyricProvider.utils.errors.Forbidden(errorResponse.error);
@@ -46,7 +48,11 @@ export const fetchUserData = async (token: string): Promise<UserDataResponse> =>
 
 	const result = await response.json();
 
-	if (userDataResponseSchema.safeParse(result)) {
+	const responseValidation = userDataResponseSchema.safeParse(result);
+
+	if (!responseValidation.success) {
+		logger.error(`Error retrieving user data.`, responseValidation.error);
+
 		throw new lyricProvider.utils.errors.ServiceUnavailable(
 			'The required fields groups and pcgl_id were not returned in the response object',
 		);
@@ -55,11 +61,7 @@ export const fetchUserData = async (token: string): Promise<UserDataResponse> =>
 	return result;
 };
 
-export const verifyAllowedAccess = async (
-	token: string,
-	study: string,
-	action: ActionIDsValues,
-): Promise<UserDataResponse> => {
+export const verifyAllowedAccess = async (token: string, study: string, action: ActionIDsValues): Promise<boolean> => {
 	const { AUTHZ_URL } = authEnvConfig;
 	const url = `${AUTHZ_URL}/authz/allowed`;
 
@@ -92,6 +94,8 @@ export const verifyAllowedAccess = async (
 	if (!response.ok) {
 		const errorResponse: UserDataResponseErrorType = await response.json();
 
+		logger.error(`Error verifying user token.`, errorResponse.error);
+
 		switch (response.status) {
 			case 403:
 				throw new lyricProvider.utils.errors.Forbidden(errorResponse.error);
@@ -102,13 +106,7 @@ export const verifyAllowedAccess = async (
 
 	const result = await response.json();
 
-	if (userDataResponseSchema.safeParse(result)) {
-		throw new lyricProvider.utils.errors.ServiceUnavailable(
-			'The required fields groups and pcgl_id were not returned in the response object.',
-		);
-	}
-
-	return result;
+	return result[0];
 };
 
 const determineActionMethod = (action: ActionIDsValues) => {
