@@ -93,13 +93,25 @@ const token = validateRequest(OIDCCodeResponse, async (request, response, next) 
 
 		const tokenData: CILogonToken = jwtDecode(tokenResponse.id_token);
 
+		/**
+		 * The JWT returns this time as _seconds_ from the Unix Epoch,
+		 * whereas JS expects it as milliseconds, so we have to multiply by 1000
+		 * to make it compatible for any arithmetic.
+		 */
+		const tokenTimeToLive = tokenData.exp * 1000;
+		const tokenIssueTime = tokenData.iat * 1000;
+
 		response.render('token.njk', {
+			app_title: 'Clinical Submission',
+			app_subheading: 'Authentication Helper Tool',
+			app_api_docs: '/api-docs/',
+
 			sub: tokenData.sub,
 			accessToken: tokenResponse.access_token,
-			expires: new Date(tokenData.exp * 1000).toLocaleString('en-CA', { dateStyle: 'short', timeStyle: 'medium' }),
-			valid_till: tokenData.exp,
+			expires: new Date(tokenTimeToLive).toLocaleString('en-CA', { dateStyle: 'short', timeStyle: 'medium' }),
+			valid_till: tokenTimeToLive,
 			idp_name: tokenData.idp_name,
-			iat: new Date(tokenData.iat * 1000).toLocaleString('en-CA', { dateStyle: 'short', timeStyle: 'medium' }),
+			iat: new Date(tokenIssueTime).toLocaleString('en-CA', { dateStyle: 'short', timeStyle: 'medium' }),
 			name: tokenData.name,
 			given_name: tokenData.given_name ?? 'N/A',
 			family_name: tokenData.family_name ?? 'N/A',

@@ -22,10 +22,10 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>PCGL - Clinical Submission | Authentication Helper Tool</title>
+		<title>PCGL - {{ app_title }} | {{ app_subheading }}</title>
 		<link rel="stylesheet" href="/static/css/base.css" />
 		<link rel="icon" type="image/png" href="/static/images/favicon.png" />
-		<script src="/static/js/tokenPage.js"></script>
+		<script src="/static/js/token.js"></script>
 	</head>
 	<body>
 		<nav>
@@ -34,8 +34,8 @@
 					<img class="logo" src="/static/images/pcgl-logo-colour.svg" alt="Pan-Canadian Genome Library" />
 				</ul>
 				<ul style="flex: 1; text-align: end">
-					<h1 class="h3">Clinical Submission&nbsp;&mdash;&nbsp;Authentication Helper Tool</h1>
-					<a class="external secondary" href="/api-docs" target="_blank">Open Swagger Docs</a>
+					<h1 class="h3">{{ app_title }}&nbsp;&mdash;&nbsp;{{ app_subheading }}</h1>
+					<a class="external secondary" href="{{ app_api_docs }}" target="_blank">Open Swagger Docs</a>
 				</ul>
 			</div>
 		</nav>

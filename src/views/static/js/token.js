@@ -25,7 +25,9 @@ const copyToken = () => {
 	const copyTokenButton = document.getElementById('accessTokenButton');
 	tokenArea.focus();
 	tokenArea.select();
+
 	navigator.clipboard.writeText(tokenArea.value);
+
 	copyTokenButton.innerText = 'Copied!';
 	setTimeout(() => {
 		copyTokenButton.innerText = 'Copy';
@@ -67,9 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	refreshTokenButton.addEventListener('click', refreshToken);
 
 	const validTillElement = document.getElementById('validTilTime');
-
-	//NOTE: CILogon returns time as second whereas JS Date expects MS.
-	const validTillTime = Number(validTillElement.innerText) * 1000;
+	const validTillTime = Number(validTillElement.innerText);
 	validTillElement.innerText = '-';
 
 	renderExpireCountdown(validTillTime, validTillElement);
