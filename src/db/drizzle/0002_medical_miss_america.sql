@@ -1,1 +1,1 @@
-ALTER TABLE "pcgl"."study" ADD COLUMN "id" serial NOT NULL;
+ALTER TABLE "pcgl"."study";

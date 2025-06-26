@@ -27,7 +27,6 @@ import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import { studyService } from '@/service/studyService.js';
-import { generateId } from '@/utils/idGenerator.js';
 
 export const getAllStudies = validateRequest(listAllStudies, async (req, res, next) => {
 	const db = getDbInstance();
@@ -66,7 +65,6 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 	const studyRepo = studyService(db);
 
 	try {
-		req.body.studyId = generateId({ entity: 'study' });
 		const results = await studyRepo.createStudy(studyData);
 		if (!results) {
 			throw new lyricProvider.utils.errors.BadRequest(`Unable to create study with provided data.`);

@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { z } from 'zod';
+import { RefinementCtx, z, ZodIssue } from 'zod';
 
 const NodeEnvOptions = ['development', 'production'] as const;
 const LogLeveOptions = ['error', 'warn', 'info', 'debug'] as const;
@@ -19,14 +19,32 @@ const envSchema = z.object({
 	ID_CUSTOMALPHABET: z.string().default('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'),
 	ID_CUSTOMSIZE: z.coerce.number().default(21),
 	ID_MANAGER_SECRET: z.string(),
-	ID_MANAGER_CONFIG: z.string().transform((str, ctx) => {
+	ID_MANAGER_CONFIG: z.string().transform((str: string, ctx: RefinementCtx) => {
+		const configSchema = z.object({
+			entityName: z.string(),
+			fieldName: z.string(),
+			prefix: z.string(),
+			paddingLength: z.number().int().nonnegative(),
+		});
+
 		try {
 			const parsed = JSON.parse(str);
 			if (!Array.isArray(parsed)) {
-				throw new Error('Must be an array');
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: 'ID_MANAGER_CONFIG must be a JSON array.',
+				});
+				return z.NEVER;
 			}
-			return parsed;
-		} catch (e) {
+
+			const result = z.array(configSchema).safeParse(parsed);
+			if (!result.success) {
+				result.error.issues.forEach((issue: ZodIssue) => ctx.addIssue(issue));
+				return z.NEVER;
+			}
+
+			return result.data;
+		} catch {
 			ctx.addIssue({
 				code: z.ZodIssueCode.custom,
 				message: 'ID_MANAGER_CONFIG must be a valid JSON stringified array',
