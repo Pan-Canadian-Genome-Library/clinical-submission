@@ -23,9 +23,13 @@ import EnvironmentConfigError from './EnvironmentConfigError.js';
 
 const authEnvConfigSchema = z.object({
 	AUTH_URL: z.string(),
-	AUTH_ENDPOINT: z.string(),
-	AUTH_METHOD_GET: z.string(),
-	AUTH_METHOD_POST: z.string(),
+	AUTH_ACTION_WRITE_ENDPOINT: z.string(),
+	AUTH_ACTION_WRITE_METHOD: z.string(),
+	AUTH_ACTION_READ_ENDPOINT: z.string(),
+	AUTH_ACTION_READ_METHOD: z.string(),
+	AUTH_GROUP_ADMIN: z.string(),
+	AUTH_GROUP_SUBMITTER: z.string(),
+	AUTH_GROUP_DATA_EXTRACTOR: z.string(),
 });
 
 const parseResult = authEnvConfigSchema.safeParse(process.env);
@@ -34,4 +38,21 @@ if (!parseResult.success) {
 	throw new EnvironmentConfigError(`authEnv`, parseResult.error);
 }
 
-export const authEnvConfig = { ...parseResult.data };
+export const authEnvConfig = {
+	...parseResult.data,
+	actions: {
+		write: {
+			method: parseResult.data.AUTH_ACTION_READ_METHOD,
+			endpoint: parseResult.data.AUTH_ACTION_WRITE_ENDPOINT,
+		},
+		read: {
+			method: parseResult.data.AUTH_ACTION_READ_METHOD,
+			endpoint: parseResult.data.AUTH_ACTION_WRITE_ENDPOINT,
+		},
+	},
+	groups: {
+		admin: parseResult.data.AUTH_GROUP_ADMIN,
+		dataSubmitter: parseResult.data.AUTH_GROUP_SUBMITTER,
+		dataExtractor: parseResult.data.AUTH_GROUP_DATA_EXTRACTOR,
+	},
+};

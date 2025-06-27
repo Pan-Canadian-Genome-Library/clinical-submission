@@ -20,7 +20,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { logger } from '@/common/logger.js';
-import { ActionIDsValues, UserGroups } from '@/common/types/auth.js';
+import { ActionIDsValues } from '@/common/types/auth.js';
 import { lyricProvider } from '@/core/provider.js';
 import { fetchUserData, verifyAllowedAccess } from '@/external/authorizationClient.js';
 
@@ -46,13 +46,15 @@ export const authMiddleware = (action: ActionIDsValues) => {
 				throw new lyricProvider.utils.errors.BadRequest('Bad request, no study id was provided');
 			}
 
-			// Grab the users data
-			const resultMe = await fetchUserData(token);
+			// TODO: CHANGING INTO AUTH CHECK
 
-			// Check permissions from group, if they have the admin group, skip verify step
-			if (resultMe.groups.some((value) => value.name === UserGroups.ADMIN)) {
-				next();
-			}
+			// // Grab the users data
+			// const resultMe = await fetchUserData(token);
+
+			// // Check permissions from group, if they have the admin group, skip verify step
+			// if (resultMe.groups.some((value) => value.name === UserGroups.ADMIN)) {
+			// 	next();
+			// }
 
 			// Verify if the user has permissions to access this group
 			const resultVerify = await verifyAllowedAccess(token, studyId, action);

@@ -76,7 +76,7 @@ export const fetchUserData = async (token: string): Promise<UserDataResponse> =>
  * @returns True or false depending if the user has access to the study
  */
 export const verifyAllowedAccess = async (token: string, study: string, action: ActionIDsValues): Promise<boolean> => {
-	const { AUTH_URL, AUTH_ENDPOINT, AUTH_METHOD_GET, AUTH_METHOD_POST } = authEnvConfig;
+	const { AUTH_URL, actions } = authEnvConfig;
 	const url = `${AUTH_URL}/allowed`;
 
 	const headers = new Headers({
@@ -89,11 +89,11 @@ export const verifyAllowedAccess = async (token: string, study: string, action: 
 		headers,
 		body: JSON.stringify({
 			action: {
-				endpoint: AUTH_ENDPOINT,
-				method: action === 'READ' ? AUTH_METHOD_GET : AUTH_METHOD_POST,
+				endpoint: action === 'READ' ? actions.read.endpoint : actions.write.endpoint,
+				method: action === 'READ' ? actions.read.method : actions.write.method,
 			},
-			path: AUTH_ENDPOINT,
-			method: action === 'READ' ? AUTH_METHOD_GET : AUTH_METHOD_POST,
+			path: action === 'READ' ? actions.read.endpoint : actions.write.endpoint,
+			method: action === 'READ' ? actions.read.method : actions.write.method,
 			studies: [study],
 		}),
 	});

@@ -26,17 +26,6 @@ export const ActionIDs = {
 
 export type ActionIDsValues = (typeof ActionIDs)[keyof typeof ActionIDs];
 
-export const UserGroups = {
-	ADMIN: 'CO:admins',
-	DATA_SUBMITTER: 'CO:submitter', // TODO: Likely to change
-	DATA_EXTRACTOR: 'CO:extractor', // TODO: Likely to change
-} as const;
-
-export type UserGroupsValue = (typeof UserGroups)[keyof typeof UserGroups];
-
-export const userRoleSchema = zod.enum([UserGroups.ADMIN, UserGroups.DATA_SUBMITTER, UserGroups.DATA_EXTRACTOR]);
-export type UserRole = zod.infer<typeof userRoleSchema>;
-
 export type UserDataResponse = {
 	emails: Email[];
 	pcgl_id: string | number;
