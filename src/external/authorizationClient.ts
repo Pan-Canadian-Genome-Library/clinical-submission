@@ -23,6 +23,12 @@ import { userDataResponseSchema } from '@/common/validation/auth-validation.js';
 import { authEnvConfig } from '@/config/authEnvConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 
+/**
+ * Fetches user associated authz information.
+ *
+ * @param token Access token from Authz
+ * @returns validated object of UserDataResponse
+ */
 export const fetchUserData = async (token: string): Promise<UserDataResponse> => {
 	const { AUTH_URL } = authEnvConfig;
 	const url = `${AUTH_URL}/user/me`;
@@ -61,6 +67,14 @@ export const fetchUserData = async (token: string): Promise<UserDataResponse> =>
 	return result;
 };
 
+/**
+ *
+ *
+ * @param token Access token from Authz
+ * @param study Study user is trying to get access to
+ * @param action Type of CRUD operation user is trying to do
+ * @returns True or false depending if the user has access to the study
+ */
 export const verifyAllowedAccess = async (token: string, study: string, action: ActionIDsValues): Promise<boolean> => {
 	const { AUTH_URL, AUTH_ENDPOINT, AUTH_METHOD_GET, AUTH_METHOD_POST } = authEnvConfig;
 	const url = `${AUTH_URL}/allowed`;
