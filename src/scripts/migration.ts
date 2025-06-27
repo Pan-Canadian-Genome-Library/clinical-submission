@@ -1,6 +1,6 @@
 import { migrate } from '@overture-stack/lyric';
 
-import { env } from '@/common/envConfig.js';
+import { env } from '@/config/envConfig.js';
 
 try {
 	migrate({

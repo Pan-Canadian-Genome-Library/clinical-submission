@@ -21,14 +21,17 @@ import { errorHandler } from '@overture-stack/lyric';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
+import nunjucks from 'nunjucks';
+import path from 'path';
 
-import { env } from '@/common/envConfig.js';
+import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { requestLogger } from '@/middleware/requestLogger.js';
 import { healthCheckRouter } from '@/routes/healthCheck.js';
 import { openAPIRouter } from '@/routes/openApi.js';
 import { submissionRouter } from '@/routes/submission.js';
 
+import { authRouter } from './routes/auth.js';
 import { dacRouter } from './routes/dac.js';
 import { studyRouter } from './routes/study.js';
 
@@ -55,6 +58,19 @@ app.use(
 	}),
 );
 
+/**
+ * Nunjucks is the templating middleware we use for our temporary
+ * login page. We're setting the cache to be disabled since we
+ * want a re-render every hit since tokens could change.
+ *
+ * @see https://mozilla.github.io/nunjucks/api.html#express
+ */
+nunjucks.configure(path.join(import.meta.dirname, 'views'), {
+	noCache: true,
+	express: app,
+});
+app.use('/static', express.static(path.join(import.meta.dirname, 'views', 'static')));
+
 // Request logging
 app.use(requestLogger);
 
@@ -62,6 +78,7 @@ app.use(requestLogger);
 app.use('/dac', dacRouter);
 app.use('/health', healthCheckRouter);
 app.use('/study', studyRouter);
+app.use('/auth', authRouter);
 
 // Lyric routes
 app.use('/audit', lyricProvider.routers.audit);

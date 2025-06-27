@@ -1,6 +1,6 @@
 import { LoggerOptions, pino } from 'pino';
 
-import { env } from './envConfig.js';
+import { env } from '@/config/envConfig.js';
 
 const pinoConfig: LoggerOptions = {
 	level: env.LOG_LEVEL,
