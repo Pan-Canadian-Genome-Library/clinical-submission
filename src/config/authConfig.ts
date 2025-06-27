@@ -17,6 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import urlJoin from 'url-join';
 import { z } from 'zod';
 
 import { env } from '@/config/envConfig.js';
@@ -52,8 +53,8 @@ function getAuthConfig() {
 	return {
 		...parseResult.data,
 		enabled,
-		loginRedirectPath: `${env.API_HOST}/auth/token`,
-		logoutRedirectPath: '/api-docs/',
+		loginRedirectPath: urlJoin(env.API_HOST, '/auth/token'),
+		logoutRedirectPath: urlJoin(env.API_HOST, '/api-docs/'),
 	};
 }
 
