@@ -45,8 +45,7 @@ const logout = async (request: Request, response: Response) => {
 		return;
 	}
 
-	const logoutSuccessRedirectUrl = urlJoin(env.API_HOST, authConfig.logoutRedirectPath);
-	const redirectUrl = getOidcAuthorizeUrl(authConfig, logoutSuccessRedirectUrl);
+	const redirectUrl = getOidcAuthorizeUrl(authConfig, authConfig.logoutRedirectPath);
 	response.redirect(redirectUrl);
 };
 
