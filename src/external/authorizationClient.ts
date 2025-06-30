@@ -20,7 +20,7 @@
 import { logger } from '@/common/logger.js';
 import { ActionIDsValues, UserDataResponse, UserDataResponseErrorType } from '@/common/types/auth.js';
 import { userDataResponseSchema } from '@/common/validation/auth-validation.js';
-import { authEnvConfig } from '@/config/authEnvConfig.js';
+import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 
 /**
@@ -30,8 +30,8 @@ import { lyricProvider } from '@/core/provider.js';
  * @returns validated object of UserDataResponse
  */
 export const fetchUserData = async (token: string): Promise<UserDataResponse> => {
-	const { AUTH_URL } = authEnvConfig;
-	const url = `${AUTH_URL}/user/me`;
+	const { AUTHZ_ENDPOINT } = authConfig;
+	const url = `${AUTHZ_ENDPOINT}/user/me`;
 
 	const headers = new Headers({
 		Authorization: `Bearer ${token}`,
@@ -76,8 +76,8 @@ export const fetchUserData = async (token: string): Promise<UserDataResponse> =>
  * @returns True or false depending if the user has access to the study
  */
 export const verifyAllowedAccess = async (token: string, study: string, action: ActionIDsValues): Promise<boolean> => {
-	const { AUTH_URL, actions } = authEnvConfig;
-	const url = `${AUTH_URL}/allowed`;
+	const { AUTHZ_ENDPOINT, actions } = authConfig;
+	const url = `${AUTHZ_ENDPOINT}/allowed`;
 
 	const headers = new Headers({
 		Authorization: `Bearer ${token}`,

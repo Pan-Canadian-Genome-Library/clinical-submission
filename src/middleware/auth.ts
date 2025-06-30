@@ -48,8 +48,8 @@ export const authMiddleware = (action: ActionIDsValues) => {
 
 			// TODO: CHANGING INTO AUTH CHECK
 
-			// // Grab the users data
-			// const resultMe = await fetchUserData(token);
+			// Grab the users data
+			const resultMe = await fetchUserData(token);
 
 			// // Check permissions from group, if they have the admin group, skip verify step
 			// if (resultMe.groups.some((value) => value.name === UserGroups.ADMIN)) {
