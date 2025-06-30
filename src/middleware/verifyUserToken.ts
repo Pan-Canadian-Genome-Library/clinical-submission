@@ -17,29 +17,44 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import express, { json, Router, urlencoded } from 'express';
+import { UserSessionResult } from '@overture-stack/lyric';
+import { Request } from 'express';
 
-import {
-	createNewStudy,
-	deleteStudyById,
-	getAllStudies,
-	getStudyById,
-	updateStudyById,
-} from '@/controllers/studyController.js';
-import { authMiddleware } from '@/middleware/auth.js';
+import { logger } from '@/common/logger.js';
 
-export const studyRouter: Router = (() => {
-	const router = express.Router();
+const extractTokenFromHeader = (req: Request): string | undefined => {
+	const authHeader = req.headers['authorization'];
+	if (!authHeader || !authHeader.startsWith('Bearer ')) {
+		return;
+	}
 
-	router.use(json());
-	router.use(urlencoded({ extended: false }));
+	return authHeader.split(' ')[1];
+};
 
-	router.get('/:studyId', authMiddleware('READ'), getStudyById);
-	router.get('/', authMiddleware('READ'), getAllStudies);
+export const verifyUserToken = (req: Request): UserSessionResult => {
+	const token = extractTokenFromHeader(req);
+	if (!token) {
+		return {
+			errorCode: 401,
+			errorMessage: 'Unauthorized: No token provided',
+		};
+	}
 
-	router.post('/', authMiddleware('WRITE'), createNewStudy);
-	router.delete('/:studyId', authMiddleware('WRITE'), deleteStudyById);
-	router.patch('/:studyId', authMiddleware('WRITE'), updateStudyById);
+	try {
+		// Determine the user information
 
-	return router;
-})();
+		return {
+			user: {
+				username: 'testing',
+				isAdmin: true,
+				allowedWriteOrganizations: [],
+			},
+		};
+	} catch (err) {
+		logger.error(`Error verifying token ${err}`);
+		return {
+			errorCode: 403,
+			errorMessage: 'Forbidden: Invalid token',
+		};
+	}
+};
