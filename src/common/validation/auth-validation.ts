@@ -17,9 +17,8 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { z } from 'zod';
-
 import { ParsedQs } from 'qs';
+import { z } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
@@ -60,7 +59,7 @@ export const oidcUserInfoResponseSchema = z.object({
 	family_name: z.string().optional(),
 	email: z.string().optional(),
 });
-export type OIDCUserInfoResponse = zod.infer<typeof oidcUserInfoResponseSchema>;
+export type OIDCUserInfoResponse = z.infer<typeof oidcUserInfoResponseSchema>;
 
 export const oidcTokenResponseSchema = z
 	.object({
@@ -75,7 +74,7 @@ export const oidcTokenResponseSchema = z
 			error_description: z.string(),
 		}),
 	);
-export type OIDCTokenResponse = zod.infer<typeof oidcTokenResponseSchema>;
+export type OIDCTokenResponse = z.infer<typeof oidcTokenResponseSchema>;
 
 export interface OIDCCodeParams extends ParsedQs {
 	code: string;
