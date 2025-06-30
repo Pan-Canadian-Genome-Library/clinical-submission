@@ -17,34 +17,46 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { logger } from '@/common/logger.js';
+import urlJoin from 'url-join';
+import { z } from 'zod';
+
 import { env } from '@/config/envConfig.js';
-import { app } from '@/server.js';
 
-import { dbConfig } from './config/dbConfig.js';
-import { connectToDb } from './db/index.js';
+import EnvironmentConfigError from './EnvironmentConfigError.js';
 
-const { NODE_ENV, SERVER_PORT } = env;
-
-// Connect drizzle
-connectToDb(dbConfig.connectionString);
-
-const server = app.listen(SERVER_PORT, () => {
-	logger.info(`Server started. Running in "${NODE_ENV}" mode. Listening to port ${SERVER_PORT}`);
-
-	if (NODE_ENV === 'development') {
-		logger.info(`Swagger API Docs are available at http://localhost:${SERVER_PORT}/api-docs`);
+function getAuthConfig() {
+	const enabled = env.AUTH_ENABLED === true;
+	// Enforce enabling auth when running in production
+	if (env.NODE_ENV === 'production' && !enabled) {
+		throw new EnvironmentConfigError(
+			`The application "NODE_ENV" is set to "production" while "AUTH_ENABLED" is not "true". Auth must be enabled to run in production.`,
+		);
 	}
-});
 
-const onCloseSignal = () => {
-	logger.info('sigint received, shutting down');
-	server.close(() => {
-		logger.info('server closed');
-		process.exit();
+	if (!enabled) {
+		// Running with auth disabled may be useful for developers.
+		return { enabled };
+	}
+
+	const authConfigSchema = z.object({
+		AUTH_PROVIDER_HOST: z.string().url(),
+		AUTH_CLIENT_ID: z.string(),
+		AUTH_CLIENT_SECRET: z.string(),
 	});
-	setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
-};
 
-process.on('SIGINT', onCloseSignal);
-process.on('SIGTERM', onCloseSignal);
+	const parseResult = authConfigSchema.safeParse(process.env);
+
+	if (!parseResult.success) {
+		throw new EnvironmentConfigError(`auth`, parseResult.error);
+	}
+
+	return {
+		...parseResult.data,
+		enabled,
+		loginRedirectPath: urlJoin(env.API_HOST, '/auth/token'),
+		logoutRedirectPath: urlJoin(env.API_HOST, '/api-docs/'),
+	};
+}
+
+export const authConfig = getAuthConfig();
+export type AuthConfig = typeof authConfig & { enabled: true };

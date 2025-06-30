@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { pinoHttp } from 'pino-http';
 
-const ignoreUrls = ['/api-docs', '/health'];
+const ignoreUrls = ['/api-docs', '/health', '/auth/token'];
 
 export const requestLogger = pinoHttp({
 	autoLogging: {

@@ -1,6 +1,6 @@
 import { AppConfig, provider } from '@overture-stack/lyric';
 
-import { env } from '@/common/envConfig.js';
+import { env } from '@/config/envConfig.js';
 import { verifyUserToken } from '@/middleware/verifyUserToken.js';
 
 const appConfig: AppConfig = {

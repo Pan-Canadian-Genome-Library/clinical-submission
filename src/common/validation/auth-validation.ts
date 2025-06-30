@@ -19,6 +19,12 @@
 
 import { z } from 'zod';
 
+import { ParsedQs } from 'qs';
+
+import { RequestValidation } from '@/middleware/requestValidation.js';
+
+import { stringNotEmpty } from './common.js';
+
 export const userDataResponseSchema = z.object({
 	pcgl_id: z.string(),
 	groups: z.array(
@@ -47,3 +53,36 @@ export const userDataResponseSchema = z.object({
 		)
 		.optional(),
 });
+
+export const oidcUserInfoResponseSchema = z.object({
+	sub: z.string(),
+	given_name: z.string().optional(),
+	family_name: z.string().optional(),
+	email: z.string().optional(),
+});
+export type OIDCUserInfoResponse = zod.infer<typeof oidcUserInfoResponseSchema>;
+
+export const oidcTokenResponseSchema = z
+	.object({
+		access_token: z.string(),
+		refresh_token: z.string().optional(),
+		refresh_token_iat: z.number().optional(),
+		id_token: z.string(),
+	})
+	.or(
+		z.object({
+			error: z.string(),
+			error_description: z.string(),
+		}),
+	);
+export type OIDCTokenResponse = zod.infer<typeof oidcTokenResponseSchema>;
+
+export interface OIDCCodeParams extends ParsedQs {
+	code: string;
+}
+
+export const OIDCCodeResponse: RequestValidation<object, OIDCCodeParams, string> = {
+	query: z.object({
+		code: stringNotEmpty,
+	}),
+};
