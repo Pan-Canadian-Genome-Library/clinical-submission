@@ -17,8 +17,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOF
  * */
 
-import { z as zod } from 'zod';
-
 export const ActionIDs = {
 	WRITE: 'WRITE',
 	READ: 'READ',

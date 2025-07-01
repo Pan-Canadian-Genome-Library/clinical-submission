@@ -25,7 +25,7 @@ import { Group } from '@/common/types/auth.js';
 import { authConfig } from '@/config/authConfig.js';
 import { fetchUserData } from '@/external/authorizationClient.js';
 
-const extractAccessTokenFromHeader = (req: Request): string | undefined => {
+export const extractAccessTokenFromHeader = (req: Request): string | undefined => {
 	const authHeader = req.headers['authorization'];
 	if (!authHeader || !authHeader.startsWith('Bearer ')) {
 		return;
