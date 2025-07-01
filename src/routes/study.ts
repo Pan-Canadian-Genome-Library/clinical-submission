@@ -30,16 +30,15 @@ import { authMiddleware } from '@/middleware/auth.js';
 
 export const studyRouter: Router = (() => {
 	const router = express.Router();
-
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
 
-	router.get('/:studyId', authMiddleware('READ'), getStudyById);
-	router.get('/', authMiddleware('READ'), getAllStudies);
+	router.get('/:studyId', authMiddleware(), getStudyById); // Move the actions to the controller level
+	router.get('/', authMiddleware(), getAllStudies);
 
-	router.post('/', authMiddleware('WRITE'), createNewStudy);
-	router.delete('/:studyId', authMiddleware('WRITE'), deleteStudyById);
-	router.patch('/:studyId', authMiddleware('WRITE'), updateStudyById);
+	router.post('/', authMiddleware(), createNewStudy);
+	router.delete('/:studyId', authMiddleware(), deleteStudyById);
+	router.patch('/:studyId', authMiddleware(), updateStudyById);
 
 	return router;
 })();
