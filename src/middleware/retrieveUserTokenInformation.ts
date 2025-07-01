@@ -21,6 +21,9 @@ import { UserSessionResult } from '@overture-stack/lyric';
 import { Request } from 'express';
 
 import { logger } from '@/common/logger.js';
+import { Group } from '@/common/types/auth.js';
+import { authConfig } from '@/config/authConfig.js';
+import { fetchUserData } from '@/external/authorizationClient.js';
 
 const extractAccessTokenFromHeader = (req: Request): string | undefined => {
 	const authHeader = req.headers['authorization'];
@@ -31,8 +34,24 @@ const extractAccessTokenFromHeader = (req: Request): string | undefined => {
 	return authHeader.split(' ')[1];
 };
 
-export const retrieveUserTokenInformation = (req: Request): UserSessionResult => {
+const isAdmin = (groups: Group[]): boolean => {
+	const { AUTH_GROUP_ADMIN } = authConfig;
+
+	return groups.some((val) => val.name === AUTH_GROUP_ADMIN);
+};
+
+const extractUserGroups = (groups: Group[]): string[] => {
+	const parsedGroups: string[] = groups.reduce((acu: string[], currentGroup) => {
+		acu.push(currentGroup.name);
+		return acu;
+	}, []);
+
+	return parsedGroups;
+};
+
+export const retrieveUserTokenInformation = async (req: Request): Promise<UserSessionResult> => {
 	const token = extractAccessTokenFromHeader(req);
+	console.log('hai');
 
 	if (!token) {
 		return {
@@ -43,13 +62,13 @@ export const retrieveUserTokenInformation = (req: Request): UserSessionResult =>
 
 	try {
 		// Determine the user information
-		// MAKE ME API CALL HERE
+		const result = await fetchUserData(token);
 
 		return {
 			user: {
-				username: 'testing',
-				isAdmin: true,
-				allowedWriteOrganizations: [],
+				username: `${result.pcgl_id}`,
+				isAdmin: isAdmin(result.groups),
+				allowedWriteOrganizations: extractUserGroups(result.groups),
 			},
 		};
 	} catch (err) {

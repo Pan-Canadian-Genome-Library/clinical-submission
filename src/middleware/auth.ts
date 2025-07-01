@@ -30,7 +30,7 @@ import { retrieveUserTokenInformation } from './retrieveUserTokenInformation.js'
 export const authMiddleware = () => {
 	return async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const userTokenInfo = retrieveUserTokenInformation(req);
+			const userTokenInfo = await retrieveUserTokenInformation(req);
 
 			if (userTokenInfo.errorCode) {
 				return res.status(userTokenInfo.errorCode).json({ message: userTokenInfo.errorMessage });
