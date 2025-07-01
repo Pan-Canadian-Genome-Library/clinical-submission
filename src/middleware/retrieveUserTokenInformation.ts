@@ -22,7 +22,7 @@ import { Request } from 'express';
 
 import { logger } from '@/common/logger.js';
 
-const extractTokenFromHeader = (req: Request): string | undefined => {
+const extractAccessTokenFromHeader = (req: Request): string | undefined => {
 	const authHeader = req.headers['authorization'];
 	if (!authHeader || !authHeader.startsWith('Bearer ')) {
 		return;
@@ -31,17 +31,19 @@ const extractTokenFromHeader = (req: Request): string | undefined => {
 	return authHeader.split(' ')[1];
 };
 
-export const verifyUserToken = (req: Request): UserSessionResult => {
-	const token = extractTokenFromHeader(req);
+export const retrieveUserTokenInformation = (req: Request): UserSessionResult => {
+	const token = extractAccessTokenFromHeader(req);
+
 	if (!token) {
 		return {
 			errorCode: 401,
-			errorMessage: 'Unauthorized: No token provided',
+			errorMessage: 'Unauthorized: No Access token provided',
 		};
 	}
 
 	try {
 		// Determine the user information
+		// MAKE ME API CALL HERE
 
 		return {
 			user: {

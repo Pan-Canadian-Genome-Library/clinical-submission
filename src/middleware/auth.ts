@@ -20,52 +20,26 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { logger } from '@/common/logger.js';
-import { ActionIDsValues } from '@/common/types/auth.js';
-import { lyricProvider } from '@/core/provider.js';
-import { fetchUserData, verifyAllowedAccess } from '@/external/authorizationClient.js';
+
+import { retrieveUserTokenInformation } from './retrieveUserTokenInformation.js';
 
 /**
  * Middleware to handle authentication
  * @returns
  */
-export const authMiddleware = (action: ActionIDsValues) => {
-	return async (req: Request, _: Response, next: NextFunction) => {
+export const authMiddleware = () => {
+	return async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			// Parse token from request
-			const authHeader = req.headers['authorization'];
-			const token = authHeader && authHeader.split(' ')[1];
+			const userTokenInfo = retrieveUserTokenInformation(req);
 
-			if (!token) {
-				throw new lyricProvider.utils.errors.Forbidden('Unauthorized request, no token was found');
+			if (userTokenInfo.errorCode) {
+				return res.status(userTokenInfo.errorCode).json({ message: userTokenInfo.errorMessage });
 			}
 
-			// Get study from params
-			const studyId = req.params.studyId;
-
-			if (!studyId) {
-				throw new lyricProvider.utils.errors.BadRequest('Bad request, no study id was provided');
-			}
-
-			// TODO: CHANGING INTO AUTH CHECK
-
-			// Grab the users data
-			const resultMe = await fetchUserData(token);
-
-			// // Check permissions from group, if they have the admin group, skip verify step
-			// if (resultMe.groups.some((value) => value.name === UserGroups.ADMIN)) {
-			// 	next();
-			// }
-
-			// Verify if the user has permissions to access this group
-			const resultVerify = await verifyAllowedAccess(token, studyId, action);
-
-			if (!resultVerify) {
-				logger.error('Forbidden resource, user does not have access to this study');
-				throw new lyricProvider.utils.errors.Forbidden('Forbidden resource, you do not have access to this study');
-			}
-
-			next();
+			req.user = userTokenInfo.user;
+			return next();
 		} catch (error) {
+			logger.error(error);
 			next(error);
 			return;
 		}
