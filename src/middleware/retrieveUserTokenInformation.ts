@@ -51,7 +51,6 @@ const extractUserGroups = (groups: Group[]): string[] => {
 
 export const retrieveUserTokenInformation = async (req: Request): Promise<UserSessionResult> => {
 	const token = extractAccessTokenFromHeader(req);
-	console.log('hai');
 
 	if (!token) {
 		return {
