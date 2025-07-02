@@ -17,6 +17,8 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { UserSession } from '@overture-stack/lyric';
+
 import { logger } from '@/common/logger.js';
 import { ActionIDsValues, UserDataResponse, UserDataResponseErrorType } from '@/common/types/auth.js';
 import { userDataResponseSchema } from '@/common/validation/auth-validation.js';
@@ -70,19 +72,30 @@ export const fetchUserData = async (token: string): Promise<UserDataResponse> =>
 /**
  *
  *
- * @param token Access token from Authz
  * @param study Study user is trying to get access to
  * @param action Type of CRUD operation user is trying to do
+ * @param token Access token from Authz
+ * @param user User information
  * @returns True or false depending if the user has access to the study
  */
-export const verifyAllowedAccess = async (token: string, study: string, action: ActionIDsValues): Promise<boolean> => {
-	const { AUTHZ_ENDPOINT, actions } = authConfig;
+export const hasAllowedAccess = async (
+	study: string,
+	action: ActionIDsValues,
+	token?: string,
+	user?: UserSession,
+): Promise<boolean> => {
+	const { AUTHZ_ENDPOINT, actions, enabled } = authConfig;
 	const url = `${AUTHZ_ENDPOINT}/allowed`;
 
 	const headers = new Headers({
 		Authorization: `Bearer ${token}`,
 		'Content-Type': 'application/json',
 	});
+
+	// If auth is disabled or if the user is an admin, skip all auth steps
+	if (!enabled || user?.isAdmin) {
+		return true;
+	}
 
 	const response = await fetch(url, {
 		method: 'POST',

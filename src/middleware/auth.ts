@@ -20,6 +20,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { logger } from '@/common/logger.js';
+import { authConfig } from '@/config/authConfig.js';
 
 import { retrieveUserTokenInformation } from './retrieveUserTokenInformation.js';
 
@@ -28,8 +29,13 @@ import { retrieveUserTokenInformation } from './retrieveUserTokenInformation.js'
  * @returns
  */
 export const authMiddleware = () => {
+	const { enabled } = authConfig;
 	return async (req: Request, res: Response, next: NextFunction) => {
 		try {
+			// If auth is disabled, then skip fetching user information
+			if (!enabled) {
+				return next();
+			}
 			const userTokenInfo = await retrieveUserTokenInformation(req);
 
 			if (userTokenInfo.errorCode) {
