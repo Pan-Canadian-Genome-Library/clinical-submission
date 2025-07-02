@@ -21,8 +21,7 @@ import { NextFunction, Request, Response } from 'express';
 
 import { logger } from '@/common/logger.js';
 import { authConfig } from '@/config/authConfig.js';
-
-import { retrieveUserTokenInformation } from './retrieveUserTokenInformation.js';
+import { retrieveUserTokenInformation } from '@/external/authorizationClient.js';
 
 /**
  * Middleware to handle authentication

@@ -25,9 +25,8 @@ import {
 } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
-import { hasAllowedAccess } from '@/external/authorizationClient.js';
+import { extractAccessTokenFromHeader, hasAllowedAccess } from '@/external/authorizationClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
-import { extractAccessTokenFromHeader } from '@/middleware/retrieveUserTokenInformation.js';
 import { studyService } from '@/service/studyService.js';
 
 export const getAllStudies = validateRequest(listAllStudies, async (req, res, next) => {
