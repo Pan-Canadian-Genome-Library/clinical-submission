@@ -24,6 +24,20 @@ export const stringNotEmpty = z.string().trim().min(1);
 export const stringNotEmptyOptional = stringNotEmpty.optional();
 export const orderByString = z.literal('asc').or(z.literal('desc'));
 
+/**
+ * Zod's `z.coerce` does not work in an "expected" way for booleans and will always return `true`
+ * for a boolean if the string it's parsing is not empty. This function will make the type
+ * check work in an "expected" way if used in conjunction with the zod `z.preprocess` function.
+ *
+ * @see https://github.com/colinhacks/zod/discussions/3329
+ *
+ * @param potentialBoolean `unknown` - untyped and unconverted boolean value
+ * @returns `boolean` `true` if processed to true, or `false` if false.
+ */
+export const processCoercedBoolean = (potentialBoolean: unknown) => {
+	return String(potentialBoolean).toLowerCase().trim() === 'true' ? true : false;
+};
+
 export const positiveInteger = z.string().superRefine((value, ctx) => {
 	const parsed = parseInt(value);
 	if (isNaN(parsed)) {

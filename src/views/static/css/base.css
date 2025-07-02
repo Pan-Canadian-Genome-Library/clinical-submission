@@ -1,0 +1,291 @@
+/*
+ * Copyright (c) 2025 The Ontario Institute for Cancer Research. All rights reserved
+ *
+ * This program and the accompanying materials are made available under the terms of
+ * the GNU Affero General Public License v3.0. You should have received a copy of the
+ * GNU Affero General Public License along with this program.
+ *  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+ * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+* {
+	box-sizing: border-box;
+}
+
+:root {
+	/* Colours */
+	--pcgl-colour-red: #da3832;
+	--pcgl-colour-black: #000000;
+	--pcgl-colour-dark-grey: #939598;
+	--pcgl-colour-light-grey: #bcbec0;
+	--pcgl-colour-fuchsia: #c41d7f;
+	--pcgl-colour-white: #ffffff;
+
+	--grey-subtle: #f3f3f3;
+
+	/* Fonts */
+	--standard-font: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', Roboto, Oxygen, Ubuntu,
+		Cantarell, 'Open Sans', sans-serif;
+
+	--h1-font-size: 1.5rem;
+	--h2-font-size: 1.25rem;
+	--h3-font-size: 1rem;
+
+	/* UI */
+	--standard-border-radius: 5px;
+	--standard-padding: 1rem 1.5rem;
+	--standard-transition: cubic-bezier(0.075, 0.82, 0.165, 1) all 0.3s;
+}
+
+html {
+	font-family: var(--standard-font);
+	height: 100%;
+	margin: 0;
+	font-size: 1rem;
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	min-height: 100%;
+}
+
+nav {
+	min-width: 100%;
+	display: flex;
+	flex-direction: row;
+	border-top: 8px var(--pcgl-colour-red) solid;
+}
+
+nav .nav-container {
+	display: flex;
+	margin: 0.5rem 2.5rem;
+	flex-direction: row;
+	align-items: center;
+	width: 100%;
+}
+nav .logo {
+	width: 235px;
+	margin: 0 0 0 -2.5rem;
+}
+
+footer {
+	font-weight: 200;
+	bottom: 0;
+	min-width: 100%;
+	color: var(--pcgl-colour-white);
+	padding: 1rem 2.5rem;
+	background-color: var(--pcgl-colour-black);
+}
+
+button,
+.button {
+	cursor: pointer;
+	background-color: var(--pcgl-colour-black);
+	color: var(--pcgl-colour-white);
+	padding: var(--standard-padding);
+	border: transparent 1px solid;
+	border-radius: var(--standard-border-radius);
+	&:hover,
+	&:focus {
+		transition: var(--standard-transition);
+		background-color: var(--pcgl-colour-white);
+		color: var(--pcgl-colour-black);
+		border: var(--pcgl-colour-black) 1px solid;
+	}
+	&.destructive {
+		background-color: var(--pcgl-colour-red);
+		color: var(--pcgl-colour-white);
+		&:focus,
+		&:hover {
+			transition: var(--standard-transition);
+			background-color: var(--pcgl-colour-white);
+			color: var(--pcgl-colour-red);
+			border: var(--pcgl-colour-red) 1px solid;
+		}
+	}
+}
+
+button.secondary,
+.button.secondary {
+	cursor: pointer;
+	background-color: var(--pcgl-colour-white);
+	color: var(--pcgl-colour-black);
+	padding: var(--standard-padding);
+	border: var(--pcgl-colour-black) 1px solid;
+	border-radius: var(--standard-border-radius);
+	&:hover,
+	&:focus {
+		transition: var(--standard-transition);
+		background-color: var(--pcgl-colour-black);
+		color: var(--pcgl-colour-white);
+		border: transparent 1px solid;
+	}
+	&.destructive {
+		background-color: var(--pcgl-colour-red);
+		color: var(--pcgl-colour-white);
+		&:focus,
+		&:hover {
+			transition: var(--standard-transition);
+			background-color: var(--pcgl-colour-white);
+			color: var(--pcgl-colour-red);
+			border: var(--pcgl-colour-red) 1px solid;
+		}
+	}
+}
+
+a {
+	color: var(--pcgl-colour-red);
+	font-weight: 300;
+	&:hover,
+	&:focus {
+		transition: var(--standard-transition);
+		color: var(--pcgl-colour-black);
+	}
+}
+
+a.secondary {
+	color: var(--pcgl-colour-black);
+	&:hover,
+	&:focus {
+		transition: var(--standard-transition);
+		color: var(--pcgl-colour-red);
+	}
+}
+
+a.external::after {
+	content: ' ↗';
+}
+
+h1,
+.h1 {
+	font-weight: 800;
+	font-size: var(--h1-font-size);
+}
+
+h2,
+.h2 {
+	font-weight: 500;
+	font-size: var(--h2-font-size);
+}
+
+h3,
+.h3 {
+	font-weight: 300;
+	font-size: var(--h3-font-size);
+}
+
+textarea {
+	height: 5rem;
+	padding: var(--standard-padding);
+	background-color: var(--grey-subtle);
+	font-family: var(--standard-font);
+	color: var(--pcgl-colour-black);
+	font-size: 1rem;
+	border: transparent 1px solid;
+	border-radius: var(--standard-border-radius);
+	resize: none;
+	margin: 0.75rem 0 0 0;
+}
+
+details {
+	font-weight: 500;
+	font-size: var(--h2-font-size);
+	margin-block: 0.5rem;
+	padding-block: 0.5rem;
+}
+
+details[open] div:not(.info-row) {
+	margin: 1rem 1rem;
+	border-radius: var(--standard-border-radius);
+	border: transparent 1px solid;
+	background-color: var(--grey-subtle);
+	padding: var(--standard-padding);
+}
+
+summary {
+	padding: 0 0 1rem 0;
+	cursor: pointer;
+	&::marker {
+		color: var(--pcgl-colour-red);
+	}
+}
+
+.content {
+	max-width: 1320px;
+	width: 100%;
+	flex: 1;
+	padding: 0 1rem;
+	margin: auto;
+	display: flex;
+	flex-direction: column;
+}
+
+.content-full {
+	min-width: 100%;
+	flex: 1;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.tool-container {
+	margin: 1rem 0 0.5rem 0;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-content: center;
+}
+
+.tool-container__buttons {
+	display: flex;
+	align-items: center;
+	justify-content: end;
+	width: 100%;
+	margin: 1.5rem 0 1rem 0;
+	gap: 1rem;
+}
+
+.info-row {
+	display: flex;
+	flex-direction: row;
+	align-content: center;
+	justify-content: space-between;
+}
+
+.info-col {
+	display: flex;
+	flex-direction: column;
+	align-content: space-between;
+	justify-content: center;
+}
+
+.info-title {
+	font-size: 1rem;
+	font-weight: 500;
+	&::after {
+		content: ':';
+	}
+}
+
+.info-desc {
+	font-size: 1rem;
+	font-weight: 200;
+	&.highlight {
+		font-weight: 400;
+	}
+	&.expired {
+		font-weight: 500;
+		color: var(--pcgl-colour-red);
+	}
+}

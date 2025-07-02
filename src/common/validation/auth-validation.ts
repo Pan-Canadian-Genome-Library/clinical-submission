@@ -17,34 +17,42 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { logger } from '@/common/logger.js';
-import { env } from '@/config/envConfig.js';
-import { app } from '@/server.js';
+import { ParsedQs } from 'qs';
+import { z as zod } from 'zod';
 
-import { dbConfig } from './config/dbConfig.js';
-import { connectToDb } from './db/index.js';
+import { RequestValidation } from '@/middleware/requestValidation.js';
 
-const { NODE_ENV, SERVER_PORT } = env;
+import { stringNotEmpty } from './common.js';
 
-// Connect drizzle
-connectToDb(dbConfig.connectionString);
-
-const server = app.listen(SERVER_PORT, () => {
-	logger.info(`Server started. Running in "${NODE_ENV}" mode. Listening to port ${SERVER_PORT}`);
-
-	if (NODE_ENV === 'development') {
-		logger.info(`Swagger API Docs are available at http://localhost:${SERVER_PORT}/api-docs`);
-	}
+export const oidcUserInfoResponseSchema = zod.object({
+	sub: zod.string(),
+	given_name: zod.string().optional(),
+	family_name: zod.string().optional(),
+	email: zod.string().optional(),
 });
+export type OIDCUserInfoResponse = zod.infer<typeof oidcUserInfoResponseSchema>;
 
-const onCloseSignal = () => {
-	logger.info('sigint received, shutting down');
-	server.close(() => {
-		logger.info('server closed');
-		process.exit();
-	});
-	setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
+export const oidcTokenResponseSchema = zod
+	.object({
+		access_token: zod.string(),
+		refresh_token: zod.string().optional(),
+		refresh_token_iat: zod.number().optional(),
+		id_token: zod.string(),
+	})
+	.or(
+		zod.object({
+			error: zod.string(),
+			error_description: zod.string(),
+		}),
+	);
+export type OIDCTokenResponse = zod.infer<typeof oidcTokenResponseSchema>;
+
+export interface OIDCCodeParams extends ParsedQs {
+	code: string;
+}
+
+export const OIDCCodeResponse: RequestValidation<object, OIDCCodeParams, string> = {
+	query: zod.object({
+		code: stringNotEmpty,
+	}),
 };
-
-process.on('SIGINT', onCloseSignal);
-process.on('SIGTERM', onCloseSignal);
