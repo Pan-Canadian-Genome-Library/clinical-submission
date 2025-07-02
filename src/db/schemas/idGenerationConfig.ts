@@ -13,12 +13,9 @@ export const idGenerationConfig = pcglSchema.table(
 		paddingLength: integer('padding_length').notNull(),
 		sequenceName: varchar('sequence_name', { length: 255 }).notNull().unique(),
 		sequenceStart: integer('sequence_start').notNull(),
-		sequenceIncrement: integer('sequence_increment').notNull(),
 		createdAt: timestamp('created_at', { withTimezone: false }).defaultNow(),
 	},
-	(t) => ({
-		uniqueEntityField: unique().on(t.entityName, t.fieldName),
-	}),
+	(table) => [unique().on(table.entityName, table.fieldName)],
 );
 
 export const generatedIdentifiers = pcglSchema.table('generated_identifiers', {
