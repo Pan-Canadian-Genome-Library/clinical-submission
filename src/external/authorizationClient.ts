@@ -27,8 +27,6 @@ import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 
 /**
- * Fetches user associated authz information.
- *
  * @param token Access token from Authz
  * @returns validated object of UserDataResponse
  */
@@ -71,8 +69,6 @@ export const fetchUserData = async (token: string): Promise<UserDataResponse> =>
 };
 
 /**
- *
- *
  * @param study Study user is trying to get access to
  * @param action Type of CRUD operation user is trying to do
  * @param token Access token from Authz
@@ -130,6 +126,10 @@ export const hasAllowedAccess = async (
 	return result[0];
 };
 
+/**
+ * Function to fetch userdata and will return type UserSessionResult.
+ * Formats the response from `fetchUserData` into UserSessionResult to follow lyric pattern
+ */
 export const retrieveUserTokenInformation = async (req: Request): Promise<UserSessionResult> => {
 	const token = extractAccessTokenFromHeader(req);
 
@@ -141,7 +141,6 @@ export const retrieveUserTokenInformation = async (req: Request): Promise<UserSe
 	}
 
 	try {
-		// Determine the user information
 		const result = await fetchUserData(token);
 
 		return {
@@ -160,6 +159,9 @@ export const retrieveUserTokenInformation = async (req: Request): Promise<UserSe
 	}
 };
 
+/**
+ * Simple helper function to extract access token from header
+ */
 export const extractAccessTokenFromHeader = (req: Request): string | undefined => {
 	const authHeader = req.headers['authorization'];
 	if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -170,7 +172,6 @@ export const extractAccessTokenFromHeader = (req: Request): string | undefined =
 };
 
 /**
- *
  * @param groups List of groups users belongs to
  * @returns boolean if user has admin group
  */
@@ -182,7 +183,7 @@ const isAdmin = (groups: Group[]): boolean => {
 
 /**
  * @param groups List of groups user belongs to
- * @returns array of groups (only the name)
+ * @returns array of strings with names of the groups
  */
 const extractUserGroups = (groups: Group[]): string[] => {
 	const parsedGroups: string[] = groups.reduce((acu: string[], currentGroup) => {
