@@ -25,7 +25,7 @@ import {
 } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
-import { extractAccessTokenFromHeader, hasAllowedAccess } from '@/external/authorizationClient.js';
+import { extractAccessTokenFromHeader, hasAllowedAccess } from '@/external/pcglAuthZClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import { studyService } from '@/service/studyService.js';
 
