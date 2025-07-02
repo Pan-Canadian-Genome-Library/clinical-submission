@@ -151,10 +151,10 @@ export const retrieveUserTokenInformation = async (req: Request): Promise<UserSe
 			},
 		};
 	} catch (err) {
-		logger.error(`Error verifying token ${err}`);
+		logger.error(`Error retrieving user information ${err}`);
 		return {
-			errorCode: 403,
-			errorMessage: 'Forbidden: Invalid token',
+			errorCode: 400,
+			errorMessage: 'Bad Request: Error retrieving user information',
 		};
 	}
 };
