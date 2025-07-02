@@ -34,12 +34,21 @@ export const extractAccessTokenFromHeader = (req: Request): string | undefined =
 	return authHeader.split(' ')[1];
 };
 
+/**
+ *
+ * @param groups List of groups users belongs to
+ * @returns boolean if user has admin group
+ */
 const isAdmin = (groups: Group[]): boolean => {
 	const { AUTH_GROUP_ADMIN } = authConfig;
 
 	return groups.some((val) => val.name === AUTH_GROUP_ADMIN);
 };
 
+/**
+ * @param groups List of groups user belongs to
+ * @returns array of groups (only the name)
+ */
 const extractUserGroups = (groups: Group[]): string[] => {
 	const parsedGroups: string[] = groups.reduce((acu: string[], currentGroup) => {
 		acu.push(currentGroup.name);
