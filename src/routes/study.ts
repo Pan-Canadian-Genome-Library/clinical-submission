@@ -33,7 +33,7 @@ export const studyRouter: Router = (() => {
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
 
-	router.get('/:studyId', authMiddleware(), getStudyById); // Move the actions to the controller level
+	router.get('/:studyId', authMiddleware(), getStudyById);
 	router.get('/', authMiddleware(), getAllStudies);
 
 	router.post('/', authMiddleware(), createNewStudy);

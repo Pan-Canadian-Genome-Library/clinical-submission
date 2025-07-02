@@ -1,7 +1,6 @@
 import { AppConfig, provider } from '@overture-stack/lyric';
 
 import { env } from '@/config/envConfig.js';
-import { retrieveUserTokenInformation } from '@/middleware/retrieveUserTokenInformation.js';
 
 const appConfig: AppConfig = {
 	db: {
@@ -13,7 +12,6 @@ const appConfig: AppConfig = {
 	},
 	auth: {
 		enabled: env.AUTH_ENABLED,
-		customAuthHandler: retrieveUserTokenInformation,
 	},
 	idService: {
 		customAlphabet: env.ID_CUSTOMALPHABET,
