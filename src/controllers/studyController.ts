@@ -52,7 +52,7 @@ export const getStudyById = validateRequest(getOrDeleteStudyByID, async (req, re
 
 	try {
 		if (!(await hasAllowedAccess(studyId, 'READ', token, user))) {
-			throw new lyricProvider.utils.errors.Forbidden(`You do not have access to study - ${studyId}'`);
+			throw new lyricProvider.utils.errors.Forbidden(`You do not have access to study - ${studyId}`);
 		}
 
 		const results = await studyRepo.getStudyById(studyId);
@@ -75,7 +75,7 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 
 	try {
 		if (!(await hasAllowedAccess(studyData.studyId, 'WRITE', token, user))) {
-			throw new lyricProvider.utils.errors.Forbidden(`You do not have access to study - ${studyData.studyId}'`);
+			throw new lyricProvider.utils.errors.Forbidden(`You do not have access to study - ${studyData.studyId}`);
 		}
 
 		const results = await studyRepo.createStudy(studyData);
@@ -98,7 +98,7 @@ export const deleteStudyById = validateRequest(getOrDeleteStudyByID, async (req,
 
 	try {
 		if (!(await hasAllowedAccess(studyId, 'WRITE', token, user))) {
-			throw new lyricProvider.utils.errors.Forbidden(`You do not have access to study - ${studyId}'`);
+			throw new lyricProvider.utils.errors.Forbidden(`You do not have access to study - ${studyId}`);
 		}
 
 		const results = await studyRepo.deleteStudy(studyId);
@@ -128,7 +128,7 @@ export const updateStudyById = validateRequest(updateStudy, async (req, res, nex
 
 	try {
 		if (!(await hasAllowedAccess(studyId, 'WRITE', token, user))) {
-			throw new lyricProvider.utils.errors.Forbidden(`You do not have access to study - ${studyId}'`);
+			throw new lyricProvider.utils.errors.Forbidden(`You do not have access to study - ${studyId}`);
 		}
 
 		const results = await studyRepo.updateStudy(studyId, updateData);
