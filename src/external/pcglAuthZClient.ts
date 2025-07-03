@@ -21,7 +21,7 @@ import { UserSession, UserSessionResult } from '@overture-stack/lyric';
 import { Request } from 'express';
 
 import { logger } from '@/common/logger.js';
-import { ActionIDsValues, Group, UserDataResponse, UserDataResponseErrorType } from '@/common/types/auth.js';
+import { ActionIDsValues, Group, UserDataResponseErrorType } from '@/common/types/auth.js';
 import { userDataResponseSchema } from '@/common/validation/auth-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
