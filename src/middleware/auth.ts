@@ -21,7 +21,8 @@ import { NextFunction, Request, Response } from 'express';
 
 import { logger } from '@/common/logger.js';
 import { authConfig } from '@/config/authConfig.js';
-import { retrieveUserTokenInformation } from '@/external/pcglAuthZClient.js';
+import { lyricProvider } from '@/core/provider.js';
+import { extractAccessTokenFromHeader, fetchUserData } from '@/external/pcglAuthZClient.js';
 
 /**
  * Middleware to handle authentication
@@ -29,19 +30,21 @@ import { retrieveUserTokenInformation } from '@/external/pcglAuthZClient.js';
  */
 export const authMiddleware = () => {
 	const { enabled } = authConfig;
-	return async (req: Request, res: Response, next: NextFunction) => {
+	return async (req: Request, _: Response, next: NextFunction) => {
 		try {
 			// If auth is disabled, then skip fetching user information
 			if (!enabled) {
 				return next();
 			}
-			const userTokenInfo = await retrieveUserTokenInformation(req);
+			const token = extractAccessTokenFromHeader(req);
 
-			if (userTokenInfo.errorCode) {
-				return res.status(userTokenInfo.errorCode).json({ message: userTokenInfo.errorMessage });
+			if (!token) {
+				throw new lyricProvider.utils.errors.Forbidden('Unauthorized: No Access token provided');
 			}
 
-			req.user = userTokenInfo.user;
+			const result = await fetchUserData(token);
+
+			req.user = result.user;
 			return next();
 		} catch (error) {
 			logger.error(error);

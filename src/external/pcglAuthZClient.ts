@@ -30,7 +30,7 @@ import { lyricProvider } from '@/core/provider.js';
  * @param token Access token from Authz
  * @returns validated object of UserDataResponse
  */
-export const fetchUserData = async (token: string): Promise<UserDataResponse> => {
+export const fetchUserData = async (token: string): Promise<UserSessionResult> => {
 	const { AUTHZ_ENDPOINT } = authConfig;
 	const url = `${AUTHZ_ENDPOINT}/user/me`;
 
@@ -65,7 +65,15 @@ export const fetchUserData = async (token: string): Promise<UserDataResponse> =>
 		);
 	}
 
-	return result;
+	const userTokenInfo: UserSessionResult = {
+		user: {
+			username: `${responseValidation.data.pcgl_id}`,
+			isAdmin: isAdmin(responseValidation.data.groups),
+			allowedWriteOrganizations: extractUserGroups(responseValidation.data.groups),
+		},
+	};
+
+	return userTokenInfo;
 };
 
 /**
@@ -124,39 +132,6 @@ export const hasAllowedAccess = async (
 	const result = await response.json();
 
 	return result[0];
-};
-
-/**
- * Function to fetch userdata and will return type UserSessionResult.
- * Formats the response from `fetchUserData` into UserSessionResult to follow lyric pattern
- */
-export const retrieveUserTokenInformation = async (req: Request): Promise<UserSessionResult> => {
-	const token = extractAccessTokenFromHeader(req);
-
-	if (!token) {
-		return {
-			errorCode: 401,
-			errorMessage: 'Unauthorized: No Access token provided',
-		};
-	}
-
-	try {
-		const result = await fetchUserData(token);
-
-		return {
-			user: {
-				username: `${result.pcgl_id}`,
-				isAdmin: isAdmin(result.groups),
-				allowedWriteOrganizations: extractUserGroups(result.groups),
-			},
-		};
-	} catch (err) {
-		logger.error(`Error retrieving user information ${err}`);
-		return {
-			errorCode: 400,
-			errorMessage: 'Bad Request: Error retrieving user information',
-		};
-	}
 };
 
 /**
