@@ -25,6 +25,16 @@ import { processCoercedBoolean } from '@/common/validation/common.js';
 const NodeEnvOptions = ['development', 'production'] as const;
 const LogLevelOptions = ['error', 'warn', 'info', 'debug'] as const;
 
+export const HttpMethods = ['GET', 'POST', 'PUT', 'DELETE'] as const;
+export type HttpMethod = (typeof HttpMethods)[number];
+
+const parseHttpMethods = (value: string) => {
+	return value
+		.split(',')
+		.filter((v) => v.trim() !== '')
+		.map((v) => v.trim().toUpperCase());
+};
+
 dotenv.config();
 
 const envSchema = z.object({
@@ -32,6 +42,11 @@ const envSchema = z.object({
 	ALLOWED_ORIGINS: z.string().optional(),
 	AUDIT_ENABLED: z.preprocess((val) => processCoercedBoolean(val), z.boolean()).default(true),
 	AUTH_ENABLED: z.preprocess((val) => processCoercedBoolean(val), z.boolean()).default(false),
+	AUTH_PROTECT_METHODS: z
+		.string()
+		.default(HttpMethods.join(','))
+		.transform(parseHttpMethods)
+		.pipe(z.array(z.enum(HttpMethods))),
 	DB_HOST: z.string(),
 	DB_NAME: z.string(),
 	DB_PASSWORD: z.string(),

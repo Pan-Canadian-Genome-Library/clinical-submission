@@ -12,6 +12,7 @@ const appConfig: AppConfig = {
 	},
 	auth: {
 		enabled: env.AUTH_ENABLED,
+		protectedMethods: env.AUTH_PROTECT_METHODS,
 	},
 	idService: {
 		customAlphabet: env.ID_CUSTOMALPHABET,
