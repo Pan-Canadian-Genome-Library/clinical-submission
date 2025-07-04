@@ -22,7 +22,8 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import nunjucks from 'nunjucks';
-import path from 'path';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
@@ -36,6 +37,9 @@ import { dacRouter } from './routes/dac.js';
 import { studyRouter } from './routes/study.js';
 
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Middlewares
 app.use(helmet());
@@ -65,11 +69,11 @@ app.use(
  *
  * @see https://mozilla.github.io/nunjucks/api.html#express
  */
-nunjucks.configure(path.join(import.meta.dirname, 'views'), {
+nunjucks.configure(path.join(__dirname, 'views'), {
 	noCache: true,
 	express: app,
 });
-app.use('/static', express.static(path.join(import.meta.dirname, 'views', 'static')));
+app.use('/static', express.static(path.join(__dirname, 'views', 'static')));
 
 // Request logging
 app.use(requestLogger);
