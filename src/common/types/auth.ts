@@ -15,7 +15,42 @@
  * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ * */
+
+export const ActionIDs = {
+	WRITE: 'WRITE',
+	READ: 'READ',
+} as const;
+
+export type ActionIDsValues = (typeof ActionIDs)[keyof typeof ActionIDs];
+
+export type UserDataResponse = {
+	emails: Email[];
+	pcgl_id: string | number;
+	study_authorizations: Record<string, StudyAuthorization>;
+	groups: Group[];
+};
+
+export type Email = {
+	address: string;
+	type: string;
+};
+
+export type StudyAuthorization = {
+	end_date: string;
+	start_date: string;
+	study_id: string;
+};
+
+export type Group = {
+	id: number | string;
+	description: string;
+	name: string;
+};
+
+export type UserDataResponseErrorType = {
+	error: string;
+};
 
 /**
  * JWT Token returned by CILogon on successful authentication. Note that some

@@ -17,28 +17,39 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import express, { json, Router, urlencoded } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
-import {
-	createNewStudy,
-	deleteStudyById,
-	getAllStudies,
-	getStudyById,
-	updateStudyById,
-} from '@/controllers/studyController.js';
-import { authMiddleware } from '@/middleware/auth.js';
+import { logger } from '@/common/logger.js';
+import { authConfig } from '@/config/authConfig.js';
+import { lyricProvider } from '@/core/provider.js';
+import { extractAccessTokenFromHeader, fetchUserData } from '@/external/pcglAuthZClient.js';
 
-export const studyRouter: Router = (() => {
-	const router = express.Router();
-	router.use(json());
-	router.use(urlencoded({ extended: false }));
+/**
+ * Middleware to handle authentication
+ * @returns
+ */
+export const authMiddleware = () => {
+	const { enabled } = authConfig;
+	return async (req: Request, _: Response, next: NextFunction) => {
+		try {
+			// If auth is disabled, then skip fetching user information
+			if (!enabled) {
+				return next();
+			}
+			const token = extractAccessTokenFromHeader(req);
 
-	router.get('/:studyId', authMiddleware(), getStudyById);
-	router.get('/', authMiddleware(), getAllStudies);
+			if (!token) {
+				throw new lyricProvider.utils.errors.Forbidden('Unauthorized: No Access token provided');
+			}
 
-	router.post('/', authMiddleware(), createNewStudy);
-	router.delete('/:studyId', authMiddleware(), deleteStudyById);
-	router.patch('/:studyId', authMiddleware(), updateStudyById);
+			const result = await fetchUserData(token);
 
-	return router;
-})();
+			req.user = result.user;
+			return next();
+		} catch (error) {
+			logger.error(error);
+			next(error);
+			return;
+		}
+	};
+};

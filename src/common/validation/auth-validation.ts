@@ -18,41 +18,70 @@
  */
 
 import { ParsedQs } from 'qs';
-import { z as zod } from 'zod';
+import { z } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
 import { stringNotEmpty } from './common.js';
 
-export const oidcUserInfoResponseSchema = zod.object({
-	sub: zod.string(),
-	given_name: zod.string().optional(),
-	family_name: zod.string().optional(),
-	email: zod.string().optional(),
+export const userDataResponseSchema = z.object({
+	pcgl_id: z.string(),
+	groups: z.array(
+		z.object({
+			id: z.coerce.string(),
+			name: z.string(),
+			description: z.string(),
+		}),
+	),
+	emails: z.array(
+		z
+			.object({
+				type: z.string(),
+				address: z.string(),
+			})
+			.optional(),
+	),
+	study_authorizations: z
+		.record(
+			z.string(),
+			z.object({
+				end_date: z.string(),
+				start_date: z.string(),
+				study_id: z.string(),
+			}),
+		)
+		.optional(),
 });
-export type OIDCUserInfoResponse = zod.infer<typeof oidcUserInfoResponseSchema>;
 
-export const oidcTokenResponseSchema = zod
+export const oidcUserInfoResponseSchema = z.object({
+	sub: z.string(),
+	given_name: z.string().optional(),
+	family_name: z.string().optional(),
+	email: z.string().optional(),
+});
+export type OIDCUserInfoResponse = z.infer<typeof oidcUserInfoResponseSchema>;
+
+export const oidcTokenResponseSchema = z
 	.object({
-		access_token: zod.string(),
-		refresh_token: zod.string().optional(),
-		refresh_token_iat: zod.number().optional(),
-		id_token: zod.string(),
+		access_token: z.string(),
+		refresh_token: z.string().optional(),
+		refresh_token_iat: z.number().optional(),
+		id_token: z.string(),
 	})
 	.or(
-		zod.object({
-			error: zod.string(),
-			error_description: zod.string(),
+		z.object({
+			error: z.string(),
+			error_description: z.string(),
 		}),
 	);
-export type OIDCTokenResponse = zod.infer<typeof oidcTokenResponseSchema>;
+export type OIDCTokenResponse = z.infer<typeof oidcTokenResponseSchema>;
 
 export interface OIDCCodeParams extends ParsedQs {
 	code: string;
 }
 
 export const OIDCCodeResponse: RequestValidation<object, OIDCCodeParams, string> = {
-	query: zod.object({
+	query: z.object({
 		code: stringNotEmpty,
 	}),
 };
