@@ -1,6 +1,14 @@
-# Setup
+# Pan Canadian Genome Library Data Submission Service
 
-## Development tools
+<img src="./img/pcgl-logo.png" height="90" align="right" />
+
+> The Pan-Canadian Genome Library (PCGL) is a large collaborative effort to unify Canada's genome sequencing efforts. The PCGL is an open-source and open-science initiative, building upon Canadian-made foundational components and datasets, and utilizing international standards such as GA4GH to unify Canada’s human genome sequencing efforts.
+
+This repository acts as a wrapper around the [@overture-stack/lyric](https://github.com/overture-stack/lyric) package, enabling efficient handling and management of data submissions. It adapts Lyric's functionality to meet PCGL requirements, ensuring reliable data submission and data management.
+
+## Getting started
+
+### Development tools
 
 - [PNPM](https://pnpm.io/) Dependency manager
 - [Node.js](https://nodejs.org/en) Runtime environment (v20 or higher)
@@ -11,7 +19,7 @@
 - [Postgres Database](https://www.postgresql.org/) for data storage
 - [Dictionary Manager](https://github.com/Pan-Canadian-Genome-Library/dictionary-manager) PCGL Dictionary Management and validation
 
-For development purpose, a `docker-compose.yml` is provided to spin up required services.
+> For development purpose, a `docker-compose.yml` is provided to spin up required services.
 
 ### Quickstart Development
 
