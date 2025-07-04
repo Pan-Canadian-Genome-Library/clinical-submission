@@ -18,7 +18,7 @@
  */
 
 import { relations } from 'drizzle-orm';
-import { foreignKey, serial, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { foreignKey, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { dac } from './dacSchema.js';
 import { pcglSchema } from './generate.js';
