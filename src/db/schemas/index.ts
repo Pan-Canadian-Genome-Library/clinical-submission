@@ -19,4 +19,5 @@
 
 export * from './dacSchema.js';
 export * from './generate.js';
+export * from './idGenerationConfig.js';
 export * from './studiesSchema.js';
