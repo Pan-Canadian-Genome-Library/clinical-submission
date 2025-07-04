@@ -12,10 +12,11 @@ const appConfig: AppConfig = {
 	},
 	auth: {
 		enabled: env.AUTH_ENABLED,
+		protectedMethods: env.AUTH_PROTECT_METHODS,
 	},
 	idService: {
-		customAlphabet: env.ID_CUSTOMALPHABET,
-		customSize: env.ID_CUSTOMSIZE,
+		customAlphabet: env.ID_CUSTOM_ALPHABET,
+		customSize: env.ID_CUSTOM_SIZE,
 		useLocal: env.ID_USELOCAL,
 	},
 	features: {
