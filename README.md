@@ -1,6 +1,6 @@
 # Pan Canadian Genome Library Data Submission Service
 
-<img src="./img/pcgl-logo.png" height="90" align="right" />
+<img src="./docs/img/pcgl-logo.png" height="90" align="right" />
 
 > The Pan-Canadian Genome Library (PCGL) is a large collaborative effort to unify Canada's genome sequencing efforts. The PCGL is an open-source and open-science initiative, building upon Canadian-made foundational components and datasets, and utilizing international standards such as GA4GH to unify Canada’s human genome sequencing efforts.
 
