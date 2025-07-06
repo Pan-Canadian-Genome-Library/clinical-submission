@@ -17,11 +17,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { UserSession, UserSessionResult } from '@overture-stack/lyric';
+import { UserSession } from '@overture-stack/lyric';
 import { Request } from 'express';
 
 import { logger } from '@/common/logger.js';
-import { ActionIDsValues, Group, UserDataResponseErrorType } from '@/common/types/auth.js';
+import {
+	ActionIDs,
+	ActionIDsValues,
+	Group,
+	PCGLUserSessionResult,
+	UserDataResponseErrorType,
+} from '@/common/types/auth.js';
 import { userDataResponseSchema } from '@/common/validation/auth-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
@@ -30,7 +36,7 @@ import { lyricProvider } from '@/core/provider.js';
  * @param token Access token from Authz
  * @returns validated object of UserDataResponse
  */
-export const fetchUserData = async (token: string): Promise<UserSessionResult> => {
+export const fetchUserData = async (token: string): Promise<PCGLUserSessionResult> => {
 	const { AUTHZ_ENDPOINT } = authConfig;
 	const url = `${AUTHZ_ENDPOINT}/user/me`;
 
@@ -65,11 +71,12 @@ export const fetchUserData = async (token: string): Promise<UserSessionResult> =
 		);
 	}
 
-	const userTokenInfo: UserSessionResult = {
+	const userTokenInfo: PCGLUserSessionResult = {
 		user: {
 			username: `${responseValidation.data.pcgl_id}`,
 			isAdmin: isAdmin(responseValidation.data.groups),
-			allowedWriteOrganizations: extractUserGroups(responseValidation.data.groups),
+			allowedWriteOrganizations: extractUserGroups(responseValidation.data.groups), // parse
+			groups: extractUserGroups(responseValidation.data.groups),
 		},
 	};
 
@@ -107,11 +114,11 @@ export const hasAllowedAccess = async (
 		headers,
 		body: JSON.stringify({
 			action: {
-				endpoint: action === 'READ' ? actions.read.endpoint : actions.write.endpoint,
-				method: action === 'READ' ? actions.read.method : actions.write.method,
+				endpoint: action === ActionIDs.READ ? actions.read.endpoint : actions.write.endpoint,
+				method: action === ActionIDs.READ ? actions.read.method : actions.write.method,
 			},
-			path: action === 'READ' ? actions.read.endpoint : actions.write.endpoint,
-			method: action === 'READ' ? actions.read.method : actions.write.method,
+			path: action === ActionIDs.READ ? actions.read.endpoint : actions.write.endpoint,
+			method: action === ActionIDs.READ ? actions.read.method : actions.write.method,
 			studies: [study],
 		}),
 	});

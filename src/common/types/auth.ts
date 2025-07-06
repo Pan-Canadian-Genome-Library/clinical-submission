@@ -17,6 +17,8 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 
+import { UserSession, UserSessionResult } from '@overture-stack/lyric';
+
 export const ActionIDs = {
 	WRITE: 'WRITE',
 	READ: 'READ',
@@ -50,6 +52,15 @@ export type Group = {
 
 export type UserDataResponseErrorType = {
 	error: string;
+};
+
+// Lyrics UserSessionResult's UserSession needs to be extended to include groups
+export type PCGLUserSessionResult = Omit<UserSessionResult, 'user'> & {
+	user?: UserSession & UserSessionExtended;
+};
+
+export type UserSessionExtended = {
+	groups: string[];
 };
 
 /**
