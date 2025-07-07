@@ -1,20 +1,27 @@
 {
-  "version": "7",
-  "dialect": "postgresql",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1748873487417,
-      "tag": "0000_dac_study_table_init",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1749236350650,
-      "tag": "0001_pluralise_collab_add_dac_fk",
-      "breakpoints": true
-    }
-  ]
+	"version": "7",
+	"dialect": "postgresql",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "7",
+			"when": 1748873487417,
+			"tag": "0000_dac_study_table_init",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1749236350650,
+			"tag": "0001_pluralise_collab_add_dac_fk",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1751908412532,
+			"tag": "0002_id_generation_config",
+			"breakpoints": true
+		}
+	]
 }
