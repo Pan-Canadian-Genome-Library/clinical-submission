@@ -9,7 +9,7 @@
 		"db:migrate": "NODE_OPTIONS='--import tsx' drizzle-kit migrate",
 		"\n==================  Build  ==================": "",
 		"build:compile": "rimraf dist && tsc",
-		"build:copy": "copyfiles src/api-docs/**/*.yml dist/",
+		"build:copy": "copyfiles src/api-docs/**/*.yml dist/ && copyfiles src/views/**/*.{njk,js,css,png,svg,jpg,jpeg} dist/",
 		"build:copy:db": "copyfiles -u 1 \"src/db/drizzle/**/*\" dist/src/",
 		"build:all": "pnpm build:compile && pnpm build:copy && pnpm db:generate && pnpm build:copy:db",
 		"\n=============  Dev environment  =============": "",
