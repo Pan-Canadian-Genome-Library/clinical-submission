@@ -13,6 +13,7 @@ const upload = multer({ dest: '/tmp', limits: { fileSize: fileSizeLimit } });
 export const submissionRouter: Router = (() => {
 	const router = express.Router();
 
+	// TODO: add auth Middleware to these routes
 	router.post('/category/:categoryId/data', upload.array('files'), submit);
 	router.put('/category/:categoryId/data', upload.array('files'), editData);
 
