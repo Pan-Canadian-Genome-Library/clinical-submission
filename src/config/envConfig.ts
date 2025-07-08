@@ -35,6 +35,15 @@ const parseHttpMethods = (value: string) => {
 		.map((v) => v.trim().toUpperCase());
 };
 
+const IDManagerConfigSchema = z.object({
+	entityName: z.string(),
+	fieldName: z.string(),
+	prefix: z.string(),
+	paddingLength: z.coerce.number().optional(),
+	parentEntityName: z.string().optional(),
+	parentFieldName: z.string().optional(),
+});
+
 dotenv.config();
 
 const envSchema = z.object({
@@ -64,25 +73,15 @@ const envSchema = z.object({
 	ID_MANAGER_CONFIG: z.string().transform((val, ctx) => {
 		try {
 			const parsed = JSON.parse(val);
-			if (!Array.isArray(parsed)) {
-				ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'ID_MANAGER_CONFIG must be a JSON array' });
+			const validation = z.array(IDManagerConfigSchema).safeParse(parsed);
+			if (!validation.success) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: `Invalid ID_MANAGER_CONFIG: ${validation.error.message}`,
+				});
 				return z.NEVER;
 			}
-
-			for (const config of parsed) {
-				if (
-					typeof config.entityName !== 'string' ||
-					typeof config.fieldName !== 'string' ||
-					typeof config.prefix !== 'string'
-				) {
-					ctx.addIssue({
-						code: z.ZodIssueCode.custom,
-						message: 'Each ID config must have entityName, fieldName, and prefix as strings',
-					});
-					return z.NEVER;
-				}
-			}
-			return parsed;
+			return validation.data;
 		} catch {
 			ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'ID_MANAGER_CONFIG must be valid JSON' });
 			return z.NEVER;
