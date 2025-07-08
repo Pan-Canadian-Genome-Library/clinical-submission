@@ -39,7 +39,7 @@ const IDManagerConfigSchema = z.object({
 	entityName: z.string(),
 	fieldName: z.string(),
 	prefix: z.string(),
-	paddingLength: z.coerce.number().optional(),
+	paddingLength: z.coerce.number().default(8),
 	parentEntityName: z.string().optional(),
 	parentFieldName: z.string().optional(),
 });
