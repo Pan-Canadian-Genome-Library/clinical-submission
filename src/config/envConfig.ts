@@ -25,16 +25,6 @@ import { processCoercedBoolean } from '@/common/validation/common.js';
 const NodeEnvOptions = ['development', 'production'] as const;
 const LogLevelOptions = ['error', 'warn', 'info', 'debug'] as const;
 
-export const HttpMethods = ['GET', 'POST', 'PUT', 'DELETE'] as const;
-export type HttpMethod = (typeof HttpMethods)[number];
-
-const parseHttpMethods = (value: string) => {
-	return value
-		.split(',')
-		.filter((v) => v.trim() !== '')
-		.map((v) => v.trim().toUpperCase());
-};
-
 dotenv.config();
 
 const envSchema = z.object({
@@ -42,25 +32,48 @@ const envSchema = z.object({
 	ALLOWED_ORIGINS: z.string().optional(),
 	AUDIT_ENABLED: z.preprocess((val) => processCoercedBoolean(val), z.boolean()).default(true),
 	AUTH_ENABLED: z.preprocess((val) => processCoercedBoolean(val), z.boolean()).default(false),
-	AUTH_PROTECT_METHODS: z
-		.string()
-		.default(HttpMethods.join(','))
-		.transform(parseHttpMethods)
-		.pipe(z.array(z.enum(HttpMethods))),
 	DB_HOST: z.string(),
 	DB_NAME: z.string(),
 	DB_PASSWORD: z.string(),
 	DB_PORT: z.coerce.number().min(100),
 	DB_USER: z.string(),
 	ID_USELOCAL: z.preprocess((val) => processCoercedBoolean(val), z.boolean()).default(true),
-	ID_CUSTOM_ALPHABET: z.string().default('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'),
-	ID_CUSTOM_SIZE: z.coerce.number().default(21),
+	ID_CUSTOMALPHABET: z.string().default('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'),
+	ID_CUSTOMSIZE: z.coerce.number().default(21),
 	LECTERN_URL: z.string().url(),
 	LOG_LEVEL: z.enum(LogLevelOptions).default('info'),
 	NODE_ENV: z.enum(NodeEnvOptions).default('development'),
 	PLURALIZE_SCHEMAS_ENABLED: z.preprocess((val) => processCoercedBoolean(val), z.boolean()).default(true),
 	SERVER_PORT: z.coerce.number().min(100).default(3030),
 	SERVER_UPLOAD_LIMIT: z.string().default('10mb'),
+	ID_MANAGER_CONFIG: z.string().transform((val, ctx) => {
+		try {
+			const parsed = JSON.parse(val);
+			if (!Array.isArray(parsed)) {
+				ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'ID_MANAGER_CONFIG must be a JSON array' });
+				return z.NEVER;
+			}
+
+			for (const config of parsed) {
+				if (
+					typeof config.entityName !== 'string' ||
+					typeof config.fieldName !== 'string' ||
+					typeof config.prefix !== 'string'
+				) {
+					ctx.addIssue({
+						code: z.ZodIssueCode.custom,
+						message: 'Each ID config must have entityName, fieldName, and prefix as strings',
+					});
+					return z.NEVER;
+				}
+			}
+			return parsed;
+		} catch {
+			ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'ID_MANAGER_CONFIG must be valid JSON' });
+			return z.NEVER;
+		}
+	}),
+	ID_MANAGER_SECRET: z.string().min(1, 'ID_MANAGER_SECRET is required'),
 });
 
 const envParsed = envSchema.safeParse(process.env);
