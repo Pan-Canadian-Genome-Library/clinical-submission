@@ -75,9 +75,12 @@ const envSchema = z.object({
 			const parsed = JSON.parse(val);
 			const validation = z.array(IDManagerConfigSchema).safeParse(parsed);
 			if (!validation.success) {
+				const errorMessages = validation.error.errors
+					.map((issue) => `${issue.path.join('.')} is ${issue.message}`)
+					.join(' | ');
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					message: `Invalid ID_MANAGER_CONFIG: ${validation.error.message}`,
+					message: `Invalid ID_MANAGER_CONFIG: ${errorMessages}`,
 				});
 				return z.NEVER;
 			}
