@@ -44,6 +44,18 @@ export type StudyAuthorization = {
 	study_id: string;
 };
 
+export type DacAuthorization = {
+	study_id: string;
+	start_date: string;
+	end_date: string;
+};
+
+export type StudyAuthorizations = {
+	team_member: string[];
+	study_curator: string[];
+	dac_authorizations: DacAuthorization[];
+};
+
 export type Group = {
 	id: number | string;
 	description: string;

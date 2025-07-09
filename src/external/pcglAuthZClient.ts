@@ -76,7 +76,7 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 		user: {
 			username: `${responseValidation.data.pcgl_id}`,
 			isAdmin: isAdmin(responseValidation.data.groups),
-			allowedWriteOrganizations: extractUserStudies(responseValidation.data.study_authorizations), // studies === organization
+			allowedWriteOrganizations: responseValidation.data.study_authorizations.study_curator,
 			groups: extractUserGroups(responseValidation.data.groups),
 		},
 	};
@@ -175,16 +175,4 @@ const extractUserGroups = (groups: Group[]): string[] => {
 	}, []);
 
 	return parsedGroups;
-};
-
-/**
- * @param studies Object of study_authorizations
- * @returns array of strings with names of the authorized studies
- */
-const extractUserStudies = (studies: Record<string, StudyAuthorization>) => {
-	const parseStudies: string[] = Object.values(studies).reduce((acu: string[], currentStudy) => {
-		acu.push(currentStudy.study_id);
-		return acu;
-	}, []);
-	return parseStudies;
 };

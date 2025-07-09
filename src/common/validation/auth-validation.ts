@@ -41,14 +41,17 @@ export const userDataResponseSchema = z.object({
 			})
 			.optional(),
 	),
-	study_authorizations: z.record(
-		z.string(),
-		z.object({
-			end_date: z.string(),
-			start_date: z.string(),
-			study_id: z.string(),
-		}),
-	),
+	study_authorizations: z.object({
+		team_member: z.array(z.string()).optional(),
+		study_curator: z.array(z.string()),
+		dac_authorizations: z.array(
+			z.object({
+				end_date: z.string(),
+				start_date: z.string(),
+				study_id: z.string(),
+			}),
+		),
+	}),
 });
 
 export const oidcUserInfoResponseSchema = z.object({
