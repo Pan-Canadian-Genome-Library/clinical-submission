@@ -53,3 +53,33 @@ export const authMiddleware = () => {
 		}
 	};
 };
+
+export const lyricAdminMiddleware = async (req: Request) => {
+	try {
+		const token = extractAccessTokenFromHeader(req);
+
+		if (!token) {
+			return {
+				errorCode: 401,
+				errorMessage: 'Unauthorized: No token provided',
+			};
+		}
+
+		const result = await fetchUserData(token);
+
+		if (!result.user?.isAdmin) {
+			return {
+				errorCode: 403,
+				errorMessage: 'Forbidden: Must be an admin to access this resource',
+			};
+		}
+
+		return result;
+	} catch (error) {
+		logger.error(error);
+		return {
+			errorCode: 403,
+			errorMessage: 'Forbidden: Invalid token',
+		};
+	}
+};

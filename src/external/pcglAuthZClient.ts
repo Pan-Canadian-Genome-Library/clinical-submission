@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { UserSession } from '@overture-stack/lyric';
+import { UserSession, UserSessionResult } from '@overture-stack/lyric';
 import { Request } from 'express';
 
 import { logger } from '@/common/logger.js';
@@ -37,7 +37,7 @@ import { lyricProvider } from '@/core/provider.js';
  * @param token Access token from Authz
  * @returns validated object of UserDataResponse
  */
-export const fetchUserData = async (token: string): Promise<PCGLUserSessionResult> => {
+export const fetchUserData = async (token: string): Promise<PCGLUserSessionResult | UserSessionResult> => {
 	const { AUTHZ_ENDPOINT } = authConfig;
 	const url = `${AUTHZ_ENDPOINT}/user/me`;
 
