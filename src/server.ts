@@ -90,6 +90,7 @@ app.use('/category', lyricProvider.routers.category);
 app.use('/data', lyricProvider.routers.submittedData);
 app.use('/dictionary', lyricProvider.routers.dictionary);
 app.use('/submission', submissionRouter);
+app.use('/validator', lyricProvider.routers.validator);
 
 // Swagger route
 app.use('/api-docs', openAPIRouter);
