@@ -25,7 +25,30 @@ import { RequestValidation } from '@/middleware/requestValidation.js';
 import { stringNotEmpty } from './common.js';
 
 export const userDataResponseSchema = z.object({
-	pcgl_id: z.string(),
+	userinfo: z.object({
+		emails: z.array(
+			z
+				.object({
+					type: z.string(),
+					address: z.string(),
+				})
+				.optional(),
+		),
+		pcgl_id: z.string(),
+		site_admin: z.boolean(),
+		site_curator: z.boolean(),
+	}),
+	study_authorizations: z.object({
+		editable_studies: z.array(z.string()),
+		readable_studies: z.array(z.string()),
+	}),
+	dac_authorizations: z.array(
+		z.object({
+			end_date: z.string(),
+			start_date: z.string(),
+			study_id: z.string(),
+		}),
+	),
 	groups: z.array(
 		z.object({
 			id: z.coerce.string(),
@@ -33,25 +56,6 @@ export const userDataResponseSchema = z.object({
 			description: z.string(),
 		}),
 	),
-	emails: z.array(
-		z
-			.object({
-				type: z.string(),
-				address: z.string(),
-			})
-			.optional(),
-	),
-	study_authorizations: z.object({
-		team_member: z.array(z.string()).optional(),
-		study_curator: z.array(z.string()),
-		dac_authorizations: z.array(
-			z.object({
-				end_date: z.string(),
-				start_date: z.string(),
-				study_id: z.string(),
-			}),
-		),
-	}),
 });
 
 export const oidcUserInfoResponseSchema = z.object({

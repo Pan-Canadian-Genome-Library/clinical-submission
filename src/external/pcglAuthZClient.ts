@@ -26,7 +26,6 @@ import {
 	ActionIDsValues,
 	Group,
 	PCGLUserSessionResult,
-	StudyAuthorization,
 	UserDataResponseErrorType,
 } from '@/common/types/auth.js';
 import { userDataResponseSchema } from '@/common/validation/auth-validation.js';
@@ -74,9 +73,9 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 
 	const userTokenInfo: PCGLUserSessionResult = {
 		user: {
-			username: `${responseValidation.data.pcgl_id}`,
+			username: `${responseValidation.data.userinfo.pcgl_id}`,
 			isAdmin: isAdmin(responseValidation.data.groups),
-			allowedWriteOrganizations: responseValidation.data.study_authorizations.study_curator,
+			allowedWriteOrganizations: responseValidation.data.study_authorizations.editable_studies,
 			groups: extractUserGroups(responseValidation.data.groups),
 		},
 	};
