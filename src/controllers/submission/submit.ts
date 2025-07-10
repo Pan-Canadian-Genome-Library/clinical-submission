@@ -1,4 +1,23 @@
-import { BATCH_ERROR_TYPE, type BatchError } from '@overture-stack/lyric';
+/*
+ * Copyright (c) 2025 The Ontario Institute for Cancer Research. All rights reserved
+ *
+ * This program and the accompanying materials are made available under the terms of
+ * the GNU Affero General Public License v3.0. You should have received a copy of the
+ * GNU Affero General Public License along with this program.
+ *  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+ * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+import { BATCH_ERROR_TYPE, type BatchError, type EntityData } from '@overture-stack/lyric';
 import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
 import { z } from 'zod';
@@ -38,9 +57,9 @@ export const submit = validateRequest(submitRequestSchema, async (req, res, next
 		const username = '';
 
 		logger.info(
-			`Upload Submission Request: categoryId '${categoryId}'`,
-			` organization '${organization}'`,
-			` files: '${files?.map((f) => f.originalname)}'`,
+			`Upload Submission Request: categoryId '${categoryId}'` +
+				` organization '${organization}'` +
+				` files: '${files?.map((f) => f.originalname)}'`,
 		);
 
 		if (!files || files.length == 0) {
@@ -57,12 +76,11 @@ export const submit = validateRequest(submitRequestSchema, async (req, res, next
 		}
 
 		const fileErrors: BatchError[] = [];
-		let submissionId: number | undefined;
-		const entityList: string[] = [];
+		const entityData: EntityData = {};
 
 		for (const file of files) {
 			try {
-				// // validate if entity name is present in the dictionary
+				// validate if entity name is present in the dictionary
 				const entityName = file.originalname.split('.')[0]?.toLowerCase();
 				const schema = currentDictionary.dictionary.find((schema) => schema.name.toLowerCase() === entityName);
 				if (!schema || !entityName) {
@@ -80,22 +98,25 @@ export const submit = validateRequest(submitRequestSchema, async (req, res, next
 					continue;
 				}
 
+				// converts TSV/CSV into JSON object format
 				const extractedData = await parseFileToRecords(prevalidatedFile, schema);
 
-				const uploadResult = await lyricProvider.services.submission.submit({
-					records: extractedData,
-					entityName,
-					categoryId,
-					organization,
-					username,
-				});
-
-				submissionId = uploadResult.submissionId;
-				entityList.push(entityName);
+				entityData[entityName] = extractedData;
 			} catch (error) {
 				logger.error(`Error processing file`, error);
 			}
 		}
+
+		// Send submission data, organized by entity.
+		const submitResult = await lyricProvider.services.submission.submit({
+			data: entityData,
+			categoryId,
+			organization,
+			username,
+		});
+
+		// Entity names that are sent for Submission
+		const entityList = Object.keys(entityData);
 
 		let status: string = CREATE_SUBMISSION_STATUS.PROCESSING;
 		if (entityList.length === 0) {
@@ -110,7 +131,7 @@ export const submit = validateRequest(submitRequestSchema, async (req, res, next
 
 		// This response provides the details of file Submission
 		return res.status(200).send({
-			submissionId,
+			submissionId: submitResult.submissionId,
 			status,
 			batchErrors: fileErrors,
 			inProcessEntities: entityList,
