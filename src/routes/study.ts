@@ -26,19 +26,19 @@ import {
 	getStudyById,
 	updateStudyById,
 } from '@/controllers/studyController.js';
+import { authMiddleware } from '@/middleware/auth.js';
 
 export const studyRouter: Router = (() => {
 	const router = express.Router();
-
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
 
-	router.post('/', createNewStudy);
-	router.get('/', getAllStudies);
+	router.get('/:studyId', authMiddleware(), getStudyById);
+	router.get('/', authMiddleware(), getAllStudies);
 
-	router.get('/:studyId', getStudyById);
-	router.delete('/:studyId', deleteStudyById);
-	router.patch('/:studyId', updateStudyById);
+	router.post('/', authMiddleware(), createNewStudy);
+	router.delete('/:studyId', authMiddleware(), deleteStudyById);
+	router.patch('/:studyId', authMiddleware(), updateStudyById);
 
 	return router;
 })();

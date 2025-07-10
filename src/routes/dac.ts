@@ -20,18 +20,18 @@
 import express, { json, Router, urlencoded } from 'express';
 
 import dacController from '@/controllers/dacController.js';
+import { authMiddleware } from '@/middleware/auth.js';
 
 export const dacRouter: Router = (() => {
 	const router = express.Router();
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
 
-	// TODO: Auth
-	router.get('/:dacId', dacController.getDacById);
-	router.get('/', dacController.getAllDac);
-	router.post('/create', dacController.createDac);
-	router.delete('/:dacId', dacController.deleteDac);
-	router.patch('/:dacId', dacController.updateDac);
+	router.get('/:dacId', authMiddleware(), dacController.getDacById);
+	router.get('/', authMiddleware(), dacController.getAllDac);
+	router.post('/create', authMiddleware(), dacController.createDac);
+	router.delete('/:dacId', authMiddleware(), dacController.deleteDac);
+	router.patch('/:dacId', authMiddleware(), dacController.updateDac);
 
 	return router;
 })();
