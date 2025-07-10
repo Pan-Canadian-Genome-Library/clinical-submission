@@ -66,9 +66,7 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 	if (!responseValidation.success) {
 		logger.error(`Error retrieving user data.`, responseValidation.error);
 
-		throw new lyricProvider.utils.errors.ServiceUnavailable(
-			'The required fields groups and pcgl_id were not returned in the response object',
-		);
+		throw new lyricProvider.utils.errors.ServiceUnavailable('User object response has unexpected format');
 	}
 
 	const userTokenInfo: PCGLUserSessionResult = {
