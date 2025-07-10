@@ -25,7 +25,8 @@ import { lyricProvider } from '@/core/provider.js';
 import { extractAccessTokenFromHeader, fetchUserData } from '@/external/pcglAuthZClient.js';
 
 /**
- * Middleware to handle authentication
+ * Middleware to handle authentication.
+ *
  * @returns
  */
 export const authMiddleware = () => {

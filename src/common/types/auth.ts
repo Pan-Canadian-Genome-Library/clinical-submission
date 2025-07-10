@@ -26,10 +26,17 @@ export const ActionIDs = {
 
 export type ActionIDsValues = (typeof ActionIDs)[keyof typeof ActionIDs];
 
-export type UserDataResponse = {
+export type UserInfo = {
 	emails: Email[];
 	pcgl_id: string | number;
-	study_authorizations: Record<string, StudyAuthorization>;
+	site_admin: boolean;
+	site_curator: boolean;
+};
+
+export type UserDataResponse = {
+	userinfo: UserInfo;
+	study_authorizations: StudyAuthorization;
+	dac_authorizations: DacAuthorization[];
 	groups: Group[];
 };
 
@@ -39,21 +46,14 @@ export type Email = {
 };
 
 export type StudyAuthorization = {
-	end_date: string;
-	start_date: string;
-	study_id: string;
+	editable_studies: string[];
+	readable_studies: string[];
 };
 
 export type DacAuthorization = {
 	study_id: string;
 	start_date: string;
 	end_date: string;
-};
-
-export type StudyAuthorizations = {
-	team_member: string[];
-	study_curator: string[];
-	dac_authorizations: DacAuthorization[];
 };
 
 export type Group = {
