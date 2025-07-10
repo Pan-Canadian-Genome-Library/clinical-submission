@@ -40,6 +40,14 @@ const validatorConfigSchema = z.object({
 	entityName: z.string(),
 	fieldName: z.string(),
 });
+const IDManagerConfigSchema = z.object({
+	entityName: z.string(),
+	fieldName: z.string(),
+	prefix: z.string(),
+	paddingLength: z.coerce.number().default(8),
+	parentEntityName: z.string().optional(),
+	parentFieldName: z.string().optional(),
+});
 
 dotenv.config();
 
@@ -61,6 +69,27 @@ const envSchema = z.object({
 	ID_USELOCAL: z.preprocess((val) => processCoercedBoolean(val), z.boolean()).default(true),
 	ID_CUSTOM_ALPHABET: z.string().default('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'),
 	ID_CUSTOM_SIZE: z.coerce.number().default(21),
+	ID_MANAGER_CONFIG: z.string().transform((val, ctx) => {
+		try {
+			const parsed = JSON.parse(val);
+			const validation = z.array(IDManagerConfigSchema).safeParse(parsed);
+			if (!validation.success) {
+				const errorMessages = validation.error.errors
+					.map((issue) => `${issue.path.join('.')} is ${issue.message}`)
+					.join(' | ');
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: `Invalid ID_MANAGER_CONFIG: ${errorMessages}`,
+				});
+				return z.NEVER;
+			}
+			return validation.data;
+		} catch {
+			ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'ID_MANAGER_CONFIG must be valid JSON' });
+			return z.NEVER;
+		}
+	}),
+	ID_MANAGER_SECRET: z.string().min(1, 'ID_MANAGER_SECRET is required'),
 	LECTERN_URL: z.string().url(),
 	LOG_LEVEL: z.enum(LogLevelOptions).default('info'),
 	NODE_ENV: z.enum(NodeEnvOptions).default('development'),
