@@ -27,7 +27,8 @@ import { extractAccessTokenFromHeader, fetchUserData } from '@/external/pcglAuth
 /**
  * Middleware to handle authentication.
  *
- * @returns
+ * Middleware that returns PCGLUserSessionResult to req.user. Does not check if belongs to study here since study endpoints can have their id's
+ * passed to the backend using params or as fields in body. To check if a user has access to a study is done with hasAllowedAccess applied in the study endpoints
  */
 export const authMiddleware = () => {
 	const { enabled } = authConfig;

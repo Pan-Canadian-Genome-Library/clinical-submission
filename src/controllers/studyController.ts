@@ -33,8 +33,13 @@ export const getAllStudies = validateRequest(listAllStudies, async (req, res, ne
 	const db = getDbInstance();
 	const { page, orderBy, pageSize } = req.query;
 	const studyRepo = studyService(db);
+	const user = req.user;
 
 	try {
+		if (!user?.isAdmin) {
+			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user');
+		}
+
 		const results = await studyRepo.listStudies({ page: Number(page), orderBy, pageSize: Number(pageSize) });
 		res.status(200).send(results);
 		return;
