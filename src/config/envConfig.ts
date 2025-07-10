@@ -35,6 +35,11 @@ const parseHttpMethods = (value: string) => {
 		.map((v) => v.trim().toUpperCase());
 };
 
+const validatorConfigSchema = z.object({
+	categoryId: z.number(),
+	entityName: z.string(),
+	fieldName: z.string(),
+});
 const IDManagerConfigSchema = z.object({
 	entityName: z.string(),
 	fieldName: z.string(),
@@ -64,12 +69,6 @@ const envSchema = z.object({
 	ID_USELOCAL: z.preprocess((val) => processCoercedBoolean(val), z.boolean()).default(true),
 	ID_CUSTOM_ALPHABET: z.string().default('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'),
 	ID_CUSTOM_SIZE: z.coerce.number().default(21),
-	LECTERN_URL: z.string().url(),
-	LOG_LEVEL: z.enum(LogLevelOptions).default('info'),
-	NODE_ENV: z.enum(NodeEnvOptions).default('development'),
-	PLURALIZE_SCHEMAS_ENABLED: z.preprocess((val) => processCoercedBoolean(val), z.boolean()).default(true),
-	SERVER_PORT: z.coerce.number().min(100).default(3030),
-	SERVER_UPLOAD_LIMIT: z.string().default('10mb'),
 	ID_MANAGER_CONFIG: z.string().transform((val, ctx) => {
 		try {
 			const parsed = JSON.parse(val);
@@ -91,6 +90,27 @@ const envSchema = z.object({
 		}
 	}),
 	ID_MANAGER_SECRET: z.string().min(1, 'ID_MANAGER_SECRET is required'),
+	LECTERN_URL: z.string().url(),
+	LOG_LEVEL: z.enum(LogLevelOptions).default('info'),
+	NODE_ENV: z.enum(NodeEnvOptions).default('development'),
+	PLURALIZE_SCHEMAS_ENABLED: z.preprocess((val) => processCoercedBoolean(val), z.boolean()).default(true),
+	SERVER_PORT: z.coerce.number().min(100).default(3030),
+	SERVER_UPLOAD_LIMIT: z.string().default('10mb'),
+	VALIDATOR_CONFIG: z
+		.string()
+		.transform((val, ctx) => {
+			try {
+				return JSON.parse(val);
+			} catch (error) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: 'Not a valid JSON',
+				});
+
+				return z.NEVER;
+			}
+		})
+		.pipe(z.array(validatorConfigSchema)),
 });
 
 const envParsed = envSchema.safeParse(process.env);
