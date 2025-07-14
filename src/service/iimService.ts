@@ -17,6 +17,8 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { eq } from 'drizzle-orm';
+
 import { logger } from '@/common/logger.js';
 import { type IIMConfigObject } from '@/common/validation/id-manager-validation.js';
 import { lyricProvider } from '@/core/provider.js';
@@ -54,6 +56,18 @@ const iimService = (db: PostgresDb) => ({
 					logger.error(`[IIM]: Unable to insert IIM Configuration into database. ${exception}`);
 					throw new lyricProvider.utils.errors.InternalServerError('Unable to insert a IIM Configuration');
 				}
+			}
+		});
+	},
+
+	getIIMConfig: async (entityName: IIMConfigObject['entityName'], transaction?: PostgresTransaction) => {
+		const dbTransaction = transaction ?? db;
+		return dbTransaction.transaction(async (transaction) => {
+			try {
+				return await transaction.select().from(idGenerationConfig).where(eq(idGenerationConfig.entityName, entityName));
+			} catch (exception) {
+				logger.error(`[IIM]: Unexpected error retrieving IIM Configuration. ${exception}`);
+				throw new lyricProvider.utils.errors.InternalServerError('Unexpected error retrieving IIM Configuration');
 			}
 		});
 	},

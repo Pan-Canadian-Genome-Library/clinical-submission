@@ -18,7 +18,7 @@
  */
 
 import { logger } from '@/common/logger.js';
-import { type IIMConfig } from '@/common/validation/id-manager-validation.js';
+import { type IIMConfig, type IIMConfigObject } from '@/common/validation/id-manager-validation.js';
 import { getDbInstance } from '@/db/index.js';
 import iimService from '@/service/iimService.js';
 
@@ -39,4 +39,14 @@ const processIIMConfiguration = (iimEnvConfig: IIMConfig) => {
 	}
 };
 
-export { processIIMConfiguration };
+const retrieveIIMConfiguration = async (entityName: IIMConfigObject['entityName']) => {
+	const database = getDbInstance();
+	const config = await iimService(database).getIIMConfig(entityName);
+
+	if (config.length && config[0]) {
+		return config[0];
+	}
+	return undefined;
+};
+
+export { processIIMConfiguration, retrieveIIMConfiguration };
