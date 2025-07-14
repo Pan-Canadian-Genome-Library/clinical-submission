@@ -56,8 +56,21 @@ export const authMiddleware = () => {
 	};
 };
 
-export const lyricAdminMiddleware = async (req: Request) => {
+export const adminMiddleware = async (req: Request) => {
+	const { enabled } = authConfig;
+
 	try {
+		// If auth is disabled, then skip fetching user information
+		if (!enabled) {
+			return {
+				user: {
+					username: `AUTH DISABLED`,
+					isAdmin: true,
+					allowedWriteOrganizations: [],
+				},
+			};
+		}
+
 		const token = extractAccessTokenFromHeader(req);
 
 		if (!token) {
