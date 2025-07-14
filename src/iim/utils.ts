@@ -18,36 +18,25 @@
  */
 
 import { logger } from '@/common/logger.js';
-import { env } from '@/config/envConfig.js';
-import { app } from '@/server.js';
+import { type IIMConfig } from '@/common/validation/id-manager-validation.js';
+import { getDbInstance } from '@/db/index.js';
+import iimService from '@/service/iimService.js';
 
-import { dbConfig } from './config/dbConfig.js';
-import { connectToDb } from './db/index.js';
-import { processIIMConfiguration } from './iim/utils.js';
-
-const { NODE_ENV, SERVER_PORT } = env;
-
-// Connect drizzle
-connectToDb(dbConfig.connectionString);
-
-const server = app.listen(SERVER_PORT, () => {
-	logger.info(`Server started. Running in "${NODE_ENV}" mode. Listening to port ${SERVER_PORT}`);
-
-	if (NODE_ENV === 'development') {
-		logger.info(`Swagger API Docs are available at http://localhost:${SERVER_PORT}/api-docs`);
+const processIIMConfiguration = (iimEnvConfig: IIMConfig) => {
+	const database = getDbInstance();
+	if (!iimEnvConfig.length) {
+		logger.warn('[IIM]: No IIM configurations present.');
 	}
-
-	processIIMConfiguration(env.ID_MANAGER_CONFIG);
-});
-
-const onCloseSignal = () => {
-	logger.info('sigint received, shutting down');
-	server.close(() => {
-		logger.info('server closed');
-		process.exit();
-	});
-	setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
+	try {
+		iimEnvConfig.map(async (iimConfig) => {
+			const result = await iimService(database).addIIMConfig(iimConfig);
+			if (result && result[0]) {
+				logger.debug(`[IIM]: Added record to config table: ${JSON.stringify(result[0])}`);
+			}
+		});
+	} catch (exception) {
+		logger.error(exception);
+	}
 };
 
-process.on('SIGINT', onCloseSignal);
-process.on('SIGTERM', onCloseSignal);
+export { processIIMConfiguration };

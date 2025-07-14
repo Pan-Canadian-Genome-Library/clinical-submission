@@ -37,7 +37,7 @@ export const isPostgresError = (
 		error instanceof Error &&
 		'severity' in error &&
 		'code' in error &&
-		'table' in error
+		('table' in error || 'constraint' in error)
 	) {
 		return error;
 	}

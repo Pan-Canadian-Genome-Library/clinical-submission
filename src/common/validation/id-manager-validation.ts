@@ -17,37 +17,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { logger } from '@/common/logger.js';
-import { env } from '@/config/envConfig.js';
-import { app } from '@/server.js';
+import { z } from 'zod';
 
-import { dbConfig } from './config/dbConfig.js';
-import { connectToDb } from './db/index.js';
-import { processIIMConfiguration } from './iim/utils.js';
-
-const { NODE_ENV, SERVER_PORT } = env;
-
-// Connect drizzle
-connectToDb(dbConfig.connectionString);
-
-const server = app.listen(SERVER_PORT, () => {
-	logger.info(`Server started. Running in "${NODE_ENV}" mode. Listening to port ${SERVER_PORT}`);
-
-	if (NODE_ENV === 'development') {
-		logger.info(`Swagger API Docs are available at http://localhost:${SERVER_PORT}/api-docs`);
-	}
-
-	processIIMConfiguration(env.ID_MANAGER_CONFIG);
+export const iimConfigObject = z.object({
+	entityName: z.string(),
+	fieldName: z.string(),
+	prefix: z.string(),
+	paddingLength: z.number().int().positive().default(8),
+	parentEntityName: z.string().optional(),
+	parentFieldName: z.string().optional(),
+	sequenceName: z.string(),
+	sequenceStart: z.number().int().positive(),
 });
+export type IIMConfigObject = z.infer<typeof iimConfigObject>;
 
-const onCloseSignal = () => {
-	logger.info('sigint received, shutting down');
-	server.close(() => {
-		logger.info('server closed');
-		process.exit();
-	});
-	setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
-};
-
-process.on('SIGINT', onCloseSignal);
-process.on('SIGTERM', onCloseSignal);
+export const iimConfig = z.array(iimConfigObject);
+export type IIMConfig = z.infer<typeof iimConfig>;
