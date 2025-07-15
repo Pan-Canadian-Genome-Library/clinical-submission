@@ -23,7 +23,7 @@ import { logger } from '@/common/logger.js';
 import { type IIMConfigObject } from '@/common/validation/id-manager-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
-import { idGenerationConfig } from '@/db/schemas/idGenerationConfig.js';
+import { generatedIdentifiers, idGenerationConfig } from '@/db/schemas/idGenerationConfig.js';
 import { PostgresTransaction } from '@/db/types.js';
 import { isPostgresError, PostgresErrors } from '@/db/utils.js';
 
@@ -68,6 +68,21 @@ const iimService = (db: PostgresDb) => ({
 			} catch (exception) {
 				logger.error(`[IIM]: Unexpected error retrieving IIM Configuration. ${exception}`);
 				throw new lyricProvider.utils.errors.InternalServerError('Unexpected error retrieving IIM Configuration');
+			}
+		});
+	},
+
+	getIDByHash: async (hashedValue: string, transaction?: PostgresTransaction) => {
+		const dbTransaction = transaction ?? db;
+		return dbTransaction.transaction(async (transaction) => {
+			try {
+				return await transaction
+					.select()
+					.from(generatedIdentifiers)
+					.where(eq(generatedIdentifiers.sourceHash, hashedValue));
+			} catch (exception) {
+				logger.error(`[IIM]: Unexpected error retrieving ID . ${exception}`);
+				throw new lyricProvider.utils.errors.InternalServerError('Unexpected error retrieving ID');
 			}
 		});
 	},

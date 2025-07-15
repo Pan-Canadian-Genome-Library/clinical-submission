@@ -18,12 +18,11 @@
  */
 
 import { logger } from '@/common/logger.js';
+import { dbConfig } from '@/config/dbConfig.js';
 import { env } from '@/config/envConfig.js';
+import { connectToDb } from '@/db/index.js';
+import { generateHash, processIIMConfiguration } from '@/internal/id-manager/utils.js';
 import { app } from '@/server.js';
-
-import { dbConfig } from './config/dbConfig.js';
-import { connectToDb } from './db/index.js';
-import { processIIMConfiguration } from './iim/utils.js';
 
 const { NODE_ENV, SERVER_PORT } = env;
 
@@ -38,6 +37,7 @@ const server = app.listen(SERVER_PORT, () => {
 	}
 
 	processIIMConfiguration(env.ID_MANAGER_CONFIG);
+	console.log(generateHash('test', 'test'));
 });
 
 const onCloseSignal = () => {

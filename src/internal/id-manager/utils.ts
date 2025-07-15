@@ -17,10 +17,12 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { type BinaryToTextEncoding, createHmac } from 'node:crypto';
+
 import { logger } from '@/common/logger.js';
 import { type IIMConfig, type IIMConfigObject } from '@/common/validation/id-manager-validation.js';
 import { getDbInstance } from '@/db/index.js';
-import iimService from '@/service/iimService.js';
+import iimService from '@/service/idManagerService.js';
 
 const processIIMConfiguration = (iimEnvConfig: IIMConfig) => {
 	const database = getDbInstance();
@@ -49,4 +51,18 @@ const retrieveIIMConfiguration = async (entityName: IIMConfigObject['entityName'
 	return undefined;
 };
 
-export { processIIMConfiguration, retrieveIIMConfiguration };
+const generateHash = (plainText: string, secret: string, outputOptions: BinaryToTextEncoding = 'base64') => {
+	return createHmac('sha256', secret).update(plainText).digest(outputOptions);
+};
+
+const findIDByHash = async (hashedValue: string) => {
+	const database = getDbInstance();
+	const hashedRecord = await iimService(database).getIDByHash(hashedValue);
+
+	if (hashedRecord.length && hashedRecord[0]) {
+		return hashedRecord[0];
+	}
+	return undefined;
+};
+
+export { findIDByHash, generateHash, processIIMConfiguration, retrieveIIMConfiguration };
