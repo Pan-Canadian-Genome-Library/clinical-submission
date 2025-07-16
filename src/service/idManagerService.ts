@@ -17,14 +17,15 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
+import { QueryResult } from 'pg';
 
 import { logger } from '@/common/logger.js';
 import { type IIMConfigObject } from '@/common/validation/id-manager-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
 import { generatedIdentifiers, idGenerationConfig } from '@/db/schemas/idGenerationConfig.js';
-import { PostgresTransaction } from '@/db/types.js';
+import type { GeneratedIdentifiersTable, PostgresTransaction } from '@/db/types.js';
 import { isPostgresError, PostgresErrors } from '@/db/utils.js';
 
 const iimService = (db: PostgresDb) => ({
@@ -54,7 +55,7 @@ const iimService = (db: PostgresDb) => ({
 					return;
 				} else {
 					logger.error(`[IIM]: Unable to insert IIM Configuration into database. ${exception}`);
-					throw new lyricProvider.utils.errors.InternalServerError('Unable to insert a IIM Configuration');
+					throw new lyricProvider.utils.errors.InternalServerError('Unable to initialize IIM Service.');
 				}
 			}
 		});
@@ -87,8 +88,61 @@ const iimService = (db: PostgresDb) => ({
 		});
 	},
 
-	createIMMSequence: async () => {
-		// await transaction.execute(sql`CREATE SEQUENCE ${iimData.sequenceName} START ${iimData.sequenceStart};`);
+	getNextSequenceValue: async (sequenceName: IIMConfigObject['sequenceName']) => {
+		try {
+			const nextValue: QueryResult<Record<'nextval', number>> = await db.execute(sql`SELECT nextval(${sequenceName})`);
+			return nextValue.rows[0] ? nextValue.rows[0].nextval : undefined;
+		} catch (exception) {
+			logger.error(`[IIM]: Unexpected error getting next sequence value. ${exception}`);
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'Unexpected error while retrieving next IIM sequence value.',
+			);
+		}
+	},
+
+	createIDRecord: async (IdRecord: GeneratedIdentifiersTable, transaction?: PostgresTransaction) => {
+		const dbTransaction = transaction ?? db;
+		return dbTransaction.transaction(async (transaction) => {
+			try {
+				const record = await transaction.insert(generatedIdentifiers).values(IdRecord).returning();
+				return record;
+			} catch (exception) {
+				const postgresError = isPostgresError(exception);
+				if (postgresError && postgresError.code === PostgresErrors.UNIQUE_KEY_VIOLATION) {
+					logger.error(
+						`[IIM]: Can't insert record with ID ${IdRecord.generatedId}. Record already exists within the table.`,
+					);
+					throw new lyricProvider.utils.errors.InternalServerError('Unable to create new ID record.');
+				} else {
+					logger.error(`[IIM]: Unable to insert IIM Configuration into database. ${exception}`);
+					throw new lyricProvider.utils.errors.InternalServerError('Unable to create new ID record.');
+				}
+			}
+		});
+	},
+
+	createIMMSequence: async (iimData: IIMConfigObject, transaction?: PostgresTransaction) => {
+		const dbTransaction = transaction ?? db;
+		return dbTransaction.transaction(async (transaction) => {
+			try {
+				const sequenceCreationResult = await transaction.execute(
+					sql`CREATE SEQUENCE "${iimData.sequenceName}" START ${iimData.sequenceStart};`,
+				);
+
+				return sequenceCreationResult;
+			} catch (exception) {
+				const postgresError = isPostgresError(exception);
+				if (postgresError && postgresError.code === PostgresErrors.UNIQUE_KEY_VIOLATION) {
+					logger.debug(
+						`[IIM]: Can't add sequence ${iimData.sequenceName}. This sequence already exists within the IIM Configuration table, skipping...`,
+					);
+					return;
+				} else {
+					logger.error(`[IIM]: Unable to create sequence specified by IIM Config Record. ${exception}`);
+					throw new lyricProvider.utils.errors.InternalServerError('Error processing IIM Configuration.');
+				}
+			}
+		});
 	},
 });
 

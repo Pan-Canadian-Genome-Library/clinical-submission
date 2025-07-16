@@ -29,15 +29,20 @@ const processIIMConfiguration = (iimEnvConfig: IIMConfig) => {
 	if (!iimEnvConfig.length) {
 		logger.warn('[IIM]: No IIM configurations present.');
 	}
-	try {
-		iimEnvConfig.map(async (iimConfig) => {
-			const result = await iimService(database).addIIMConfig(iimConfig);
-			if (result && result[0]) {
-				logger.debug(`[IIM]: Added record to config table: ${JSON.stringify(result[0])}`);
+
+	for (const config of iimEnvConfig) {
+		database.transaction(async (transaction) => {
+			try {
+				const recordResult = await iimService(database).addIIMConfig(config, transaction);
+				const sequenceResult = await iimService(database).createIMMSequence(config, transaction);
+				if (recordResult && recordResult[0]) {
+					logger.debug(`[IIM]: Added record to config table: ${JSON.stringify(recordResult[0])}`);
+				}
+				console.log(sequenceResult);
+			} catch (exception) {
+				logger.error('[IIM]: Unable to initialize IIM Config, rolling back configuration...');
 			}
 		});
-	} catch (exception) {
-		logger.error(exception);
 	}
 };
 
@@ -65,4 +70,25 @@ const findIDByHash = async (hashedValue: string) => {
 	return undefined;
 };
 
-export { findIDByHash, generateHash, processIIMConfiguration, retrieveIIMConfiguration };
+const getNextSequenceValue = async (sequenceName: IIMConfigObject['sequenceName']): Promise<number | undefined> => {
+	const database = getDbInstance();
+	return await iimService(database).getNextSequenceValue(sequenceName);
+};
+
+const generateID = (
+	nextSequenceValue: number,
+	entityPrefix: IIMConfigObject['prefix'],
+	paddingLength: IIMConfigObject['paddingLength'],
+) => {
+	const paddedString = String(nextSequenceValue).padStart(paddingLength, '0');
+	return `${entityPrefix}${paddedString}`;
+};
+
+export {
+	findIDByHash,
+	generateHash,
+	generateID,
+	getNextSequenceValue,
+	processIIMConfiguration,
+	retrieveIIMConfiguration,
+};

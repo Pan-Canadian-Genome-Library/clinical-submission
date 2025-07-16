@@ -21,7 +21,12 @@ import { logger } from '@/common/logger.js';
 import { dbConfig } from '@/config/dbConfig.js';
 import { env } from '@/config/envConfig.js';
 import { connectToDb } from '@/db/index.js';
-import { generateHash, processIIMConfiguration } from '@/internal/id-manager/utils.js';
+import {
+	generateHash,
+	generateID,
+	getNextSequenceValue,
+	processIIMConfiguration,
+} from '@/internal/id-manager/utils.js';
 import { app } from '@/server.js';
 
 const { NODE_ENV, SERVER_PORT } = env;
@@ -29,7 +34,7 @@ const { NODE_ENV, SERVER_PORT } = env;
 // Connect drizzle
 connectToDb(dbConfig.connectionString);
 
-const server = app.listen(SERVER_PORT, () => {
+const server = app.listen(SERVER_PORT, async () => {
 	logger.info(`Server started. Running in "${NODE_ENV}" mode. Listening to port ${SERVER_PORT}`);
 
 	if (NODE_ENV === 'development') {
@@ -37,7 +42,6 @@ const server = app.listen(SERVER_PORT, () => {
 	}
 
 	processIIMConfiguration(env.ID_MANAGER_CONFIG);
-	console.log(generateHash('test', 'test'));
 });
 
 const onCloseSignal = () => {

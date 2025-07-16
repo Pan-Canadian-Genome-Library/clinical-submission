@@ -28,3 +28,9 @@ export type PostgresTransaction = PgTransaction<
 	typeof schema,
 	ExtractTablesWithRelations<typeof schema>
 >;
+
+export type GeneratedIdentifiersTable = typeof schema.generatedIdentifiers.$inferInsert;
+export type GeneratedIdentifiersRecord = typeof schema.generatedIdentifiers.$inferSelect;
+
+export type IDGenerationConfigTable = typeof schema.idGenerationConfig.$inferInsert;
+export type IDGenerationConfigRecord = typeof schema.generatedIdentifiers.$inferSelect;
