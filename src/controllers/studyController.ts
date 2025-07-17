@@ -37,7 +37,7 @@ export const getAllStudies = validateRequest(listAllStudies, async (req, res, ne
 
 	try {
 		if (!user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user');
+			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
 		}
 
 		const results = await studyRepo.listStudies({ page: Number(page), orderBy, pageSize: Number(pageSize) });
