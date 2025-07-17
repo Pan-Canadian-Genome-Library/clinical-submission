@@ -21,12 +21,7 @@ import { logger } from '@/common/logger.js';
 import { dbConfig } from '@/config/dbConfig.js';
 import { env } from '@/config/envConfig.js';
 import { connectToDb } from '@/db/index.js';
-import {
-	generateHash,
-	generateID,
-	getNextSequenceValue,
-	processIIMConfiguration,
-} from '@/internal/id-manager/utils.js';
+import { processIIMConfiguration } from '@/internal/id-manager/utils.js';
 import { app } from '@/server.js';
 
 const { NODE_ENV, SERVER_PORT } = env;
@@ -34,13 +29,14 @@ const { NODE_ENV, SERVER_PORT } = env;
 // Connect drizzle
 connectToDb(dbConfig.connectionString);
 
-const server = app.listen(SERVER_PORT, async () => {
+const server = app.listen(SERVER_PORT, () => {
 	logger.info(`Server started. Running in "${NODE_ENV}" mode. Listening to port ${SERVER_PORT}`);
 
 	if (NODE_ENV === 'development') {
 		logger.info(`Swagger API Docs are available at http://localhost:${SERVER_PORT}/api-docs`);
 	}
 
+	logger.info('Initializing IIM Configuration...');
 	processIIMConfiguration(env.ID_MANAGER_CONFIG);
 });
 

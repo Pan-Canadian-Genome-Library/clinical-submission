@@ -22,8 +22,20 @@ import { type BinaryToTextEncoding, createHmac } from 'node:crypto';
 import { logger } from '@/common/logger.js';
 import { type IIMConfig, type IIMConfigObject } from '@/common/validation/id-manager-validation.js';
 import { getDbInstance } from '@/db/index.js';
+import { type IDGenerationConfigRecord, type IDGenerationConfigTable } from '@/db/types.js';
 import iimService from '@/service/idManagerService.js';
 
+/**
+ * Processes IIM Configuration passed in via the applications environment variables,
+ * and inserts them into the IIM Configuration table. It then also creates the associated
+ * sequences within the DB.
+ *
+ * **NOTE:** *This function operates as a transaction, meaning that if insertion of the record
+ * into the config table fails, or if the sequence creation fails, the transaction will rollback,
+ * leaving the table in a state as to what it was prior.*
+ *
+ * @param iimEnvConfig The required `ID_MANAGER_CONFIG` environment variable.
+ */
 const processIIMConfiguration = (iimEnvConfig: IIMConfig) => {
 	const database = getDbInstance();
 	if (!iimEnvConfig.length) {
@@ -50,7 +62,14 @@ const processIIMConfiguration = (iimEnvConfig: IIMConfig) => {
 	}
 };
 
-const retrieveIIMConfiguration = async (entityName: IIMConfigObject['entityName']) => {
+/**
+ * Retrieves the IIM Configuration variables associated with a particular entity.
+ * @param entityName The name of the entity to which this IIM config applies to.
+ * @returns `Promise<IDGenerationConfigTable | undefined>` - A promise containing the record from the config table associated with the entity,`undefined` if not found.
+ */
+const retrieveIIMConfiguration = async (
+	entityName: IIMConfigObject['entityName'],
+): Promise<IDGenerationConfigTable | undefined> => {
 	const database = getDbInstance();
 	const config = await iimService(database).getIIMConfig(entityName);
 
@@ -60,11 +79,24 @@ const retrieveIIMConfiguration = async (entityName: IIMConfigObject['entityName'
 	return undefined;
 };
 
-const generateHash = (plainText: string, secret: string, outputOptions: BinaryToTextEncoding = 'base64') => {
+/**
+ * Generates a HMAC SHA-256 hash value using a provided secret. Output can be specified via the `outputOptions` param
+ * by default this function outputs in `base64`.
+ * @param plainText A string containing the plaintext value that needs to be hashed.
+ * @param secret `ID_MANAGER_SECRET` - secret value used to hash the plaintext string.
+ * @param outputOptions Which format you would like the hash to output to. By default this is `base64`.
+ * @returns Hashed output string in various encoding options, based upon what `outputOptions` is set to. By default this is base64.
+ */
+const generateHash = (plainText: string, secret: string, outputOptions: BinaryToTextEncoding = 'base64'): string => {
 	return createHmac('sha256', secret).update(plainText).digest(outputOptions);
 };
 
-const findIDByHash = async (hashedValue: string) => {
+/**
+ * Finds a ID for an entity based upon its Hashed ID value.
+ * @param hashedValue the Hashed ID for an entity.
+ * @returns `Promise<IDGenerationConfigRecord | undefined>` - A promise containing the ID record. `undefined` if not found.
+ */
+const findIDByHash = async (hashedValue: string): Promise<IDGenerationConfigRecord | undefined> => {
 	const database = getDbInstance();
 	const hashedRecord = await iimService(database).getIDByHash(hashedValue);
 
@@ -74,16 +106,28 @@ const findIDByHash = async (hashedValue: string) => {
 	return undefined;
 };
 
+/**
+ * Gets the next value in a specified sequence.
+ * @param sequenceName The name of the sequence in the database.
+ * @returns `Promise<number | undefined>` - A number containing the next value in the sequence. `undefined` if not found.
+ */
 const getNextSequenceValue = async (sequenceName: IIMConfigObject['sequenceName']): Promise<number | undefined> => {
 	const database = getDbInstance();
 	return await iimService(database).getNextSequenceValue(sequenceName);
 };
 
+/**
+ * Generates an unique padded ID based upon the next sequence value provided to it via the DB, the prefix for the entity and the padding length.
+ * @param nextSequenceValue `number` containing the next sequence value.
+ * @param entityPrefix `string` containing the prefix for the ID.
+ * @param paddingLength `number` containing the total number of 0's preceding the value.
+ * @returns `string` - with the generated ID.
+ */
 const generateID = (
 	nextSequenceValue: number,
 	entityPrefix: IIMConfigObject['prefix'],
 	paddingLength: IIMConfigObject['paddingLength'],
-) => {
+): string => {
 	const paddedString = String(nextSequenceValue).padStart(paddingLength, '0');
 	return `${entityPrefix}${paddedString}`;
 };
