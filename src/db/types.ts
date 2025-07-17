@@ -17,37 +17,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { logger } from '@/common/logger.js';
-import { dbConfig } from '@/config/dbConfig.js';
-import { env } from '@/config/envConfig.js';
-import { connectToDb } from '@/db/index.js';
-import { processIIMConfiguration } from '@/internal/id-manager/utils.js';
-import { app } from '@/server.js';
+import { ExtractTablesWithRelations } from 'drizzle-orm';
+import { NodePgQueryResultHKT } from 'drizzle-orm/node-postgres';
+import { PgTransaction } from 'drizzle-orm/pg-core';
 
-const { NODE_ENV, SERVER_PORT } = env;
+import * as schema from '@/db/schemas/index.js';
 
-// Connect drizzle
-connectToDb(dbConfig.connectionString);
+export type PostgresTransaction = PgTransaction<
+	NodePgQueryResultHKT,
+	typeof schema,
+	ExtractTablesWithRelations<typeof schema>
+>;
 
-const server = app.listen(SERVER_PORT, () => {
-	logger.info(`Server started. Running in "${NODE_ENV}" mode. Listening to port ${SERVER_PORT}`);
+export type GeneratedIdentifiersTable = typeof schema.generatedIdentifiers.$inferInsert;
+export type GeneratedIdentifiersRecord = typeof schema.generatedIdentifiers.$inferSelect;
 
-	if (NODE_ENV === 'development') {
-		logger.info(`Swagger API Docs are available at http://localhost:${SERVER_PORT}/api-docs`);
-	}
-
-	logger.info('Initializing IIM Configuration...');
-	processIIMConfiguration(env.ID_MANAGER_CONFIG);
-});
-
-const onCloseSignal = () => {
-	logger.info('sigint received, shutting down');
-	server.close(() => {
-		logger.info('server closed');
-		process.exit();
-	});
-	setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
-};
-
-process.on('SIGINT', onCloseSignal);
-process.on('SIGTERM', onCloseSignal);
+export type IDGenerationConfigTable = typeof schema.idGenerationConfig.$inferInsert;
+export type IDGenerationConfigRecord = typeof schema.generatedIdentifiers.$inferSelect;

@@ -135,3 +135,6 @@ dist
 
 # VSCode settings
 .vscode
+
+# macOS specific artifact 
+.DS_Store
