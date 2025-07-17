@@ -15,6 +15,13 @@ components:
         schema:
           type: string
         description: ID of the DAC user
+      EntityName:
+        description: The name of the Entity
+        name: entityName
+        in: path
+        schema:
+          type: string
+        required: true
       Organization:
         name: organization
         in: path
@@ -33,6 +40,13 @@ components:
         schema:
           type: boolean
         required: false
+      Organization:
+        description: The name of the Organization
+        name: organization
+        in: query
+        schema:
+          type: string
+        required: true
       OrganizationFilter:
         description: Optional query parameter to filter results to include only submissions associated to an specific organization. By default, returns submissions from all organizations
         name: organization
@@ -63,6 +77,13 @@ components:
         schema:
           type: integer
         description: Optional query parameter to specify the number of results per page. Default value is 20
+      Value:
+        name: value
+        in: query
+        required: true
+        schema:
+          type: string
+        description: The value to search for in the specified field
       View:
         name: view
         in: query

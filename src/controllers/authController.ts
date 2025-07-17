@@ -19,12 +19,10 @@
 
 import type { Request, Response } from 'express';
 import { jwtDecode } from 'jwt-decode';
-import urlJoin from 'url-join';
 
 import type { CILogonToken } from '@/common/types/auth.js';
 import { OIDCCodeResponse } from '@/common/validation/auth-validation.js';
 import { authConfig } from '@/config/authConfig.js';
-import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { exchangeCodeForTokens, getOidcAuthorizeUrl } from '@/external/oidcAuthenticationClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';

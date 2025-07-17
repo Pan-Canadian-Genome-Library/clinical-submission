@@ -27,7 +27,7 @@
 	"license": "AGPL-3.0-or-later",
 	"type": "module",
 	"dependencies": {
-		"@overture-stack/lyric": "^0.9.1",
+		"@overture-stack/lyric": "^0.11.0",
 		"axios": "^1.10.0",
 		"bytes": "^3.1.2",
 		"cors": "^2.8.5",
