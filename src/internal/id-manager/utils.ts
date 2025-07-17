@@ -38,9 +38,13 @@ const processIIMConfiguration = (iimEnvConfig: IIMConfig) => {
 				if (recordResult && recordResult[0]) {
 					logger.debug(`[IIM]: Added record to config table: ${JSON.stringify(recordResult[0])}`);
 				}
-				console.log(sequenceResult);
+				if (sequenceResult) {
+					logger.debug(`[IIM]: Added sequence to DB: ${config.sequenceName} with start ${config.sequenceStart}`);
+				}
 			} catch (exception) {
-				logger.error('[IIM]: Unable to initialize IIM Config, rolling back configuration...');
+				logger.error(
+					'[IIM]: IIM not configured! Unable to initialize IIM Config due to DB errors, rolling back configuration...',
+				);
 			}
 		});
 	}

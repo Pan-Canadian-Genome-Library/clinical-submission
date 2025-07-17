@@ -53,6 +53,7 @@ export const isPostgresError = (
 export const PostgresErrors = {
 	UNIQUE_KEY_VIOLATION: '23505',
 	FOREIGN_KEY_VIOLATION: '23503',
+	IN_FAILED_SQL_TRANSACTION: '25P02',
 } as const;
 
 type PostgresErrors = (typeof PostgresErrors)[keyof typeof PostgresErrors];

@@ -31,61 +31,62 @@ import { isPostgresError, PostgresErrors } from '@/db/utils.js';
 const iimService = (db: PostgresDb) => ({
 	addIIMConfig: async (iimData: IIMConfigObject, transaction?: PostgresTransaction) => {
 		const dbTransaction = transaction ?? db;
-		return dbTransaction.transaction(async (transaction) => {
-			try {
-				const record = await transaction
-					.insert(idGenerationConfig)
-					.values({
-						entityName: iimData.entityName,
-						fieldName: iimData.fieldName,
-						paddingLength: iimData.paddingLength,
-						prefix: iimData.prefix,
-						sequenceName: iimData.sequenceName,
-						sequenceStart: iimData.sequenceStart,
-					})
-					.returning();
 
-				return record;
-			} catch (exception) {
-				const postgresError = isPostgresError(exception);
-				if (postgresError && postgresError.code === PostgresErrors.UNIQUE_KEY_VIOLATION) {
-					logger.debug(
-						`[IIM]: Can't insert record {"entityName: "${iimData.entityName}", "fieldName": "${iimData.fieldName}", "sequenceName": "${iimData.sequenceName}" ...}. This record already exists within the IIM Configuration table, skipping...`,
-					);
-					return;
-				} else {
-					logger.error(`[IIM]: Unable to insert IIM Configuration into database. ${exception}`);
-					throw new lyricProvider.utils.errors.InternalServerError('Unable to initialize IIM Service.');
-				}
+		try {
+			const record = await dbTransaction
+				.insert(idGenerationConfig)
+				.values({
+					entityName: iimData.entityName,
+					fieldName: iimData.fieldName,
+					paddingLength: iimData.paddingLength,
+					prefix: iimData.prefix,
+					sequenceName: iimData.sequenceName,
+					sequenceStart: iimData.sequenceStart,
+				})
+				.returning();
+
+			return record;
+		} catch (exception) {
+			const postgresError = isPostgresError(exception);
+			if (postgresError && postgresError.code === PostgresErrors.UNIQUE_KEY_VIOLATION) {
+				logger.debug(
+					`[IIM]: Can't insert record {"entityName: "${iimData.entityName}", "fieldName": "${iimData.fieldName}", "sequenceName": "${iimData.sequenceName}" ...}. This record already exists within the IIM Configuration table, skipping...`,
+				);
+				return;
+			} else {
+				logger.error(`[IIM]: Unable to insert IIM Configuration into database. ${exception}`);
+				throw new lyricProvider.utils.errors.InternalServerError('Unable to initialize IIM Service.');
 			}
-		});
+		}
 	},
 
 	getIIMConfig: async (entityName: IIMConfigObject['entityName'], transaction?: PostgresTransaction) => {
 		const dbTransaction = transaction ?? db;
-		return dbTransaction.transaction(async (transaction) => {
-			try {
-				return await transaction.select().from(idGenerationConfig).where(eq(idGenerationConfig.entityName, entityName));
-			} catch (exception) {
-				logger.error(`[IIM]: Unexpected error retrieving IIM Configuration. ${exception}`);
-				throw new lyricProvider.utils.errors.InternalServerError('Unexpected error retrieving IIM Configuration');
-			}
-		});
+
+		try {
+			return await dbTransaction.select().from(idGenerationConfig).where(eq(idGenerationConfig.entityName, entityName));
+		} catch (exception) {
+			logger.error(`[IIM]: Unexpected error retrieving IIM Configuration. ${exception}`);
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'IIM service encountered an Unexpected error retrieving IIM Configuration.',
+			);
+		}
 	},
 
 	getIDByHash: async (hashedValue: string, transaction?: PostgresTransaction) => {
 		const dbTransaction = transaction ?? db;
-		return dbTransaction.transaction(async (transaction) => {
-			try {
-				return await transaction
-					.select()
-					.from(generatedIdentifiers)
-					.where(eq(generatedIdentifiers.sourceHash, hashedValue));
-			} catch (exception) {
-				logger.error(`[IIM]: Unexpected error retrieving ID . ${exception}`);
-				throw new lyricProvider.utils.errors.InternalServerError('Unexpected error retrieving ID');
-			}
-		});
+
+		try {
+			return await dbTransaction
+				.select()
+				.from(generatedIdentifiers)
+				.where(eq(generatedIdentifiers.sourceHash, hashedValue));
+		} catch (exception) {
+			logger.error(`[IIM]: Unexpected error retrieving ID . ${exception}`);
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'IIM Service encountered an unexpected error while retrieving generated ID.',
+			);
+		}
 	},
 
 	getNextSequenceValue: async (sequenceName: IIMConfigObject['sequenceName']) => {
@@ -95,54 +96,59 @@ const iimService = (db: PostgresDb) => ({
 		} catch (exception) {
 			logger.error(`[IIM]: Unexpected error getting next sequence value. ${exception}`);
 			throw new lyricProvider.utils.errors.InternalServerError(
-				'Unexpected error while retrieving next IIM sequence value.',
+				'IIM Service encountered an unexpected error while retrieving next IIM sequence value.',
 			);
 		}
 	},
 
 	createIDRecord: async (IdRecord: GeneratedIdentifiersTable, transaction?: PostgresTransaction) => {
 		const dbTransaction = transaction ?? db;
-		return dbTransaction.transaction(async (transaction) => {
-			try {
-				const record = await transaction.insert(generatedIdentifiers).values(IdRecord).returning();
-				return record;
-			} catch (exception) {
-				const postgresError = isPostgresError(exception);
-				if (postgresError && postgresError.code === PostgresErrors.UNIQUE_KEY_VIOLATION) {
-					logger.error(
-						`[IIM]: Can't insert record with ID ${IdRecord.generatedId}. Record already exists within the table.`,
-					);
-					throw new lyricProvider.utils.errors.InternalServerError('Unable to create new ID record.');
-				} else {
-					logger.error(`[IIM]: Unable to insert IIM Configuration into database. ${exception}`);
-					throw new lyricProvider.utils.errors.InternalServerError('Unable to create new ID record.');
-				}
+
+		try {
+			const record = await dbTransaction.insert(generatedIdentifiers).values(IdRecord).returning();
+			return record;
+		} catch (exception) {
+			const postgresError = isPostgresError(exception);
+			if (postgresError && postgresError.code === PostgresErrors.UNIQUE_KEY_VIOLATION) {
+				logger.error(
+					`[IIM]: Can't insert record with ID ${IdRecord.generatedId}. Record already exists within the table.`,
+				);
+				throw new lyricProvider.utils.errors.InternalServerError('Unable to create new ID record.');
+			} else {
+				logger.error(`[IIM]: Unexpected error. Unable to insert new generated ID record. ${exception}`);
+				throw new lyricProvider.utils.errors.InternalServerError(
+					'IIM Service encountered an error creating new generated ID.',
+				);
 			}
-		});
+		}
 	},
 
 	createIMMSequence: async (iimData: IIMConfigObject, transaction?: PostgresTransaction) => {
 		const dbTransaction = transaction ?? db;
-		return dbTransaction.transaction(async (transaction) => {
-			try {
-				const sequenceCreationResult = await transaction.execute(
-					sql`CREATE SEQUENCE "${iimData.sequenceName}" START ${iimData.sequenceStart};`,
-				);
 
-				return sequenceCreationResult;
-			} catch (exception) {
-				const postgresError = isPostgresError(exception);
-				if (postgresError && postgresError.code === PostgresErrors.UNIQUE_KEY_VIOLATION) {
-					logger.debug(
-						`[IIM]: Can't add sequence ${iimData.sequenceName}. This sequence already exists within the IIM Configuration table, skipping...`,
-					);
-					return;
-				} else {
-					logger.error(`[IIM]: Unable to create sequence specified by IIM Config Record. ${exception}`);
-					throw new lyricProvider.utils.errors.InternalServerError('Error processing IIM Configuration.');
-				}
+		try {
+			const sequenceCreationResult = await dbTransaction.execute(
+				sql.raw(`CREATE SEQUENCE "${iimData.sequenceName}" START ${iimData.sequenceStart};`),
+			);
+
+			return sequenceCreationResult;
+		} catch (exception) {
+			const postgresError = isPostgresError(exception);
+			if (postgresError && postgresError.code === PostgresErrors.UNIQUE_KEY_VIOLATION) {
+				logger.debug(
+					`[IIM]: Can't add sequence ${iimData.sequenceName}. This sequence already exists within the IIM Configuration table, skipping...`,
+				);
+				return;
+			} else if (postgresError && postgresError.code === PostgresErrors.IN_FAILED_SQL_TRANSACTION) {
+				logger.debug(
+					`[IIM]: Can't add sequence "${iimData.sequenceName}". The SQL command prior to this one has caused the SQL transaction to abort. This is not necessarily a fatal error and can be intended behaviour if this function is chained with insertion into the configuration table.`,
+				);
+				return;
+			} else {
+				logger.error(`[IIM]: Unable to create sequence specified by IIM config record. ${exception}`);
+				throw new lyricProvider.utils.errors.InternalServerError('Unable to initialize IIM Service.');
 			}
-		});
+		}
 	},
 });
 
