@@ -19,6 +19,7 @@
 
 import { UserSession, UserSessionResult } from '@overture-stack/lyric';
 import { Request } from 'express';
+import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
 import {
@@ -38,7 +39,8 @@ import { lyricProvider } from '@/core/provider.js';
  */
 export const fetchUserData = async (token: string): Promise<PCGLUserSessionResult | UserSessionResult> => {
 	const { AUTHZ_ENDPOINT } = authConfig;
-	const url = `${AUTHZ_ENDPOINT}/user/me`;
+
+	const url = urlJoin(AUTHZ_ENDPOINT, `/user/me`);
 
 	const headers = new Headers({
 		Authorization: `Bearer ${token}`,
@@ -95,7 +97,8 @@ export const hasAllowedAccess = async (
 	user?: UserSession,
 ): Promise<boolean> => {
 	const { AUTHZ_ENDPOINT, actions, enabled } = authConfig;
-	const url = `${AUTHZ_ENDPOINT}/allowed`;
+
+	const url = urlJoin(AUTHZ_ENDPOINT, `/allowed`);
 
 	const headers = new Headers({
 		Authorization: `Bearer ${token}`,
