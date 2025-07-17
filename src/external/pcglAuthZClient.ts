@@ -159,9 +159,9 @@ export const extractAccessTokenFromHeader = (req: Request): string | undefined =
  * @returns boolean if user has admin group
  */
 const isAdmin = (groups: Group[]): boolean => {
-	const { AUTH_GROUP_ADMIN } = authConfig;
+	const { groups: configGroups } = authConfig;
 
-	return groups.some((val) => val.name === AUTH_GROUP_ADMIN);
+	return groups.some((val) => val.name === configGroups.admin);
 };
 
 /**

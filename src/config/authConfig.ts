@@ -38,11 +38,11 @@ const authConfigSchema = z.object({
 	AUTH_PROVIDER_HOST: z.string().url(),
 	AUTH_CLIENT_ID: z.string(),
 	AUTH_CLIENT_SECRET: z.string(),
-	AUTH_ACTION_WRITE_ENDPOINT: z.string(),
-	AUTH_ACTION_WRITE_METHOD: z.string(),
-	AUTH_ACTION_READ_ENDPOINT: z.string(),
-	AUTH_ACTION_READ_METHOD: z.string(),
-	AUTH_GROUP_ADMIN: z.string(),
+	AUTHZ_ACTION_WRITE_ENDPOINT: z.string(),
+	AUTHZ_ACTION_WRITE_METHOD: z.string(),
+	AUTHZ_ACTION_READ_ENDPOINT: z.string(),
+	AUTHZ_ACTION_READ_METHOD: z.string(),
+	AUTHZ_GROUP_ADMIN: z.string(),
 });
 
 const parseResult = authConfigSchema.safeParse(process.env);
@@ -55,16 +55,16 @@ export const authConfig = {
 	...parseResult.data,
 	actions: {
 		write: {
-			method: parseResult.data.AUTH_ACTION_READ_METHOD,
-			endpoint: parseResult.data.AUTH_ACTION_WRITE_ENDPOINT,
+			method: parseResult.data.AUTHZ_ACTION_READ_METHOD,
+			endpoint: parseResult.data.AUTHZ_ACTION_WRITE_ENDPOINT,
 		},
 		read: {
-			method: parseResult.data.AUTH_ACTION_READ_METHOD,
-			endpoint: parseResult.data.AUTH_ACTION_WRITE_ENDPOINT,
+			method: parseResult.data.AUTHZ_ACTION_READ_METHOD,
+			endpoint: parseResult.data.AUTHZ_ACTION_WRITE_ENDPOINT,
 		},
 	},
 	groups: {
-		admin: parseResult.data.AUTH_GROUP_ADMIN,
+		admin: parseResult.data.AUTHZ_GROUP_ADMIN,
 	},
 	enabled,
 	loginRedirectPath: urlJoin(env.API_HOST, '/auth/token'),
