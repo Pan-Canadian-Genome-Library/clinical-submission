@@ -33,21 +33,29 @@ import { userDataResponseSchema } from '@/common/validation/auth-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 
-/**
- * @param token Access token from Authz
- * @returns validated object of UserDataResponse
- */
-export const fetchUserData = async (token: string): Promise<PCGLUserSessionResult | UserSessionResult> => {
+const authZClient = async (resource: string, token: string, options?: RequestInit) => {
 	const { AUTHZ_ENDPOINT } = authConfig;
 
-	const url = urlJoin(AUTHZ_ENDPOINT, `/user/me`);
-
+	const url = urlJoin(AUTHZ_ENDPOINT, resource);
 	const headers = new Headers({
 		Authorization: `Bearer ${token}`,
 		'Content-Type': 'application/json',
 	});
 
-	const response = await fetch(url, { headers });
+	try {
+		return await fetch(url, { headers, ...options });
+	} catch (error) {
+		logger.error(`Bad request: Error occurred during fetch`, error);
+		throw new lyricProvider.utils.errors.InternalServerError(`Bad request: Something went wrong fetching permissions`);
+	}
+};
+
+/**
+ * @param token Access token from Authz
+ * @returns validated object of UserDataResponse
+ */
+export const fetchUserData = async (token: string): Promise<PCGLUserSessionResult | UserSessionResult> => {
+	const response = await authZClient(`/user/me`, token);
 
 	if (!response.ok) {
 		const errorResponse: UserDataResponseErrorType = await response.json();
@@ -93,26 +101,18 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 export const hasAllowedAccess = async (
 	study: string,
 	action: ActionIDsValues,
-	token?: string,
+	token: string,
 	user?: UserSession,
 ): Promise<boolean> => {
-	const { AUTHZ_ENDPOINT, actions, enabled } = authConfig;
-
-	const url = urlJoin(AUTHZ_ENDPOINT, `/allowed`);
-
-	const headers = new Headers({
-		Authorization: `Bearer ${token}`,
-		'Content-Type': 'application/json',
-	});
+	const { actions, enabled } = authConfig;
 
 	// If auth is disabled or if the user is an admin, skip all auth steps
 	if (!enabled || user?.isAdmin) {
 		return true;
 	}
 
-	const response = await fetch(url, {
+	const response = await authZClient(`/allowed`, token, {
 		method: 'POST',
-		headers,
 		body: JSON.stringify({
 			action: {
 				endpoint: action === ActionIDs.READ ? actions.read.endpoint : actions.write.endpoint,
