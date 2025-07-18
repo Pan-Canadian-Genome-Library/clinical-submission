@@ -37,12 +37,6 @@ const getAllDac = validateRequest(getAllDacData, async (req, res, next) => {
 
 		const params = req.query;
 
-		const user = req.user;
-
-		if (!user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
-		}
-
 		const result = await dacSvc.listAllDac({
 			orderBy: params.orderBy,
 			page: Number(params.page),
@@ -62,12 +56,6 @@ const getDacById = validateRequest(getDacByIdData, async (req, res, next) => {
 		const dacSvc = await dacService(database);
 
 		const dacId = req.params.dacId;
-
-		const user = req.user;
-
-		if (!user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
-		}
 
 		const result = await dacSvc.getDacById(dacId);
 
