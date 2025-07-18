@@ -78,6 +78,11 @@ const createDac = validateRequest(createDacData, async (req, res, next) => {
 		const dacSvc = await dacService(database);
 
 		const dacFields = req.body;
+		const user = req.user;
+
+		if (!user?.isAdmin) {
+			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
+		}
 
 		const result = await dacSvc.saveDac(dacFields);
 
@@ -94,6 +99,11 @@ const deleteDac = validateRequest(deleteDacByIdData, async (req, res, next) => {
 		const dacSvc = await dacService(database);
 
 		const dacId = req.params.dacId;
+		const user = req.user;
+
+		if (!user?.isAdmin) {
+			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
+		}
 
 		const result = await dacSvc.deleteDacById(dacId);
 
@@ -117,6 +127,11 @@ const updateDac = validateRequest(updateDacByIdData, async (req, res, next) => {
 
 		const dacId = req.params.dacId;
 		const dacFields = req.body;
+		const user = req.user;
+
+		if (!user?.isAdmin) {
+			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
+		}
 
 		const result = await dacSvc.updateDacById(dacId, dacFields);
 

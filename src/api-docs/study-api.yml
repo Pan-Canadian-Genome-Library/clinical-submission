@@ -7,6 +7,8 @@
       - $ref: '#/components/parameters/query/PageSize'
     tags:
       - Study
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: An array of all studies will be listed. Will return an empty array if no studies are present.
@@ -96,6 +98,8 @@
                 type: string
                 enum: ['COMPLETED', 'ONGOING']
                 description: Indicate if the study is completed or ongoing.
+    security:
+      - bearerAuth: []
     responses:
       201:
         description: Successfully created a new study.
@@ -124,6 +128,8 @@
         description: Unique identifier of the study in PCGL.
     tags:
       - Study
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Returns a record containing all information available on the study.
@@ -219,6 +225,8 @@
         schema:
           type: string
         description: Unique identifier of the study in PCGL.
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Successfully updated the requested study.
@@ -246,6 +254,8 @@
         description: Unique identifier of the study in PCGL.
     tags:
       - Study
+    security:
+      - bearerAuth: []
     responses:
       204:
         description: Successfully deleted a study by a Study ID. Note that as per the HTTP Spec, no content is returned.

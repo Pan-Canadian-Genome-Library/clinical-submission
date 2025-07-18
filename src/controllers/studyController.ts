@@ -63,8 +63,13 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 	const studyData = req.body;
 	const db = getDbInstance();
 	const studyRepo = studyService(db);
+	const user = req.user;
 
 	try {
+		if (!user?.isAdmin) {
+			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
+		}
+
 		const results = await studyRepo.createStudy(studyData);
 		if (!results) {
 			throw new lyricProvider.utils.errors.BadRequest(`Unable to create study with provided data.`);
@@ -80,8 +85,13 @@ export const deleteStudyById = validateRequest(getOrDeleteStudyByID, async (req,
 	const studyId = req.params.studyId;
 	const db = getDbInstance();
 	const studyRepo = studyService(db);
+	const user = req.user;
 
 	try {
+		if (!user?.isAdmin) {
+			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
+		}
+
 		const results = await studyRepo.deleteStudy(studyId);
 
 		if (!results) {
@@ -104,7 +114,13 @@ export const updateStudyById = validateRequest(updateStudy, async (req, res, nex
 	const db = getDbInstance();
 	const studyRepo = studyService(db);
 
+	const user = req.user;
+
 	try {
+		if (!user?.isAdmin) {
+			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
+		}
+
 		const results = await studyRepo.updateStudy(studyId, updateData);
 
 		if (!results) {
