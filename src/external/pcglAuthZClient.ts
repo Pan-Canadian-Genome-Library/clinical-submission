@@ -46,7 +46,9 @@ const authZClient = async (resource: string, token: string, options?: RequestIni
 		return await fetch(url, { headers, ...options });
 	} catch (error) {
 		logger.error(`Bad request: Error occurred during fetch`, error);
-		throw new lyricProvider.utils.errors.InternalServerError(`Bad request: Something went wrong fetching permissions`);
+		throw new lyricProvider.utils.errors.InternalServerError(
+			`Bad request: Something went wrong fetching from authz service`,
+		);
 	}
 };
 
@@ -92,6 +94,8 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 };
 
 /**
+ * 	NOTE: Not being used right now(7/18/2025) since only admin has permissions to make CRUD operations. Subject to change, with potential refactoring.
+ *
  * @param study Study user is trying to get access to
  * @param action Type of CRUD operation user is trying to do
  * @param token Access token from Authz
