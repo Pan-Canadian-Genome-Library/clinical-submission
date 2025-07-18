@@ -62,12 +62,12 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 	if (!response.ok) {
 		const errorResponse: UserDataResponseErrorType = await response.json();
 
-		logger.error(`Error retrieving user data.`, errorResponse.error);
+		logger.error(`Error retrieving user data.`, errorResponse);
 		switch (response.status) {
 			case 403:
-				throw new lyricProvider.utils.errors.Forbidden(errorResponse.error);
+				throw new lyricProvider.utils.errors.Forbidden(errorResponse.detail);
 			default:
-				throw new lyricProvider.utils.errors.InternalServerError(errorResponse.error);
+				throw new lyricProvider.utils.errors.InternalServerError(errorResponse.detail);
 		}
 	}
 
@@ -131,13 +131,13 @@ export const hasAllowedAccess = async (
 	if (!response.ok) {
 		const errorResponse: UserDataResponseErrorType = await response.json();
 
-		logger.error(`Error verifying user token.`, errorResponse.error);
+		logger.error(`Error verifying user token.`, errorResponse);
 
 		switch (response.status) {
 			case 403:
-				throw new lyricProvider.utils.errors.Forbidden(errorResponse.error);
+				throw new lyricProvider.utils.errors.Forbidden(errorResponse.detail);
 			default:
-				throw new lyricProvider.utils.errors.InternalServerError(errorResponse.error);
+				throw new lyricProvider.utils.errors.InternalServerError(errorResponse.detail);
 		}
 	}
 
