@@ -24,39 +24,51 @@ import { env } from '@/config/envConfig.js';
 
 import EnvironmentConfigError from './EnvironmentConfigError.js';
 
-function getAuthConfig() {
-	const enabled = env.AUTH_ENABLED === true;
-	// Enforce enabling auth when running in production
-	if (env.NODE_ENV === 'production' && !enabled) {
-		throw new EnvironmentConfigError(
-			`The application "NODE_ENV" is set to "production" while "AUTH_ENABLED" is not "true". Auth must be enabled to run in production.`,
-		);
-	}
+const enabled = env.AUTH_ENABLED === true;
 
-	if (!enabled) {
-		// Running with auth disabled may be useful for developers.
-		return { enabled };
-	}
-
-	const authConfigSchema = z.object({
-		AUTH_PROVIDER_HOST: z.string().url(),
-		AUTH_CLIENT_ID: z.string(),
-		AUTH_CLIENT_SECRET: z.string(),
-	});
-
-	const parseResult = authConfigSchema.safeParse(process.env);
-
-	if (!parseResult.success) {
-		throw new EnvironmentConfigError(`auth`, parseResult.error);
-	}
-
-	return {
-		...parseResult.data,
-		enabled,
-		loginRedirectPath: urlJoin(env.API_HOST, '/auth/token'),
-		logoutRedirectPath: urlJoin(env.API_HOST, '/api-docs/'),
-	};
+// Enforce enabling auth when running in production
+if (env.NODE_ENV === 'production' && !enabled) {
+	throw new EnvironmentConfigError(
+		`The application "NODE_ENV" is set to "production" while "AUTH_ENABLED" is not "true". Auth must be enabled to run in production.`,
+	);
 }
 
-export const authConfig = getAuthConfig();
-export type AuthConfig = typeof authConfig & { enabled: true };
+const authConfigSchema = z.object({
+	AUTHZ_ENDPOINT: z.string().url(),
+	AUTH_PROVIDER_HOST: z.string().url(),
+	AUTH_CLIENT_ID: z.string(),
+	AUTH_CLIENT_SECRET: z.string(),
+	AUTHZ_ACTION_WRITE_ENDPOINT: z.string(),
+	AUTHZ_ACTION_WRITE_METHOD: z.string(),
+	AUTHZ_ACTION_READ_ENDPOINT: z.string(),
+	AUTHZ_ACTION_READ_METHOD: z.string(),
+	AUTHZ_GROUP_ADMIN: z.string(),
+});
+
+const parseResult = authConfigSchema.safeParse(process.env);
+
+if (!parseResult.success) {
+	throw new EnvironmentConfigError(`auth`, parseResult.error);
+}
+
+export const authConfig = {
+	...parseResult.data,
+	actions: {
+		write: {
+			method: parseResult.data.AUTHZ_ACTION_READ_METHOD,
+			endpoint: parseResult.data.AUTHZ_ACTION_WRITE_ENDPOINT,
+		},
+		read: {
+			method: parseResult.data.AUTHZ_ACTION_READ_METHOD,
+			endpoint: parseResult.data.AUTHZ_ACTION_WRITE_ENDPOINT,
+		},
+	},
+	groups: {
+		admin: parseResult.data.AUTHZ_GROUP_ADMIN,
+	},
+	enabled,
+	loginRedirectPath: urlJoin(env.API_HOST, '/auth/token'),
+	logoutRedirectPath: urlJoin(env.API_HOST, '/api-docs/'),
+};
+
+export type AuthConfig = typeof authConfig;

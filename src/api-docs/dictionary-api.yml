@@ -87,6 +87,8 @@
               - categoryName
               - dictionaryName
               - dictionaryVersion
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Dictionary info

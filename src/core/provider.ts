@@ -1,6 +1,7 @@
 import { AppConfig, provider } from '@overture-stack/lyric';
 
 import { env } from '@/config/envConfig.js';
+import { adminMiddleware } from '@/middleware/auth.js';
 
 const appConfig: AppConfig = {
 	db: {
@@ -13,6 +14,7 @@ const appConfig: AppConfig = {
 	auth: {
 		enabled: env.AUTH_ENABLED,
 		protectedMethods: env.AUTH_PROTECT_METHODS,
+		customAuthHandler: adminMiddleware,
 	},
 	idService: {
 		customAlphabet: env.ID_CUSTOM_ALPHABET,
