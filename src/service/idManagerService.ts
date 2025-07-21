@@ -29,7 +29,7 @@ import type { GeneratedIdentifiersTable, PostgresTransaction } from '@/db/types.
 import { isPostgresError, PostgresErrors } from '@/db/utils.js';
 
 const generateSequenceName = (iimData: IIMConfigObject): string => {
-	return `${iimData.entityName}-${iimData.fieldName}-sequence`;
+	return `${iimData.entityName}_${iimData.fieldName}_seq`.toLowerCase();
 };
 
 const iimService = (db: PostgresDb) => ({
