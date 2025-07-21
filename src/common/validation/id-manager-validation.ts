@@ -26,8 +26,7 @@ export const iimConfigObject = z.object({
 	paddingLength: z.number().int().positive().default(8),
 	parentEntityName: z.string().optional(),
 	parentFieldName: z.string().optional(),
-	sequenceName: z.string(),
-	sequenceStart: z.number().int().positive(),
+	sequenceStart: z.number().int().positive().default(1),
 });
 export type IIMConfigObject = z.infer<typeof iimConfigObject>;
 

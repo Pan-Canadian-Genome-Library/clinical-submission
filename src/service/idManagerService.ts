@@ -28,6 +28,10 @@ import { generatedIdentifiers, idGenerationConfig } from '@/db/schemas/idGenerat
 import type { GeneratedIdentifiersTable, PostgresTransaction } from '@/db/types.js';
 import { isPostgresError, PostgresErrors } from '@/db/utils.js';
 
+const generateSequenceName = (iimData: IIMConfigObject): string => {
+	return `${iimData.entityName}-${iimData.fieldName}-sequence`;
+};
+
 const iimService = (db: PostgresDb) => ({
 	addIIMConfig: async (iimData: IIMConfigObject, transaction?: PostgresTransaction) => {
 		const dbTransaction = transaction ?? db;
@@ -40,7 +44,7 @@ const iimService = (db: PostgresDb) => ({
 					fieldName: iimData.fieldName,
 					paddingLength: iimData.paddingLength,
 					prefix: iimData.prefix,
-					sequenceName: iimData.sequenceName,
+					sequenceName: generateSequenceName(iimData),
 					sequenceStart: iimData.sequenceStart,
 				})
 				.returning();
@@ -50,7 +54,7 @@ const iimService = (db: PostgresDb) => ({
 			const postgresError = isPostgresError(exception);
 			if (postgresError && postgresError.code === PostgresErrors.UNIQUE_KEY_VIOLATION) {
 				logger.debug(
-					`[IIM]: Can't insert record {"entityName: "${iimData.entityName}", "fieldName": "${iimData.fieldName}", "sequenceName": "${iimData.sequenceName}" ...}. This record already exists within the IIM Configuration table, skipping...`,
+					`[IIM]: Can't insert record {"entityName: "${iimData.entityName}", "fieldName": "${iimData.fieldName}"  ...}. This record already exists within the IIM Configuration table, skipping...`,
 				);
 				return;
 			} else {
@@ -89,7 +93,7 @@ const iimService = (db: PostgresDb) => ({
 		}
 	},
 
-	getNextSequenceValue: async (sequenceName: IIMConfigObject['sequenceName']) => {
+	getNextSequenceValue: async (sequenceName: string) => {
 		try {
 			const nextValue: QueryResult<Record<'nextval', number>> = await db.execute(sql`SELECT nextval(${sequenceName})`);
 			return nextValue.rows[0] ? nextValue.rows[0].nextval : undefined;
@@ -123,27 +127,31 @@ const iimService = (db: PostgresDb) => ({
 		}
 	},
 
-	createIMMSequence: async (iimData: IIMConfigObject, transaction?: PostgresTransaction) => {
+	createIMMSequence: async (
+		iimData: IIMConfigObject,
+		transaction?: PostgresTransaction,
+	): Promise<[QueryResult<Record<string, unknown>> | undefined, string]> => {
 		const dbTransaction = transaction ?? db;
+		const sequenceName = generateSequenceName(iimData);
 
 		try {
 			const sequenceCreationResult = await dbTransaction.execute(
-				sql.raw(`CREATE SEQUENCE "${iimData.sequenceName}" START ${iimData.sequenceStart};`),
+				sql.raw(`CREATE SEQUENCE "${sequenceName}" START ${iimData.sequenceStart};`),
 			);
 
-			return sequenceCreationResult;
+			return [sequenceCreationResult, sequenceName];
 		} catch (exception) {
 			const postgresError = isPostgresError(exception);
 			if (postgresError && postgresError.code === PostgresErrors.UNIQUE_KEY_VIOLATION) {
 				logger.debug(
-					`[IIM]: Can't add sequence ${iimData.sequenceName}. This sequence already exists within the IIM Configuration table, skipping...`,
+					`[IIM]: Can't add sequence ${sequenceName}. This sequence already exists within the IIM Configuration table, skipping...`,
 				);
-				return;
+				return [undefined, sequenceName];
 			} else if (postgresError && postgresError.code === PostgresErrors.IN_FAILED_SQL_TRANSACTION) {
 				logger.debug(
-					`[IIM]: Can't add sequence "${iimData.sequenceName}". The SQL command prior to this one has caused the SQL transaction to abort. This is not necessarily a fatal error and can be intended behaviour if this function is chained with insertion into the configuration table.`,
+					`[IIM]: Can't add sequence "${sequenceName}". The SQL command prior to this one has caused the SQL transaction to abort. This is not necessarily a fatal error and can be intended behaviour if this function is chained with insertion into the configuration table.`,
 				);
-				return;
+				return [undefined, sequenceName];
 			} else {
 				logger.error(`[IIM]: Unable to create sequence specified by IIM config record. ${exception}`);
 				throw new lyricProvider.utils.errors.InternalServerError('Unable to initialize IIM Service.');

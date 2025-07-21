@@ -50,8 +50,10 @@ const processIIMConfiguration = (iimEnvConfig: IIMConfig) => {
 				if (recordResult && recordResult[0]) {
 					logger.debug(`[IIM]: Added record to config table: ${JSON.stringify(recordResult[0])}`);
 				}
-				if (sequenceResult) {
-					logger.debug(`[IIM]: Added sequence to DB: ${config.sequenceName} with start ${config.sequenceStart}`);
+
+				const [sequenceSQLResult, sequenceName] = sequenceResult;
+				if (sequenceSQLResult) {
+					logger.debug(`[IIM]: Added sequence to DB: ${sequenceName} with start ${config.sequenceStart}`);
 				}
 			} catch (exception) {
 				logger.error(
@@ -111,7 +113,7 @@ const findIDByHash = async (hashedValue: string): Promise<IDGenerationConfigReco
  * @param sequenceName The name of the sequence in the database.
  * @returns `Promise<number | undefined>` - A number containing the next value in the sequence. `undefined` if not found.
  */
-const getNextSequenceValue = async (sequenceName: IIMConfigObject['sequenceName']): Promise<number | undefined> => {
+const getNextSequenceValue = async (sequenceName: string): Promise<number | undefined> => {
 	const database = getDbInstance();
 	return await iimService(database).getNextSequenceValue(sequenceName);
 };
