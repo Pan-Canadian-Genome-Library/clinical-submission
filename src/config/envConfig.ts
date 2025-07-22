@@ -21,6 +21,7 @@ import dotenv from 'dotenv';
 import { z } from 'zod';
 
 import { processCoercedBoolean } from '@/common/validation/common.js';
+import { iimConfig } from '@/common/validation/id-manager-validation.js';
 
 const NodeEnvOptions = ['development', 'production'] as const;
 const LogLevelOptions = ['error', 'warn', 'info', 'debug'] as const;
@@ -39,14 +40,6 @@ const validatorConfigSchema = z.object({
 	categoryId: z.number(),
 	entityName: z.string(),
 	fieldName: z.string(),
-});
-const IDManagerConfigSchema = z.object({
-	entityName: z.string(),
-	fieldName: z.string(),
-	prefix: z.string(),
-	paddingLength: z.coerce.number().default(8),
-	parentEntityName: z.string().optional(),
-	parentFieldName: z.string().optional(),
 });
 
 dotenv.config();
@@ -72,7 +65,7 @@ const envSchema = z.object({
 	ID_MANAGER_CONFIG: z.string().transform((val, ctx) => {
 		try {
 			const parsed = JSON.parse(val);
-			const validation = z.array(IDManagerConfigSchema).safeParse(parsed);
+			const validation = iimConfig.safeParse(parsed);
 			if (!validation.success) {
 				const errorMessages = validation.error.errors
 					.map((issue) => `${issue.path.join('.')} is ${issue.message}`)
