@@ -70,7 +70,7 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 				throw new lyricProvider.utils.errors.InternalServerError(errorResponse.detail);
 			default:
 				throw new lyricProvider.utils.errors.InternalServerError(
-					'Something went wrong verifying user, please try again.',
+					'Something went wrong while verifying PCGL user account information, please try again later.',
 				);
 		}
 	}
@@ -144,7 +144,7 @@ export const hasAllowedAccess = async (
 				throw new lyricProvider.utils.errors.InternalServerError(errorResponse.detail);
 			default:
 				throw new lyricProvider.utils.errors.InternalServerError(
-					'Something went wrong verifying user, please try again.',
+					'Something went wrong while verifying PCGL user account information, please try again later.',
 				);
 		}
 	}
