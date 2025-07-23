@@ -66,6 +66,8 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 		switch (response.status) {
 			case 403:
 				throw new lyricProvider.utils.errors.Forbidden(errorResponse.error);
+			case 500:
+				throw new lyricProvider.utils.errors.InternalServerError(errorResponse.detail);
 			default:
 				throw new lyricProvider.utils.errors.InternalServerError(
 					'Something went wrong verifying user, please try again.',
@@ -138,6 +140,8 @@ export const hasAllowedAccess = async (
 		switch (response.status) {
 			case 403:
 				throw new lyricProvider.utils.errors.Forbidden(errorResponse.error);
+			case 500:
+				throw new lyricProvider.utils.errors.InternalServerError(errorResponse.detail);
 			default:
 				throw new lyricProvider.utils.errors.InternalServerError(
 					'Something went wrong verifying user, please try again.',
