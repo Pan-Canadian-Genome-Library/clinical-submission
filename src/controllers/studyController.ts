@@ -86,6 +86,7 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 		const studyConfig = await retrieveIIMConfiguration('Study');
 
 		if (!studyConfig) {
+			logger.error(`[Study/IIM]: ID Generation is misconfigured! Study table ID Generation does NOT exist.`);
 			throw new lyricProvider.utils.errors.InternalServerError(
 				'Study table ID generation config does not exist. Unable to create studies.',
 			);
@@ -94,6 +95,9 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 		const convertedStudyData = convertFromStudyDTO(studyData);
 
 		if (!isValidStudyField(studyConfig.fieldName)) {
+			logger.error(
+				`[Study/IIM]: ID Generation is misconfigured! ${studyConfig.fieldName} does NOT exist within the study table!`,
+			);
 			throw new lyricProvider.utils.errors.InternalServerError(
 				`ID generation is misconfigured! ${studyConfig.fieldName} doesn't exist in study table.`,
 			);
@@ -114,7 +118,7 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 		const nextSequence = await getNextSequenceValue(studyConfig.sequenceName);
 		if (!nextSequence) {
 			logger.error(
-				`Error creating study. IIM Config somehow references an unknown sequence? ${studyConfig.sequenceName}`,
+				`[Study/IIM]: Error creating study. IIM Config somehow references an unknown sequence? ${studyConfig.sequenceName}`,
 			);
 			throw new lyricProvider.utils.errors.InternalServerError('Unable to create study. Cannot generate ID.');
 		}
