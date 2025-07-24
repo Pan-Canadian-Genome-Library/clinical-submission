@@ -25,6 +25,7 @@ import { CreateStudyFields } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
 import { study } from '@/db/schemas/studiesSchema.js';
+import { PostgresTransaction } from '@/db/types.js';
 import { isPostgresError, PostgresErrors } from '@/db/utils.js';
 
 const convertToStudyDTO = (study: StudyRecord): StudyDTO => {
@@ -137,9 +138,14 @@ const studyService = (db: PostgresDb) => ({
 		return studyRecords[0];
 	},
 
-	createStudy: async (studyData: CreateStudyFields): Promise<StudyDTO | undefined> => {
+	createStudy: async (
+		studyData: CreateStudyFields,
+		transaction?: PostgresTransaction,
+	): Promise<StudyDTO | undefined> => {
+		const dbDriver = transaction ? transaction : db;
+
 		try {
-			const newStudyRecord = await db.insert(study).values(convertFromStudyDTO(studyData)).returning();
+			const newStudyRecord = await dbDriver.insert(study).values(convertFromStudyDTO(studyData)).returning();
 
 			if (newStudyRecord[0]) {
 				return convertToStudyDTO(newStudyRecord[0]);

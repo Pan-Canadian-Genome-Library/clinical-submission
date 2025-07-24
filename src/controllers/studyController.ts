@@ -23,8 +23,10 @@ import {
 	listAllStudies,
 	updateStudy,
 } from '@/common/validation/study-validation.js';
+import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
+import { findIDByHash, generateHash, retrieveIIMConfiguration } from '@/internal/id-manager/utils.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import { studyService } from '@/service/studyService.js';
 
@@ -67,9 +69,40 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 
 	try {
 		if (!user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
+			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 		}
 
+		const studyConfig = await retrieveIIMConfiguration('Study');
+
+		if (!studyConfig) {
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'ID generation config does not exist. Unable to create studies.',
+			);
+		}
+
+		const entityToHash = studyConfig.entityName;
+
+		if (!(entityToHash in Object.keys(studyData))) {
+			throw new lyricProvider.utils.errors.InternalServerError(
+				`ID generation is misconfigured! ${entityToHash} doesn't exist in study table.`,
+			);
+		}
+
+		const hashableData: string = String(studyData[entityToHash]);
+
+		const idmHash = generateHash(hashableData, env.ID_MANAGER_SECRET);
+
+		const existingHashRecord = await findIDByHash(idmHash);
+
+		if (existingHashRecord) {
+			throw new lyricProvider.utils.errors.BadRequest(
+				`${studyData.studyId} already exists in studies. Study name must be unique.`,
+			);
+		}
+
+		// const tr = db.transaction(await (transaction) => {
+
+		// });
 		const results = await studyRepo.createStudy(studyData);
 		if (!results) {
 			throw new lyricProvider.utils.errors.BadRequest(`Unable to create study with provided data.`);
@@ -89,7 +122,7 @@ export const deleteStudyById = validateRequest(getOrDeleteStudyByID, async (req,
 
 	try {
 		if (!user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
+			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 		}
 
 		const results = await studyRepo.deleteStudy(studyId);
@@ -118,7 +151,7 @@ export const updateStudyById = validateRequest(updateStudy, async (req, res, nex
 
 	try {
 		if (!user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
+			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 		}
 
 		const results = await studyRepo.updateStudy(studyId, updateData);
