@@ -19,10 +19,14 @@
 
 import { type BinaryToTextEncoding, createHmac } from 'node:crypto';
 
+import { getTableColumns } from 'drizzle-orm';
+
 import { logger } from '@/common/logger.js';
+import { StudyModel } from '@/common/types/study.js';
 import { type IIMConfig, type IIMConfigObject } from '@/common/validation/id-manager-validation.js';
 import { getDbInstance } from '@/db/index.js';
-import { type IDGenerationConfigRecord, type IDGenerationConfigTable } from '@/db/types.js';
+import { study } from '@/db/schemas/studiesSchema.js';
+import { GeneratedIdentifiersRecord, type IDGenerationConfigRecord } from '@/db/types.js';
 import iimService from '@/service/idManagerService.js';
 
 /**
@@ -59,6 +63,7 @@ const processIIMConfiguration = (iimEnvConfig: IIMConfig) => {
 				logger.error(
 					'[IIM]: IIM not configured! Unable to initialize IIM Config due to DB errors, rolling back configuration...',
 				);
+				return;
 			}
 		});
 	}
@@ -71,7 +76,7 @@ const processIIMConfiguration = (iimEnvConfig: IIMConfig) => {
  */
 const retrieveIIMConfiguration = async (
 	entityName: IIMConfigObject['entityName'],
-): Promise<IDGenerationConfigTable | undefined> => {
+): Promise<IDGenerationConfigRecord | undefined> => {
 	const database = getDbInstance();
 	const config = await iimService(database).getIIMConfig(entityName);
 
@@ -98,7 +103,7 @@ const generateHash = (plainText: string, secret: string, outputOptions: BinaryTo
  * @param hashedValue the Hashed ID for an entity.
  * @returns `Promise<IDGenerationConfigRecord | undefined>` - A promise containing the ID record. `undefined` if not found.
  */
-const findIDByHash = async (hashedValue: string): Promise<IDGenerationConfigRecord | undefined> => {
+const findIDByHash = async (hashedValue: string): Promise<GeneratedIdentifiersRecord | undefined> => {
 	const database = getDbInstance();
 	const hashedRecord = await iimService(database).getIDByHash(hashedValue);
 
@@ -134,11 +139,16 @@ const generateID = (
 	return `${entityPrefix}${paddedString}`;
 };
 
+function isValidStudyField(value: string): value is keyof Omit<StudyModel, 'created_at' | 'updated_at'> {
+	return Object.keys(getTableColumns(study)).includes(value);
+}
+
 export {
 	findIDByHash,
 	generateHash,
 	generateID,
 	getNextSequenceValue,
+	isValidStudyField,
 	processIIMConfiguration,
 	retrieveIIMConfiguration,
 };

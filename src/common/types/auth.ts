@@ -62,12 +62,17 @@ export type Group = {
 	name: string;
 };
 
-export type UserDataResponseErrorType = {
-	type: string;
-	title: string;
-	detail: string;
-	status: number;
-};
+export type UserDataResponseErrorType =
+	| {
+			type: string;
+			title: string;
+			detail: string;
+			status: number;
+	  }
+	| {
+			error: string;
+	  };
+
 // Lyrics UserSessionResult's UserSession needs to be extended to include groups
 export type PCGLUserSessionResult = Omit<UserSessionResult, 'user'> & {
 	user?: UserSession & UserSessionExtended;

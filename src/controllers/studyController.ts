@@ -17,6 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { logger } from '@/common/logger.js';
 import {
 	createStudy,
 	getOrDeleteStudyByID,
@@ -26,9 +27,18 @@ import {
 import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
-import { findIDByHash, generateHash, retrieveIIMConfiguration } from '@/internal/id-manager/utils.js';
+import {
+	findIDByHash,
+	generateHash,
+	generateID,
+	getNextSequenceValue,
+	isValidStudyField,
+	retrieveIIMConfiguration,
+} from '@/internal/id-manager/utils.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
+import iimService from '@/service/idManagerService.js';
 import { studyService } from '@/service/studyService.js';
+import { convertFromStudyDTO } from '@/service/utils.js';
 
 export const getAllStudies = validateRequest(listAllStudies, async (req, res, next) => {
 	const db = getDbInstance();
@@ -65,6 +75,7 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 	const studyData = req.body;
 	const db = getDbInstance();
 	const studyRepo = studyService(db);
+	const iimRepo = iimService(db);
 	const user = req.user;
 
 	try {
@@ -76,39 +87,62 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 
 		if (!studyConfig) {
 			throw new lyricProvider.utils.errors.InternalServerError(
-				'ID generation config does not exist. Unable to create studies.',
+				'Study table ID generation config does not exist. Unable to create studies.',
 			);
 		}
 
-		const entityToHash = studyConfig.entityName;
+		const convertedStudyData = convertFromStudyDTO(studyData);
 
-		if (!(entityToHash in Object.keys(studyData))) {
+		if (!isValidStudyField(studyConfig.fieldName)) {
 			throw new lyricProvider.utils.errors.InternalServerError(
-				`ID generation is misconfigured! ${entityToHash} doesn't exist in study table.`,
+				`ID generation is misconfigured! ${studyConfig.fieldName} doesn't exist in study table.`,
 			);
 		}
 
-		const hashableData: string = String(studyData[entityToHash]);
-
+		const entityToHash = studyConfig.fieldName;
+		const hashableData: string = String(convertedStudyData[entityToHash]);
 		const idmHash = generateHash(hashableData, env.ID_MANAGER_SECRET);
 
-		const existingHashRecord = await findIDByHash(idmHash);
+		const existingHashEntry = await findIDByHash(idmHash);
 
-		if (existingHashRecord) {
+		if (existingHashEntry) {
 			throw new lyricProvider.utils.errors.BadRequest(
 				`${studyData.studyId} already exists in studies. Study name must be unique.`,
 			);
 		}
 
-		// const tr = db.transaction(await (transaction) => {
-
-		// });
-		const results = await studyRepo.createStudy(studyData);
-		if (!results) {
-			throw new lyricProvider.utils.errors.BadRequest(`Unable to create study with provided data.`);
+		const nextSequence = await getNextSequenceValue(studyConfig.sequenceName);
+		if (!nextSequence) {
+			logger.error(
+				`Error creating study. IIM Config somehow references an unknown sequence? ${studyConfig.sequenceName}`,
+			);
+			throw new lyricProvider.utils.errors.InternalServerError('Unable to create study. Cannot generate ID.');
 		}
-		res.status(201).send(results);
-		return;
+
+		const generatedID = generateID(nextSequence, studyConfig.prefix, studyConfig.paddingLength);
+		db.transaction(async (transaction) => {
+			try {
+				const createID = await iimRepo.createIDRecord(
+					{
+						sourceHash: idmHash,
+						configId: studyConfig.id,
+						generatedId: generatedID,
+					},
+					transaction,
+				);
+
+				const results = await studyRepo.createStudy(studyData, transaction);
+
+				if (!results || !createID) {
+					throw new lyricProvider.utils.errors.BadRequest(`Unable to create study with provided data.`);
+				}
+
+				res.status(201).send(results);
+				return;
+			} catch (exception) {
+				next(exception);
+			}
+		});
 	} catch (exception) {
 		next(exception);
 	}
