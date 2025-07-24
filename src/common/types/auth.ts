@@ -26,42 +26,6 @@ export const ActionIDs = {
 
 export type ActionIDsValues = (typeof ActionIDs)[keyof typeof ActionIDs];
 
-export type UserInfo = {
-	emails: Email[];
-	pcgl_id: string | number;
-	site_admin: boolean;
-	site_curator: boolean;
-};
-
-export type UserDataResponse = {
-	userinfo: UserInfo;
-	study_authorizations: StudyAuthorization;
-	dac_authorizations: DacAuthorization[];
-	groups: Group[];
-};
-
-export type Email = {
-	address: string;
-	type: string;
-};
-
-export type StudyAuthorization = {
-	editable_studies: string[];
-	readable_studies: string[];
-};
-
-export type DacAuthorization = {
-	study_id: string;
-	start_date: string;
-	end_date: string;
-};
-
-export type Group = {
-	id: number | string;
-	description: string;
-	name: string;
-};
-
 export type UserDataResponseErrorType = {
 	type: string;
 	title: string;
