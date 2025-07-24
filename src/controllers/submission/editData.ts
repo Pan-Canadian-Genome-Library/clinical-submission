@@ -5,6 +5,7 @@ import { z } from 'zod';
 
 import { logger } from '@/common/logger.js';
 import { lyricProvider } from '@/core/provider.js';
+import { extractAccessTokenFromHeader, hasAllowedAccess } from '@/external/pcglAuthZClient.js';
 import { type RequestValidation, validateRequest } from '@/middleware/requestValidation.js';
 import { prevalidateEditFile } from '@/submission/fileValidation.js';
 import { parseFileToRecords } from '@/submission/readFile.js';
@@ -35,10 +36,16 @@ export const editData = validateRequest(editDataRequestSchema, async (req, res, 
 		const organization = req.body.organization;
 
 		const user = req.user;
+		const token = extractAccessTokenFromHeader(req);
 
-		if (!user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
+		if (!token || !user) {
+			throw new lyricProvider.utils.errors.Forbidden('Unauthorized: Unable to authorize user');
 		}
+
+		if (await hasAllowedAccess(organization, 'WRITE', token, user)) {
+			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
+		}
+
 		const username = user.username;
 
 		logger.info(
