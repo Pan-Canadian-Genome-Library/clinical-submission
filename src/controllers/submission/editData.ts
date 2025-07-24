@@ -42,7 +42,7 @@ export const editData = validateRequest(editDataRequestSchema, async (req, res, 
 			throw new lyricProvider.utils.errors.Forbidden('Unauthorized: Unable to authorize user');
 		}
 
-		if (await hasAllowedAccess(organization, 'WRITE', token, user)) {
+		if (!(await hasAllowedAccess(organization, 'WRITE', token, user.isAdmin))) {
 			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 		}
 

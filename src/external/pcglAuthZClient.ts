@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { UserSession, UserSessionResult } from '@overture-stack/lyric';
+import { UserSessionResult } from '@overture-stack/lyric';
 import { Request } from 'express';
 import urlJoin from 'url-join';
 
@@ -112,12 +112,12 @@ export const hasAllowedAccess = async (
 	study: string,
 	action: ActionIDsValues,
 	token: string,
-	user?: UserSession,
+	isAdmin: boolean,
 ): Promise<boolean> => {
 	const { actions, enabled } = authConfig;
 
 	// If auth is disabled or if the user is an admin, skip all auth steps
-	if (!enabled || user?.isAdmin) {
+	if (!enabled || isAdmin) {
 		return true;
 	}
 
