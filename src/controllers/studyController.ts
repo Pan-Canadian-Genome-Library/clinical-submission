@@ -67,7 +67,7 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 
 	try {
 		if (!user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
+			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 		}
 
 		const results = await studyRepo.createStudy(studyData);
@@ -89,7 +89,7 @@ export const deleteStudyById = validateRequest(getOrDeleteStudyByID, async (req,
 
 	try {
 		if (!user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
+			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 		}
 
 		const results = await studyRepo.deleteStudy(studyId);
@@ -118,7 +118,7 @@ export const updateStudyById = validateRequest(updateStudy, async (req, res, nex
 
 	try {
 		if (!user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
+			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 		}
 
 		const results = await studyRepo.updateStudy(studyId, updateData);

@@ -91,7 +91,7 @@ export const adminMiddleware = async (req: Request) => {
 		if (!result.user?.isAdmin) {
 			return {
 				errorCode: 403,
-				errorMessage: 'Forbidden: Must be an admin to access this resource',
+				errorMessage: 'Forbidden: You must be an admin to access this resource',
 			};
 		}
 

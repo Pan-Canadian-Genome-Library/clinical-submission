@@ -55,7 +55,7 @@ export const submit = validateRequest(submitRequestSchema, async (req, res, next
 		const user = req.user;
 
 		if (!user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
+			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 		}
 
 		const username = user.username;
