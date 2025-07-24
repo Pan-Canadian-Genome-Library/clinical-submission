@@ -34,8 +34,12 @@ export const editData = validateRequest(editDataRequestSchema, async (req, res, 
 		const files = Array.isArray(req.files) ? req.files : [];
 		const organization = req.body.organization;
 
-		// TODO: get username from auth
-		const username = '';
+		const user = req.user;
+
+		if (!user?.isAdmin) {
+			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
+		}
+		const username = user.username;
 
 		logger.info(
 			`Edit Data Submission Request: categoryId '${categoryId}'`,

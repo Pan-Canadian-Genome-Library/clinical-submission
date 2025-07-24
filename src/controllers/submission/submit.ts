@@ -52,9 +52,13 @@ export const submit = validateRequest(submitRequestSchema, async (req, res, next
 		const categoryId = Number(req.params.categoryId);
 		const files = Array.isArray(req.files) ? req.files : [];
 		const organization = req.body.organization;
+		const user = req.user;
 
-		// TODO: get username from auth
-		const username = '';
+		if (!user?.isAdmin) {
+			throw new lyricProvider.utils.errors.Forbidden('Must be an admin user.');
+		}
+
+		const username = user.username;
 
 		logger.info(
 			`Upload Submission Request: categoryId '${categoryId}'` +
