@@ -68,9 +68,13 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 				throw new lyricProvider.utils.errors.Forbidden(
 					'error' in errorResponse ? errorResponse.error : errorResponse.detail,
 				);
-			default:
+			case 500:
 				throw new lyricProvider.utils.errors.InternalServerError(
 					'error' in errorResponse ? errorResponse.error : errorResponse.detail,
+				);
+			default:
+				throw new lyricProvider.utils.errors.InternalServerError(
+					'Something went wrong while verifying PCGL user account information, please try again later.',
 				);
 		}
 	}
@@ -142,9 +146,13 @@ export const hasAllowedAccess = async (
 				throw new lyricProvider.utils.errors.Forbidden(
 					'error' in errorResponse ? errorResponse.error : errorResponse.detail,
 				);
-			default:
+			case 500:
 				throw new lyricProvider.utils.errors.InternalServerError(
 					'error' in errorResponse ? errorResponse.error : errorResponse.detail,
+				);
+			default:
+				throw new lyricProvider.utils.errors.InternalServerError(
+					'Something went wrong while verifying PCGL user account information, please try again later.',
 				);
 		}
 	}
