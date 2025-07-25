@@ -33,4 +33,4 @@ export type GeneratedIdentifiersTable = typeof schema.generatedIdentifiers.$infe
 export type GeneratedIdentifiersRecord = typeof schema.generatedIdentifiers.$inferSelect;
 
 export type IDGenerationConfigTable = typeof schema.idGenerationConfig.$inferInsert;
-export type IDGenerationConfigRecord = typeof schema.generatedIdentifiers.$inferSelect;
+export type IDGenerationConfigRecord = typeof schema.idGenerationConfig.$inferSelect;
