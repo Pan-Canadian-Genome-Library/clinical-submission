@@ -25,10 +25,9 @@ import { lyricProvider } from '@/core/provider.js';
 import { extractAccessTokenFromHeader, fetchUserData } from '@/external/pcglAuthZClient.js';
 
 /**
- * Middleware to handle authentication.
- *
- * Middleware that returns PCGLUserSessionResult to req.user. Does not check if belongs to study here since study endpoints can have their id's
- * passed to the backend using params or as fields in body. To check if a user has access to a study is done with hasAllowedAccess applied in the study endpoints
+ * Middleware to handle authentication that returns PCGLUserSessionResult to req.user.
+ * Only validation is checking if token exists or not, then returned user object/information from authz is added to req.user.
+ * To check if a user has permissions to any specific endpoints must be done on the controller level from the passed req.user object
  */
 export const authMiddleware = () => {
 	const { enabled } = authConfig;
@@ -56,6 +55,13 @@ export const authMiddleware = () => {
 	};
 };
 
+/**
+ * Auth Middleware that checks specifically for admin user.
+ * Used for lyric endpoints, and is provided as a custom configuration in the appConfig of lyricProvider
+ *
+ * @param req request object
+ * @returns
+ */
 export const adminMiddleware = async (req: Request) => {
 	const { enabled } = authConfig;
 
@@ -85,7 +91,7 @@ export const adminMiddleware = async (req: Request) => {
 		if (!result.user?.isAdmin) {
 			return {
 				errorCode: 403,
-				errorMessage: 'Forbidden: Must be an admin to access this resource',
+				errorMessage: 'Forbidden: You must be an admin to access this resource',
 			};
 		}
 

@@ -58,6 +58,9 @@ export const userDataResponseSchema = z.object({
 	),
 });
 
+export type UserDataResponseSchemaType = z.infer<typeof userDataResponseSchema>;
+export type Groups = Pick<UserDataResponseSchemaType, 'groups'>;
+
 export const oidcUserInfoResponseSchema = z.object({
 	sub: z.string(),
 	given_name: z.string().optional(),

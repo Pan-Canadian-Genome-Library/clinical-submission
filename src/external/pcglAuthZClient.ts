@@ -17,23 +17,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { UserSession, UserSessionResult } from '@overture-stack/lyric';
+import { UserSessionResult } from '@overture-stack/lyric';
 import { Request } from 'express';
 import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
-import {
-	ActionIDs,
-	ActionIDsValues,
-	Group,
-	PCGLUserSessionResult,
-	UserDataResponseErrorType,
-} from '@/common/types/auth.js';
-import { userDataResponseSchema } from '@/common/validation/auth-validation.js';
+import { ActionIDs, ActionIDsValues, PCGLUserSessionResult, UserDataResponseErrorType } from '@/common/types/auth.js';
+import { Groups, userDataResponseSchema, UserDataResponseSchemaType } from '@/common/validation/auth-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 
-const authZClient = async (resource: string, token: string, options?: RequestInit) => {
+/**
+ *  Function to perform fetch requests to AUTHZ service
+ *
+ * @param resource endpoint to query from authz
+ * @param token authorization token
+ * @param options optional additional request configurations for the fetch call
+ *
+ */
+const fetchAuthZResource = async (resource: string, token: string, options?: RequestInit) => {
 	const { AUTHZ_ENDPOINT } = authConfig;
 
 	const url = urlJoin(AUTHZ_ENDPOINT, resource);
@@ -45,42 +47,46 @@ const authZClient = async (resource: string, token: string, options?: RequestIni
 	try {
 		return await fetch(url, { headers, ...options });
 	} catch (error) {
-		logger.error(`Bad request: Error occurred during fetch`, error);
-		throw new lyricProvider.utils.errors.InternalServerError(
-			`Bad request: Something went wrong fetching from authz service`,
-		);
+		logger.error(`[AUTHZ]: Something went wrong fetching authz service. ${error}`);
+		throw new lyricProvider.utils.errors.InternalServerError(`Bad request: Something went wrong verifying user data`);
 	}
 };
 
 /**
+ *	Fetches user data from authz. This user information is then return as a user object PCGLUserSessionResult or UserSessionResult
  * @param token Access token from Authz
  * @returns validated object of UserDataResponse
  */
 export const fetchUserData = async (token: string): Promise<PCGLUserSessionResult | UserSessionResult> => {
-	const response = await authZClient(`/user/me`, token);
+	const response = await fetchAuthZResource(`/user/me`, token);
 
 	if (!response.ok) {
 		const errorResponse: UserDataResponseErrorType = await response.json();
 
-		logger.error(`Error retrieving user data.`, errorResponse);
+		logger.error(`[AUTHZ]: Unable to verify user response from AUTHZ. ${errorResponse}`);
+
+		const responseMessage =
+			'Something went wrong while verifying PCGL user account information, please try again later.';
+
 		switch (response.status) {
+			case 401:
 			case 403:
-				throw new lyricProvider.utils.errors.Forbidden(errorResponse.error);
-			case 500:
-				throw new lyricProvider.utils.errors.InternalServerError(errorResponse.detail);
-			default:
-				throw new lyricProvider.utils.errors.InternalServerError(
-					'Something went wrong while verifying PCGL user account information, please try again later.',
+				throw new lyricProvider.utils.errors.Forbidden(responseMessage);
+			case 404:
+				throw new lyricProvider.utils.errors.NotFound(
+					"This account is currently not associated within the PCGL project. This may be due to the fact that you haven't completed the onboarding process for new accounts, or have logged in with an account not previously used to access the service.",
 				);
+			default:
+				throw new lyricProvider.utils.errors.InternalServerError(responseMessage);
 		}
 	}
 
-	const result = await response.json();
+	const result: UserDataResponseSchemaType = await response.json();
 
 	const responseValidation = userDataResponseSchema.safeParse(result);
 
 	if (!responseValidation.success) {
-		logger.error(`Error retrieving user data.`, responseValidation.error);
+		logger.error(`[AUTHZ]: Malformed response object from AUTHZ. ${responseValidation.error}`);
 
 		throw new lyricProvider.utils.errors.ServiceUnavailable('User object response has unexpected format');
 	}
@@ -88,9 +94,9 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 	const userTokenInfo: PCGLUserSessionResult = {
 		user: {
 			username: `${responseValidation.data.userinfo.pcgl_id}`,
-			isAdmin: isAdmin(responseValidation.data.groups),
+			isAdmin: isAdmin({ groups: responseValidation.data.groups }),
 			allowedWriteOrganizations: responseValidation.data.study_authorizations.editable_studies,
-			groups: extractUserGroups(responseValidation.data.groups),
+			groups: extractUserGroups({ groups: responseValidation.data.groups }),
 		},
 	};
 
@@ -98,7 +104,6 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 };
 
 /**
- * 	NOTE: Not being used right now(7/18/2025) since only admin has permissions to make CRUD operations. Subject to change, with potential refactoring.
  *
  * @param study Study user is trying to get access to
  * @param action Type of CRUD operation user is trying to do
@@ -110,16 +115,16 @@ export const hasAllowedAccess = async (
 	study: string,
 	action: ActionIDsValues,
 	token: string,
-	user?: UserSession,
+	isAdmin: boolean,
 ): Promise<boolean> => {
 	const { actions, enabled } = authConfig;
 
 	// If auth is disabled or if the user is an admin, skip all auth steps
-	if (!enabled || user?.isAdmin) {
+	if (!enabled || isAdmin) {
 		return true;
 	}
 
-	const response = await authZClient(`/allowed`, token, {
+	const response = await fetchAuthZResource(`/allowed`, token, {
 		method: 'POST',
 		body: JSON.stringify({
 			action: {
@@ -135,17 +140,21 @@ export const hasAllowedAccess = async (
 	if (!response.ok) {
 		const errorResponse: UserDataResponseErrorType = await response.json();
 
-		logger.error(`Error verifying user token.`, errorResponse);
+		logger.error(`[AUTHZ]: Unable to verify user access to this study/organization from AUTHZ. ${errorResponse}`);
+
+		const responseMessage =
+			'Something went wrong while verifying PCGL user account information, please try again later.';
 
 		switch (response.status) {
+			case 401:
 			case 403:
-				throw new lyricProvider.utils.errors.Forbidden(errorResponse.error);
-			case 500:
-				throw new lyricProvider.utils.errors.InternalServerError(errorResponse.detail);
-			default:
-				throw new lyricProvider.utils.errors.InternalServerError(
-					'Something went wrong while verifying PCGL user account information, please try again later.',
+				throw new lyricProvider.utils.errors.Forbidden(responseMessage);
+			case 404:
+				throw new lyricProvider.utils.errors.NotFound(
+					"This account is currently not associated within the PCGL project. This may be due to the fact that you haven't completed the onboarding process for new accounts, or have logged in with an account not previously used to access the service.",
 				);
+			default:
+				throw new lyricProvider.utils.errors.InternalServerError(responseMessage);
 		}
 	}
 
@@ -155,7 +164,11 @@ export const hasAllowedAccess = async (
 };
 
 /**
- * Simple helper function to extract access token from header
+ *	Function that takes in request object, checks if theres an authorization header and returns its token
+ *  Only works with Bearer type authorization values
+ *
+ * @param req Request object
+ * @returns Access token or undefined depending if authorization header exists or authorization type is NOT Bearer
  */
 export const extractAccessTokenFromHeader = (req: Request): string | undefined => {
 	const authHeader = req.headers['authorization'];
@@ -163,14 +176,14 @@ export const extractAccessTokenFromHeader = (req: Request): string | undefined =
 		return;
 	}
 
-	return authHeader.split(' ')[1];
+	return authHeader.replace('Bearer ', '').trim();
 };
 
 /**
  * @param groups List of groups users belongs to
  * @returns boolean if user has admin group
  */
-const isAdmin = (groups: Group[]): boolean => {
+const isAdmin = ({ groups }: Groups): boolean => {
 	const { groups: configGroups } = authConfig;
 
 	return groups.some((val) => val.name === configGroups.admin);
@@ -180,11 +193,6 @@ const isAdmin = (groups: Group[]): boolean => {
  * @param groups List of groups user belongs to
  * @returns array of strings with names of the groups
  */
-const extractUserGroups = (groups: Group[]): string[] => {
-	const parsedGroups: string[] = groups.reduce((acu: string[], currentGroup) => {
-		acu.push(currentGroup.name);
-		return acu;
-	}, []);
-
-	return parsedGroups;
+const extractUserGroups = ({ groups }: Groups): string[] => {
+	return groups.map((currentGroup) => currentGroup.name);
 };

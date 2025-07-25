@@ -43,6 +43,7 @@ const authConfigSchema = z.object({
 	AUTHZ_ACTION_READ_ENDPOINT: z.string(),
 	AUTHZ_ACTION_READ_METHOD: z.string(),
 	AUTHZ_GROUP_ADMIN: z.string(),
+	AUTHZ_GROUP_SUBMITTERS: z.string(),
 });
 
 const parseResult = authConfigSchema.safeParse(process.env);
@@ -65,6 +66,7 @@ export const authConfig = {
 	},
 	groups: {
 		admin: parseResult.data.AUTHZ_GROUP_ADMIN,
+		submitter: parseResult.data.AUTHZ_GROUP_SUBMITTERS,
 	},
 	enabled,
 	loginRedirectPath: urlJoin(env.API_HOST, '/auth/token'),
