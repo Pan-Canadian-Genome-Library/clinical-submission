@@ -69,6 +69,7 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 			'Something went wrong while verifying PCGL user account information, please try again later.';
 
 		switch (response.status) {
+			case 401:
 			case 403:
 				throw new lyricProvider.utils.errors.Forbidden(responseMessage);
 			case 404:
@@ -145,6 +146,7 @@ export const hasAllowedAccess = async (
 			'Something went wrong while verifying PCGL user account information, please try again later.';
 
 		switch (response.status) {
+			case 401:
 			case 403:
 				throw new lyricProvider.utils.errors.Forbidden(responseMessage);
 			case 404:
