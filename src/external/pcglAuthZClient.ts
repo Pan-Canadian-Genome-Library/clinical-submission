@@ -47,10 +47,8 @@ const fetchAuthZResource = async (resource: string, token: string, options?: Req
 	try {
 		return await fetch(url, { headers, ...options });
 	} catch (error) {
-		logger.error(`Bad request: Error occurred during fetch`, error);
-		throw new lyricProvider.utils.errors.InternalServerError(
-			`Bad request: Something went wrong fetching from authz service`,
-		);
+		logger.error(`[AUTHZ]: Something went wrong fetching authz service. ${error}`);
+		throw new lyricProvider.utils.errors.InternalServerError(`Bad request: Something went wrong verifying user data`);
 	}
 };
 
@@ -65,16 +63,20 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 	if (!response.ok) {
 		const errorResponse: UserDataResponseErrorType = await response.json();
 
-		logger.error(`Error retrieving user data.`, errorResponse);
+		logger.error(`[AUTHZ]: Unable to verify user response from AUTHZ. ${errorResponse}`);
+
+		const responseMessage =
+			'Something went wrong while verifying PCGL user account information, please try again later.';
+
 		switch (response.status) {
 			case 403:
-				throw new lyricProvider.utils.errors.Forbidden(errorResponse.error);
-			case 500:
-				throw new lyricProvider.utils.errors.InternalServerError(errorResponse.detail);
-			default:
-				throw new lyricProvider.utils.errors.InternalServerError(
-					'Something went wrong while verifying PCGL user account information, please try again later.',
+				throw new lyricProvider.utils.errors.Forbidden(responseMessage);
+			case 404:
+				throw new lyricProvider.utils.errors.NotFound(
+					"This account is currently not associated within the PCGL project. This may be due to the fact that you haven't completed the onboarding process for new accounts, or have logged in with an account not previously used to access the service.",
 				);
+			default:
+				throw new lyricProvider.utils.errors.InternalServerError(responseMessage);
 		}
 	}
 
@@ -83,7 +85,7 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 	const responseValidation = userDataResponseSchema.safeParse(result);
 
 	if (!responseValidation.success) {
-		logger.error(`Error retrieving user data.`, responseValidation.error);
+		logger.error(`[AUTHZ]: Malformed response object from AUTHZ. ${responseValidation.error}`);
 
 		throw new lyricProvider.utils.errors.ServiceUnavailable('User object response has unexpected format');
 	}
@@ -137,17 +139,20 @@ export const hasAllowedAccess = async (
 	if (!response.ok) {
 		const errorResponse: UserDataResponseErrorType = await response.json();
 
-		logger.error(`Error verifying user token.`, errorResponse);
+		logger.error(`[AUTHZ]: Unable to verify user access to this study/organization from AUTHZ. ${errorResponse}`);
+
+		const responseMessage =
+			'Something went wrong while verifying PCGL user account information, please try again later.';
 
 		switch (response.status) {
 			case 403:
-				throw new lyricProvider.utils.errors.Forbidden(errorResponse.error);
-			case 500:
-				throw new lyricProvider.utils.errors.InternalServerError(errorResponse.detail);
-			default:
-				throw new lyricProvider.utils.errors.InternalServerError(
-					'Something went wrong while verifying PCGL user account information, please try again later.',
+				throw new lyricProvider.utils.errors.Forbidden(responseMessage);
+			case 404:
+				throw new lyricProvider.utils.errors.NotFound(
+					"This account is currently not associated within the PCGL project. This may be due to the fact that you haven't completed the onboarding process for new accounts, or have logged in with an account not previously used to access the service.",
 				);
+			default:
+				throw new lyricProvider.utils.errors.InternalServerError(responseMessage);
 		}
 	}
 
