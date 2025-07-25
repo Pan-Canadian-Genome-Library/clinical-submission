@@ -90,6 +90,8 @@ footer {
 
 button,
 .button {
+	font-size: 0.95rem;
+	text-decoration: none;
 	cursor: pointer;
 	background-color: var(--pcgl-colour-black);
 	color: var(--pcgl-colour-white);
@@ -229,6 +231,11 @@ summary {
 	margin: auto;
 	display: flex;
 	flex-direction: column;
+
+	&.login_content {
+		justify-content: center;
+		align-items: center;
+	}
 }
 
 .content-full {
@@ -287,5 +294,32 @@ summary {
 	&.expired {
 		font-weight: 500;
 		color: var(--pcgl-colour-red);
+	}
+}
+
+.login_box {
+	display: flex;
+	flex-direction: column;
+	margin-top: -10rem;
+	width: 50%;
+	/* background-color: var(--grey-subtle); */
+	padding: var(--standard-padding);
+	border: transparent 1px solid;
+	border-radius: var(--standard-border-radius);
+}
+
+.login_box__buttons {
+	margin-top: 1.5rem;
+	width: 100%;
+	display: flex;
+	text-align: center;
+}
+
+@media (width <= 1250px) {
+	.login_box {
+		display: flex;
+		flex-direction: column;
+		margin-top: -10rem;
+		width: 100%;
 	}
 }

@@ -28,6 +28,15 @@ import { exchangeCodeForTokens, getOidcAuthorizeUrl } from '@/external/oidcAuthe
 import { validateRequest } from '@/middleware/requestValidation.js';
 
 const login = async (request: Request, response: Response) => {
+	response.render('login.njk', {
+		app_title: 'Clinical Submission',
+		app_subheading: 'Login',
+		redirect_url: '/auth/redirect',
+		currentYear: new Date().getFullYear(),
+	});
+};
+
+const redirect = async (request: Request, response: Response) => {
 	if (!authConfig.enabled) {
 		response.status(400).json({ error: 'AUTH_DISABLED', message: 'Authentication is disabled.' });
 		return;
@@ -115,4 +124,4 @@ const token = validateRequest(OIDCCodeResponse, async (request, response, next) 
 	}
 });
 
-export { login, logout, token };
+export { login, logout, redirect, token };

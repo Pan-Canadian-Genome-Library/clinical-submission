@@ -19,7 +19,7 @@
 
 import express, { json, Router, urlencoded } from 'express';
 
-import { login, logout, token } from '@/controllers/authController.js';
+import { login, logout, redirect, token } from '@/controllers/authController.js';
 
 export const authRouter: Router = (() => {
 	const router = express.Router();
@@ -27,6 +27,7 @@ export const authRouter: Router = (() => {
 	router.use(urlencoded({ extended: false }));
 
 	router.get('/login', login);
+	router.get('/redirect', redirect);
 	router.get('/logout', logout);
 	router.get('/token', token);
 
