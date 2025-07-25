@@ -36,6 +36,8 @@
         in: path
         type: string
         required: true
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Submission cleared successfully. Returns the current Active Submission
@@ -85,6 +87,8 @@
         schema:
           type: integer
         description: An optional query parameter used to specify the index of the item within the submission type to be deleted. <br />If not provided all the items within the submission type will be deleted.
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Submission cleared successfully. Returns the current Active Submission
@@ -144,6 +148,8 @@
         in: path
         type: string
         required: true
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Commit Submission Result
@@ -171,6 +177,8 @@
       - multipart/form-data
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
+    security:
+      - bearerAuth: []
     requestBody:
       content:
         multipart/form-data:
@@ -210,6 +218,8 @@
       - multipart/form-data
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
+    security:
+      - bearerAuth: []
     requestBody:
       content:
         multipart/form-data:
@@ -255,6 +265,8 @@
         schema:
           type: string
         description: The unique system ID of the data to be deleted
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Delete Data request accepted
