@@ -195,8 +195,6 @@
             required:
               - files
               - organization
-    security:
-      - bearerAuth: []
     responses:
       200:
         description: Submission accepted
@@ -238,8 +236,6 @@
             required:
               - files
               - organization
-    security:
-      - bearerAuth: []
     responses:
       200:
         description: Edit Data request accepted
