@@ -53,8 +53,7 @@ export const submit = validateRequest(submitRequestSchema, async (req, res, next
 		const files = Array.isArray(req.files) ? req.files : [];
 		const organization = req.body.organization;
 
-		// TODO: get username from auth
-		const username = '';
+		const username = req.user?.username || '';
 
 		logger.info(
 			`Upload Submission Request: categoryId '${categoryId}'` +
