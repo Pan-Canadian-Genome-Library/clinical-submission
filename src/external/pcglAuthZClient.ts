@@ -96,6 +96,7 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 			username: `${responseValidation.data.userinfo.pcgl_id}`,
 			isAdmin: isAdmin({ groups: responseValidation.data.groups }),
 			allowedWriteOrganizations: responseValidation.data.study_authorizations.editable_studies,
+			allowedReadOrganizations: responseValidation.data.study_authorizations.readable_studies,
 			groups: extractUserGroups({ groups: responseValidation.data.groups }),
 		},
 	};
@@ -152,67 +153,4 @@ const isAdmin = ({ groups }: Groups): boolean => {
  */
 const extractUserGroups = ({ groups }: Groups): string[] => {
 	return groups.map((currentGroup) => currentGroup.name);
-};
-
-/**
- *
- * NOTE: previous solution, before user/me returned "study_authorizations"
- *		 Currently unused, will leave for now incase of spec changes
- *
- * @param study Study user is trying to get access to
- * @param action Type of CRUD operation user is trying to do
- * @param token Access token from Authz
- * @param user User information
- * @returns True or false depending if the user has access to the study
- */
-export const hasAllowedAccessAuthz = async (
-	study: string,
-	action: ActionIDsValues,
-	token: string,
-	isAdmin: boolean,
-): Promise<boolean> => {
-	const { actions, enabled } = authConfig;
-
-	// If auth is disabled or if the user is an admin, skip all auth steps
-	if (!enabled || isAdmin) {
-		return true;
-	}
-
-	const response = await fetchAuthZResource(`/allowed`, token, {
-		method: 'POST',
-		body: JSON.stringify({
-			action: {
-				endpoint: action === ActionIDs.READ ? actions.read.endpoint : actions.write.endpoint,
-				method: action === ActionIDs.READ ? actions.read.method : actions.write.method,
-			},
-			path: action === ActionIDs.READ ? actions.read.endpoint : actions.write.endpoint,
-			method: action === ActionIDs.READ ? actions.read.method : actions.write.method,
-			studies: [study],
-		}),
-	});
-
-	if (!response.ok) {
-		const errorResponse: UserDataResponseErrorType = await response.json();
-
-		logger.error(`[AUTHZ]: Unable to verify user access to this study/organization from AUTHZ. ${errorResponse}`);
-
-		const responseMessage =
-			'Something went wrong while verifying PCGL user account information, please try again later.';
-
-		switch (response.status) {
-			case 401:
-			case 403:
-				throw new lyricProvider.utils.errors.Forbidden(responseMessage);
-			case 404:
-				throw new lyricProvider.utils.errors.NotFound(
-					"This account is currently not associated within the PCGL project. This may be due to the fact that you haven't completed the onboarding process for new accounts, or have logged in with an account not previously used to access the service.",
-				);
-			default:
-				throw new lyricProvider.utils.errors.InternalServerError(responseMessage);
-		}
-	}
-
-	const result = await response.json();
-
-	return result[0];
 };

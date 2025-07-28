@@ -38,10 +38,6 @@ const authConfigSchema = z.object({
 	AUTH_PROVIDER_HOST: z.string().url(),
 	AUTH_CLIENT_ID: z.string(),
 	AUTH_CLIENT_SECRET: z.string(),
-	AUTHZ_ACTION_WRITE_ENDPOINT: z.string(),
-	AUTHZ_ACTION_WRITE_METHOD: z.string(),
-	AUTHZ_ACTION_READ_ENDPOINT: z.string(),
-	AUTHZ_ACTION_READ_METHOD: z.string(),
 	AUTHZ_GROUP_ADMIN: z.string(),
 	AUTHZ_GROUP_SUBMITTERS: z.string(),
 });
@@ -54,16 +50,6 @@ if (!parseResult.success) {
 
 export const authConfig = {
 	...parseResult.data,
-	actions: {
-		write: {
-			method: parseResult.data.AUTHZ_ACTION_READ_METHOD,
-			endpoint: parseResult.data.AUTHZ_ACTION_WRITE_ENDPOINT,
-		},
-		read: {
-			method: parseResult.data.AUTHZ_ACTION_READ_METHOD,
-			endpoint: parseResult.data.AUTHZ_ACTION_WRITE_ENDPOINT,
-		},
-	},
 	groups: {
 		admin: parseResult.data.AUTHZ_GROUP_ADMIN,
 		submitter: parseResult.data.AUTHZ_GROUP_SUBMITTERS,

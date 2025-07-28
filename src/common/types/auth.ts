@@ -41,6 +41,7 @@ export type PCGLUserSessionResult = Omit<UserSessionResult, 'user'> & {
 
 export type UserSessionExtended = {
 	groups: string[];
+	allowedReadOrganizations: string[];
 };
 
 /**
