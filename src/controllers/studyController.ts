@@ -38,7 +38,7 @@ import {
 import { validateRequest } from '@/middleware/requestValidation.js';
 import iimService from '@/service/idManagerService.js';
 import { studyService } from '@/service/studyService.js';
-import { convertFromStudyDTO } from '@/service/utils.js';
+import { convertToRecordFromStudyDTO } from '@/service/dtoConversion.js';
 
 export const getAllStudies = validateRequest(listAllStudies, async (req, res, next) => {
 	const db = getDbInstance();
@@ -92,7 +92,7 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 			);
 		}
 
-		const convertedStudyData = convertFromStudyDTO(studyData);
+		const convertedStudyData = convertToRecordFromStudyDTO(studyData);
 
 		if (!isValidStudyField(studyConfig.fieldName)) {
 			logger.error(

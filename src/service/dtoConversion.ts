@@ -19,7 +19,7 @@
 
 import { StudyDTO, StudyModel, StudyRecord } from '@/common/types/study.js';
 
-export const convertToStudyDTO = (study: StudyRecord): StudyDTO => {
+export const convertFromRecordToStudyDTO = (study: StudyRecord): StudyDTO => {
 	return {
 		studyId: study.study_id,
 		dacId: study.dac_id,
@@ -41,7 +41,7 @@ export const convertToStudyDTO = (study: StudyRecord): StudyDTO => {
 	};
 };
 
-export const convertFromStudyDTO = (
+export const convertToRecordFromStudyDTO = (
 	studyData: Omit<StudyDTO, 'updatedAt' | 'createdAt'>,
 ): Omit<StudyModel, 'created_at' | 'updated_at'> => {
 	return {
@@ -63,7 +63,7 @@ export const convertFromStudyDTO = (
 	};
 };
 
-export const convertFromPartialStudyDTO = (
+export const convertToRecordFromPartialStudyDTO = (
 	studyData: Partial<Omit<StudyDTO, 'updatedAt' | 'createdAt' | 'studyId'>>,
 ): Partial<Omit<StudyModel, 'created_at' | 'updated_at' | 'study_id'>> => {
 	return {

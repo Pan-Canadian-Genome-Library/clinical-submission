@@ -27,7 +27,11 @@ import { PostgresDb } from '@/db/index.js';
 import { study } from '@/db/schemas/studiesSchema.js';
 import { PostgresTransaction } from '@/db/types.js';
 import { isPostgresError, PostgresErrors } from '@/db/utils.js';
-import { convertFromPartialStudyDTO, convertFromStudyDTO, convertToStudyDTO } from '@/service/utils.js';
+import {
+	convertToRecordFromPartialStudyDTO,
+	convertToRecordFromStudyDTO,
+	convertFromRecordToStudyDTO,
+} from '@/service/dtoConversion.js';
 
 const studyService = (db: PostgresDb) => ({
 	listStudies: async ({
@@ -53,7 +57,7 @@ const studyService = (db: PostgresDb) => ({
 				'Something went wrong while fetching studies. Please try again later.',
 			);
 		}
-		return studyRecords.map((studies) => convertToStudyDTO(studies));
+		return studyRecords.map((studies) => convertFromRecordToStudyDTO(studies));
 	},
 
 	getStudyById: async (studyId: string): Promise<StudyDTO | undefined> => {
@@ -68,7 +72,7 @@ const studyService = (db: PostgresDb) => ({
 		}
 
 		if (studyRecords[0]) {
-			return convertToStudyDTO(studyRecords[0]);
+			return convertFromRecordToStudyDTO(studyRecords[0]);
 		}
 
 		return studyRecords[0];
@@ -81,10 +85,10 @@ const studyService = (db: PostgresDb) => ({
 		const dbDriver = transaction ? transaction : db;
 
 		try {
-			const newStudyRecord = await dbDriver.insert(study).values(convertFromStudyDTO(studyData)).returning();
+			const newStudyRecord = await dbDriver.insert(study).values(convertToRecordFromStudyDTO(studyData)).returning();
 
 			if (newStudyRecord[0]) {
-				return convertToStudyDTO(newStudyRecord[0]);
+				return convertFromRecordToStudyDTO(newStudyRecord[0]);
 			}
 
 			return newStudyRecord[0];
@@ -113,7 +117,7 @@ const studyService = (db: PostgresDb) => ({
 		try {
 			const deletedRecord = await db.delete(study).where(eq(study.study_id, studyId)).returning();
 			if (deletedRecord[0]) {
-				return convertToStudyDTO(deletedRecord[0]);
+				return convertFromRecordToStudyDTO(deletedRecord[0]);
 			}
 
 			return deletedRecord[0];
@@ -128,7 +132,7 @@ const studyService = (db: PostgresDb) => ({
 
 	updateStudy: async (studyId: string, studyData: Partial<StudyDTO>): Promise<StudyDTO | undefined> => {
 		try {
-			const convertedStudyData = convertFromPartialStudyDTO(studyData);
+			const convertedStudyData = convertToRecordFromPartialStudyDTO(studyData);
 
 			const updatedRecord = await db
 				.update(study)
@@ -137,7 +141,7 @@ const studyService = (db: PostgresDb) => ({
 				.returning();
 
 			if (updatedRecord[0]) {
-				return convertToStudyDTO(updatedRecord[0]);
+				return convertFromRecordToStudyDTO(updatedRecord[0]);
 			}
 
 			return updatedRecord[0];
