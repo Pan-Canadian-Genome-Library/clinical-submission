@@ -8,6 +8,8 @@
       - $ref: '#/components/parameters/path/EntityName'
       - $ref: '#/components/parameters/query/Organization'
       - $ref: '#/components/parameters/query/Value'
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Record exists

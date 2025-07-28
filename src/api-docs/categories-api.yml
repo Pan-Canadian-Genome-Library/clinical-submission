@@ -3,6 +3,8 @@
     summary: List all categories
     tags:
       - Category
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: List all categories
@@ -33,6 +35,8 @@
         schema:
           type: string
         description: ID of the category
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Category Details

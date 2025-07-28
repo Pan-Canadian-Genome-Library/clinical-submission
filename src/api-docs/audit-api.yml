@@ -49,6 +49,8 @@
         schema:
           type: integer
         description: Optional query parameter to specify the number of results per page. Default value is 20
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Change history
