@@ -10,8 +10,6 @@
         in: path
         type: string
         required: true
-    security:
-      - bearerAuth: []
     responses:
       200:
         description: Submission details
@@ -122,8 +120,6 @@
       - $ref: '#/components/parameters/query/PageSize'
       - $ref: '#/components/parameters/query/OnlyActive'
       - $ref: '#/components/parameters/query/OrganizationFilter'
-    security:
-      - bearerAuth: []
     responses:
       200:
         description: Submissions details
