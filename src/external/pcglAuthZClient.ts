@@ -141,7 +141,7 @@ export const hasAllowedAccess = async (
 
 		logger.error(`Error verifying user token.`, errorResponse);
 
-			const responseMessage =
+		const responseMessage =
 			'Something went wrong while verifying PCGL user account information, please try again later.';
 
 		switch (response.status) {
@@ -154,6 +154,7 @@ export const hasAllowedAccess = async (
 				);
 			default:
 				throw new lyricProvider.utils.errors.InternalServerError(responseMessage);
+		}
 	}
 
 	const result = await response.json();
