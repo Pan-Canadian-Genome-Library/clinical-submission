@@ -63,19 +63,19 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 		const errorResponse: UserDataResponseErrorType = await response.json();
 		logger.error(`Error retrieving user data.`, errorResponse);
 
+		const responseMessage =
+			'Something went wrong while verifying PCGL user account information, please try again later.';
+
 		switch (response.status) {
+			case 401:
 			case 403:
-				throw new lyricProvider.utils.errors.Forbidden(
-					'error' in errorResponse ? errorResponse.error : errorResponse.detail,
-				);
-			case 500:
-				throw new lyricProvider.utils.errors.InternalServerError(
-					'error' in errorResponse ? errorResponse.error : errorResponse.detail,
+				throw new lyricProvider.utils.errors.Forbidden(responseMessage);
+			case 404:
+				throw new lyricProvider.utils.errors.NotFound(
+					"This account is currently not associated within the PCGL project. This may be due to the fact that you haven't completed the onboarding process for new accounts, or have logged in with an account not previously used to access the service.",
 				);
 			default:
-				throw new lyricProvider.utils.errors.InternalServerError(
-					'Something went wrong while verifying PCGL user account information, please try again later.',
-				);
+				throw new lyricProvider.utils.errors.InternalServerError(responseMessage);
 		}
 	}
 
@@ -141,20 +141,19 @@ export const hasAllowedAccess = async (
 
 		logger.error(`Error verifying user token.`, errorResponse);
 
+			const responseMessage =
+			'Something went wrong while verifying PCGL user account information, please try again later.';
+
 		switch (response.status) {
+			case 401:
 			case 403:
-				throw new lyricProvider.utils.errors.Forbidden(
-					'error' in errorResponse ? errorResponse.error : errorResponse.detail,
-				);
-			case 500:
-				throw new lyricProvider.utils.errors.InternalServerError(
-					'error' in errorResponse ? errorResponse.error : errorResponse.detail,
+				throw new lyricProvider.utils.errors.Forbidden(responseMessage);
+			case 404:
+				throw new lyricProvider.utils.errors.NotFound(
+					"This account is currently not associated within the PCGL project. This may be due to the fact that you haven't completed the onboarding process for new accounts, or have logged in with an account not previously used to access the service.",
 				);
 			default:
-				throw new lyricProvider.utils.errors.InternalServerError(
-					'Something went wrong while verifying PCGL user account information, please try again later.',
-				);
-		}
+				throw new lyricProvider.utils.errors.InternalServerError(responseMessage);
 	}
 
 	const result = await response.json();
