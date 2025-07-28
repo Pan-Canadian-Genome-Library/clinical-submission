@@ -106,12 +106,66 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 /**
  *
  * @param study Study user is trying to get access to
+ * @param userStudies An array of user studies
+ * @returns True or false depending if the user has access to the study
+ */
+export const hasAllowedAccess = (study: string, userStudies: string[], isAdmin: boolean): boolean => {
+	const { enabled } = authConfig;
+
+	// If auth is disabled or if the user is an admin, skip all auth steps
+	if (!enabled || isAdmin) {
+		return true;
+	}
+
+	return userStudies.some((currentStudy) => currentStudy === study);
+};
+
+/**
+ *	Function that takes in request object, checks if theres an authorization header and returns its token
+ *  Only works with Bearer type authorization values
+ *
+ * @param req Request object
+ * @returns Access token or undefined depending if authorization header exists or authorization type is NOT Bearer
+ */
+export const extractAccessTokenFromHeader = (req: Request): string | undefined => {
+	const authHeader = req.headers['authorization'];
+	if (!authHeader || !authHeader.startsWith('Bearer ')) {
+		return;
+	}
+
+	return authHeader.replace('Bearer ', '').trim();
+};
+
+/**
+ * @param groups List of groups users belongs to
+ * @returns boolean if user has admin group
+ */
+const isAdmin = ({ groups }: Groups): boolean => {
+	const { groups: configGroups } = authConfig;
+
+	return groups.some((val) => val.name === configGroups.admin);
+};
+
+/**
+ * @param groups List of groups user belongs to
+ * @returns array of strings with names of the groups
+ */
+const extractUserGroups = ({ groups }: Groups): string[] => {
+	return groups.map((currentGroup) => currentGroup.name);
+};
+
+/**
+ *
+ * NOTE: previous solution, before user/me returned "study_authorizations"
+ *		 Currently unused, will leave for now incase of spec changes
+ *
+ * @param study Study user is trying to get access to
  * @param action Type of CRUD operation user is trying to do
  * @param token Access token from Authz
  * @param user User information
  * @returns True or false depending if the user has access to the study
  */
-export const hasAllowedAccess = async (
+export const hasAllowedAccessAuthz = async (
 	study: string,
 	action: ActionIDsValues,
 	token: string,
@@ -161,38 +215,4 @@ export const hasAllowedAccess = async (
 	const result = await response.json();
 
 	return result[0];
-};
-
-/**
- *	Function that takes in request object, checks if theres an authorization header and returns its token
- *  Only works with Bearer type authorization values
- *
- * @param req Request object
- * @returns Access token or undefined depending if authorization header exists or authorization type is NOT Bearer
- */
-export const extractAccessTokenFromHeader = (req: Request): string | undefined => {
-	const authHeader = req.headers['authorization'];
-	if (!authHeader || !authHeader.startsWith('Bearer ')) {
-		return;
-	}
-
-	return authHeader.replace('Bearer ', '').trim();
-};
-
-/**
- * @param groups List of groups users belongs to
- * @returns boolean if user has admin group
- */
-const isAdmin = ({ groups }: Groups): boolean => {
-	const { groups: configGroups } = authConfig;
-
-	return groups.some((val) => val.name === configGroups.admin);
-};
-
-/**
- * @param groups List of groups user belongs to
- * @returns array of strings with names of the groups
- */
-const extractUserGroups = ({ groups }: Groups): string[] => {
-	return groups.map((currentGroup) => currentGroup.name);
 };

@@ -24,7 +24,7 @@ import { z } from 'zod';
 
 import { logger } from '@/common/logger.js';
 import { lyricProvider } from '@/core/provider.js';
-import { extractAccessTokenFromHeader, hasAllowedAccess } from '@/external/pcglAuthZClient.js';
+import { hasAllowedAccess } from '@/external/pcglAuthZClient.js';
 import { type RequestValidation, validateRequest } from '@/middleware/requestValidation.js';
 import { prevalidateNewDataFile } from '@/submission/fileValidation.js';
 import { parseFileToRecords } from '@/submission/readFile.js';
@@ -54,13 +54,12 @@ export const submit = validateRequest(submitRequestSchema, async (req, res, next
 		const files = Array.isArray(req.files) ? req.files : [];
 		const organization = req.body.organization;
 		const user = req.user;
-		const token = extractAccessTokenFromHeader(req);
 
-		if (!token || !user) {
+		if (!user) {
 			throw new lyricProvider.utils.errors.Forbidden('Unauthorized: Unable to authorize user');
 		}
 
-		if (!(await hasAllowedAccess(organization, 'WRITE', token, user.isAdmin))) {
+		if (!hasAllowedAccess(organization, user.allowedWriteOrganizations, user.isAdmin)) {
 			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 		}
 
