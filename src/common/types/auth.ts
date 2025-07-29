@@ -19,13 +19,6 @@
 
 import { UserSession, UserSessionResult } from '@overture-stack/lyric';
 
-export const ActionIDs = {
-	WRITE: 'WRITE',
-	READ: 'READ',
-} as const;
-
-export type ActionIDsValues = (typeof ActionIDs)[keyof typeof ActionIDs];
-
 export type UserDataResponseErrorType = {
 	type: string;
 	title: string;
