@@ -22,7 +22,7 @@ import { Request } from 'express';
 import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
-import { ActionIDs, ActionIDsValues, PCGLUserSessionResult, UserDataResponseErrorType } from '@/common/types/auth.js';
+import { PCGLUserSessionResult, UserDataResponseErrorType } from '@/common/types/auth.js';
 import { Groups, userDataResponseSchema, UserDataResponseSchemaType } from '@/common/validation/auth-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';

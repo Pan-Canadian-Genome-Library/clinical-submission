@@ -25,7 +25,7 @@ import { type IIMConfigObject } from '@/common/validation/id-manager-validation.
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
 import { generatedIdentifiers, idGenerationConfig } from '@/db/schemas/idGenerationConfig.js';
-import type { GeneratedIdentifiersTable, PostgresTransaction } from '@/db/types.js';
+import type { GeneratedIdentifiersTable, IDGenerationConfigRecord, PostgresTransaction } from '@/db/types.js';
 import { isPostgresError, PostgresErrors } from '@/db/utils.js';
 
 const generateSequenceName = (iimData: IIMConfigObject): string => {
@@ -40,7 +40,7 @@ const iimService = (db: PostgresDb) => ({
 			const record = await dbTransaction
 				.insert(idGenerationConfig)
 				.values({
-					entityName: iimData.entityName,
+					entityName: iimData.entityName.toLowerCase().trim(),
 					fieldName: iimData.fieldName,
 					paddingLength: iimData.paddingLength,
 					prefix: iimData.prefix,
@@ -64,7 +64,10 @@ const iimService = (db: PostgresDb) => ({
 		}
 	},
 
-	getIIMConfig: async (entityName: IIMConfigObject['entityName'], transaction?: PostgresTransaction) => {
+	getIIMConfig: async (
+		entityName: IIMConfigObject['entityName'],
+		transaction?: PostgresTransaction,
+	): Promise<IDGenerationConfigRecord[]> => {
 		const dbTransaction = transaction ?? db;
 
 		try {
@@ -117,7 +120,9 @@ const iimService = (db: PostgresDb) => ({
 				logger.error(
 					`[IIM]: Can't insert record with ID ${IdRecord.generatedId}. Record already exists within the table.`,
 				);
-				throw new lyricProvider.utils.errors.InternalServerError('Unable to create new ID record.');
+				throw new lyricProvider.utils.errors.BadRequest(
+					`Unable to create new ID record ${IdRecord.generatedId}. ID already exists, but must be unique.`,
+				);
 			} else {
 				logger.error(`[IIM]: Unexpected error. Unable to insert new generated ID record. ${exception}`);
 				throw new lyricProvider.utils.errors.InternalServerError(

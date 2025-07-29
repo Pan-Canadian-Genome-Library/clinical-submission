@@ -20,77 +20,18 @@
 import { asc, desc, eq, sql } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
-import type { StudyDTO, StudyModel, StudyRecord } from '@/common/types/study.js';
+import type { StudyDTO } from '@/common/types/study.js';
 import { CreateStudyFields } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
 import { study } from '@/db/schemas/studiesSchema.js';
+import { PostgresTransaction } from '@/db/types.js';
 import { isPostgresError, PostgresErrors } from '@/db/utils.js';
-
-const convertToStudyDTO = (study: StudyRecord): StudyDTO => {
-	return {
-		studyId: study.study_id,
-		dacId: study.dac_id,
-		studyName: study.study_name,
-		studyDescription: study.study_description,
-		programName: study.program_name,
-		status: study.status,
-		context: study.context,
-		domain: study.domain,
-		participantCriteria: study.participant_criteria,
-		principalInvestigators: study.principal_investigators,
-		leadOrganizations: study.lead_organizations,
-		collaborators: study.collaborators,
-		fundingSources: study.funding_sources,
-		publicationLinks: study.publication_links,
-		keywords: study.keywords,
-		createdAt: study.created_at,
-		updatedAt: study.updated_at,
-	};
-};
-
-const convertFromStudyDTO = (
-	studyData: Omit<StudyDTO, 'updatedAt' | 'createdAt'>,
-): Omit<StudyModel, 'created_at' | 'updated_at'> => {
-	return {
-		study_id: studyData.studyId,
-		dac_id: studyData.dacId,
-		study_name: studyData.studyName,
-		study_description: studyData.studyDescription,
-		program_name: studyData.programName,
-		status: studyData.status,
-		context: studyData.context,
-		domain: studyData.domain.map((domains) => domains.toUpperCase()),
-		participant_criteria: studyData.participantCriteria,
-		principal_investigators: studyData.principalInvestigators,
-		lead_organizations: studyData.leadOrganizations,
-		collaborators: studyData.collaborators,
-		funding_sources: studyData.fundingSources,
-		publication_links: studyData.publicationLinks,
-		keywords: studyData.keywords,
-	};
-};
-
-const convertFromPartialStudyDTO = (
-	studyData: Partial<Omit<StudyDTO, 'updatedAt' | 'createdAt' | 'studyId'>>,
-): Partial<Omit<StudyModel, 'created_at' | 'updated_at' | 'study_id'>> => {
-	return {
-		dac_id: studyData.dacId,
-		study_name: studyData.studyName,
-		study_description: studyData.studyDescription,
-		program_name: studyData.programName,
-		status: studyData.status,
-		context: studyData.context,
-		domain: studyData.domain?.map((domains) => domains.toUpperCase()),
-		participant_criteria: studyData.participantCriteria,
-		principal_investigators: studyData.principalInvestigators,
-		lead_organizations: studyData.leadOrganizations,
-		collaborators: studyData.collaborators,
-		funding_sources: studyData.fundingSources,
-		publication_links: studyData.publicationLinks,
-		keywords: studyData.keywords,
-	};
-};
+import {
+	convertToRecordFromPartialStudyDTO,
+	convertToRecordFromStudyDTO,
+	convertFromRecordToStudyDTO,
+} from '@/service/dtoConversion.js';
 
 const studyService = (db: PostgresDb) => ({
 	listStudies: async ({
@@ -116,7 +57,7 @@ const studyService = (db: PostgresDb) => ({
 				'Something went wrong while fetching studies. Please try again later.',
 			);
 		}
-		return studyRecords.map((studies) => convertToStudyDTO(studies));
+		return studyRecords.map((studies) => convertFromRecordToStudyDTO(studies));
 	},
 
 	getStudyById: async (studyId: string): Promise<StudyDTO | undefined> => {
@@ -131,18 +72,23 @@ const studyService = (db: PostgresDb) => ({
 		}
 
 		if (studyRecords[0]) {
-			return convertToStudyDTO(studyRecords[0]);
+			return convertFromRecordToStudyDTO(studyRecords[0]);
 		}
 
 		return studyRecords[0];
 	},
 
-	createStudy: async (studyData: CreateStudyFields): Promise<StudyDTO | undefined> => {
+	createStudy: async (
+		studyData: CreateStudyFields,
+		transaction?: PostgresTransaction,
+	): Promise<StudyDTO | undefined> => {
+		const dbDriver = transaction ? transaction : db;
+
 		try {
-			const newStudyRecord = await db.insert(study).values(convertFromStudyDTO(studyData)).returning();
+			const newStudyRecord = await dbDriver.insert(study).values(convertToRecordFromStudyDTO(studyData)).returning();
 
 			if (newStudyRecord[0]) {
-				return convertToStudyDTO(newStudyRecord[0]);
+				return convertFromRecordToStudyDTO(newStudyRecord[0]);
 			}
 
 			return newStudyRecord[0];
@@ -171,7 +117,7 @@ const studyService = (db: PostgresDb) => ({
 		try {
 			const deletedRecord = await db.delete(study).where(eq(study.study_id, studyId)).returning();
 			if (deletedRecord[0]) {
-				return convertToStudyDTO(deletedRecord[0]);
+				return convertFromRecordToStudyDTO(deletedRecord[0]);
 			}
 
 			return deletedRecord[0];
@@ -186,7 +132,7 @@ const studyService = (db: PostgresDb) => ({
 
 	updateStudy: async (studyId: string, studyData: Partial<StudyDTO>): Promise<StudyDTO | undefined> => {
 		try {
-			const convertedStudyData = convertFromPartialStudyDTO(studyData);
+			const convertedStudyData = convertToRecordFromPartialStudyDTO(studyData);
 
 			const updatedRecord = await db
 				.update(study)
@@ -195,7 +141,7 @@ const studyService = (db: PostgresDb) => ({
 				.returning();
 
 			if (updatedRecord[0]) {
-				return convertToStudyDTO(updatedRecord[0]);
+				return convertFromRecordToStudyDTO(updatedRecord[0]);
 			}
 
 			return updatedRecord[0];
