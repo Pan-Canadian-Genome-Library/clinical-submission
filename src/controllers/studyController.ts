@@ -125,7 +125,7 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 		}
 
 		const generatedID = generateID(nextSequence, studyConfig.prefix, studyConfig.paddingLength);
-		db.transaction(async (transaction) => {
+		const studyTransaction = await db.transaction(async (transaction) => {
 			try {
 				const createID = await iimRepo.createIDRecord(
 					{
@@ -142,12 +142,14 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 					throw new lyricProvider.utils.errors.BadRequest(`Unable to create study with provided data.`);
 				}
 
-				res.status(201).send(results);
-				return;
+				return results;
 			} catch (exception) {
 				next(exception);
 			}
 		});
+
+		res.status(201).send(studyTransaction);
+		return;
 	} catch (exception) {
 		next(exception);
 	}
