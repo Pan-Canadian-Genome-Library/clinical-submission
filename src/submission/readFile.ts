@@ -3,8 +3,6 @@ import { parse as csvParse } from 'csv-parse';
 import firstline from 'firstline';
 import fs from 'fs';
 
-import { logger } from '@/common/logger.js';
-
 import { getSeparatorCharacter } from './format.js';
 
 /**
