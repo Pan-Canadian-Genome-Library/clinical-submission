@@ -31,6 +31,7 @@ export type UserDataResponseErrorType = {
 	title: string;
 	detail: string;
 	status: number;
+	error: string;
 };
 
 // Lyrics UserSessionResult's UserSession needs to be extended to include groups
