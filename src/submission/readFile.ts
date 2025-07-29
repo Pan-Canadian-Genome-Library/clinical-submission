@@ -3,6 +3,8 @@ import { parse as csvParse } from 'csv-parse';
 import firstline from 'firstline';
 import fs from 'fs';
 
+import { logger } from '@/common/logger.js';
+
 import { getSeparatorCharacter } from './format.js';
 
 /**
@@ -62,7 +64,7 @@ export const parseFileToRecords = async (
 		return acc;
 	}, {});
 
-	return new Promise((resolve) => {
+	return new Promise((resolve, reject) => {
 		const stream = fs.createReadStream(file.path).pipe(csvParse({ delimiter: separatorCharacter }));
 
 		stream.on('data', (record: string[]) => {
@@ -80,6 +82,9 @@ export const parseFileToRecords = async (
 
 		stream.on('end', () => {
 			resolve(returnRecords);
+		});
+		stream.on('error', (error) => {
+			reject(error.message);
 		});
 
 		stream.on('close', () => {
