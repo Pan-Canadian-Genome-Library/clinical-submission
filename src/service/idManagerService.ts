@@ -40,7 +40,7 @@ const iimService = (db: PostgresDb) => ({
 			const record = await dbTransaction
 				.insert(idGenerationConfig)
 				.values({
-					entityName: iimData.entityName,
+					entityName: iimData.entityName.toLowerCase().trim(),
 					fieldName: iimData.fieldName,
 					paddingLength: iimData.paddingLength,
 					prefix: iimData.prefix,

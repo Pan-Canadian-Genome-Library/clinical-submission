@@ -36,9 +36,9 @@ import {
 	retrieveIIMConfiguration,
 } from '@/internal/id-manager/utils.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
+import { convertToRecordFromStudyDTO } from '@/service/dtoConversion.js';
 import iimService from '@/service/idManagerService.js';
 import { studyService } from '@/service/studyService.js';
-import { convertToRecordFromStudyDTO } from '@/service/dtoConversion.js';
 
 export const getAllStudies = validateRequest(listAllStudies, async (req, res, next) => {
 	const db = getDbInstance();
@@ -72,6 +72,7 @@ export const getStudyById = validateRequest(getOrDeleteStudyByID, async (req, re
 });
 
 export const createNewStudy = validateRequest(createStudy, async (req, res, next) => {
+	const IIM_CONFIG_NAME = 'study';
 	const studyData = req.body;
 	const db = getDbInstance();
 	const studyRepo = studyService(db);
@@ -83,7 +84,7 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 		}
 
-		const studyConfig = await retrieveIIMConfiguration('Study');
+		const studyConfig = await retrieveIIMConfiguration(IIM_CONFIG_NAME);
 
 		if (!studyConfig) {
 			logger.error(`[Study/IIM]: ID Generation is misconfigured! Study table ID Generation does NOT exist.`);
