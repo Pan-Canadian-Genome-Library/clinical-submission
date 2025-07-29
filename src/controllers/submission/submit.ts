@@ -112,7 +112,8 @@ export const submit = validateRequest(submitRequestSchema, async (req, res, next
 
 				entityData[entityName] = extractedData;
 			} catch (error) {
-				logger.error(`Error processing file`, error);
+				logger.error(`File processing failed. Error: ${error}`);
+				throw new lyricProvider.utils.errors.BadRequest(`File processing failed`, error);
 			}
 		}
 

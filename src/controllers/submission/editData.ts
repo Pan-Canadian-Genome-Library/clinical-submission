@@ -103,7 +103,8 @@ export const editData = validateRequest(editDataRequestSchema, async (req, res, 
 				submissionId = uploadResult.submissionId;
 				entityList.push(entityName);
 			} catch (error) {
-				logger.error(`Error processing file`, error);
+				logger.error(`File processing failed. Error: ${error}`);
+				throw new lyricProvider.utils.errors.BadRequest(`File processing failed`, error);
 			}
 		}
 
