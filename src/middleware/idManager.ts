@@ -40,7 +40,7 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], 
 
 		if (!entityIIMConfig) {
 			logger.error(
-				`[Middleware/IIM]: ${record.entityName} does NOT exist in IIM configuration table. Configuration record must be added prior.`,
+				`[Middleware/IIM]: ${record.entityName} does NOT exist in IIM configuration table. Configuration record must be added prior to attempting to use the IIM.`,
 			);
 
 			throw new lyricProvider.utils.errors.InternalServerError(
@@ -52,7 +52,7 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], 
 		const hashableData = record.data[entityToHash];
 
 		if (hashableData === undefined) {
-			logger.error(`[Middleware/IIM]: ${entityToHash} does NOT exist in record. IIM may be misconfigured.`);
+			logger.error(`[Middleware/IIM]: ${entityToHash} does NOT exist in table referenced. IIM may be misconfigured.`);
 
 			throw new lyricProvider.utils.errors.InternalServerError(
 				'The Internal ID Manager is misconfigured. Please check configuration and try again later.',
