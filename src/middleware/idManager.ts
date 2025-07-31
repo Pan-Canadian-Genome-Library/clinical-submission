@@ -34,7 +34,6 @@ import iimService from '@/service/idManagerService.js';
 
 const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], db: PostgresDb) => {
 	const iimRepo = iimService(db);
-
 	const allIDConfigs = await retrieveAllIIMConfigurations();
 
 	if (!allIDConfigs) {
@@ -58,11 +57,12 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], 
 			continue;
 		}
 
-		const entityToHash = entityIIMConfig.fieldName;
-		const hashableData = record.data[entityToHash];
+		const hashableData = record.data[entityIIMConfig.fieldName];
 
 		if (hashableData === undefined) {
-			logger.error(`[Middleware/IIM]: ${entityToHash} does NOT exist in table referenced. IIM may be misconfigured.`);
+			logger.error(
+				`[Middleware/IIM]: ${entityIIMConfig.fieldName} does NOT exist in table referenced. IIM may be misconfigured.`,
+			);
 
 			throw new lyricProvider.utils.errors.InternalServerError(
 				'The Internal ID Manager is misconfigured. Please check configuration and try again later.',
