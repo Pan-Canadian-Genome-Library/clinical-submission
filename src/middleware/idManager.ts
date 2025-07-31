@@ -36,6 +36,10 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], 
 	const iimRepo = iimService(db);
 	const allIDConfigs = await retrieveAllIIMConfigurations();
 
+	let numberOfInsertedRecords = 0;
+	let numberOfErroredRecords = 0;
+	let numberOfSkippedRecords = 0;
+
 	if (!allIDConfigs) {
 		logger.error(
 			`[Middleware/IIM]: No ID config records exist in IIM configuration table. Configuration records must be added prior to attempting to use the IIM.`,
@@ -54,6 +58,7 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], 
 		 */
 		if (!entityIIMConfig) {
 			logger.debug(`[Middleware/IIM]: ${record.entityName} does NOT exist in IIM configuration table. Skipping...`);
+			numberOfSkippedRecords++;
 			continue;
 		}
 
@@ -63,21 +68,17 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], 
 			logger.error(
 				`[Middleware/IIM]: ${entityIIMConfig.fieldName} does NOT exist in table referenced. IIM may be misconfigured.`,
 			);
-
-			throw new lyricProvider.utils.errors.InternalServerError(
-				'The Internal ID Manager is misconfigured. Please check configuration and try again later.',
-			);
+			numberOfErroredRecords++;
+			continue;
 		}
 
 		const idmHash = generateHash(String(hashableData), env.ID_MANAGER_SECRET);
-
 		const existingHashEntry = await findIDByHash(idmHash);
 
 		if (existingHashEntry) {
-			//TODO: make this a better error message
-			throw new lyricProvider.utils.errors.BadRequest(
-				`Hashed record already exists in IIM table. Data must be unique.`,
-			);
+			logger.info(`[Middleware/IIM]: ${existingHashEntry} record already exists in IIM table. Data must be unique.`);
+			numberOfErroredRecords++;
+			continue;
 		}
 
 		const nextSequence = await getNextSequenceValue(entityIIMConfig.sequenceName);
@@ -85,7 +86,8 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], 
 			logger.error(
 				`[Middleware/IIM]: Error creating new IIM record. IIM Config somehow references an unknown sequence? ${entityIIMConfig.sequenceName}`,
 			);
-			throw new lyricProvider.utils.errors.InternalServerError('Unable to create IIM record. Cannot generate ID.');
+			numberOfErroredRecords++;
+			continue;
 		}
 
 		const generatedID = generateID(nextSequence, entityIIMConfig.prefix, entityIIMConfig.paddingLength);
@@ -97,11 +99,22 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], 
 		});
 
 		if (!createID) {
-			throw new lyricProvider.utils.errors.BadRequest(`Unable to create IIM record with provided data.`);
+			logger.error(`[Middleware/IIM]: Error creating new IIM record. with provided data.`);
+			numberOfErroredRecords++;
+			continue;
 		}
 
-		return createID;
+		numberOfInsertedRecords++;
 	}
+
+	const recordStats = {
+		inserted: numberOfInsertedRecords,
+		skipped: numberOfSkippedRecords,
+		errored: numberOfErroredRecords,
+	};
+
+	logger.info(`[Middleware/IIM]: Number of ID records generated: ${JSON.stringify(recordStats)}`);
+	return recordStats;
 };
 
 export const onFinishCommitCallback = (resultOnCommit: ResultOnCommit) => {
