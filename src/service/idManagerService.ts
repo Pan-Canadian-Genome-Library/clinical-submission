@@ -64,6 +64,18 @@ const iimService = (db: PostgresDb) => ({
 		}
 	},
 
+	getAllIIMConfigs: async (transaction?: PostgresTransaction): Promise<IDGenerationConfigRecord[]> => {
+		const dbTransaction = transaction ?? db;
+		try {
+			return await dbTransaction.select().from(idGenerationConfig);
+		} catch (exception) {
+			logger.error(`[IIM]: Unexpected error retrieving IIM all configurations. ${exception}`);
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'IIM service encountered an Unexpected error retrieving IIM configurations.',
+			);
+		}
+	},
+
 	getIIMConfig: async (
 		entityName: IIMConfigObject['entityName'],
 		transaction?: PostgresTransaction,

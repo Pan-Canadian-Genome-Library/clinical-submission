@@ -28,24 +28,34 @@ import {
 	generateHash,
 	generateID,
 	getNextSequenceValue,
-	retrieveIIMConfiguration,
+	retrieveAllIIMConfigurations,
 } from '@/internal/id-manager/utils.js';
 import iimService from '@/service/idManagerService.js';
 
 const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], db: PostgresDb) => {
 	const iimRepo = iimService(db);
 
+	const allIDConfigs = await retrieveAllIIMConfigurations();
+
+	if (!allIDConfigs) {
+		logger.error(
+			`[Middleware/IIM]: No ID config records exist in IIM configuration table. Configuration records must be added prior to attempting to use the IIM.`,
+		);
+
+		throw new lyricProvider.utils.errors.InternalServerError(
+			'The Internal ID Manager is misconfigured. Please check configuration and try again later.',
+		);
+	}
+
 	for (const record of insertedRecords) {
-		const entityIIMConfig = await retrieveIIMConfiguration(record.entityName);
+		const entityIIMConfig = allIDConfigs.find((configRecord) => configRecord.entityName === record.entityName);
 
+		/**
+		 * Skip any records which don't have a config record associated with it, we don't need to hash these.
+		 */
 		if (!entityIIMConfig) {
-			logger.error(
-				`[Middleware/IIM]: ${record.entityName} does NOT exist in IIM configuration table. Configuration record must be added prior to attempting to use the IIM.`,
-			);
-
-			throw new lyricProvider.utils.errors.InternalServerError(
-				'The Internal ID Manager is misconfigured. Please check configuration and try again later.',
-			);
+			logger.debug(`[Middleware/IIM]: ${record.entityName} does NOT exist in IIM configuration table. Skipping...`);
+			continue;
 		}
 
 		const entityToHash = entityIIMConfig.fieldName;

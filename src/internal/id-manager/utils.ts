@@ -70,6 +70,20 @@ const processIIMConfiguration = (iimEnvConfig: IIMConfig) => {
 };
 
 /**
+ * Retrieves all available IIM configurations in the table.
+ * @returns `Promise<IDGenerationConfigRecord[] | undefined>` - list of IDGenerationConfigRecords if found, undefined if none.
+ */
+const retrieveAllIIMConfigurations = async (): Promise<IDGenerationConfigRecord[] | undefined> => {
+	const database = getDbInstance();
+	const config = await iimService(database).getAllIIMConfigs();
+
+	if (config.length) {
+		return config;
+	}
+
+	return undefined;
+};
+/**
  * Retrieves the IIM Configuration variables associated with a particular entity.
  * @param entityName The name of the entity to which this IIM config applies to.
  * @returns `Promise<IDGenerationConfigTable | undefined>` - A promise containing the record from the config table associated with the entity,`undefined` if not found.
@@ -150,5 +164,6 @@ export {
 	getNextSequenceValue,
 	isValidStudyField,
 	processIIMConfiguration,
+	retrieveAllIIMConfigurations,
 	retrieveIIMConfiguration,
 };
