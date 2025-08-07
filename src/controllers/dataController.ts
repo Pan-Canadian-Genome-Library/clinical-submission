@@ -56,7 +56,7 @@ const getDataIdExists = validateRequest(getDataById, async (req, res, next) => {
 			return;
 		}
 
-		// Check if both the idConfigResult row id matches the row id for the generatedIdentifierResult row
+		// Check if both the idConfigResult id matches the configId in the generatedIdentifierResult
 		if (generatedIdentifierResult[0]?.configId !== idConfigResult[0]?.id) {
 			res.status(200).send(false);
 			return;
