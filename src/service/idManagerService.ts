@@ -54,7 +54,7 @@ const iimService = (db: PostgresDb) => ({
 			const postgresError = isPostgresError(exception);
 			if (postgresError && postgresError.code === PostgresErrors.UNIQUE_KEY_VIOLATION) {
 				logger.debug(
-					`[IIM]: Can't insert record {"entityName: "${iimData.entityName}", "fieldName": "${iimData.fieldName}"  ...}. This record already exists within the IIM Configuration table, skipping...`,
+					`[IIM]: Can't insert record {"entityName: "${iimData.entityName}"...}. This record already exists within the IIM Configuration table, skipping...`,
 				);
 				return;
 			} else {
@@ -149,6 +149,7 @@ const iimService = (db: PostgresDb) => ({
 		}
 	},
 
+	// Generating to public, needs to be in PCGL
 	createIMMSequence: async (
 		iimData: IIMConfigObject,
 		transaction?: PostgresTransaction,
