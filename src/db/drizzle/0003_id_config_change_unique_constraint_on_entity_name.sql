@@ -1,0 +1,2 @@
+ALTER TABLE "pcgl"."id_generation_config" DROP CONSTRAINT "id_generation_config_entity_name_field_name_unique";--> statement-breakpoint
+ALTER TABLE "pcgl"."id_generation_config" ADD CONSTRAINT "id_generation_config_entity_name_unique" UNIQUE("entity_name");

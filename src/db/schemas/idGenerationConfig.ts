@@ -17,24 +17,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 import { relations } from 'drizzle-orm';
-import { integer, serial, text, timestamp, unique, varchar } from 'drizzle-orm/pg-core';
+import { integer, serial, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { pcglSchema } from './generate.js';
 
-export const idGenerationConfig = pcglSchema.table(
-	'id_generation_config',
-	{
-		id: serial('id').primaryKey(),
-		entityName: varchar('entity_name', { length: 255 }).notNull(),
-		fieldName: varchar('field_name', { length: 255 }).notNull(),
-		prefix: varchar('prefix', { length: 50 }).notNull(),
-		paddingLength: integer('padding_length').notNull(),
-		sequenceName: varchar('sequence_name', { length: 255 }).notNull().unique(),
-		sequenceStart: integer('sequence_start').notNull(),
-		createdAt: timestamp('created_at', { withTimezone: false }).defaultNow(),
-	},
-	(table) => [unique().on(table.entityName, table.fieldName)],
-);
+export const idGenerationConfig = pcglSchema.table('id_generation_config', {
+	id: serial('id').primaryKey(),
+	entityName: varchar('entity_name', { length: 255 }).notNull().unique(),
+	fieldName: varchar('field_name', { length: 255 }).notNull(),
+	prefix: varchar('prefix', { length: 50 }).notNull(),
+	paddingLength: integer('padding_length').notNull(),
+	sequenceName: varchar('sequence_name', { length: 255 }).notNull().unique(),
+	sequenceStart: integer('sequence_start').notNull(),
+	createdAt: timestamp('created_at', { withTimezone: false }).defaultNow(),
+});
 
 export const generatedIdentifiers = pcglSchema.table('generated_identifiers', {
 	id: serial('id').primaryKey(),
