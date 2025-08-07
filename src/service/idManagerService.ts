@@ -54,13 +54,25 @@ const iimService = (db: PostgresDb) => ({
 			const postgresError = isPostgresError(exception);
 			if (postgresError && postgresError.code === PostgresErrors.UNIQUE_KEY_VIOLATION) {
 				logger.debug(
-					`[IIM]: Can't insert record {"entityName: "${iimData.entityName}", "fieldName": "${iimData.fieldName}"  ...}. This record already exists within the IIM Configuration table, skipping...`,
+					`[IIM]: Can't insert record {"entityName: "${iimData.entityName}"...}. This record already exists within the IIM Configuration table, skipping...`,
 				);
 				return;
 			} else {
 				logger.error(`[IIM]: Unable to insert IIM Configuration into database. ${exception}`);
 				throw new lyricProvider.utils.errors.InternalServerError('Unable to initialize IIM Service.');
 			}
+		}
+	},
+
+	getAllIIMConfigs: async (transaction?: PostgresTransaction): Promise<IDGenerationConfigRecord[]> => {
+		const dbTransaction = transaction ?? db;
+		try {
+			return await dbTransaction.select().from(idGenerationConfig);
+		} catch (exception) {
+			logger.error(`[IIM]: Unexpected error retrieving IIM all configurations. ${exception}`);
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'IIM service encountered an Unexpected error retrieving IIM configurations.',
+			);
 		}
 	},
 
@@ -132,6 +144,7 @@ const iimService = (db: PostgresDb) => ({
 		}
 	},
 
+	// Generating to public, needs to be in PCGL
 	createIMMSequence: async (
 		iimData: IIMConfigObject,
 		transaction?: PostgresTransaction,
