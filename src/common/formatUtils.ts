@@ -17,26 +17,34 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import express, { json, Router, urlencoded } from 'express';
+import { VIEW_TYPE, ViewType } from '@overture-stack/lyric';
 
-import dataController from '@/controllers/dataController.js';
-import { lyricProvider } from '@/core/provider.js';
+/**
+ * Ensure a value is wrapped in an array.
+ *
+ * If passed an array, return it returns the same array. If passed a single item, wrap it in an array.
+ * The function then filters out any empty strings and `undefined` values
+ * @param val an item or array
+ * @return an array
+ */
+export const asArray = <T>(val: T | T[]): T[] => {
+	const result = Array.isArray(val) ? val : [val];
+	return result.filter((item) => item !== null && item !== '' && item !== undefined);
+};
 
-export const dataRouter: Router = (() => {
-	const router = express.Router();
-	router.use(json());
-	router.use(urlencoded({ extended: false }));
+/**
+ * Convert a value into it's View type if it matches.
+ * Otherwise it returns `undefined`
+ * @param {unknown} value
+ * @returns {ViewType | undefined}
+ */
+export const convertToViewType = (value: unknown): ViewType | undefined => {
+	if (typeof value === 'string') {
+		const parseResult = VIEW_TYPE.safeParse(value.trim().toLowerCase());
 
-	// PCGL specific endpoint
-	router.get('/category/:id/:entityName/exists/:parentId?', dataController.getDataIdExists);
-
-	// Lyric endpoints extended
-	router.get('/category/:categoryId', dataController.getCategoryById);
-	router.get('/category/{categoryId}id/{systemId}');
-	router.get('/category/{categoryId}/organization/{organization}');
-	router.post('/category/{categoryId}/organization/{organization}/query');
-
-	router.use('', lyricProvider.routers.submittedData);
-
-	return router;
-})();
+		if (parseResult.success) {
+			return parseResult.data;
+		}
+	}
+	return undefined;
+};
