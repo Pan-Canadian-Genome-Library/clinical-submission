@@ -34,7 +34,7 @@ export const dataRouter: Router = (() => {
 	router.get('/category/:categoryId', dataController.getCategoryById);
 	router.get('/category/:categoryId/id/:systemId', dataController.getCategoryBySystemId);
 	router.get('/category/:categoryId/organization/:organization', dataController.getCategoryByOrganization);
-	router.post('/category/{categoryId}/organization/{organization}/query');
+	router.post('/category/:categoryId/organization/:organization/query', dataController.getSubmittedDataByQuery);
 
 	router.use('', lyricProvider.routers.submittedData);
 
