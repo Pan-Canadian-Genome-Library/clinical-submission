@@ -33,7 +33,7 @@ export const dataRouter: Router = (() => {
 	// Lyric endpoints extended
 	router.get('/category/:categoryId', dataController.getCategoryById);
 	router.get('/category/:categoryId/id/:systemId', dataController.getCategoryBySystemId);
-	router.get('/category/{categoryId}/organization/{organization}');
+	router.get('/category/:categoryId/organization/:organization', dataController.getCategoryByOrganization);
 	router.post('/category/{categoryId}/organization/{organization}/query');
 
 	router.use('', lyricProvider.routers.submittedData);
