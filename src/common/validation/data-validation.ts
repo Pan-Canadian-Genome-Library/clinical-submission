@@ -30,10 +30,17 @@ interface DataIdParams extends ParamsDictionary {
 	entityName: string;
 }
 
-export const getDataById: RequestValidation<object, ParsedQs, DataIdParams> = {
+interface DataIdExistsQuery extends ParsedQs {
+	parentId?: string;
+}
+
+export const getDataById: RequestValidation<object, DataIdExistsQuery, DataIdParams> = {
 	pathParams: z.object({
 		id: stringNotEmpty,
 		entityName: stringNotEmpty,
+		parentId: stringNotEmptyOptional,
+	}),
+	query: z.object({
 		parentId: stringNotEmptyOptional,
 	}),
 };

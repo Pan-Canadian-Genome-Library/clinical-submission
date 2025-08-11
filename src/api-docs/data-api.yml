@@ -1,3 +1,46 @@
+/data/category/{id}/{entityName}/exists:
+  get:
+    summary: Retrieve boolean if category exists
+    tags:
+      - Data
+    parameters:
+      - name: id
+        description: External Id which represents the PHI value. (e.g. a participant ID "ABC1234")
+        in: path
+        schema:
+          type: string
+        required: true
+      - name: entityName
+        description: Name of the entity. (e.g. "participant")
+        in: path
+        schema:
+          type: string
+        required: true
+      - name: parentId
+        description: Internal ID. The PCGL sequential ID for its parent. (e.g. a study ID "S00000001")
+        in: query
+        schema:
+          type: string
+        required: false
+    responses:
+      200:
+        description: Successful response indicating a boolean result
+        content:
+          application/json:
+            schema:
+              type: boolean
+            example: true
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/UnauthorizedError'
+      404:
+        $ref: '#/components/responses/NotFound'
+      500:
+        $ref: '#/components/responses/ServerError'
+      503:
+        $ref: '#/components/responses/ServiceUnavailableError'
+
 /data/category/{categoryId}:
   get:
     summary: Retrieve Submitted Data for a specific Category

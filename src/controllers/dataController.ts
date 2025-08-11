@@ -43,13 +43,14 @@ const getDataIdExists = validateRequest(getDataById, async (req, res, next) => {
 	const iimRepo = iimService(db);
 
 	try {
-		const { id, entityName, parentId } = req.params;
+		const { id, entityName } = req.params;
+		const { parentId } = req.query;
 
 		const idConfigResult = await iimRepo.getIIMConfig(entityName);
 
 		//  Check if entityName exists
 		if (!idConfigResult[0]) {
-			res.status(404).send(false);
+			res.status(200).send(false);
 			return;
 		}
 
@@ -63,8 +64,7 @@ const getDataIdExists = validateRequest(getDataById, async (req, res, next) => {
 			return;
 		}
 
-		//  Check if parentId exists, if yes, that means getIDByHash also searched for its internal id(parentId)
-		//    If generatedIdentifierResult has a value with lookup with BOTH idmHash and parentId, then it exists
+		//  Check if parentId exists, if yes, that means getIDByHash also searched for its internal id(parentId) so if generatedIdentifierResult has a value with lookup with BOTH idmHash and parentId, then it exists
 		if (parentId && generatedIdentifierResult[0]) {
 			res.status(200).send(true);
 			return;
