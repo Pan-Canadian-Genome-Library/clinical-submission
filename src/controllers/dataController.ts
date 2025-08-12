@@ -200,9 +200,9 @@ export const getSubmittedDataByQuery = validateRequest(dataGetByQueryRequestSche
 });
 
 /**
- *	Formatting function that takes in lyric SubmittedDataResponse[] and inserts an additional field `internalId`
+ *	Formatting function that takes in lyric SubmittedDataResponse[] and inserts an additional field `internalId` thats generated from the IIM service
  * @param submittedResult
- * @returns
+ * @returns array of SubmittedDataResponse with additional field `internalId`
  */
 const FormatLyricDataToPCGLResponse = async (submittedResult: SubmittedDataResponse[]) => {
 	const db = getDbInstance();
