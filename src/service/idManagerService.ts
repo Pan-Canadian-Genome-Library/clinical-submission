@@ -28,6 +28,8 @@ import { generatedIdentifiers, idGenerationConfig } from '@/db/schemas/idGenerat
 import type { GeneratedIdentifiersTable, IDGenerationConfigRecord, PostgresTransaction } from '@/db/types.js';
 import { isPostgresError, PostgresErrors } from '@/db/utils.js';
 
+import { schemaName } from '../../drizzle.config.js';
+
 const generateSequenceName = (iimData: IIMConfigObject): string => {
 	return `${iimData.entityName}_${iimData.fieldName}_seq`.toLowerCase();
 };
@@ -110,7 +112,10 @@ const iimService = (db: PostgresDb) => ({
 
 	getNextSequenceValue: async (sequenceName: string) => {
 		try {
-			const nextValue: QueryResult<Record<'nextval', number>> = await db.execute(sql`SELECT nextval(${sequenceName})`);
+			const nextSequenceValue = `${schemaName}.${sequenceName}`;
+			const nextValue: QueryResult<Record<'nextval', number>> = await db.execute(
+				sql`SELECT nextval(${nextSequenceValue})`,
+			);
 			return nextValue.rows[0] ? nextValue.rows[0].nextval : undefined;
 		} catch (exception) {
 			logger.error(`[IIM]: Unexpected error getting next sequence value. ${exception}`);
@@ -154,7 +159,7 @@ const iimService = (db: PostgresDb) => ({
 
 		try {
 			const sequenceCreationResult = await dbTransaction.execute(
-				sql.raw(`CREATE SEQUENCE "${sequenceName}" START ${iimData.sequenceStart};`),
+				sql.raw(`CREATE SEQUENCE ${schemaName}."${sequenceName}" START ${iimData.sequenceStart};`),
 			);
 
 			return [sequenceCreationResult, sequenceName];
