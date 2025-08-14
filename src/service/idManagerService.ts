@@ -149,7 +149,6 @@ const iimService = (db: PostgresDb) => ({
 		}
 	},
 
-	// Generating to public, needs to be in PCGL
 	createIMMSequence: async (
 		iimData: IIMConfigObject,
 		transaction?: PostgresTransaction,
