@@ -21,7 +21,6 @@ import type { ResultOnCommit, SubmittedDataResponse } from '@overture-stack/lyri
 
 import { logger } from '@/common/logger.js';
 import { env } from '@/config/envConfig.js';
-import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance, type PostgresDb } from '@/db/index.js';
 import {
 	findIDByHash,
@@ -44,10 +43,7 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], 
 		logger.error(
 			`[Middleware/IIM]: No ID config records exist in IIM configuration table. Configuration records must be added prior to attempting to use the IIM.`,
 		);
-
-		throw new lyricProvider.utils.errors.InternalServerError(
-			'The Internal ID Manager is misconfigured. Please check configuration and try again later.',
-		);
+		return;
 	}
 
 	for (const record of insertedRecords) {
