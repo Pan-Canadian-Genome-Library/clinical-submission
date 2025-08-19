@@ -218,17 +218,17 @@ const FormatLyricDataToPCGLResponse = async (submittedResult: SubmittedDataRespo
 	});
 
 	const formatSubmittedResult = submittedResult.map(async (result) => {
-		let internalId;
-
 		for (const config of iimConfigArray) {
 			if (config.entityName === result.entityName) {
 				const hashedFieldName = generateHash(`${result.data[config.fieldName]}`, env.ID_MANAGER_SECRET);
 				const generatedIdResult = await iimRepo.getIDByHash(hashedFieldName);
 
-				internalId = generatedIdResult[0]?.generatedId;
+				// replace the current value with the pcgl internalId
+				result.data[`${config.fieldName}`] = generatedIdResult[0]?.generatedId;
 			}
 		}
-		return { ...result, internalId };
+
+		return result;
 	});
 
 	return Promise.all(formatSubmittedResult);
