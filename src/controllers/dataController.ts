@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { SubmittedDataResponse, VIEW_TYPE } from '@overture-stack/lyric';
+import { DataRecordNested, SubmittedDataResponse, VIEW_TYPE } from '@overture-stack/lyric';
 import {
 	dataGetByCategoryRequestSchema,
 	dataGetByOrganizationRequestSchema,
@@ -32,7 +32,7 @@ import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { generateHash } from '@/internal/id-manager/utils.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
-import iimService from '@/service/idManagerService.js';
+import iimService, { IIMService } from '@/service/idManagerService.js';
 
 const defaultPage = 1;
 const defaultPageSize = 20;
@@ -200,38 +200,67 @@ export const getSubmittedDataByQuery = validateRequest(dataGetByQueryRequestSche
 });
 
 /**
- *	Formatting function that takes in lyric SubmittedDataResponse[] and inserts an additional field `internalId` thats generated from the IIM service
- * @param submittedResult
- * @returns array of SubmittedDataResponse with additional field `internalId`
+ *	Function that takes in lyric SubmittedDataResponse[] and applies the transformer to all its array values
+ * @returns SubmittedDataResponse replacing "data" with the sanitized sensitive fields with `internalId`
  */
 const SanitizeLyricIdsWithInternal = async (submittedResult: SubmittedDataResponse[]) => {
 	const db = getDbInstance();
 	const iimRepo = iimService(db);
 	const iimConfigs = await iimRepo.getAllIIMConfigs();
-
-	// Grab all fieldname and entityName config values
-	const iimConfigArray = iimConfigs.map((config) => {
-		return {
-			entityName: config.entityName,
-			fieldName: config.fieldName,
-		};
-	});
+	const fieldNamesToReplace = new Set(iimConfigs.map((config) => config.fieldName));
 
 	const formatSubmittedResult = submittedResult.map(async (result) => {
-		for (const config of iimConfigArray) {
-			if (config.entityName === result.entityName) {
-				const hashedFieldName = generateHash(`${result.data[config.fieldName]}`, env.ID_MANAGER_SECRET);
+		return { ...result, data: await TransformerFunction(result.data, fieldNamesToReplace, iimRepo) };
+	});
+
+	return Promise.all(formatSubmittedResult);
+};
+
+/**
+ *	Recursive function that takes in DataRecordNested and replaces sensitive entities determined from the the IIM config that was generated from the IIM service
+ * @param dataRecord
+ * @param fieldNames Fieldname values to replace with internalId
+ * @param iimRepo iim service to query for internalId's
+ * @returns Mutated Promise of DataRecordNested with field `internalId` replaced in sensitive entities
+ */
+const TransformerFunction = async (
+	dataRecord: DataRecordNested,
+	fieldNamesToReplace: Set<string>,
+	iimRepo: IIMService,
+) => {
+	const processInternalValue = async (
+		dataRecordValue: DataRecordNested,
+	): Promise<DataRecordNested | DataRecordNested[]> => {
+		// If the value is not an object/array or null|undefined, its a primitive value, return dataRecordValue
+		if (typeof dataRecordValue !== 'object' || dataRecordValue === null || dataRecordValue === undefined) {
+			return dataRecordValue;
+		}
+
+		// If its an array, then there is possible more objects to search for sensitive data, recursive call
+		if (Array.isArray(dataRecordValue)) {
+			return (await Promise.all(dataRecordValue.map(processInternalValue))).flat();
+		}
+
+		// Since the value is not an string | array, then that mean its object of DataRecordNested,
+		const result: DataRecordNested = {};
+
+		for (const [key, currentValue] of Object.entries(dataRecordValue)) {
+			// Start sanitizing logic
+			if (fieldNamesToReplace.has(key)) {
+				const hashedFieldName = generateHash(`${dataRecordValue[key]}`, env.ID_MANAGER_SECRET);
 				const generatedIdResult = await iimRepo.getIDByHash(hashedFieldName);
 
-				// replace the current value with the pcgl internalId
-				result.data[`${config.fieldName}`] = generatedIdResult[0]?.generatedId;
+				result[key] = generatedIdResult[0]?.generatedId || 'REDACTED';
+			} else {
+				// FIX: currentValue is of type "DataRecordNested | DataRecordNested[] | DataRecordValue", but processInternalValue doesn't accept that even though DataRecordNested should be an acceptable type
+				// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+				result[key] = await processInternalValue(currentValue as DataRecordNested);
 			}
 		}
 
 		return result;
-	});
-
-	return Promise.all(formatSubmittedResult);
+	};
+	return await processInternalValue(dataRecord);
 };
 
 export default {
