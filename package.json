@@ -7,7 +7,10 @@
 	"author": "Leonardo Rivera <lrivera@oicr.com>",
 	"license": "AGPL-3.0-or-later",
 	"type": "module",
-	"scripts": {},
+	"scripts": {
+		"build:all": "nx run-many --all --target=build:all",
+		"dev:all": "concurrently --names=data-dictionary-io,submission \"pnpm -w dev:ui\" \"pnpm -w dev:submission\" "
+	},
 	"devDependencies": {
 		"concurrently": "^9.1.2",
 		"husky": "^9.1.7",
