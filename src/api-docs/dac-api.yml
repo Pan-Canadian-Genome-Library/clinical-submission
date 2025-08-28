@@ -91,7 +91,7 @@
 
 /dac/create:
   post:
-    summary: Create DAC user
+    summary: Create DAC
     tags:
       - DAC
     requestBody:
@@ -142,7 +142,7 @@
         $ref: '#/components/responses/ServiceUnavailableError'
 /dac:
   get:
-    summary: Get all DAC users
+    summary: Get all DACs
     tags:
       - DAC
     parameters:
