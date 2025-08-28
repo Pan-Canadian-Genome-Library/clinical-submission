@@ -188,4 +188,3 @@ const iimService = (db: PostgresDb) => ({
 });
 
 export default iimService;
-export type IIMService = ReturnType<typeof iimService>;

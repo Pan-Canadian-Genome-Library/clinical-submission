@@ -32,7 +32,7 @@ import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { generateHash } from '@/internal/id-manager/utils.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
-import iimService, { IIMService } from '@/service/idManagerService.js';
+import iimService from '@/service/idManagerService.js';
 
 const defaultPage = 1;
 const defaultPageSize = 20;
@@ -226,7 +226,7 @@ const SanitizeLyricIdsWithInternal = async (submittedResult: SubmittedDataRespon
 const TransformerFunction = async (
 	dataRecord: DataRecordNested,
 	fieldNamesToReplace: Set<string>,
-	iimRepo: IIMService,
+	iimRepo: ReturnType<typeof iimService>,
 ) => {
 	const processInternalValue = async (
 		dataRecordValue: DataRecordNested,
