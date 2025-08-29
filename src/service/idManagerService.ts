@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { QueryResult } from 'pg';
 
 import { logger } from '@/common/logger.js';
@@ -93,14 +93,19 @@ const iimService = (db: PostgresDb) => ({
 		}
 	},
 
-	getIDByHash: async (hashedValue: string, transaction?: PostgresTransaction) => {
+	getIDByHash: async (hashedValue: string, generatedId?: string, transaction?: PostgresTransaction) => {
 		const dbTransaction = transaction ?? db;
 
 		try {
 			return await dbTransaction
 				.select()
 				.from(generatedIdentifiers)
-				.where(eq(generatedIdentifiers.sourceHash, hashedValue));
+				.where(
+					and(
+						generatedId ? eq(generatedIdentifiers.generatedId, generatedId) : undefined,
+						eq(generatedIdentifiers.sourceHash, hashedValue),
+					),
+				);
 		} catch (exception) {
 			logger.error(`[IIM]: Unexpected error retrieving ID . ${exception}`);
 			throw new lyricProvider.utils.errors.InternalServerError(
@@ -182,3 +187,4 @@ const iimService = (db: PostgresDb) => ({
 });
 
 export default iimService;
+export type IIMService = ReturnType<typeof iimService>;
