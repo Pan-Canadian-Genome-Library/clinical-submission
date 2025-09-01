@@ -1,12 +1,12 @@
 # Global variables
 ARG COMMIT=""
 ARG APP_USER=clinical
-ARG WORKDIR=/usr/src/app
+ARG WORKDIR=/clinical-submission
 
 ######################
 # Configure base image
 ######################
-FROM node:20.12.2-alpine AS base
+FROM node:22-alpine AS base
 
 ARG APP_USER
 ARG WORKDIR
@@ -34,17 +34,15 @@ USER ${APP_USER}:${APP_USER}
 # Configure build image
 ######################
 
-FROM base as build
+FROM base AS build
 
 ARG APP_USER
 ARG WORKDIR
 
-COPY --chown=clinical:clinical . ./
+COPY --chown=${APP_USER}:${APP_USER} . ./
 
 RUN pnpm install --ignore-scripts
-
 RUN pnpm build:all
-
 
 ######################
 # Configure prod-deps image
@@ -70,13 +68,14 @@ FROM base AS server
 
 ARG APP_USER
 ARG WORKDIR
+ARG SUBMISSION_DIR=${WORKDIR}/apps/submission
 
 USER ${APP_USER}
 
 WORKDIR ${WORKDIR}
 
-COPY --from=prod-deps ${WORKDIR}/node_modules ./node_modules
-COPY --from=build ${WORKDIR}/dist .
+COPY --from=prod-deps ${SUBMISSION_DIR}/node_modules ./node_modules
+COPY --from=build ${SUBMISSION_DIR}/dist .
 
 EXPOSE 3000
 

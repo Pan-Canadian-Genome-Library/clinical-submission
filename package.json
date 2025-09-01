@@ -8,13 +8,14 @@
 	"license": "AGPL-3.0-or-later",
 	"type": "module",
 	"scripts": {
-		"build:all": "nx run-many --all --target=build:all",
+		"\n==================  NX  ==================": "",
+		"build:all": "nx run-many --all --target=build:all --verbose",
 		"dev:all": "concurrently --names=data-dictionary-io,submission \"pnpm -w dev:ui\" \"pnpm -w dev:submission\" "
 	},
 	"devDependencies": {
 		"concurrently": "^9.1.2",
 		"husky": "^9.1.7",
-		"nx": "^20.4.4",
+		"nx": "21.4.1",
 		"prettier": "^3.5.1",
 		"prettier-plugin-organize-imports": "^4.1.0",
 		"rimraf": "^6.0.1",
