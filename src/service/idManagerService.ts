@@ -100,8 +100,16 @@ const iimService = (db: PostgresDb) => ({
 
 		try {
 			return await dbTransaction
-				.select()
+				.select({
+					id: generatedIdentifiers.id,
+					sourceHash: generatedIdentifiers.sourceHash,
+					generatedId: generatedIdentifiers.generatedId,
+					configId: generatedIdentifiers.configId,
+					createdAt: generatedIdentifiers.createdAt,
+					replacementId: idGenerationConfig.replacementId,
+				})
 				.from(generatedIdentifiers)
+				.leftJoin(idGenerationConfig, eq(generatedIdentifiers.configId, idGenerationConfig.id))
 				.where(
 					and(
 						generatedId ? eq(generatedIdentifiers.generatedId, generatedId) : undefined,

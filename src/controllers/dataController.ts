@@ -250,7 +250,12 @@ const TransformerFunction = async (
 				const hashedFieldName = generateHash(`${dataRecordValue[key]}`, env.ID_MANAGER_SECRET);
 				const generatedIdResult = await iimRepo.getIDByHash(hashedFieldName);
 
-				result[key] = generatedIdResult[0]?.generatedId || 'REDACTED';
+				result[key] = undefined;
+				// Shouldn't happen, but if the result from getIDByHash does not return a value, bail on replacementId logic
+				if (generatedIdResult[0] && generatedIdResult[0]?.replacementId) {
+					result[generatedIdResult[0]?.replacementId] = generatedIdResult[0]?.generatedId;
+					continue;
+				}
 			} else {
 				// FIX: currentValue is of type "DataRecordNested | DataRecordNested[] | DataRecordValue", but processInternalValue doesn't accept that even though DataRecordNested should be an acceptable type
 				// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
