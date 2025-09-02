@@ -231,6 +231,7 @@ const TransformerFunction = async (
 	const processInternalValue = async (
 		dataRecordValue: DataRecordNested,
 	): Promise<DataRecordNested | DataRecordNested[]> => {
+		// TODO: once isDataRecordValue logic is in, change the logic here
 		// If the value is not an object/array or null|undefined, its a primitive value, return dataRecordValue
 		if (typeof dataRecordValue !== 'object' || dataRecordValue === null || dataRecordValue === undefined) {
 			return dataRecordValue;
@@ -247,13 +248,15 @@ const TransformerFunction = async (
 		for (const [key, currentValue] of Object.entries(dataRecordValue)) {
 			// Start sanitizing logic
 			if (fieldNamesToReplace.has(key)) {
+				// TODO: once isDataRecordValue logic is in, change the logic here
 				const hashedFieldName = generateHash(`${dataRecordValue[key]}`, env.ID_MANAGER_SECRET);
 				const generatedIdResult = await iimRepo.getIDByHash(hashedFieldName);
 
+				// Remove sensitive field
 				result[key] = undefined;
 				// Shouldn't happen, but if the result from getIDByHash does not return a value, bail on replacementId logic
-				if (generatedIdResult[0] && generatedIdResult[0]?.replacementId) {
-					result[generatedIdResult[0]?.replacementId] = generatedIdResult[0]?.generatedId;
+				if (generatedIdResult[0] && generatedIdResult[0].replacementId) {
+					result[generatedIdResult[0].replacementId] = generatedIdResult[0].generatedId;
 					continue;
 				}
 			} else {
