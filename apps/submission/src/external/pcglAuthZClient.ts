@@ -22,8 +22,8 @@ import { Request } from 'express';
 import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
-import { PCGLUserSessionResult, UserDataResponseErrorType } from '@/common/types/auth.js';
-import { Groups, userDataResponseSchema, UserDataResponseSchemaType } from '@/common/validation/auth-validation.js';
+import { PCGLUserSessionResult } from '@/common/types/auth.js';
+import { Groups, userDataResponseSchema } from '@/common/validation/auth-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 
@@ -61,7 +61,7 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 	const response = await fetchAuthZResource(`/user/me`, token);
 
 	if (!response.ok) {
-		const errorResponse: UserDataResponseErrorType = await response.json();
+		const errorResponse = await response.json();
 
 		logger.error(`[AUTHZ]: Unable to verify user response from AUTHZ. ${errorResponse}`);
 
@@ -81,7 +81,7 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 		}
 	}
 
-	const result: UserDataResponseSchemaType = await response.json();
+	const result = await response.json();
 
 	const responseValidation = userDataResponseSchema.safeParse(result);
 

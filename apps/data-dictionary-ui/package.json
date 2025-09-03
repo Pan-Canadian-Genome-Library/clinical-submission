@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"start:dev": "vite",
-		"build": "tsc -b && vite build",
+		"build": "vite build --emptyOutDir",
 		"lint": "eslint .",
 		"preview": "vite preview"
 	},
