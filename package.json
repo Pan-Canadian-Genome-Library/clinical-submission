@@ -9,8 +9,12 @@
 	"type": "module",
 	"scripts": {
 		"\n==================  NX  ==================": "",
-		"build:all": "nx run-many --all --target=build:all --verbose",
-		"dev:all": "concurrently --names=data-dictionary-io,submission \"pnpm -w dev:ui\" \"pnpm -w dev:submission\" "
+		"build:all": "nx run-many --all --target=build:all",
+		"dev:all": "concurrently --names=data-dictionary-io,submission \"pnpm -w dev:ui\" \"pnpm -w dev:submission\"",
+		"\n==================  LOCAL  ==================": "",
+		"build": "pnpm run build:api && pnpm run build:ui",
+		"build:api": "pnpm --filter ./apps/data-dictionary-ui run build",
+		"build:ui": "pnpm --filter ./apps/submission run build:all"
 	},
 	"devDependencies": {
 		"concurrently": "^9.1.2",
