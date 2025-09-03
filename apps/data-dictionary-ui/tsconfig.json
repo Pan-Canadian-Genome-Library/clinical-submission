@@ -1,5 +1,5 @@
 {
-	"extends": "../tsconfig.apps.json",
+	// "extends": "../tsconfig.apps.json",
 	"compilerOptions": {
 		"target": "ESNext",
 		"lib": ["ESNext", "DOM", "DOM.Iterable"],
@@ -14,5 +14,5 @@
 			"@/*": ["./src/*"]
 		}
 	},
-	"include": ["src", "vite.config.ts"]
+	"include": ["src", "vite.config.ts", "eslint.config.js"]
 }
