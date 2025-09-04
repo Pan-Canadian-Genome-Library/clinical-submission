@@ -3,6 +3,13 @@
 	"version": "0.2.0",
 	"description": "",
 	"main": "dist/index.js",
+	"private": true,
+	"author": "Leonardo Rivera <lrivera@oicr.com>",
+	"license": "AGPL-3.0-or-later",
+	"type": "module",
+	"aliases": {
+		"@": "src"
+	},
 	"scripts": {
 		"studio": "NODE_OPTIONS='--import tsx' drizzle-kit studio",
 		"db:generate": "NODE_OPTIONS='--import tsx' drizzle-kit generate",
@@ -23,10 +30,6 @@
 		"migrate:db:prod": "node --import=./register.js src/scripts/migration.js",
 		"start:prod": "pnpm migrate:db:prod && pnpm migrate:pcgl:db:prod && NODE_ENV=production node --import=./register.js src/index.js"
 	},
-	"private": true,
-	"author": "Leonardo Rivera <lrivera@oicr.com>",
-	"license": "AGPL-3.0-or-later",
-	"type": "module",
 	"dependencies": {
 		"@overture-stack/lyric": "^0.11.0",
 		"axios": "^1.10.0",
@@ -76,8 +79,5 @@
 		"tsx": "^4.15.7",
 		"typescript": "^5.4.5",
 		"typescript-eslint": "^7.13.1"
-	},
-	"aliases": {
-		"@": "src"
 	}
 }

@@ -6,7 +6,7 @@ ARG WORKDIR=/clinical-submission
 ######################
 # Configure base image
 ######################
-FROM node:22-alpine AS base
+FROM node:20.12.2-alpine AS base
 
 ARG APP_USER
 ARG WORKDIR
@@ -42,12 +42,12 @@ ARG WORKDIR
 COPY --chown=${APP_USER}:${APP_USER} . ./
 
 RUN pnpm install --ignore-scripts
-RUN pnpm build:all
+RUN pnpm build
 
 ######################
 # Configure prod-deps image
 ######################
-
+ 
 FROM build AS prod-deps
 
 ARG APP_USER
@@ -60,7 +60,6 @@ USER ${APP_USER}:${APP_USER}
 # pnpm will not install any package listed in devDependencies
 RUN pnpm install --prod
 
-
 ######################
 # Configure server image
 ######################
@@ -72,7 +71,9 @@ ARG SUBMISSION_DIR=${WORKDIR}/apps/submission
 
 USER ${APP_USER}
 
-WORKDIR ${WORKDIR}
+COPY --from=build ${WORKDIR}/node_modules ./node_modules
+
+WORKDIR ${SUBMISSION_DIR}
 
 COPY --from=prod-deps ${SUBMISSION_DIR}/node_modules ./node_modules
 COPY --from=build ${SUBMISSION_DIR}/dist .
