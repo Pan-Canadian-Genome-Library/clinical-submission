@@ -35,6 +35,12 @@ export const authMiddleware = () => {
 		try {
 			// If auth is disabled, then skip fetching user information
 			if (!enabled) {
+				// TODO: Move admin logic into this middleware
+				req.user = {
+					username: 'DisabledAuth',
+					isAdmin: true,
+					allowedWriteOrganizations: [],
+				};
 				return next();
 			}
 			const token = extractAccessTokenFromHeader(req);
