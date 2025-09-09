@@ -1,9 +1,8 @@
 server {
- listen 3000 default_server;
+ listen 3001 default_server;
  root   /usr/share/nginx/html;
  index  index.html;
  etag   on;
- client_max_body_size 6M;
 
  location /api/ {
    rewrite /api/(.*) /$1  break;
