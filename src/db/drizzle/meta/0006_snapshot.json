@@ -1,0 +1,399 @@
+{
+  "id": "389cad0e-b813-4b2f-9e74-69a42dbe3e8e",
+  "prevId": "72c3897c-a260-45d2-badd-2636dd89af22",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "pcgl.dac": {
+      "name": "dac",
+      "schema": "pcgl",
+      "columns": {
+        "dac_id": {
+          "name": "dac_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "dac_name": {
+          "name": "dac_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dac_description": {
+          "name": "dac_description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contact_name": {
+          "name": "contact_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contact_email": {
+          "name": "contact_email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "pcgl.generated_identifiers": {
+      "name": "generated_identifiers",
+      "schema": "pcgl",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "source_hash": {
+          "name": "source_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "generated_id": {
+          "name": "generated_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "config_id": {
+          "name": "config_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "generated_identifiers_config_id_id_generation_config_id_fk": {
+          "name": "generated_identifiers_config_id_id_generation_config_id_fk",
+          "tableFrom": "generated_identifiers",
+          "tableTo": "id_generation_config",
+          "schemaTo": "pcgl",
+          "columnsFrom": [
+            "config_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "generated_identifiers_source_hash_unique": {
+          "name": "generated_identifiers_source_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "source_hash"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "pcgl.id_generation_config": {
+      "name": "id_generation_config",
+      "schema": "pcgl",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "entity_name": {
+          "name": "entity_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "field_name": {
+          "name": "field_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prefix": {
+          "name": "prefix",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "replacement_id": {
+          "name": "replacement_id",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "padding_length": {
+          "name": "padding_length",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sequence_name": {
+          "name": "sequence_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sequence_start": {
+          "name": "sequence_start",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "id_generation_config_entity_name_unique": {
+          "name": "id_generation_config_entity_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "entity_name"
+          ]
+        },
+        "id_generation_config_replacement_id_unique": {
+          "name": "id_generation_config_replacement_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "replacement_id"
+          ]
+        },
+        "id_generation_config_sequence_name_unique": {
+          "name": "id_generation_config_sequence_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "sequence_name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "pcgl.study": {
+      "name": "study",
+      "schema": "pcgl",
+      "columns": {
+        "study_id": {
+          "name": "study_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "dac_id": {
+          "name": "dac_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "study_name": {
+          "name": "study_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "study_description": {
+          "name": "study_description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "program_name": {
+          "name": "program_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "keywords": {
+          "name": "keywords",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "study_status",
+          "typeSchema": "pcgl",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "context": {
+          "name": "context",
+          "type": "study_context",
+          "typeSchema": "pcgl",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "domain": {
+          "name": "domain",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "participant_criteria": {
+          "name": "participant_criteria",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "principal_investigators": {
+          "name": "principal_investigators",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lead_organizations": {
+          "name": "lead_organizations",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "collaborators": {
+          "name": "collaborators",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "funding_sources": {
+          "name": "funding_sources",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "publication_links": {
+          "name": "publication_links",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "category_id": {
+          "name": "category_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": -1
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "dac_id_fk": {
+          "name": "dac_id_fk",
+          "tableFrom": "study",
+          "tableTo": "dac",
+          "schemaTo": "pcgl",
+          "columnsFrom": [
+            "dac_id"
+          ],
+          "columnsTo": [
+            "dac_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "study_category_id_unique": {
+          "name": "study_category_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "category_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "pcgl.study_context": {
+      "name": "study_context",
+      "schema": "pcgl",
+      "values": [
+        "CLINICAL",
+        "RESEARCH"
+      ]
+    },
+    "pcgl.study_status": {
+      "name": "study_status",
+      "schema": "pcgl",
+      "values": [
+        "ONGOING",
+        "COMPLETED"
+      ]
+    }
+  },
+  "schemas": {
+    "pcgl": "pcgl"
+  },
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

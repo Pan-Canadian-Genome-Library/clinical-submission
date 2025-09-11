@@ -35,7 +35,9 @@ import { submissionRouter } from '@/routes/submission.js';
 import { authRouter } from './routes/auth.js';
 import { dacRouter } from './routes/dac.js';
 import { dataRouter } from './routes/data.js';
+import { dictionaryRouter } from './routes/dictionary.js';
 import { studyRouter } from './routes/study.js';
+import { categoryRouter } from './routes/categoryRouter.js';
 
 const app = express();
 
@@ -88,8 +90,9 @@ app.use('/auth', authRouter);
 // Lyric routes
 app.use('/audit', lyricProvider.routers.audit);
 app.use('/category', lyricProvider.routers.category);
-app.use('/dictionary', lyricProvider.routers.dictionary);
+app.use('/dictionary', dictionaryRouter);
 app.use('/validator', lyricProvider.routers.validator);
+app.use('/admin/category', categoryRouter);
 
 //Lyric custom routes
 /**

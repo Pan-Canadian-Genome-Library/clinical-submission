@@ -18,10 +18,11 @@
  */
 
 import { relations } from 'drizzle-orm';
-import { foreignKey, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { foreignKey, integer, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { dac } from './dacSchema.js';
 import { pcglSchema } from './generate.js';
+import { number } from 'zod';
 
 export const studyStatus = pcglSchema.enum('study_status', ['ONGOING', 'COMPLETED']);
 export const studyContext = pcglSchema.enum('study_context', ['CLINICAL', 'RESEARCH']);
@@ -46,6 +47,7 @@ export const study = pcglSchema.table(
 		publication_links: text().array(),
 		created_at: timestamp().notNull().defaultNow(),
 		updated_at: timestamp(),
+		category_id: integer().unique().default(-1),
 	},
 	(table) => [
 		foreignKey({
