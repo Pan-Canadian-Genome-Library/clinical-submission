@@ -38,6 +38,7 @@ export const convertFromRecordToStudyDTO = (study: StudyRecord): StudyDTO => {
 		keywords: study.keywords,
 		createdAt: study.created_at,
 		updatedAt: study.updated_at,
+		categoryId: study.category_id,
 	};
 };
 
@@ -60,6 +61,7 @@ export const convertToRecordFromStudyDTO = (
 		funding_sources: studyData.fundingSources,
 		publication_links: studyData.publicationLinks,
 		keywords: studyData.keywords,
+		category_id: studyData.categoryId,
 	};
 };
 
@@ -81,5 +83,6 @@ export const convertToRecordFromPartialStudyDTO = (
 		funding_sources: studyData.fundingSources,
 		publication_links: studyData.publicationLinks,
 		keywords: studyData.keywords,
+		category_id: studyData.categoryId,
 	};
 };
