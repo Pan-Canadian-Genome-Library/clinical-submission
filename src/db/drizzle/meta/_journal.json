@@ -29,6 +29,13 @@
       "when": 1754592604595,
       "tag": "0003_id_config_change_unique_constraint_on_entity_name",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1757598756630,
+      "tag": "0004_clammy_white_tiger",
+      "breakpoints": true
     }
   ]
 }
