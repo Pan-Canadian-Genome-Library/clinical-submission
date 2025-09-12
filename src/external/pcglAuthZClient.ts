@@ -74,7 +74,7 @@ const refreshAuthZServiceToken = async () => {
 const fetchAuthZResource = async (resource: string, token: string, options?: RequestInit) => {
 	/**
 	 * Internal function that does the work of fetching the resource from AuthZ.
-	 * We will need to retry this if if is rejected due to an expired serviceToken.
+	 * We will need to retry this if this is rejected due to an expired serviceToken.
 	 */
 	async function _fetchFromAuthZ() {
 		const { AUTHZ_ENDPOINT } = authConfig;
