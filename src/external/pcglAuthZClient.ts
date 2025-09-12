@@ -23,7 +23,6 @@ import { Groups, userDataResponseSchema, UserDataResponseSchemaType } from '@/co
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { UserSessionResult } from '@overture-stack/lyric';
-import { InternalServerError } from '@overture-stack/lyric/dist/src/utils/errors.js';
 import { Request } from 'express';
 import urlJoin from 'url-join';
 
@@ -53,13 +52,17 @@ const refreshAuthZServiceToken = async () => {
 			}),
 		});
 		if (!response.ok) {
-			throw new Error(`Failed to fetch sevice token with status ${response.status}`);
+			throw new lyricProvider.utils.errors.InternalServerError(
+				`Failed to fetch sevice token with status ${response.status}`,
+			);
 		}
 		const tokenResponse = await response.json();
 		serviceToken = tokenResponse.token;
 	} catch (error) {
 		logger.error(`[AUTHZ]: Something went wrong fetching authz service token.`, error);
-		throw new InternalServerError(`Bad request: Something went wrong fetching from authz service`);
+		throw new lyricProvider.utils.errors.InternalServerError(
+			`Bad request: Something went wrong fetching from authz service`,
+		);
 	}
 };
 
