@@ -45,6 +45,7 @@ const iimService = (db: PostgresDb) => ({
 					fieldName: iimData.fieldName,
 					paddingLength: iimData.paddingLength,
 					prefix: iimData.prefix,
+					internalId: iimData.internalId,
 					sequenceName: generateSequenceName(iimData),
 					sequenceStart: iimData.sequenceStart,
 				})
@@ -104,7 +105,7 @@ const iimService = (db: PostgresDb) => ({
 					generatedId: generatedIdentifiers.generatedId,
 					configId: generatedIdentifiers.configId,
 					createdAt: generatedIdentifiers.createdAt,
-					replacementId: idGenerationConfig.replacementId,
+					internalId: idGenerationConfig.internalId,
 				})
 				.from(generatedIdentifiers)
 				.leftJoin(idGenerationConfig, eq(generatedIdentifiers.configId, idGenerationConfig.id))

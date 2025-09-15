@@ -23,6 +23,7 @@ export const iimConfigObject = z.object({
 	entityName: z.string(),
 	fieldName: z.string(),
 	prefix: z.string(),
+	internalId: z.string(),
 	paddingLength: z.number().int().positive().default(8),
 	parentEntityName: z.string().optional(),
 	parentFieldName: z.string().optional(),

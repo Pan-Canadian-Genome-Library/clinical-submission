@@ -252,11 +252,11 @@ const TransformerFunction = async (
 				const hashedFieldName = generateHash(`${dataRecordValue[key]}`, env.ID_MANAGER_SECRET);
 				const generatedIdResult = await iimRepo.getIDByHash(hashedFieldName);
 
-				// Remove sensitive field
-				result[key] = undefined;
-				// Shouldn't happen, but if the result from getIDByHash does not return a value, bail on replacementId logic
-				if (generatedIdResult[0] && generatedIdResult[0].replacementId) {
-					result[generatedIdResult[0].replacementId] = generatedIdResult[0].generatedId;
+				if (generatedIdResult[0] && generatedIdResult[0].internalId) {
+					// Add PCGL internal id
+					result[generatedIdResult[0].internalId] = generatedIdResult[0]?.generatedId;
+					// Persist original id
+					result[key] = currentValue;
 					continue;
 				}
 			} else {
