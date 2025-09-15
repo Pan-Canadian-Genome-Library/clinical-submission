@@ -72,8 +72,8 @@ export type OIDCUserInfoResponse = z.infer<typeof oidcUserInfoResponseSchema>;
 export const oidcTokenResponseSchema = z
 	.object({
 		access_token: z.string(),
-		refresh_token: z.string().optional(),
-		refresh_token_iat: z.number().optional(),
+		refresh_token: z.string(),
+		refresh_token_iat: z.number(),
 		id_token: z.string(),
 	})
 	.or(
