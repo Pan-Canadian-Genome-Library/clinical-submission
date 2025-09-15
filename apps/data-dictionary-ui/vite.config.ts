@@ -9,7 +9,7 @@ const API_PROXY_PATH = '/api';
 
 export default ({ mode }: { mode: string }) => {
 	process.env = { ...process.env, ...loadEnv(mode, process.cwd(), ['VITE', 'API']) };
-	const apiHost = process.env.API_URL || 'http://localhost:3030';
+	const apiHost = process.env.API_URL || 'http://localhost:3000';
 
 	// https://vitejs.dev/config/
 	return defineConfig({
