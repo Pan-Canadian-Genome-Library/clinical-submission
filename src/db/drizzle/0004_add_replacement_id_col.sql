@@ -1,1 +1,0 @@
-ALTER TABLE "pcgl"."id_generation_config" ADD COLUMN "replacement_id" varchar(50) NOT NULL;

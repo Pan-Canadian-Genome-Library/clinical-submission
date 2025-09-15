@@ -46,7 +46,6 @@ const iimService = (db: PostgresDb) => ({
 					fieldName: iimData.fieldName,
 					paddingLength: iimData.paddingLength,
 					prefix: iimData.prefix,
-					replacementId: iimData.replacementId,
 					sequenceName: generateSequenceName(iimData),
 					sequenceStart: iimData.sequenceStart,
 				})
