@@ -35,7 +35,7 @@ const copyToken = () => {
 };
 
 const refreshToken = () => {
-	window.location.replace('/auth/redirect');
+	window.location.replace('/auth/login');
 };
 
 /**
