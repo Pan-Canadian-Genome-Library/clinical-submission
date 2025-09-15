@@ -21,12 +21,11 @@ import { LecternDataProvider } from '@overture-stack/lectern-ui';
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
 	return (
-		<LecternDataProvider
-			lecternUrl={import.meta.env.PROXY_API_URL}
-			dictionaryName={import.meta.env.VITE_BASE_DICTIONARY_SCHEMA}
-		>
-			{children}
-		</LecternDataProvider>
+		<>
+			<LecternDataProvider lecternUrl={__API_PROXY_PATH__} dictionaryName={__BASE_DICTIONARY_SCHEMA__}>
+				{children}
+			</LecternDataProvider>
+		</>
 	);
 };
 
