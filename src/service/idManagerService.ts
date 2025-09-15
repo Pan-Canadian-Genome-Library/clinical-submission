@@ -24,11 +24,10 @@ import { logger } from '@/common/logger.js';
 import { type IIMConfigObject } from '@/common/validation/id-manager-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
+import { schemaName } from '@/db/schemas/generate.js';
 import { generatedIdentifiers, idGenerationConfig } from '@/db/schemas/idGenerationConfig.js';
 import type { GeneratedIdentifiersTable, IDGenerationConfigRecord, PostgresTransaction } from '@/db/types.js';
 import { isPostgresError, PostgresErrors } from '@/db/utils.js';
-
-import { schemaName } from '../../drizzle.config.js';
 
 const generateSequenceName = (iimData: IIMConfigObject): string => {
 	return `${iimData.entityName}_${iimData.fieldName}_seq`.toLowerCase();
