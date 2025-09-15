@@ -22,9 +22,9 @@ import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
 import {
+	type OIDCTokenResponse,
 	oidcTokenResponseSchema,
 	oidcUserInfoResponseSchema,
-	type OIDCTokenResponse,
 } from '@/common/validation/auth-validation.js';
 import { type AuthConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';

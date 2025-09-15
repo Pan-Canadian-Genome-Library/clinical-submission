@@ -17,14 +17,15 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { UserSessionResult } from '@overture-stack/lyric';
+import { Request } from 'express';
+import urlJoin from 'url-join';
+
 import { logger } from '@/common/logger.js';
 import { PCGLUserSessionResult, UserDataResponseErrorType } from '@/common/types/auth.js';
 import { Groups, userDataResponseSchema, UserDataResponseSchemaType } from '@/common/validation/auth-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
-import { UserSessionResult } from '@overture-stack/lyric';
-import { Request } from 'express';
-import urlJoin from 'url-join';
 
 /**
  * Store the service token fetched form AuthZ. This service token is used
