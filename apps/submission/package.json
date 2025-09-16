@@ -1,5 +1,5 @@
 {
-	"name": "submission",
+	"name": "@clinical-submission/submission",
 	"version": "0.2.0",
 	"description": "",
 	"main": "dist/index.js",
@@ -23,7 +23,7 @@
 		"lint": "eslint .",
 		"lint:fix": "eslint --fix .",
 		"migrate:db:dev": "tsx src/scripts/migration.ts && pnpm db:migrate",
-		"start:dev": "pnpm migrate:db:dev && tsx watch --clear-screen=false src/index.ts | pino-pretty",
+		"dev": "pnpm migrate:db:dev && tsx watch --clear-screen=false src/index.ts | pino-pretty",
 		"start:dev:all": "pnpm migrate:db:dev && tsx watch --clear-screen=false src/index.ts | pino-pretty",
 		"\n========  Prod environment (compiled) =======": "",
 		"migrate:pcgl:db:prod": "node --import=./register.js src/scripts/pcgl-migration.js",
