@@ -10,7 +10,9 @@
 	"scripts": {
 		"\n==================  NX  ==================": "",
 		"build:all": "nx run-many --all --target=build:all",
-		"dev:all": "concurrently --names=data-dictionary-io,submission \"pnpm -w dev:ui\" \"pnpm -w dev:submission\"",
+		"dev:all": "concurrently --names=data-dictionary-ui,submission \"pnpm -w dev:ui\" \"pnpm -w dev:api\"",
+		"dev:api": "nx run @clinical-submission/submission:dev",
+		"dev:ui": "nx run @clinical-submission/ui:dev",
 		"\n==================  LOCAL  ==================": "",
 		"build": "pnpm run build:api && pnpm run build:ui",
 		"build:api": "pnpm --filter ./apps/data-dictionary-ui run build",

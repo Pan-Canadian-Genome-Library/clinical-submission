@@ -1,10 +1,10 @@
 {
-	"name": "data-dictionary-ui",
+	"name": "@clinical-submission/ui",
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"start:dev": "vite",
+		"dev": "vite",
 		"build": "vite build --emptyOutDir",
 		"lint": "eslint .",
 		"preview": "vite preview"
