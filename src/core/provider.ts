@@ -20,7 +20,7 @@
 import { AppConfig, provider } from '@overture-stack/lyric';
 
 import { env } from '@/config/envConfig.js';
-import { adminMiddleware } from '@/middleware/auth.js';
+import { lyricAuthMiddleware } from '@/middleware/auth.js';
 import { onFinishCommitCallback } from '@/middleware/idManager.js';
 
 const appConfig: AppConfig = {
@@ -35,7 +35,7 @@ const appConfig: AppConfig = {
 	auth: {
 		enabled: env.AUTH_ENABLED,
 		protectedMethods: env.AUTH_PROTECT_METHODS,
-		customAuthHandler: adminMiddleware,
+		customAuthHandler: lyricAuthMiddleware,
 	},
 	idService: {
 		customAlphabet: env.ID_CUSTOM_ALPHABET,
