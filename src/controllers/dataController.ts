@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { DataRecordNested, SubmittedDataResponse, VIEW_TYPE } from '@overture-stack/lyric';
+import { DataRecordNested, isDataRecordValue, SubmittedDataResponse, VIEW_TYPE } from '@overture-stack/lyric';
 
 import { asArray, convertToViewType } from '@/common/formatUtils.js';
 import { getDataById } from '@/common/validation/data-validation.js';
@@ -237,9 +237,8 @@ const TransformerFunction = async (
 	const processInternalValue = async (
 		dataRecordValue: DataRecordNested,
 	): Promise<DataRecordNested | DataRecordNested[]> => {
-		// TODO: once isDataRecordValue logic is in, change the logic here
 		// If the value is not an object/array or null|undefined, its a primitive value, return dataRecordValue
-		if (typeof dataRecordValue !== 'object' || dataRecordValue === null || dataRecordValue === undefined) {
+		if (isDataRecordValue(dataRecordValue)) {
 			return dataRecordValue;
 		}
 
@@ -248,32 +247,41 @@ const TransformerFunction = async (
 			return (await Promise.all(dataRecordValue.map(processInternalValue))).flat();
 		}
 
-		// Since the value is not an string | array, then that mean its object of DataRecordNested,
+		// Since the value is not an isDataRecordValue | DataRecordNested[], then that mean its object of DataRecordNested,
 		const result: DataRecordNested = {};
 
 		for (const [key, currentValue] of Object.entries(dataRecordValue)) {
-			// Start sanitizing logic
 			if (fieldNamesToReplace.has(key)) {
-				// TODO: once isDataRecordValue logic is in, change the logic here
+				// Start sanitizing logic
 				const hashedFieldName = generateHash(`${dataRecordValue[key]}`, env.ID_MANAGER_SECRET);
 				const generatedIdResult = await iimRepo.getIDByHash(hashedFieldName);
 
 				if (generatedIdResult[0] && generatedIdResult[0].internalId) {
-					// Add PCGL internal id
-					result[generatedIdResult[0].internalId] = generatedIdResult[0]?.generatedId;
-					// Persist original id
-					result[key] = currentValue;
+					result[generatedIdResult[0].internalId] = generatedIdResult[0]?.generatedId; // Add PCGL internal id
+					result[key] = currentValue; // Persist original id
 					continue;
 				}
 			} else {
-				// FIX: currentValue is of type "DataRecordNested | DataRecordNested[] | DataRecordValue", but processInternalValue doesn't accept that even though DataRecordNested should be an acceptable type
-				// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-				result[key] = await processInternalValue(currentValue as DataRecordNested);
+				// Since the currentValue is not a field name to be replaced, it will follow similar logic before this loop
+				if (isDataRecordValue(currentValue)) {
+					result[key] = currentValue;
+					continue;
+				}
+
+				// If its an array, then there is possible more objects to search for sensitive data, recursive call
+				if (Array.isArray(currentValue)) {
+					result[key] = (await Promise.all(currentValue.map(processInternalValue))).flat();
+					continue;
+				}
+
+				// This means the object dataRecordValue has another object nested, apply another recursive call
+				result[key] = await processInternalValue(currentValue);
 			}
 		}
 
 		return result;
 	};
+
 	return await processInternalValue(dataRecord);
 };
 
