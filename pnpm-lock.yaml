@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@overture-stack/lyric':
-        specifier: ^0.11.0
-        version: 0.11.0(@types/pg@8.15.2)
+        specifier: ^0.12.0
+        version: 0.12.0(@types/pg@8.15.2)
       axios:
         specifier: ^1.10.0
         version: 1.10.0
@@ -666,11 +666,11 @@ packages:
   '@overture-stack/lectern-validation@2.0.0-beta.5':
     resolution: {integrity: sha512-DGi+Yo6WAmrt5AR9wdUvLNkwIpQzXwg2V2TgwvXi8HP6+brCRpU2xzGYoksJmrIzxLEmUo0xKnTS2IJlTY3I+A==}
 
-  '@overture-stack/lyric-data-model@0.11.0':
-    resolution: {integrity: sha512-4239bobE5GHdJyLy4c4AV0OKJe0AxKsQ9XnflXlx+LmmV540+HmoHAyfVoZ/mBRv8ZV1nfaBDzSXnZUhYQhKTA==}
+  '@overture-stack/lyric-data-model@0.12.0':
+    resolution: {integrity: sha512-tnqluolwXVl8EMwl+0AIjyQg3b0oDZov6bkFXCWLziF7949mm90I6dbWzshSSriOTniSDZkY68S4J13EM8q8tA==}
 
-  '@overture-stack/lyric@0.11.0':
-    resolution: {integrity: sha512-k0U02m0Z6MY8uQ5YcNUEtptOGR+HZwjJQgkMW0afj9JmMVLsLly9b8mNAj4imjGVviZs9A2A2+LK43zg0d2RdQ==}
+  '@overture-stack/lyric@0.12.0':
+    resolution: {integrity: sha512-QKYzdy1rw8XVrOaOsw2yJ/fWw1i+Esk+Mf7VaC5lcwL2d04UAgAQvF9J0lh0mYh6llQ0Ji0LcB8laTGEkTTzDQ==}
     engines: {node: '>=20.0.0'}
 
   '@overture-stack/sqon-builder@1.1.0':
@@ -2764,7 +2764,7 @@ snapshots:
       lodash: 4.17.21
       zod: 3.23.8
 
-  '@overture-stack/lyric-data-model@0.11.0(@types/pg@8.15.2)':
+  '@overture-stack/lyric-data-model@0.12.0(@types/pg@8.15.2)':
     dependencies:
       '@overture-stack/lectern-client': 2.0.0-beta.5
       copyfiles: 2.4.1
@@ -2796,10 +2796,10 @@ snapshots:
       - sql.js
       - sqlite3
 
-  '@overture-stack/lyric@0.11.0(@types/pg@8.15.2)':
+  '@overture-stack/lyric@0.12.0(@types/pg@8.15.2)':
     dependencies:
       '@overture-stack/lectern-client': 2.0.0-beta.5
-      '@overture-stack/lyric-data-model': 0.11.0(@types/pg@8.15.2)
+      '@overture-stack/lyric-data-model': 0.12.0(@types/pg@8.15.2)
       '@overture-stack/sqon-builder': 1.1.0
       dotenv: 16.4.5
       drizzle-orm: 0.29.5(@types/pg@8.15.2)(pg@8.16.0)

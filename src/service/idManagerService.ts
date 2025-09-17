@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { QueryResult } from 'pg';
 
 import { logger } from '@/common/logger.js';
@@ -45,6 +45,7 @@ const iimService = (db: PostgresDb) => ({
 					fieldName: iimData.fieldName,
 					paddingLength: iimData.paddingLength,
 					prefix: iimData.prefix,
+					internalId: iimData.internalId,
 					sequenceName: generateSequenceName(iimData),
 					sequenceStart: iimData.sequenceStart,
 				})
@@ -93,14 +94,27 @@ const iimService = (db: PostgresDb) => ({
 		}
 	},
 
-	getIDByHash: async (hashedValue: string, transaction?: PostgresTransaction) => {
+	getIDByHash: async (hashedValue: string, generatedId?: string, transaction?: PostgresTransaction) => {
 		const dbTransaction = transaction ?? db;
 
 		try {
 			return await dbTransaction
-				.select()
+				.select({
+					id: generatedIdentifiers.id,
+					sourceHash: generatedIdentifiers.sourceHash,
+					generatedId: generatedIdentifiers.generatedId,
+					configId: generatedIdentifiers.configId,
+					createdAt: generatedIdentifiers.createdAt,
+					internalId: idGenerationConfig.internalId,
+				})
 				.from(generatedIdentifiers)
-				.where(eq(generatedIdentifiers.sourceHash, hashedValue));
+				.leftJoin(idGenerationConfig, eq(generatedIdentifiers.configId, idGenerationConfig.id))
+				.where(
+					and(
+						generatedId ? eq(generatedIdentifiers.generatedId, generatedId) : undefined,
+						eq(generatedIdentifiers.sourceHash, hashedValue),
+					),
+				);
 		} catch (exception) {
 			logger.error(`[IIM]: Unexpected error retrieving ID . ${exception}`);
 			throw new lyricProvider.utils.errors.InternalServerError(
