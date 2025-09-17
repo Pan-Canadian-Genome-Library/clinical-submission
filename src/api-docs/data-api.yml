@@ -1,6 +1,6 @@
 /data/category/{id}/{entityName}/exists:
   get:
-    summary: Retrieve boolean if category exists
+    summary: Retrieve boolean if record exists
     tags:
       - Data
     parameters:

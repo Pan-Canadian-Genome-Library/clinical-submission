@@ -266,17 +266,6 @@ const TransformerFunction = async (
 	const processInternalValue = async (
 		dataRecordValue: DataRecordNested,
 	): Promise<DataRecordNested | DataRecordNested[]> => {
-		// If the dataRecordValue is not an object/array or null|undefined, its a primitive value, return dataRecordValue
-		if (isDataRecordValue(dataRecordValue)) {
-			return dataRecordValue;
-		}
-
-		// If dataRecordValue is an array, then there is possible more objects to search for sensitive data, recursive call
-		if (Array.isArray(dataRecordValue)) {
-			return (await Promise.all(dataRecordValue.map(processInternalValue))).flat();
-		}
-
-		// Since the dataRecordValue is not an isDataRecordValue | DataRecordNested[], then that mean its object of DataRecordNested, we need to determine if this object has a fieldNamesToAdd in its key/value
 		const result: DataRecordNested = {};
 
 		for (const [key, currentValue] of Object.entries(dataRecordValue)) {
