@@ -19,17 +19,16 @@
 
 import express, { json, Router, urlencoded } from 'express';
 
-import { login, logout, redirect, token } from '@/controllers/authController.js';
+import authController from '@/controllers/authController.js';
 
 export const authRouter: Router = (() => {
 	const router = express.Router();
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
 
-	router.get('/login', login);
-	router.get('/redirect', redirect);
-	router.get('/logout', logout);
-	router.get('/token', token);
+	router.get('/login', authController.login);
+	router.get('/logout', authController.logout);
+	router.get('/token', authController.token);
 
 	return router;
 })();
