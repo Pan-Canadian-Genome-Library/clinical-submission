@@ -17,21 +17,15 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import HeaderPCGL from '@/components/Header';
-import '../styles/App.css';
-import { DictionaryTable } from '@overture-stack/lectern-ui';
-import Footer from '@/components/Footer';
-
-function App() {
+const Footer = () => {
+	const currentDate = new Date().getFullYear();
 	return (
-		<div className="">
-			<HeaderPCGL />
-			<main className="wrapper">
-				<DictionaryTable lecternUrl={__API_PROXY_PATH__} dictionaryName={__BASE_DICTIONARY_SCHEMA__} />
-			</main>
-			<Footer />
-		</div>
+		<footer className="footer">
+			<div className="footer-body">
+				<h3>&copy; Pan-Canadian Genome Library {currentDate}</h3>
+			</div>
+		</footer>
 	);
-}
+};
 
-export default App;
+export default Footer;

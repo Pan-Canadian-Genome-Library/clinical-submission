@@ -16,22 +16,17 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+import PCGL from '../assets/pcgl-logo-colour.svg';
 
-import HeaderPCGL from '@/components/Header';
-import '../styles/App.css';
-import { DictionaryTable } from '@overture-stack/lectern-ui';
-import Footer from '@/components/Footer';
-
-function App() {
+const Header = () => {
 	return (
-		<div className="">
-			<HeaderPCGL />
-			<main className="wrapper">
-				<DictionaryTable lecternUrl={__API_PROXY_PATH__} dictionaryName={__BASE_DICTIONARY_SCHEMA__} />
-			</main>
-			<Footer />
-		</div>
+		<header className="header">
+			<div className="header-body">
+				<img className="header-image" src={PCGL} alt="PCGL DACO Home" />
+				<h2>Clinical Submission Dictionary</h2>
+			</div>
+		</header>
 	);
-}
+};
 
-export default App;
+export default Header;
