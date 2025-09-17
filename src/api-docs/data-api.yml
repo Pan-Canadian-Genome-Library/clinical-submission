@@ -1,4 +1,4 @@
-/data/category/{id}/{entityName}/exists:
+/data/{id}/{entityName}/exists:
   get:
     summary: Retrieve boolean if record exists
     tags:

@@ -28,7 +28,7 @@ export const dataRouter: Router = (() => {
 	router.use(urlencoded({ extended: false }));
 
 	// PCGL specific endpoint
-	router.get('/category/:id/:entityName/exists', dataController.getDataIdExists);
+	router.get('/:id/:entityName/exists', dataController.getDataIdExists);
 
 	// Lyric endpoints extended
 	router.get('/category/:categoryId', dataController.getCategoryById);
