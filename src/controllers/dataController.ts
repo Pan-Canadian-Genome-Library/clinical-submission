@@ -213,25 +213,25 @@ const SanitizeLyricIdsWithInternal = async (submittedResult: SubmittedDataRespon
 	const db = getDbInstance();
 	const iimRepo = iimService(db);
 	const iimConfigs = await iimRepo.getAllIIMConfigs();
-	const fieldNamesToReplace = new Set(iimConfigs.map((config) => config.fieldName));
+	const fieldNamesToAdd = new Set(iimConfigs.map((config) => config.fieldName));
 
 	const formatSubmittedResult = submittedResult.map(async (result) => {
-		return { ...result, data: await TransformerFunction(result.data, fieldNamesToReplace, iimRepo) };
+		return { ...result, data: await TransformerFunction(result.data, fieldNamesToAdd, iimRepo) };
 	});
 
 	return Promise.all(formatSubmittedResult);
 };
 
 /**
- *	Recursive function that takes in DataRecordNested and replaces sensitive entities determined from the the IIM config that was generated from the IIM service
+ *	Recursive function that takes in DataRecordNested and adds the generated internal id's of entities determined from the the IIM config that was generated from the IIM service
  * @param dataRecord
  * @param fieldNames Fieldname values to replace with internalId
  * @param iimRepo iim service to query for internalId's
- * @returns Mutated Promise of DataRecordNested with field `internalId` replaced in sensitive entities
+ * @returns Mutated Promise of DataRecordNested with field `internalId` injected with original entities
  */
 const TransformerFunction = async (
 	dataRecord: DataRecordNested,
-	fieldNamesToReplace: Set<string>,
+	fieldNamesToAdd: Set<string>,
 	iimRepo: ReturnType<typeof iimService>,
 ) => {
 	const processInternalValue = async (
@@ -247,12 +247,12 @@ const TransformerFunction = async (
 			return (await Promise.all(dataRecordValue.map(processInternalValue))).flat();
 		}
 
-		// Since the value is not an isDataRecordValue | DataRecordNested[], then that mean its object of DataRecordNested,
+		// Since the value is not an isDataRecordValue | DataRecordNested[], then that mean its object of DataRecordNested, we need to determine if this object has a fieldNamesToAdd in its key/value
 		const result: DataRecordNested = {};
 
 		for (const [key, currentValue] of Object.entries(dataRecordValue)) {
-			if (fieldNamesToReplace.has(key)) {
-				// Start sanitizing logic
+			// if current key of dataRecordValue is a key that has a generated ID, then start internal id inject logic
+			if (fieldNamesToAdd.has(key)) {
 				const hashedFieldName = generateHash(`${dataRecordValue[key]}`, env.ID_MANAGER_SECRET);
 				const generatedIdResult = await iimRepo.getIDByHash(hashedFieldName);
 
@@ -261,22 +261,22 @@ const TransformerFunction = async (
 					result[key] = currentValue; // Persist original id
 					continue;
 				}
-			} else {
-				// Since the currentValue is not a field name to be replaced, it will follow similar logic before this loop
-				if (isDataRecordValue(currentValue)) {
-					result[key] = currentValue;
-					continue;
-				}
-
-				// If its an array, then there is possible more objects to search for sensitive data, recursive call
-				if (Array.isArray(currentValue)) {
-					result[key] = (await Promise.all(currentValue.map(processInternalValue))).flat();
-					continue;
-				}
-
-				// This means the object dataRecordValue has another object nested, apply another recursive call
-				result[key] = await processInternalValue(currentValue);
 			}
+
+			// check if its a dataRecordValue, if yes, then just define result to current key/value
+			if (isDataRecordValue(currentValue)) {
+				result[key] = currentValue;
+				continue;
+			}
+
+			// If its an array, then there is possible more objects to search for sensitive data, recursive call
+			if (Array.isArray(currentValue)) {
+				result[key] = (await Promise.all(currentValue.map(processInternalValue))).flat();
+				continue;
+			}
+
+			// This means the object dataRecordValue has another object nested, apply another recursive call
+			result[key] = await processInternalValue(currentValue);
 		}
 
 		return result;
