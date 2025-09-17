@@ -22,7 +22,7 @@ import '../styles/App.css';
 import { DictionaryTable } from '@overture-stack/lectern-ui';
 import Footer from '@/components/Footer';
 
-function App() {
+function Home() {
 	return (
 		<div className="">
 			<HeaderPCGL />
@@ -34,4 +34,4 @@ function App() {
 	);
 }
 
-export default App;
+export default Home;
