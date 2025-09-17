@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /*
  * Copyright (c) 2025 The Ontario Institute for Cancer Research. All rights reserved
  *
@@ -17,19 +18,35 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { LecternDataProvider } from '@overture-stack/lectern-ui';
-import PCGLThemeProvider from './ThemeProvider';
+import { ThemeProvider } from '@overture-stack/lectern-ui';
 
-const Providers = ({ children }: { children: React.ReactNode }) => {
+export const pcglColours = {
+	// Main Colors
+	primary: '#C41D7F',
+	secondary: '#520339',
+	tertiary: '#FFF0F6',
+	quaternary: '#FFD6E7',
+	grey: '#d9d9d99e',
+	alternateRow: '#fff0f659',
+	darkGrey: 'rgba(0, 0, 0, 0.45)',
+};
+
+const PCGLThemeProvider = ({ children }: { children: React.ReactElement }) => {
 	return (
-		<>
-			<PCGLThemeProvider>
-				<LecternDataProvider lecternUrl={__API_PROXY_PATH__} dictionaryName={__BASE_DICTIONARY_SCHEMA__}>
-					{children}
-				</LecternDataProvider>
-			</PCGLThemeProvider>
-		</>
+		<ThemeProvider
+			theme={{
+				colors: {
+					background_overlay: pcglColours.darkGrey, // Modal background color
+					accent: pcglColours.primary, // Modal title color
+					accent_1: pcglColours.tertiary, // Button hover
+					background_alternate: pcglColours.alternateRow,
+					background_muted: pcglColours.grey, // Col box
+				},
+			}}
+		>
+			{children}
+		</ThemeProvider>
 	);
 };
 
-export default Providers;
+export default PCGLThemeProvider;
