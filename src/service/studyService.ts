@@ -153,6 +153,26 @@ const studyService = (db: PostgresDb) => ({
 			);
 		}
 	},
+	getStudiesByCategoryId: async (categoryId: number) => {
+		try {
+			return await db.select().from(study).where(eq(study.category_id, categoryId));
+		} catch (error) {
+			logger.error('Error at getStudiesByCategoryId service', error);
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'Something went wrong while fetching studies for category. Please try again later.',
+			);
+		}
+	},
+	unlinkStudiesFromCategory: async (categoryId: number) => {
+		try {
+			return await db.update(study).set({ category_id: null }).where(eq(study.category_id, categoryId));
+		} catch (error) {
+			logger.error('Error at unlinkStudiesFromCategory service', error);
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'Something went wrong while unlinking studies from category. Please try again later.',
+			);
+		}
+	},
 });
 
 export { studyService };

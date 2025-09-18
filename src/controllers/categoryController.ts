@@ -1,26 +1,40 @@
-import { eq } from 'drizzle-orm';
+/*
+ * Copyright (c) 2025 The Ontario Institute for Cancer Research. All rights reserved
+ *
+ * This program and the accompanying materials are made available under the terms of
+ * the GNU Affero General Public License v3.0. You should have received a copy of the
+ * GNU Affero General Public License along with this program.
+ *  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+ * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 import { logger } from '@/common/logger.js';
 import { getOrDeleteCategoryByID } from '@/common/validation/category-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
-import { study } from '@/db/schemas/studiesSchema.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
+import categoryService from '@/service/categoryService.js';
+import { studyService } from '@/service/studyService.js';
 
 const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res, next) => {
 	const categoryId = req.params.categoryId;
-	const db = getDbInstance();
-	const categoryRepo = lyricProvider.repositories.category;
+	const database = getDbInstance();
+	const categorySvc = await categoryService();
+	const studySvc = await studyService(database);
 	const user = req.user;
 
 	try {
 		if (!user?.isAdmin) {
 			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
-		}
-
-		const foundCategory = await categoryRepo.getCategoryById(Number(categoryId));
-		if (!foundCategory) {
-			throw new lyricProvider.utils.errors.NotFound(`No Category with ID - ${categoryId} found.`);
 		}
 
 		const categoryIdNum = Number(categoryId);
@@ -29,14 +43,19 @@ const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, 
 			throw new lyricProvider.utils.errors.BadRequest(`Invalid categoryId: ${categoryId}`);
 		}
 
-		const linkedStudies = await db.select().from(study).where(eq(study.category_id, categoryIdNum));
+		const foundCategory = await categorySvc.getCategoryById(categoryIdNum);
+		if (!foundCategory) {
+			throw new lyricProvider.utils.errors.NotFound(`No Category with ID - ${categoryId} found.`);
+		}
+
+		const linkedStudies = await studySvc.getStudiesByCategoryId(categoryIdNum);
 		if (linkedStudies.length > 0) {
 			throw new lyricProvider.utils.errors.BadRequest(
 				`Cannot delete category ${categoryId} because it is linked to ${linkedStudies.length} study(ies).`,
 			);
 		}
 
-		await db.update(study).set({ category_id: null }).where(eq(study.category_id, categoryIdNum));
+		await studySvc.unlinkStudiesFromCategory(categoryIdNum);
 
 		res.status(204).send();
 		return;
