@@ -185,6 +185,8 @@
           schema:
             type: object
             properties:
+              studyId:
+                type: string
               files:
                 type: array
                 items:
@@ -226,6 +228,8 @@
           schema:
             type: object
             properties:
+              studyId: 
+                type: string
               files:
                 type: array
                 items:
