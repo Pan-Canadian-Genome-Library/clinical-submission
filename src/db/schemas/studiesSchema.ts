@@ -46,7 +46,7 @@ export const study = pcglSchema.table(
 		publication_links: text().array(),
 		created_at: timestamp().notNull().defaultNow(),
 		updated_at: timestamp(),
-		category_id: integer().unique().default(-1),
+		category_id: integer().unique(),
 	},
 	(table) => [
 		foreignKey({

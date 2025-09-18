@@ -1,6 +1,6 @@
 {
-  "id": "769e14f2-a7c6-415f-a311-4b915714a7fc",
-  "prevId": "5dbfb85b-07d8-4750-b583-f53d2870a23a",
+  "id": "d3a9872b-6f93-4e4a-937a-10b59a698306",
+  "prevId": "769e14f2-a7c6-415f-a311-4b915714a7fc",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -317,8 +317,7 @@
           "name": "category_id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
-          "default": -1
+          "notNull": false
         }
       },
       "indexes": {},
