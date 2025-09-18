@@ -17,13 +17,15 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { eq, inArray } from 'drizzle-orm';
 import { logger } from '@/common/logger.js';
 import { getOrDeleteCategoryByID } from '@/common/validation/category-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
-import categoryService from '@/service/categoryService.js';
 import { studyService } from '@/service/studyService.js';
+import categoryService from '../service/categoryService.js';
+import { study } from '../db/schemas/studiesSchema.js';
 
 const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res, next) => {
 	const categoryId = req.params.categoryId;
@@ -65,4 +67,84 @@ const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, 
 	}
 });
 
-export default { deleteCategoryById };
+const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res, next) => {
+	const categoryId = req.params.categoryId;
+	const db = getDbInstance();
+	const categorySrvice = lyricProvider.services.category;
+
+	try {
+		const foundCategory = await categorySrvice.getDetails(Number(categoryId));
+		if (!foundCategory) {
+			throw new lyricProvider.utils.errors.NotFound(`No Category with ID - ${categoryId} found.`);
+		}
+
+		const categoryIdNum = Number(categoryId);
+
+		if (isNaN(categoryIdNum)) {
+			throw new lyricProvider.utils.errors.BadRequest(`Invalid categoryId: ${categoryId}`);
+		}
+
+		const linkedStudies = await db.select().from(study).where(eq(study.category_id, categoryIdNum));
+
+		if (linkedStudies.length == 0) {
+			logger.info('category is misconfigured, no associated Study');
+			throw new lyricProvider.utils.errors.NotFound(
+				`category is misconfigured, no associated Study ID - ${categoryId}.`,
+			);
+		}
+
+		const response = {
+			...foundCategory,
+			studyId: linkedStudies[0]?.category_id,
+		};
+
+		res.status(200).json(response);
+		return;
+	} catch (exception) {
+		logger.error('Error in deleteCategoryById', exception);
+		next(exception);
+	}
+});
+
+const listAllCategories = validateRequest({}, async (req, res, next) => {
+	const db = getDbInstance();
+	const categoryService = lyricProvider.services.category;
+
+	try {
+		const categories = await categoryService.listAll();
+		if (!categories || categories.length === 0) {
+			return res.status(200).json([]);
+		}
+
+		const categoryIds = categories.map((c) => c.id);
+
+		const linkedStudies = await db
+			.select({
+				studyId: study.study_id,
+				categoryId: study.category_id,
+			})
+			.from(study)
+			.where(inArray(study.category_id, categoryIds));
+
+		const studiesByCategory: Record<number, string> = {};
+		for (const s of linkedStudies) {
+			if (!s.categoryId) {
+				continue;
+			}
+			studiesByCategory[s.categoryId] = s.studyId;
+		}
+
+		const response = categories.map((cat) => ({
+			...cat,
+			studyId: studiesByCategory[cat.id],
+		}));
+
+		res.status(200).json(response);
+		return;
+	} catch (exception) {
+		logger.error('Error in listAllCategories', exception);
+		next(exception);
+	}
+});
+
+export default { deleteCategoryById, getCategoryById, listAllCategories };
