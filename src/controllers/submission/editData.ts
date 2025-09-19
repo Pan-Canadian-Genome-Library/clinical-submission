@@ -9,14 +9,24 @@ import { hasAllowedAccess } from '@/external/pcglAuthZClient.js';
 import { type RequestValidation, validateRequest } from '@/middleware/requestValidation.js';
 import { prevalidateEditFile } from '@/submission/fileValidation.js';
 import { parseFileToRecords } from '@/submission/readFile.js';
+import { getDbInstance } from '@/db/index.js';
+import { studyService } from '@/service/studyService.js';
 
 interface EditRequestPathParams extends ParamsDictionary {
 	categoryId: string;
 }
 
-export const editDataRequestSchema: RequestValidation<{ organization: string }, ParsedQs, EditRequestPathParams> = {
+export const editDataRequestSchema: RequestValidation<
+	{
+		studyId: any;
+		organization: string;
+	},
+	ParsedQs,
+	EditRequestPathParams
+> = {
 	body: z.object({
 		organization: z.string(),
+		studyId: z.string(),
 	}),
 	pathParams: z.object({
 		categoryId: z.string(),
@@ -34,6 +44,9 @@ export const editData = validateRequest(editDataRequestSchema, async (req, res, 
 		const categoryId = Number(req.params.categoryId);
 		const files = Array.isArray(req.files) ? req.files : [];
 		const organization = req.body.organization;
+		const studyId = req.body.studyId;
+		const db = getDbInstance();
+		const studySvc = studyService(db);
 
 		const user = req.user;
 
@@ -43,6 +56,16 @@ export const editData = validateRequest(editDataRequestSchema, async (req, res, 
 
 		if (!hasAllowedAccess(organization, user.allowedWriteOrganizations, user.isAdmin)) {
 			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
+		}
+
+		const results = await studySvc.getStudyById(studyId);
+
+		if (!results) {
+			throw new lyricProvider.utils.errors.NotFound(`No Study with ID - ${studyId} found.`);
+		}
+
+		if (results.categoryId != categoryId) {
+			throw new lyricProvider.utils.errors.BadRequest(`Study ${studyId} is being submitted to the incorrect category`);
 		}
 
 		const username = user.username;
