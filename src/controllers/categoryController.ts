@@ -47,6 +47,16 @@ const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, 
 			throw new lyricProvider.utils.errors.NotFound(`No Category with ID - ${categoryId} found.`);
 		}
 
+		const submittedDataCountPromise =
+			lyricProvider.repositories.submittedData.getTotalRecordsByCategoryId(categoryIdNum);
+
+		const submittedDataCount = await submittedDataCountPromise;
+		if (submittedDataCount > 0) {
+			throw new lyricProvider.utils.errors.BadRequest(
+				`Cannot delete category ${categoryId} because it is linked to ${submittedDataCount} records in submittedData`,
+			);
+		}
+
 		const linkedStudies = await studySvc.getStudiesByCategoryId(categoryIdNum);
 		if (linkedStudies.length > 0) {
 			throw new lyricProvider.utils.errors.BadRequest(
