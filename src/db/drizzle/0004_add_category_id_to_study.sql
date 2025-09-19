@@ -1,0 +1,1 @@
+ALTER TABLE "pcgl"."study" ALTER COLUMN "category_id" DROP DEFAULT;

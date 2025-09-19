@@ -71,6 +71,9 @@
           schema:
             type: object
             properties:
+              studyId:
+                type: string
+                description: A user-defined studyId
               categoryName:
                 type: string
                 description: A user-defined classification to group and organize data based on shared characteristics or criteria

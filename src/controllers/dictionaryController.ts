@@ -17,42 +17,37 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { study } from '@/db/schemas/studiesSchema.js';
+import { registerDictionaryValidation } from '@/common/validation/dictionary-validation.js';
+import { lyricProvider } from '@/core/provider.js';
+import { getDbInstance } from '@/db/index.js';
+import { validateRequest } from '@/middleware/requestValidation.js';
+import { studyService } from '@/service/studyService.js';
 
-export const StudyStatus = {
-	ONGOING: 'ONGOING',
-	COMPLETED: 'COMPLETED',
-} as const;
+const registerDictionary = validateRequest(registerDictionaryValidation, async (req, res, next) => {
+	try {
+		const { studyId, categoryName, dictionaryName, dictionaryVersion, defaultCentricEntity } = req.body;
 
-export type StudyStatusValues = (typeof StudyStatus)[keyof typeof StudyStatus];
+		const db = getDbInstance();
+		const studyRepo = studyService(db);
 
-export const StudyContext = {
-	CLINICAL: 'CLINICAL',
-	RESEARCH: 'RESEARCH',
-} as const;
+		const foundStudy = await studyRepo.getStudyById(studyId);
+		if (!foundStudy) {
+			throw new lyricProvider.utils.errors.NotFound(`Study with ID ${studyId} not found`);
+		}
 
-export type StudyContextValues = (typeof StudyContext)[keyof typeof StudyContext];
+		const { dictionary, category } = await lyricProvider.services.dictionary.register({
+			categoryName,
+			dictionaryName,
+			dictionaryVersion,
+			defaultCentricEntity,
+		});
 
-export type StudyDTO = {
-	studyId: string;
-	dacId: string;
-	studyName: string;
-	studyDescription: string;
-	programName?: string | null;
-	keywords?: string[] | null;
-	status: StudyStatusValues;
-	context: StudyContextValues;
-	domain: string[];
-	participantCriteria?: string | null;
-	principalInvestigators: string[];
-	leadOrganizations: string[];
-	collaborators?: string[] | null;
-	fundingSources: string[];
-	publicationLinks?: string[] | null;
-	createdAt: Date;
-	updatedAt?: Date | null;
-	categoryId: number | null;
-};
+		await studyRepo.updateStudy(studyId, { categoryId: category.id });
 
-export type StudyRecord = typeof study.$inferSelect;
-export type StudyModel = typeof study.$inferInsert;
+		return res.status(200).json({ dictionary, category });
+	} catch (exception) {
+		next(exception);
+	}
+});
+
+export default { registerDictionary };

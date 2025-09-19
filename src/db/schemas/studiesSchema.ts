@@ -18,7 +18,7 @@
  */
 
 import { relations } from 'drizzle-orm';
-import { foreignKey, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { foreignKey, text, integer, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { dac } from './dacSchema.js';
 import { pcglSchema } from './generate.js';
@@ -46,6 +46,7 @@ export const study = pcglSchema.table(
 		publication_links: text().array(),
 		created_at: timestamp().notNull().defaultNow(),
 		updated_at: timestamp(),
+		category_id: integer().unique(),
 	},
 	(table) => [
 		foreignKey({
