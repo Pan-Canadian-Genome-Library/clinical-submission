@@ -20,12 +20,15 @@
 import express, { json, Router, urlencoded } from 'express';
 
 import categoryController from '@/controllers/categoryController.js';
+import { lyricProvider } from '@/core/provider.js';
 import { authMiddleware } from '@/middleware/auth.js';
 
 export const categoryRouter: Router = (() => {
 	const router = express.Router();
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
+	router.get('/', lyricProvider.controllers.category.listAll);
+	router.get('/:categoryId', lyricProvider.controllers.category.getDetails);
 	router.delete('/:categoryId', authMiddleware(), categoryController.deleteCategoryById);
 	return router;
 })();

@@ -22,13 +22,12 @@ import { getOrDeleteCategoryByID } from '@/common/validation/category-validation
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
-import categoryService from '@/service/categoryService.js';
 import { studyService } from '@/service/studyService.js';
 
 const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res, next) => {
 	const categoryId = req.params.categoryId;
 	const database = getDbInstance();
-	const categorySvc = await categoryService();
+
 	const studySvc = await studyService(database);
 	const user = req.user;
 
@@ -43,7 +42,7 @@ const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, 
 			throw new lyricProvider.utils.errors.BadRequest(`Invalid categoryId: ${categoryId}`);
 		}
 
-		const foundCategory = await categorySvc.getCategoryById(categoryIdNum);
+		const foundCategory = await lyricProvider.services.category.getDetails(categoryIdNum);
 		if (!foundCategory) {
 			throw new lyricProvider.utils.errors.NotFound(`No Category with ID - ${categoryId} found.`);
 		}
