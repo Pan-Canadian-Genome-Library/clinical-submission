@@ -25,7 +25,7 @@ import { validateRequest } from '@/middleware/requestValidation.js';
 import { studyService } from '@/service/studyService.js';
 
 const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res, next) => {
-	const categoryId = req.params.categoryId;
+	const categoryId = Number(req.params.categoryId);
 	const database = getDbInstance();
 
 	const studySvc = await studyService(database);
@@ -36,19 +36,16 @@ const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, 
 			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 		}
 
-		const categoryIdNum = Number(categoryId);
-
-		if (isNaN(categoryIdNum)) {
+		if (isNaN(categoryId)) {
 			throw new lyricProvider.utils.errors.BadRequest(`Invalid categoryId: ${categoryId}`);
 		}
 
-		const foundCategory = await lyricProvider.services.category.getDetails(categoryIdNum);
+		const foundCategory = await lyricProvider.services.category.getDetails(categoryId);
 		if (!foundCategory) {
 			throw new lyricProvider.utils.errors.NotFound(`No Category with ID - ${categoryId} found.`);
 		}
 
-		const submittedDataCountPromise =
-			lyricProvider.repositories.submittedData.getTotalRecordsByCategoryId(categoryIdNum);
+		const submittedDataCountPromise = lyricProvider.repositories.submittedData.getTotalRecordsByCategoryId(categoryId);
 
 		const submittedDataCount = await submittedDataCountPromise;
 		if (submittedDataCount > 0) {
@@ -57,14 +54,10 @@ const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, 
 			);
 		}
 
-		const linkedStudies = await studySvc.getStudiesByCategoryId(categoryIdNum);
+		const linkedStudies = await studySvc.getStudiesByCategoryId(categoryId);
 		if (linkedStudies.length > 0) {
-			throw new lyricProvider.utils.errors.BadRequest(
-				`Cannot delete category ${categoryId} because it is linked to ${linkedStudies.length} study(ies).`,
-			);
+			await studySvc.unlinkStudiesFromCategory(categoryId);
 		}
-
-		await studySvc.unlinkStudiesFromCategory(categoryIdNum);
 
 		res.status(204).send();
 		return;
