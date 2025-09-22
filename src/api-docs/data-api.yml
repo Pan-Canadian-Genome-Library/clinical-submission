@@ -16,12 +16,13 @@
         schema:
           type: string
         required: true
-      - name: parentId
-        description: Internal ID. The PCGL sequential ID for its parent. (e.g. a study ID "S00000001")
-        in: query
-        schema:
-          type: string
-        required: false
+        # TODO: Feature to be added
+      # - name: parentId
+      #   description: Internal ID. The PCGL sequential ID for its parent. (e.g. a study ID "S00000001")
+      #   in: query
+      #   schema:
+      #     type: string
+      #   required: false
     responses:
       200:
         description: Successful response indicating a boolean result
