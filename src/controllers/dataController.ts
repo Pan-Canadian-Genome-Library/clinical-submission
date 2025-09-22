@@ -38,7 +38,6 @@ const getDataIdExists = validateRequest(getDataById, async (req, res, next) => {
 
 	try {
 		const { id, entityName } = req.params;
-		const { parentId } = req.query;
 
 		const idConfigResult = await iimRepo.getIIMConfig(entityName);
 
@@ -50,17 +49,11 @@ const getDataIdExists = validateRequest(getDataById, async (req, res, next) => {
 
 		const idmHash = generateHash(String(id), env.ID_MANAGER_SECRET);
 
-		const generatedIdentifierResult = await iimRepo.getIDByHash(idmHash, parentId);
+		const generatedIdentifierResult = await iimRepo.getIDByHash(idmHash);
 
 		// Check if the hash has been generated for ANY entity
 		if (!generatedIdentifierResult[0]) {
 			res.status(200).send(false);
-			return;
-		}
-
-		//  Check if parentId exists, if yes, that means getIDByHash also searched for its internal id(parentId) so if generatedIdentifierResult has a value with lookup with BOTH idmHash and parentId, then it exists
-		if (parentId && generatedIdentifierResult[0]) {
-			res.status(200).send(true);
 			return;
 		}
 
