@@ -94,7 +94,7 @@ const iimService = (db: PostgresDb) => ({
 		}
 	},
 
-	getIDByHash: async (hashedValue: string, generatedId?: string, transaction?: PostgresTransaction) => {
+	getIDByHash: async (hashedValue: string, transaction?: PostgresTransaction) => {
 		const dbTransaction = transaction ?? db;
 
 		try {
@@ -109,12 +109,7 @@ const iimService = (db: PostgresDb) => ({
 				})
 				.from(generatedIdentifiers)
 				.leftJoin(idGenerationConfig, eq(generatedIdentifiers.configId, idGenerationConfig.id))
-				.where(
-					and(
-						generatedId ? eq(generatedIdentifiers.generatedId, generatedId) : undefined,
-						eq(generatedIdentifiers.sourceHash, hashedValue),
-					),
-				);
+				.where(eq(generatedIdentifiers.sourceHash, hashedValue));
 		} catch (exception) {
 			logger.error(`[IIM]: Unexpected error retrieving ID . ${exception}`);
 			throw new lyricProvider.utils.errors.InternalServerError(
