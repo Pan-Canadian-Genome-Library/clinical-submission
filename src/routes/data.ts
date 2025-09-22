@@ -17,19 +17,27 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { z } from 'zod';
+import express, { json, Router, urlencoded } from 'express';
 
-export const iimConfigObject = z.object({
-	entityName: z.string(),
-	fieldName: z.string(),
-	prefix: z.string(),
-	internalId: z.string(),
-	paddingLength: z.number().int().positive().default(8),
-	parentEntityName: z.string().optional(),
-	parentFieldName: z.string().optional(),
-	sequenceStart: z.number().int().positive().default(1),
-});
-export type IIMConfigObject = z.infer<typeof iimConfigObject>;
+import dataController from '@/controllers/dataController.js';
+import { lyricProvider } from '@/core/provider.js';
 
-export const iimConfig = z.array(iimConfigObject);
-export type IIMConfig = z.infer<typeof iimConfig>;
+export const dataRouter: Router = (() => {
+	const router = express.Router();
+	router.use(json());
+	router.use(urlencoded({ extended: false }));
+
+	// PCGL specific endpoint
+	router.get('/entity/:entityName/:externalId/exists', dataController.getDataIdExists);
+
+	// Lyric endpoints extended
+	router.get('/category/:categoryId', dataController.getCategoryById);
+	router.get('/category/:categoryId/id/:systemId', dataController.getCategoryBySystemId);
+	router.get('/category/:categoryId/organization/:organization', dataController.getCategoryByOrganization);
+	router.post('/category/:categoryId/organization/:organization/query', dataController.getSubmittedDataByQuery);
+	router.get('/category/:categoryId/stream', dataController.getSubmittedDataStream);
+
+	router.use('', lyricProvider.routers.submittedData);
+
+	return router;
+})();

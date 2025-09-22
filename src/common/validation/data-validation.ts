@@ -17,19 +17,30 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { ParamsDictionary } from 'express-serve-static-core';
+import { ParsedQs } from 'qs';
 import { z } from 'zod';
 
-export const iimConfigObject = z.object({
-	entityName: z.string(),
-	fieldName: z.string(),
-	prefix: z.string(),
-	internalId: z.string(),
-	paddingLength: z.number().int().positive().default(8),
-	parentEntityName: z.string().optional(),
-	parentFieldName: z.string().optional(),
-	sequenceStart: z.number().int().positive().default(1),
-});
-export type IIMConfigObject = z.infer<typeof iimConfigObject>;
+import { RequestValidation } from '@/middleware/requestValidation.js';
 
-export const iimConfig = z.array(iimConfigObject);
-export type IIMConfig = z.infer<typeof iimConfig>;
+import { stringNotEmpty, stringNotEmptyOptional } from './common.js';
+
+interface DataIdParams extends ParamsDictionary {
+	externalId: string;
+	entityName: string;
+}
+
+interface DataIdExistsQuery extends ParsedQs {
+	parentId?: string;
+}
+
+export const getDataById: RequestValidation<object, DataIdExistsQuery, DataIdParams> = {
+	pathParams: z.object({
+		externalId: stringNotEmpty,
+		entityName: stringNotEmpty,
+		parentId: stringNotEmptyOptional,
+	}),
+	query: z.object({
+		parentId: stringNotEmptyOptional,
+	}),
+};

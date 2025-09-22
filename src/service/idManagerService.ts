@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { QueryResult } from 'pg';
 
 import { logger } from '@/common/logger.js';
@@ -45,6 +45,7 @@ const iimService = (db: PostgresDb) => ({
 					fieldName: iimData.fieldName,
 					paddingLength: iimData.paddingLength,
 					prefix: iimData.prefix,
+					internalId: iimData.internalId,
 					sequenceName: generateSequenceName(iimData),
 					sequenceStart: iimData.sequenceStart,
 				})
@@ -98,8 +99,16 @@ const iimService = (db: PostgresDb) => ({
 
 		try {
 			return await dbTransaction
-				.select()
+				.select({
+					id: generatedIdentifiers.id,
+					sourceHash: generatedIdentifiers.sourceHash,
+					generatedId: generatedIdentifiers.generatedId,
+					configId: generatedIdentifiers.configId,
+					createdAt: generatedIdentifiers.createdAt,
+					internalId: idGenerationConfig.internalId,
+				})
 				.from(generatedIdentifiers)
+				.leftJoin(idGenerationConfig, eq(generatedIdentifiers.configId, idGenerationConfig.id))
 				.where(eq(generatedIdentifiers.sourceHash, hashedValue));
 		} catch (exception) {
 			logger.error(`[IIM]: Unexpected error retrieving ID . ${exception}`);
