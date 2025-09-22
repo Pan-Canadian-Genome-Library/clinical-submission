@@ -70,7 +70,7 @@ const getDataIdExists = validateRequest(getDataById, async (req, res, next) => {
 	}
 });
 
-export const getCategoryById = validateRequest(
+const getCategoryById = validateRequest(
 	lyricProvider.utils.schema.dataGetByCategoryRequestSchema,
 	async (req, res, next) => {
 		try {
@@ -98,7 +98,7 @@ export const getCategoryById = validateRequest(
 	},
 );
 
-export const getCategoryBySystemId = validateRequest(
+const getCategoryBySystemId = validateRequest(
 	lyricProvider.utils.schema.dataGetBySystemIdRequestSchema,
 	async (req, res, next) => {
 		try {
@@ -126,7 +126,7 @@ export const getCategoryBySystemId = validateRequest(
 	},
 );
 
-export const getCategoryByOrganization = validateRequest(
+const getCategoryByOrganization = validateRequest(
 	lyricProvider.utils.schema.dataGetByOrganizationRequestSchema,
 	async (req, res, next) => {
 		try {
@@ -164,7 +164,7 @@ export const getCategoryByOrganization = validateRequest(
 	},
 );
 
-export const getSubmittedDataByQuery = validateRequest(
+const getSubmittedDataByQuery = validateRequest(
 	lyricProvider.utils.schema.dataGetByQueryRequestSchema,
 	async (req, res, next) => {
 		try {
@@ -199,7 +199,7 @@ export const getSubmittedDataByQuery = validateRequest(
 	},
 );
 
-export const getSubmittedDataStream = validateRequest(
+const getSubmittedDataStream = validateRequest(
 	lyricProvider.utils.schema.dataGetByCategoryRequestSchema,
 	async (req, res, next) => {
 		try {
