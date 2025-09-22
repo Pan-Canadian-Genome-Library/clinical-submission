@@ -1,10 +1,10 @@
-/data/{id}/{entityName}/exists:
+/data/entity/{entityName}/{externalId}/exists:
   get:
     summary: Retrieve boolean if record exists
     tags:
       - Data
     parameters:
-      - name: id
+      - name: externalId
         description: External Id which represents the PHI value. (e.g. a participant ID "ABC1234")
         in: path
         schema:

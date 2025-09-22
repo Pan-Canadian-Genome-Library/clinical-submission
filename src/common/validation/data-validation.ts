@@ -26,7 +26,7 @@ import { RequestValidation } from '@/middleware/requestValidation.js';
 import { stringNotEmpty, stringNotEmptyOptional } from './common.js';
 
 interface DataIdParams extends ParamsDictionary {
-	id: string;
+	externalId: string;
 	entityName: string;
 }
 
@@ -36,7 +36,7 @@ interface DataIdExistsQuery extends ParsedQs {
 
 export const getDataById: RequestValidation<object, DataIdExistsQuery, DataIdParams> = {
 	pathParams: z.object({
-		id: stringNotEmpty,
+		externalId: stringNotEmpty,
 		entityName: stringNotEmpty,
 		parentId: stringNotEmptyOptional,
 	}),

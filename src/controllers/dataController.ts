@@ -37,7 +37,7 @@ const getDataIdExists = validateRequest(getDataById, async (req, res, next) => {
 	const iimRepo = iimService(db);
 
 	try {
-		const { id, entityName } = req.params;
+		const { externalId, entityName } = req.params;
 
 		const idConfigResult = await iimRepo.getIIMConfig(entityName);
 
@@ -47,7 +47,7 @@ const getDataIdExists = validateRequest(getDataById, async (req, res, next) => {
 			return;
 		}
 
-		const idmHash = generateHash(String(id), env.ID_MANAGER_SECRET);
+		const idmHash = generateHash(String(externalId), env.ID_MANAGER_SECRET);
 
 		const generatedIdentifierResult = await iimRepo.getIDByHash(idmHash);
 
