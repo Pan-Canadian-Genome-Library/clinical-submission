@@ -24,7 +24,6 @@ import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import { studyService } from '@/service/studyService.js';
-import categoryService from '../service/categoryService.js';
 import { study } from '../db/schemas/studiesSchema.js';
 
 const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res, next) => {
