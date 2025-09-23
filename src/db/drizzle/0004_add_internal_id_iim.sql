@@ -1,2 +1,1 @@
-ALTER TABLE "pcgl"."id_generation_config" ADD COLUMN "internal_id" varchar(50) NOT NULL;--> statement-breakpoint
-ALTER TABLE "pcgl"."id_generation_config" ADD CONSTRAINT "id_generation_config_internal_id_unique" UNIQUE("internal_id");
+ALTER TABLE "pcgl"."id_generation_config" ADD COLUMN "internal_id" varchar(50);
