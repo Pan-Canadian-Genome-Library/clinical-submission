@@ -1,5 +1,5 @@
 {
-  "id": "9f11a078-c6d9-439e-b438-3cc6c161f6a2",
+  "id": "ca47ccbf-357c-4413-9c7a-bdd13f3bae0b",
   "prevId": "5dbfb85b-07d8-4750-b583-f53d2870a23a",
   "version": "7",
   "dialect": "postgresql",
@@ -159,7 +159,7 @@
           "name": "internal_id",
           "type": "varchar(50)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "padding_length": {
           "name": "padding_length",
@@ -196,13 +196,6 @@
           "nullsNotDistinct": false,
           "columns": [
             "entity_name"
-          ]
-        },
-        "id_generation_config_internal_id_unique": {
-          "name": "id_generation_config_internal_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "internal_id"
           ]
         },
         "id_generation_config_sequence_name_unique": {
