@@ -28,9 +28,9 @@ import { study } from '@/db/schemas/studiesSchema.js';
 import { PostgresTransaction } from '@/db/types.js';
 import { isPostgresError, PostgresErrors } from '@/db/utils.js';
 import {
+	convertFromRecordToStudyDTO,
 	convertToRecordFromPartialStudyDTO,
 	convertToRecordFromStudyDTO,
-	convertFromRecordToStudyDTO,
 } from '@/service/dtoConversion.js';
 
 const studyService = (db: PostgresDb) => ({

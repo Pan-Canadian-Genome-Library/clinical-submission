@@ -20,6 +20,7 @@
 import express, { json, Router, urlencoded } from 'express';
 
 import categoryController from '@/controllers/categoryController.js';
+import { lyricProvider } from '@/core/provider.js';
 import { authMiddleware } from '@/middleware/auth.js';
 
 export const categoryRouter: Router = (() => {
@@ -28,6 +29,7 @@ export const categoryRouter: Router = (() => {
 	router.use(urlencoded({ extended: false }));
 	router.get('/:categoryId', categoryController.getCategoryById);
 	router.get('/', categoryController.listAllCategories);
+	router.use('/', authMiddleware, lyricProvider.routers.category);
 	router.delete('/:categoryId', authMiddleware(), categoryController.deleteCategoryById);
 	return router;
 })();

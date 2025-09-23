@@ -35,6 +35,7 @@ import { submissionRouter } from '@/routes/submission.js';
 import { authRouter } from './routes/auth.js';
 import { categoryRouter } from './routes/categoryRouter.js';
 import { dacRouter } from './routes/dac.js';
+import { dataRouter } from './routes/data.js';
 import { dictionaryRouter } from './routes/dictionary.js';
 import { studyRouter } from './routes/study.js';
 
@@ -88,11 +89,21 @@ app.use('/auth', authRouter);
 
 // Lyric routes
 app.use('/audit', lyricProvider.routers.audit);
+app.use('/category', lyricProvider.routers.category);
+app.use('/dictionary', lyricProvider.routers.dictionary);
 app.use('/category', categoryRouter);
 app.use('/data', lyricProvider.routers.submittedData);
 app.use('/dictionary', dictionaryRouter);
 app.use('/submission', submissionRouter);
 app.use('/validator', lyricProvider.routers.validator);
+
+
+//Lyric custom routes
+/**
+ * Implements lyrics default routes with extra configurations
+ */
+app.use('/submission', submissionRouter);
+app.use('/data', dataRouter);
 
 // Swagger route
 app.use('/api-docs', openAPIRouter);

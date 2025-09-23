@@ -17,7 +17,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { dictionaryRegisterBodyParams } from '@overture-stack/lyric/dist/src/utils/schemas.js';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
 import { z } from 'zod';
@@ -26,8 +25,12 @@ import { RequestValidation } from '@/middleware/requestValidation.js';
 
 import { stringNotEmpty } from './common.js';
 
-type RegisterDictionaryBody = dictionaryRegisterBodyParams & {
+type RegisterDictionaryBody = {
 	studyId: string;
+	categoryName: string;
+	dictionaryName: string;
+	dictionaryVersion: string;
+	defaultCentricEntity?: string;
 };
 
 export const registerDictionaryValidation: RequestValidation<RegisterDictionaryBody, ParsedQs, ParamsDictionary> = {

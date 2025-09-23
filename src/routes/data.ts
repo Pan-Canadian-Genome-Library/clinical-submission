@@ -17,23 +17,27 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { logger } from '@/common/logger.js';
+import express, { json, Router, urlencoded } from 'express';
+
+import dataController from '@/controllers/dataController.js';
 import { lyricProvider } from '@/core/provider.js';
 
-const categoryService = () => {
-	return {
-		getCategoryById: async (categoryId: number) => {
-			try {
-				const category = await lyricProvider.repositories.category.getCategoryById(categoryId);
-				return category;
-			} catch (error) {
-				logger.error('Error at getCategoryById service', error);
-				throw new lyricProvider.utils.errors.InternalServerError(
-					'Something went wrong while fetching category. Please try again later.',
-				);
-			}
-		},
-	};
-};
+export const dataRouter: Router = (() => {
+	const router = express.Router();
+	router.use(json());
+	router.use(urlencoded({ extended: false }));
 
-export default categoryService;
+	// PCGL specific endpoint
+	router.get('/entity/:entityName/:externalId/exists', dataController.getDataIdExists);
+
+	// Lyric endpoints extended
+	router.get('/category/:categoryId', dataController.getCategoryById);
+	router.get('/category/:categoryId/id/:systemId', dataController.getCategoryBySystemId);
+	router.get('/category/:categoryId/organization/:organization', dataController.getCategoryByOrganization);
+	router.post('/category/:categoryId/organization/:organization/query', dataController.getSubmittedDataByQuery);
+	router.get('/category/:categoryId/stream', dataController.getSubmittedDataStream);
+
+	router.use('', lyricProvider.routers.submittedData);
+
+	return router;
+})();

@@ -62,13 +62,13 @@ export const authMiddleware = () => {
 };
 
 /**
- * Auth Middleware that checks specifically for admin user.
+ * Auth Middleware that checks specifically for lyric endpoints
  * Used for lyric endpoints, and is provided as a custom configuration in the appConfig of lyricProvider
  *
  * @param req request object
  * @returns
  */
-export const adminMiddleware = async (req: Request) => {
+export const lyricAuthMiddleware = async (req: Request) => {
 	const { enabled } = authConfig;
 
 	try {
@@ -93,13 +93,6 @@ export const adminMiddleware = async (req: Request) => {
 		}
 
 		const result = await fetchUserData(token);
-
-		if (!result.user?.isAdmin) {
-			return {
-				errorCode: 403,
-				errorMessage: 'Forbidden: You must be an admin to access this resource',
-			};
-		}
 
 		return result;
 	} catch (error) {

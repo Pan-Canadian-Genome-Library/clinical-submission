@@ -17,19 +17,34 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { z } from 'zod';
+import { VIEW_TYPE, ViewType } from '@overture-stack/lyric';
 
-export const iimConfigObject = z.object({
-	entityName: z.string(),
-	fieldName: z.string(),
-	prefix: z.string(),
-	internalId: z.string().optional(),
-	paddingLength: z.number().int().positive().default(8),
-	parentEntityName: z.string().optional(),
-	parentFieldName: z.string().optional(),
-	sequenceStart: z.number().int().positive().default(1),
-});
-export type IIMConfigObject = z.infer<typeof iimConfigObject>;
+/**
+ * Ensure a value is wrapped in an array.
+ *
+ * If passed an array, return it returns the same array. If passed a single item, wrap it in an array.
+ * The function then filters out any empty strings and `undefined` values
+ * @param val an item or array
+ * @return an array
+ */
+export const asArray = <T>(val: T | T[]): T[] => {
+	const result = Array.isArray(val) ? val : [val];
+	return result.filter((item) => item !== null && item !== '' && item !== undefined);
+};
 
-export const iimConfig = z.array(iimConfigObject);
-export type IIMConfig = z.infer<typeof iimConfig>;
+/**
+ * Convert a value into it's View type if it matches.
+ * Otherwise it returns `undefined`
+ * @param {unknown} value
+ * @returns {ViewType | undefined}
+ */
+export const convertToViewType = (value: unknown): ViewType | undefined => {
+	if (typeof value === 'string') {
+		const parseResult = VIEW_TYPE.safeParse(value.trim().toLowerCase());
+
+		if (parseResult.success) {
+			return parseResult.data;
+		}
+	}
+	return undefined;
+};

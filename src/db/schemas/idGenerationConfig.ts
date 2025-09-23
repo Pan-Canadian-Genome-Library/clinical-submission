@@ -26,6 +26,7 @@ export const idGenerationConfig = pcglSchema.table('id_generation_config', {
 	entityName: varchar('entity_name', { length: 255 }).notNull().unique(),
 	fieldName: varchar('field_name', { length: 255 }).notNull(),
 	prefix: varchar('prefix', { length: 50 }).notNull(),
+	internalId: varchar('internal_id', { length: 50 }),
 	paddingLength: integer('padding_length').notNull(),
 	sequenceName: varchar('sequence_name', { length: 255 }).notNull().unique(),
 	sequenceStart: integer('sequence_start').notNull(),

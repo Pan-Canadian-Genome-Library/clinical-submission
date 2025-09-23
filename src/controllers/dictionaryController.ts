@@ -32,7 +32,7 @@ const registerDictionary = validateRequest(registerDictionaryValidation, async (
 
 		const foundStudy = await studyRepo.getStudyById(studyId);
 		if (!foundStudy) {
-			return res.status(404).json({ error: `Study with ID ${studyId} not found` });
+			throw new lyricProvider.utils.errors.NotFound(`Study with ID ${studyId} not found`);
 		}
 
 		const { dictionary, category } = await lyricProvider.services.dictionary.register({

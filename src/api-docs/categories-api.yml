@@ -50,8 +50,6 @@
         $ref: '#/components/responses/ServerError'
       503:
         $ref: '#/components/responses/ServiceUnavailableError'
-
-/admin/category/{categoryId}:
   delete:
     summary: Delete a category by ID
     tags:
