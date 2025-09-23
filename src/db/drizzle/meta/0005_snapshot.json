@@ -1,6 +1,6 @@
 {
-  "id": "ca47ccbf-357c-4413-9c7a-bdd13f3bae0b",
-  "prevId": "5dbfb85b-07d8-4750-b583-f53d2870a23a",
+  "id": "bd480be3-c7e5-417d-bc39-a71e463c7ae1",
+  "prevId": "ca47ccbf-357c-4413-9c7a-bdd13f3bae0b",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -318,6 +318,12 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false
+        },
+        "category_id": {
+          "name": "category_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -338,7 +344,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "study_category_id_unique": {
+          "name": "study_category_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "category_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

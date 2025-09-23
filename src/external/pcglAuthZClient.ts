@@ -28,6 +28,46 @@ import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 
 /**
+ * Store the service token fetched form AuthZ. This service token is used
+ * to identify the service that is requesting user information. It will expire
+ * periodically and require being fetched again.
+ */
+let serviceToken: string | undefined = undefined;
+
+/**
+ * Function to fetch AuthZ serviceToken to append to header requirement X-Service-Token
+ */
+const refreshAuthZServiceToken = async () => {
+	const { AUTHZ_ENDPOINT } = authConfig;
+
+	try {
+		const url = urlJoin(AUTHZ_ENDPOINT, `/service/${authConfig.service.id}/verify`);
+
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				service_uuid: authConfig.service.uuid,
+			}),
+		});
+		if (!response.ok) {
+			throw new lyricProvider.utils.errors.InternalServerError(
+				`Failed to fetch sevice token with status ${response.status}`,
+			);
+		}
+		const tokenResponse = await response.json();
+		serviceToken = tokenResponse.token;
+	} catch (error) {
+		logger.error(`[AUTHZ]: Something went wrong fetching authz service token.`, error);
+		throw new lyricProvider.utils.errors.InternalServerError(
+			`Bad request: Something went wrong fetching from authz service`,
+		);
+	}
+};
+
+/**
  *  Function to perform fetch requests to AUTHZ service
  *
  * @param resource endpoint to query from authz
@@ -36,20 +76,49 @@ import { lyricProvider } from '@/core/provider.js';
  *
  */
 const fetchAuthZResource = async (resource: string, token: string, options?: RequestInit) => {
-	const { AUTHZ_ENDPOINT } = authConfig;
+	/**
+	 * Internal function that does the work of fetching the resource from AuthZ.
+	 * We will need to retry this if this is rejected due to an expired serviceToken.
+	 */
+	async function _fetchFromAuthZ() {
+		const { AUTHZ_ENDPOINT } = authConfig;
 
-	const url = urlJoin(AUTHZ_ENDPOINT, resource);
-	const headers = new Headers({
-		Authorization: `Bearer ${token}`,
-		'Content-Type': 'application/json',
-	});
+		const url = urlJoin(AUTHZ_ENDPOINT, resource);
+		const headers = new Headers({
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json',
+			'X-Service-ID': `${authConfig.service.id}`,
+			'X-Service-Token': `${serviceToken}`,
+		});
 
-	try {
-		return await fetch(url, { headers, ...options });
-	} catch (error) {
-		logger.error(`[AUTHZ]: Something went wrong fetching authz service. ${error}`);
-		throw new lyricProvider.utils.errors.InternalServerError(`Bad request: Something went wrong verifying user data`);
+		try {
+			return await fetch(url, { headers, ...options });
+		} catch (error) {
+			logger.error(`[AUTHZ]: Something went wrong fetching authz service. ${error}`);
+			throw new lyricProvider.utils.errors.InternalServerError(`Bad request: Something went wrong verifying user data`);
+		}
 	}
+
+	// If the serviceToken doesn't exist, then call refresh service token
+	if (serviceToken === undefined) {
+		await refreshAuthZServiceToken();
+	}
+
+	const firstResponse = await _fetchFromAuthZ();
+	// CASE-1: Bad bearer token
+	if (!firstResponse.ok && firstResponse.status === 401) {
+		logger.error(`[AUTHZ]: Bearer token is invalid`);
+
+		throw new Error('Something went wrong while verifying PCGL user account information, please try again later.');
+	}
+	// CASE-2: Bad serviceToken
+	// Trigger refresh service token and recall with the new token
+	if (!firstResponse.ok && firstResponse.status === 403) {
+		await refreshAuthZServiceToken();
+		return await _fetchFromAuthZ();
+	}
+
+	return firstResponse;
 };
 
 /**
@@ -63,7 +132,7 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 	if (!response.ok) {
 		const errorResponse: UserDataResponseErrorType = await response.json();
 
-		logger.error(`[AUTHZ]: Unable to verify user response from AUTHZ. ${errorResponse}`);
+		logger.error(`[AUTHZ]: Unable to verify user response from AUTHZ. ${JSON.stringify(errorResponse)}`);
 
 		const responseMessage =
 			'Something went wrong while verifying PCGL user account information, please try again later.';

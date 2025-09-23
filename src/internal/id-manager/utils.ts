@@ -49,8 +49,16 @@ const processIIMConfiguration = (iimEnvConfig: IIMConfig) => {
 	for (const config of iimEnvConfig) {
 		database.transaction(async (transaction) => {
 			try {
-				const recordResult = await iimService(database).addIIMConfig(config, transaction);
-				const sequenceResult = await iimService(database).createIMMSequence(config, transaction);
+				// If the internalId field in the IIM config doesn't exist, then we need to manually generate a unique id for the col
+				let newConfig = config;
+				if (!config.internalId) {
+					// Using config.entityName here because its a unique constraint in the table ensuring that this internal Id is always different
+					newConfig = { ...config, internalId: `default_${config.entityName}_id` };
+				}
+
+				const recordResult = await iimService(database).addIIMConfig(newConfig, transaction);
+				const sequenceResult = await iimService(database).createIMMSequence(newConfig, transaction);
+
 				if (recordResult && recordResult[0]) {
 					logger.debug(`[IIM]: Added record to config table: ${JSON.stringify(recordResult[0])}`);
 				}

@@ -21,9 +21,15 @@ import axios from 'axios';
 import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
-import { oidcTokenResponseSchema, oidcUserInfoResponseSchema } from '@/common/validation/auth-validation.js';
+import {
+	type OIDCTokenResponse,
+	oidcTokenResponseSchema,
+	oidcUserInfoResponseSchema,
+} from '@/common/validation/auth-validation.js';
 import { type AuthConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
+
+const OIDC_SCOPE = `openid profile email org.cilogon.userinfo offline_access`;
 
 /**
  * OIDC Authorization Flow Step 1
@@ -33,7 +39,7 @@ export const getOidcAuthorizeUrl = (authConfig: AuthConfig, onSuccessRedirectUrl
 	const params = new URLSearchParams({
 		client_id: authConfig.AUTH_CLIENT_ID,
 		response_type: `code`,
-		scope: `openid profile email org.cilogon.userinfo`,
+		scope: OIDC_SCOPE,
 		redirect_uri: onSuccessRedirectUrl,
 	});
 	return urlJoin(authConfig.AUTH_PROVIDER_HOST, `/authorize?${params.toString()}`);
@@ -46,7 +52,7 @@ export const getOidcAuthorizeUrl = (authConfig: AuthConfig, onSuccessRedirectUrl
 export const exchangeCodeForTokens = async (
 	authConfig: AuthConfig,
 	{ code, redirectUrl }: { code: string; redirectUrl: string },
-) => {
+): Promise<OIDCTokenResponse> => {
 	const oauth2TokenUrl = urlJoin(authConfig.AUTH_PROVIDER_HOST, `/oauth2/token`);
 	const params = {
 		code,
@@ -78,6 +84,49 @@ export const exchangeCodeForTokens = async (
 
 		logger.error(`Unexpected error exchanging auth code for tokens.`, error);
 		throw new lyricProvider.utils.errors.InternalServerError(`Unable to retrieve user tokens from OIDC provider.`);
+	}
+};
+
+export const refreshUserSession = async (
+	authConfig: AuthConfig,
+	{ refreshToken }: { refreshToken: string },
+): Promise<OIDCTokenResponse> => {
+	const oauth2RefreshUrl = urlJoin(authConfig.AUTH_PROVIDER_HOST, `/oauth2/token`);
+	const params = {
+		refresh_token: refreshToken,
+		client_id: authConfig.AUTH_CLIENT_ID,
+		client_secret: authConfig.AUTH_CLIENT_SECRET,
+		grant_type: 'refresh_token',
+		scope: OIDC_SCOPE,
+	};
+
+	try {
+		const tokenResponse = await axios.get(oauth2RefreshUrl, { params });
+		const parsedTokenResponse = oidcTokenResponseSchema.safeParse(tokenResponse.data);
+
+		if (!parsedTokenResponse.success) {
+			logger.error(
+				`OIDC Provider returned tokens for refresh request with unexpected format`,
+				parsedTokenResponse.error.message,
+			);
+			throw new lyricProvider.utils.errors.InternalServerError(
+				`Token response from refresh request has unexpected format.`,
+			);
+		}
+		return parsedTokenResponse.data;
+	} catch (error: unknown) {
+		/**
+		 * Check if we got back a valid error response. We use this because for certain errors we can recover.
+		 */
+		if (axios.isAxiosError(error) && error.status === 400 && error.response) {
+			const parsedTokenResponse = oidcTokenResponseSchema.safeParse(error.response.data);
+			if (parsedTokenResponse.success) {
+				return parsedTokenResponse.data;
+			}
+		}
+
+		logger.error(`Unexpected error using refresh_token to retrieve user tokens.`, error);
+		throw new lyricProvider.utils.errors.InternalServerError(`Unable to refresh user session from OIDC provider.`);
 	}
 };
 
