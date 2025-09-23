@@ -22,19 +22,12 @@ import express, { json, Router, urlencoded } from 'express';
 import categoryController from '@/controllers/categoryController.js';
 import { authMiddleware } from '@/middleware/auth.js';
 
-export const adminCategoryRouter: Router = (() => {
-	const router = express.Router();
-	router.use(json());
-	router.use(urlencoded({ extended: false }));
-	router.delete('/:categoryId', authMiddleware(), categoryController.deleteCategoryById);
-	return router;
-})();
-
 export const categoryRouter: Router = (() => {
 	const router = express.Router();
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
 	router.get('/:categoryId', categoryController.getCategoryById);
 	router.get('/', categoryController.listAllCategories);
+	router.delete('/:categoryId', authMiddleware(), categoryController.deleteCategoryById);
 	return router;
 })();
