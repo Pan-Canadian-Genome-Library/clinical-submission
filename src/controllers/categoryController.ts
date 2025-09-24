@@ -77,7 +77,7 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 	const studySvc = await studyService(database);
 
 	try {
-		const foundCategory = await categorySrvice.getDetails(Number(categoryId));
+		const foundCategory = await categorySrvice.getDetails(categoryId);
 		if (!foundCategory) {
 			throw new lyricProvider.utils.errors.NotFound(`No Category with ID - ${categoryId} found.`);
 		}
