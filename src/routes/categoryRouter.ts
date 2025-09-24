@@ -27,7 +27,7 @@ export const categoryRouter: Router = (() => {
 	const router = express.Router();
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
-	router.use('/', authMiddleware, lyricProvider.routers.category);
+	router.use('', lyricProvider.routers.category);
 	router.delete('/:categoryId', authMiddleware(), categoryController.deleteCategoryById);
 	return router;
 })();

@@ -27,6 +27,6 @@ const dictionaryRouter = express.Router();
 
 dictionaryRouter.post('/register', authMiddleware(), dictionaryController.registerDictionary);
 
-dictionaryRouter.use('/', authMiddleware(), lyricProvider.routers.dictionary);
+dictionaryRouter.use('', lyricProvider.routers.dictionary);
 
 export { dictionaryRouter };
