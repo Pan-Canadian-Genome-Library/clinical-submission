@@ -17,16 +17,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import express from 'express';
+import express, { Router, json, urlencoded } from 'express';
 
 import dictionaryController from '@/controllers/dictionaryController.js';
 import { lyricProvider } from '@/core/provider.js';
 import { authMiddleware } from '@/middleware/auth.js';
 
-const dictionaryRouter = express.Router();
+export const dictionaryRouter: Router = (() => {
+	const router = express.Router();
 
-dictionaryRouter.post('/register', authMiddleware(), dictionaryController.registerDictionary);
+	router.use(json());
+	router.use(urlencoded({ extended: false }));
 
-dictionaryRouter.use('', lyricProvider.routers.dictionary);
+	router.post('/register', authMiddleware(), dictionaryController.registerDictionary);
 
-export { dictionaryRouter };
+	router.use('', lyricProvider.routers.dictionary);
+
+	return router;
+})();

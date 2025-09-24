@@ -87,20 +87,17 @@ app.use('/health', healthCheckRouter);
 app.use('/study', studyRouter);
 app.use('/auth', authRouter);
 
-// Lyric routes
-app.use('/audit', lyricProvider.routers.audit);
-app.use('/category', categoryRouter);
-app.use('/data', lyricProvider.routers.submittedData);
-app.use('/dictionary', dictionaryRouter);
-app.use('/submission', submissionRouter);
-app.use('/validator', lyricProvider.routers.validator);
-
 //Lyric custom routes
 /**
  * Implements lyrics default routes with extra configurations
  */
 app.use('/submission', submissionRouter);
 app.use('/data', dataRouter);
+app.use('/audit', lyricProvider.routers.audit);
+app.use('/category', categoryRouter);
+app.use('/data', lyricProvider.routers.submittedData);
+app.use('/dictionary', dictionaryRouter);
+app.use('/validator', lyricProvider.routers.validator);
 
 // Swagger route
 app.use('/api-docs', openAPIRouter);
