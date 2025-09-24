@@ -97,7 +97,6 @@ app.use('/dictionary', dictionaryRouter);
 app.use('/submission', submissionRouter);
 app.use('/validator', lyricProvider.routers.validator);
 
-
 //Lyric custom routes
 /**
  * Implements lyrics default routes with extra configurations

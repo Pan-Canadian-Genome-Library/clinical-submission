@@ -18,13 +18,14 @@
  */
 
 import { eq, inArray } from 'drizzle-orm';
+
 import { logger } from '@/common/logger.js';
 import { getOrDeleteCategoryByID } from '@/common/validation/category-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
+import { study } from '@/db/schemas/studiesSchema.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import { studyService } from '@/service/studyService.js';
-import { study } from '../db/schemas/studiesSchema.js';
 
 const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res, next) => {
 	const categoryId = Number(req.params.categoryId);
@@ -70,9 +71,10 @@ const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, 
 });
 
 const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res, next) => {
-	const categoryId = req.params.categoryId;
-	const db = getDbInstance();
+	const categoryId = Number(req.params.categoryId);
+	const database = getDbInstance();
 	const categorySrvice = lyricProvider.services.category;
+	const studySvc = await studyService(database);
 
 	try {
 		const foundCategory = await categorySrvice.getDetails(Number(categoryId));
@@ -80,13 +82,11 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 			throw new lyricProvider.utils.errors.NotFound(`No Category with ID - ${categoryId} found.`);
 		}
 
-		const categoryIdNum = Number(categoryId);
-
-		if (isNaN(categoryIdNum)) {
+		if (isNaN(categoryId)) {
 			throw new lyricProvider.utils.errors.BadRequest(`Invalid categoryId: ${categoryId}`);
 		}
 
-		const linkedStudies = await db.select().from(study).where(eq(study.category_id, categoryIdNum));
+		const linkedStudies = await studySvc.getStudiesByCategoryId(categoryId);
 
 		if (linkedStudies.length == 0) {
 			logger.info('category is misconfigured, no associated Study');
@@ -129,11 +129,11 @@ const listAllCategories = validateRequest({}, async (req, res, next) => {
 			.where(inArray(study.category_id, categoryIds));
 
 		const studiesByCategory: Record<number, string> = {};
-		for (const s of linkedStudies) {
-			if (!s.categoryId) {
+		for (const linkedStudy of linkedStudies) {
+			if (!linkedStudy.categoryId) {
 				continue;
 			}
-			studiesByCategory[s.categoryId] = s.studyId;
+			studiesByCategory[linkedStudy.categoryId] = linkedStudy.studyId;
 		}
 
 		const response = categories.map((cat) => ({
