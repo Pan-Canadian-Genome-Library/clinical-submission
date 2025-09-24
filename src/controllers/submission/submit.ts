@@ -18,39 +18,16 @@
  */
 
 import { BATCH_ERROR_TYPE, type BatchError, type EntityData } from '@overture-stack/lyric';
-import type { ParamsDictionary } from 'express-serve-static-core';
-import type { ParsedQs } from 'qs';
-import { z } from 'zod';
 
 import { logger } from '@/common/logger.js';
+import { submitRequestSchema } from '@/common/validation/submit-validation.js';
 import { lyricProvider } from '@/core/provider.js';
+import { getDbInstance } from '@/db/index.js';
 import { hasAllowedAccess } from '@/external/pcglAuthZClient.js';
-import { type RequestValidation, validateRequest } from '@/middleware/requestValidation.js';
+import { validateRequest } from '@/middleware/requestValidation.js';
+import { studyService } from '@/service/studyService.js';
 import { prevalidateNewDataFile } from '@/submission/fileValidation.js';
 import { parseFileToRecords } from '@/submission/readFile.js';
-import { studyService } from '@/service/studyService.js';
-import { getDbInstance } from '@/db/index.js';
-
-interface SubmitRequestPathParams extends ParamsDictionary {
-	categoryId: string;
-}
-
-export const submitRequestSchema: RequestValidation<
-	{
-		studyId: any;
-		organization: string;
-	},
-	ParsedQs,
-	SubmitRequestPathParams
-> = {
-	body: z.object({
-		organization: z.string(),
-		studyId: z.string(),
-	}),
-	pathParams: z.object({
-		categoryId: z.string(),
-	}),
-};
 
 const CREATE_SUBMISSION_STATUS = {
 	PROCESSING: 'PROCESSING',
@@ -82,7 +59,7 @@ export const submit = validateRequest(submitRequestSchema, async (req, res, next
 			throw new lyricProvider.utils.errors.NotFound(`No Study with ID - ${studyId} found.`);
 		}
 
-		if (results.categoryId != categoryId) {
+		if (results.categoryId !== categoryId) {
 			throw new lyricProvider.utils.errors.BadRequest(`Study ${studyId} is being submitted to the incorrect category`);
 		}
 

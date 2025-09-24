@@ -1,37 +1,14 @@
 import { BATCH_ERROR_TYPE, type BatchError } from '@overture-stack/lyric';
-import type { ParamsDictionary } from 'express-serve-static-core';
-import type { ParsedQs } from 'qs';
-import { z } from 'zod';
 
 import { logger } from '@/common/logger.js';
+import { editDataRequestSchema } from '@/common/validation/submit-validation.js';
 import { lyricProvider } from '@/core/provider.js';
+import { getDbInstance } from '@/db/index.js';
 import { hasAllowedAccess } from '@/external/pcglAuthZClient.js';
-import { type RequestValidation, validateRequest } from '@/middleware/requestValidation.js';
+import { validateRequest } from '@/middleware/requestValidation.js';
+import { studyService } from '@/service/studyService.js';
 import { prevalidateEditFile } from '@/submission/fileValidation.js';
 import { parseFileToRecords } from '@/submission/readFile.js';
-import { getDbInstance } from '@/db/index.js';
-import { studyService } from '@/service/studyService.js';
-
-interface EditRequestPathParams extends ParamsDictionary {
-	categoryId: string;
-}
-
-export const editDataRequestSchema: RequestValidation<
-	{
-		studyId: any;
-		organization: string;
-	},
-	ParsedQs,
-	EditRequestPathParams
-> = {
-	body: z.object({
-		organization: z.string(),
-		studyId: z.string(),
-	}),
-	pathParams: z.object({
-		categoryId: z.string(),
-	}),
-};
 
 const EDIT_DATA_SUBMISSION_STATUS = {
 	PROCESSING: 'PROCESSING',
