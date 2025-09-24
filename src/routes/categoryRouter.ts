@@ -30,6 +30,7 @@ export const categoryRouter: Router = (() => {
 	router.get('/:categoryId', categoryController.getCategoryById);
 	router.get('/', categoryController.listAllCategories);
 	router.use('/', authMiddleware, lyricProvider.routers.category);
+	router.use('', lyricProvider.routers.category);
 	router.delete('/:categoryId', authMiddleware(), categoryController.deleteCategoryById);
 	return router;
 })();
