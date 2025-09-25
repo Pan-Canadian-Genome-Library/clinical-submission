@@ -17,11 +17,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { AppConfig, provider } from '@overture-stack/lyric';
+import { AppConfig, type AuthConfig, provider } from '@overture-stack/lyric';
 
+import type { PCGLUserSessionResult } from '@/common/types/auth.js';
 import { env } from '@/config/envConfig.js';
 import { lyricAuthMiddleware } from '@/middleware/auth.js';
 import { onFinishCommitCallback } from '@/middleware/idManager.js';
+
+const authConfig: AuthConfig<PCGLUserSessionResult> = {
+	enabled: env.AUTH_ENABLED,
+	protectedMethods: env.AUTH_PROTECT_METHODS,
+	customAuthHandler: lyricAuthMiddleware,
+};
 
 const appConfig: AppConfig = {
 	db: {
@@ -32,11 +39,7 @@ const appConfig: AppConfig = {
 		password: env.DB_PASSWORD,
 	},
 	onFinishCommit: onFinishCommitCallback,
-	auth: {
-		enabled: env.AUTH_ENABLED,
-		protectedMethods: env.AUTH_PROTECT_METHODS,
-		customAuthHandler: lyricAuthMiddleware,
-	},
+	auth: authConfig,
 	idService: {
 		customAlphabet: env.ID_CUSTOM_ALPHABET,
 		customSize: env.ID_CUSTOM_SIZE,

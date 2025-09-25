@@ -21,11 +21,14 @@ import express, { json, Router, urlencoded } from 'express';
 
 import dataController from '@/controllers/dataController.js';
 import { lyricProvider } from '@/core/provider.js';
+import { authMiddleware } from '@/middleware/auth.js';
 
 export const dataRouter: Router = (() => {
 	const router = express.Router();
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
+
+	router.use(authMiddleware());
 
 	// PCGL specific endpoint
 	router.get('/entity/:entityName/:externalId/exists', dataController.getDataIdExists);

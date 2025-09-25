@@ -17,12 +17,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { UserSessionResult } from '@overture-stack/lyric';
 import { Request } from 'express';
 import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
-import { PCGLUserSessionResult, UserDataResponseErrorType } from '@/common/types/auth.js';
+import { type PCGLUserSession, PCGLUserSessionResult, UserDataResponseErrorType } from '@/common/types/auth.js';
 import { Groups, userDataResponseSchema, UserDataResponseSchemaType } from '@/common/validation/auth-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
@@ -122,11 +121,11 @@ const fetchAuthZResource = async (resource: string, token: string, options?: Req
 };
 
 /**
- *	Fetches user data from authz. This user information is then return as a user object PCGLUserSessionResult or UserSessionResult
+ *	Fetches user data from authz. This user information is then return as a user object PCGLUserSessionResult
  * @param token Access token from Authz
  * @returns validated object of UserDataResponse
  */
-export const fetchUserData = async (token: string): Promise<PCGLUserSessionResult | UserSessionResult> => {
+export const fetchUserData = async (token: string): Promise<PCGLUserSessionResult> => {
 	const response = await fetchAuthZResource(`/user/me`, token);
 
 	if (!response.ok) {
@@ -171,6 +170,29 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 	};
 
 	return userTokenInfo;
+};
+
+/**
+ * Retrieves the list of organizations a user has read access to.
+ * If the user is an admin, it returns undefined to indicate access to all organizations.
+ * If no user information is provided, it also returns undefined to allow all access (assuming authentication is not enabled).
+ * Otherwise, it returns the list of organizations the user is allowed to read from.
+ * @param organization
+ * @param user
+ * @returns
+ */
+export const getUserReadableOrganizations = (user?: PCGLUserSession) => {
+	if (!user) {
+		// no user info, authentication is not enabled, allow all access
+		return undefined;
+	}
+
+	if (user.isAdmin) {
+		// admin has access to all organizations
+		return undefined;
+	}
+
+	return user.allowedReadOrganizations;
 };
 
 /**
