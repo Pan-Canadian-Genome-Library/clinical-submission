@@ -66,7 +66,6 @@ const createStudyProperties = z
 		collaborators: z.array(z.string()).optional(),
 		fundingSources: z.array(z.string()),
 		publicationLinks: z.array(z.string()).optional(),
-		categoryId: z.number().optional(),
 	})
 	.strict();
 interface StudyIDParams extends ParamsDictionary {
