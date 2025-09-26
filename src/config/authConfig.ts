@@ -53,6 +53,7 @@ if (!parseResult.success) {
 export const authConfig = {
 	...parseResult.data,
 	enabled,
+	protectedMethods: env.AUTH_PROTECT_METHODS,
 	groups: {
 		admin: parseResult.data.AUTHZ_GROUP_ADMIN,
 		submitter: parseResult.data.AUTHZ_GROUP_SUBMITTERS,
