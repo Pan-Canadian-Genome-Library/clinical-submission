@@ -17,6 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import type { AuthConfig } from '@overture-stack/lyric';
 import { NextFunction, Request, Response } from 'express';
 
 import { logger } from '@/common/logger.js';
@@ -24,6 +25,29 @@ import type { PCGLRequestWithUser, PCGLUserSessionResult } from '@/common/types/
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { extractAccessTokenFromHeader, fetchUserData } from '@/external/pcglAuthZClient.js';
+
+/**
+ * Determines whether the incoming request should bypass authentication,
+ * based on the application's authentication configuration.
+ * @param req
+ * @param authConfig
+ * @returns
+ */
+export const shouldBypassAuth = (req: PCGLRequestWithUser, authConfig: AuthConfig) => {
+	if (!authConfig.enabled) {
+		// bypass auth if it's globally disabled
+		return true;
+	}
+
+	// Skip auth if configured protectedMethods is a valid array and does not include the request method
+	const protectedMethods = authConfig.protectedMethods;
+	if (Array.isArray(protectedMethods) && !protectedMethods.some((method) => method === req.method)) {
+		return true;
+	}
+
+	// Default: required auth
+	return false;
+};
 
 /**
  * Middleware to handle authentication that returns PCGLUserSessionResult to req.user.

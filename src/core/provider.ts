@@ -24,7 +24,7 @@ import { env } from '@/config/envConfig.js';
 import { lyricAuthMiddleware } from '@/middleware/auth.js';
 import { onFinishCommitCallback } from '@/middleware/idManager.js';
 
-const authConfig: AuthConfig<PCGLUserSessionResult> = {
+export const authConfig: AuthConfig<PCGLUserSessionResult> = {
 	enabled: env.AUTH_ENABLED,
 	protectedMethods: env.AUTH_PROTECT_METHODS,
 	customAuthHandler: lyricAuthMiddleware,

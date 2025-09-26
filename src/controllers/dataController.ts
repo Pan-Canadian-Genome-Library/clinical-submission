@@ -22,12 +22,14 @@ import { DataRecordNested, isDataRecordValue, SubmittedDataResponse, VIEW_TYPE }
 import { asArray, convertToViewType } from '@/common/formatUtils.js';
 import { getDataById } from '@/common/validation/data-validation.js';
 import { env } from '@/config/envConfig.js';
-import { lyricProvider } from '@/core/provider.js';
+import { authConfig, lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { getUserReadableOrganizations, hasAllowedAccess } from '@/external/pcglAuthZClient.js';
 import { generateHash } from '@/internal/id-manager/utils.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import iimService from '@/service/idManagerService.js';
+
+import { shouldBypassAuth } from '../middleware/auth.js';
 
 const defaultPage = 1;
 const defaultPageSize = 20;
@@ -39,6 +41,11 @@ const getDataIdExists = validateRequest(getDataById, async (req, res, next) => {
 
 	try {
 		const { externalId, entityName } = req.params;
+		const user = req.user;
+
+		if (!shouldBypassAuth(req, authConfig) && !user) {
+			throw new lyricProvider.utils.errors.Forbidden(`User is not authorized to read submitted data`);
+		}
 
 		const idConfigResult = await iimRepo.getIIMConfig(entityName);
 
@@ -81,8 +88,13 @@ const getCategoryById = validateRequest(
 			const page = parseInt(String(req.query.page)) || defaultPage;
 			const pageSize = parseInt(String(req.query.pageSize)) || defaultPageSize;
 			const view = convertToViewType(req.query.view) || defaultView;
+			const user = req.user;
 
-			const readableOrganizations = getUserReadableOrganizations(req.user);
+			if (!shouldBypassAuth(req, authConfig) && !user) {
+				throw new lyricProvider.utils.errors.Forbidden(`User is not authorized to read submitted data`);
+			}
+
+			const readableOrganizations = getUserReadableOrganizations(user);
 
 			// Send submission data, organized by entity.
 			const submitResult = await lyricProvider.services.submittedData.getSubmittedDataByCategory(
@@ -122,7 +134,10 @@ const getCategoryBySystemId = validateRequest(
 				return;
 			}
 
-			if (user && !hasAllowedAccess(submitResult.result.organization, user.allowedReadOrganizations, user.isAdmin)) {
+			if (
+				!shouldBypassAuth(req, authConfig) &&
+				(!user || !hasAllowedAccess(submitResult.result.organization, user.allowedReadOrganizations, user.isAdmin))
+			) {
 				throw new lyricProvider.utils.errors.Forbidden(
 					`User is not authorized to read submitted data for organization '${submitResult.result.organization}'`,
 				);
@@ -153,7 +168,10 @@ const getCategoryByOrganization = validateRequest(
 
 			const user = req.user;
 
-			if (user && !hasAllowedAccess(organization, user.allowedReadOrganizations, user.isAdmin)) {
+			if (
+				!shouldBypassAuth(req, authConfig) &&
+				(!user || !hasAllowedAccess(organization, user.allowedReadOrganizations, user.isAdmin))
+			) {
 				throw new lyricProvider.utils.errors.Forbidden(
 					`User is not authorized to read submitted data for organization '${organization}'`,
 				);
@@ -200,7 +218,10 @@ const getSubmittedDataByQuery = validateRequest(
 
 			const user = req.user;
 
-			if (user && !hasAllowedAccess(organization, user.allowedReadOrganizations, user.isAdmin)) {
+			if (
+				!shouldBypassAuth(req, authConfig) &&
+				(!user || !hasAllowedAccess(organization, user.allowedReadOrganizations, user.isAdmin))
+			) {
 				throw new lyricProvider.utils.errors.Forbidden(
 					`User is not authorized to read submitted data for organization '${organization}'`,
 				);
@@ -234,6 +255,11 @@ const getSubmittedDataStream = validateRequest(
 			const categoryId = Number(req.params.categoryId);
 			const entityName = asArray(req.query.entityName || []);
 			const view = convertToViewType(String(req.query.view)) || defaultView;
+			const user = req.user;
+
+			if (!shouldBypassAuth(req, authConfig) && !user) {
+				throw new lyricProvider.utils.errors.Forbidden(`User is not authorized to read submitted data`);
+			}
 
 			res.setHeader('Transfer-Encoding', 'chunked');
 			res.setHeader('Content-Type', 'application/x-ndjson');
