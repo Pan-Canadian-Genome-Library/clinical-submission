@@ -29,7 +29,6 @@ interface SubmitRequestPathParams extends ParamsDictionary {
 
 export const submitRequestSchema: RequestValidation<
 	{
-		studyId: any;
 		organization: string;
 	},
 	ParsedQs,
@@ -37,7 +36,6 @@ export const submitRequestSchema: RequestValidation<
 > = {
 	body: z.object({
 		organization: z.string(),
-		studyId: z.string(),
 	}),
 	pathParams: z.object({
 		categoryId: z.string(),
