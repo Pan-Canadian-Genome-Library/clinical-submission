@@ -21,15 +21,14 @@ import { DataRecordNested, isDataRecordValue, SubmittedDataResponse, VIEW_TYPE }
 
 import { asArray, convertToViewType } from '@/common/formatUtils.js';
 import { getDataById } from '@/common/validation/data-validation.js';
+import { authConfig } from '@/config/authConfig.js';
 import { env } from '@/config/envConfig.js';
-import { authConfig, lyricProvider } from '@/core/provider.js';
+import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { getUserReadableOrganizations, hasAllowedAccess } from '@/external/pcglAuthZClient.js';
 import { generateHash } from '@/internal/id-manager/utils.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import iimService from '@/service/idManagerService.js';
-
-import { shouldBypassAuth } from '../middleware/auth.js';
 
 const defaultPage = 1;
 const defaultPageSize = 20;
@@ -43,7 +42,7 @@ const getDataIdExists = validateRequest(getDataById, async (req, res, next) => {
 		const { externalId, entityName } = req.params;
 		const user = req.user;
 
-		if (!shouldBypassAuth(req, authConfig) && !user) {
+		if (authConfig.enabled && !user) {
 			throw new lyricProvider.utils.errors.Forbidden(`User is not authorized to read submitted data`);
 		}
 
@@ -90,7 +89,7 @@ const getCategoryById = validateRequest(
 			const view = convertToViewType(req.query.view) || defaultView;
 			const user = req.user;
 
-			if (!shouldBypassAuth(req, authConfig) && !user) {
+			if (authConfig.enabled && !user) {
 				throw new lyricProvider.utils.errors.Forbidden(`User is not authorized to read submitted data`);
 			}
 
@@ -135,7 +134,7 @@ const getCategoryBySystemId = validateRequest(
 			}
 
 			if (
-				!shouldBypassAuth(req, authConfig) &&
+				authConfig.enabled &&
 				(!user || !hasAllowedAccess(submitResult.result.organization, user.allowedReadOrganizations, user.isAdmin))
 			) {
 				throw new lyricProvider.utils.errors.Forbidden(
@@ -169,7 +168,7 @@ const getCategoryByOrganization = validateRequest(
 			const user = req.user;
 
 			if (
-				!shouldBypassAuth(req, authConfig) &&
+				authConfig.enabled &&
 				(!user || !hasAllowedAccess(organization, user.allowedReadOrganizations, user.isAdmin))
 			) {
 				throw new lyricProvider.utils.errors.Forbidden(
@@ -219,7 +218,7 @@ const getSubmittedDataByQuery = validateRequest(
 			const user = req.user;
 
 			if (
-				!shouldBypassAuth(req, authConfig) &&
+				authConfig.enabled &&
 				(!user || !hasAllowedAccess(organization, user.allowedReadOrganizations, user.isAdmin))
 			) {
 				throw new lyricProvider.utils.errors.Forbidden(
@@ -257,7 +256,7 @@ const getSubmittedDataStream = validateRequest(
 			const view = convertToViewType(String(req.query.view)) || defaultView;
 			const user = req.user;
 
-			if (!shouldBypassAuth(req, authConfig) && !user) {
+			if (authConfig.enabled && !user) {
 				throw new lyricProvider.utils.errors.Forbidden(`User is not authorized to read submitted data`);
 			}
 
