@@ -17,13 +17,10 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { eq, inArray } from 'drizzle-orm';
-
 import { logger } from '@/common/logger.js';
 import { getOrDeleteCategoryByID } from '@/common/validation/category-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
-import { study } from '@/db/schemas/studiesSchema.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import { studyService } from '@/service/studyService.js';
 
@@ -57,7 +54,7 @@ const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, 
 			);
 		}
 
-		const linkedStudies = await studySvc.getStudiesByCategoryId(categoryId);
+		const linkedStudies = await studySvc.getStudiesByCategoryIds([categoryId]);
 		if (linkedStudies.length > 0) {
 			await studySvc.unlinkStudiesFromCategory(categoryId);
 		}
@@ -73,11 +70,11 @@ const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, 
 const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res, next) => {
 	const categoryId = Number(req.params.categoryId);
 	const database = getDbInstance();
-	const categorySrvice = lyricProvider.services.category;
+	const categoryService = lyricProvider.services.category;
 	const studySvc = await studyService(database);
 
 	try {
-		const foundCategory = await categorySrvice.getDetails(categoryId);
+		const foundCategory = await categoryService.getDetails(categoryId);
 		if (!foundCategory) {
 			throw new lyricProvider.utils.errors.NotFound(`No Category with ID - ${categoryId} found.`);
 		}
@@ -86,7 +83,7 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 			throw new lyricProvider.utils.errors.BadRequest(`Invalid categoryId: ${categoryId}`);
 		}
 
-		const linkedStudies = await studySvc.getStudiesByCategoryId(categoryId);
+		const linkedStudies = await studySvc.getStudiesByCategoryIds([categoryId]);
 
 		if (linkedStudies.length == 0) {
 			logger.info('category is misconfigured, no associated Study');
@@ -97,7 +94,7 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 
 		const response = {
 			...foundCategory,
-			studyId: linkedStudies[0]?.category_id,
+			studyId: linkedStudies[0]?.categoryId,
 		};
 
 		res.status(200).json(response);
@@ -109,8 +106,9 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 });
 
 const listAllCategories = validateRequest({}, async (req, res, next) => {
-	const db = getDbInstance();
 	const categoryService = lyricProvider.services.category;
+	const database = getDbInstance();
+	const studySvc = await studyService(database);
 
 	try {
 		const categories = await categoryService.listAll();
@@ -120,13 +118,7 @@ const listAllCategories = validateRequest({}, async (req, res, next) => {
 
 		const categoryIds = categories.map((c) => c.id);
 
-		const linkedStudies = await db
-			.select({
-				studyId: study.study_id,
-				categoryId: study.category_id,
-			})
-			.from(study)
-			.where(inArray(study.category_id, categoryIds));
+		const linkedStudies = await studySvc.getStudiesByCategoryIds(categoryIds);
 
 		const studiesByCategory: Record<number, string> = {};
 		for (const linkedStudy of linkedStudies) {
