@@ -84,6 +84,9 @@ components:
         id:
           type: number
           description: ID of the Category
+        studyId:
+          type: string
+          description: study id belonging to the category
         dictionary:
           type: object
           description: Dictionary used to validate the submission

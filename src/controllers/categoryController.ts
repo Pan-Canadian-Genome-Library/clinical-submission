@@ -94,7 +94,7 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 
 		const response = {
 			...foundCategory,
-			studyId: linkedStudies[0]?.categoryId,
+			studyId: linkedStudies[0]?.category_id,
 		};
 
 		res.status(200).json(response);
@@ -122,10 +122,10 @@ const listAllCategories = validateRequest({}, async (req, res, next) => {
 
 		const studiesByCategory: Record<number, string> = {};
 		for (const linkedStudy of linkedStudies) {
-			if (!linkedStudy.categoryId) {
+			if (!linkedStudy.category_id) {
 				continue;
 			}
-			studiesByCategory[linkedStudy.categoryId] = linkedStudy.studyId;
+			studiesByCategory[linkedStudy.category_id] = linkedStudy.study_id;
 		}
 
 		const response = categories.map((cat) => ({

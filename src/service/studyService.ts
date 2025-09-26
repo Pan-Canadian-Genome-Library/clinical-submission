@@ -165,13 +165,7 @@ const studyService = (db: PostgresDb) => ({
 	},
 	getStudiesByCategoryIds: async (categoryIds: number[]) => {
 		try {
-			return await db
-				.select({
-					studyId: study.study_id,
-					categoryId: study.category_id,
-				})
-				.from(study)
-				.where(inArray(study.category_id, categoryIds));
+			return await db.select().from(study).where(inArray(study.category_id, categoryIds));
 		} catch (error) {
 			logger.error('Error at getStudiesByCategoryIds service', error);
 			throw new lyricProvider.utils.errors.InternalServerError(
