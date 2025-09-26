@@ -51,7 +51,7 @@ export type StudyDTO = {
 	publicationLinks?: string[] | null;
 	createdAt: Date;
 	updatedAt?: Date | null;
-	categoryId: number | null;
+	categoryId?: number | null;
 };
 
 export type StudyRecord = typeof study.$inferSelect;
