@@ -59,7 +59,7 @@ const refreshAuthZServiceToken = async () => {
 		const tokenResponse = await response.json();
 		serviceToken = tokenResponse.token;
 	} catch (error) {
-		logger.error(`[AUTHZ]: Something went wrong fetching authz service token.`, error);
+		logger.error(error, `[AUTHZ]: Something went wrong fetching authz service token.`);
 		throw new lyricProvider.utils.errors.InternalServerError(
 			`Bad request: Something went wrong fetching from authz service`,
 		);
