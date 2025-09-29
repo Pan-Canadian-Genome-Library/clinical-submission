@@ -128,7 +128,7 @@ const listAllCategories = validateRequest({}, async (req, res, next) => {
 		res.status(200).json(response);
 		return;
 	} catch (exception) {
-		logger.error('Error in listAllCategories', exception);
+		logger.error(exception, 'Error in listAllCategories');
 		next(exception);
 	}
 });
