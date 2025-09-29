@@ -50,7 +50,7 @@
     tags:
       - Data
     security:
-      - bearerAuth:
+      - bearerAuth: []
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
       - name: entityName
