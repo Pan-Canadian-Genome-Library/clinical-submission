@@ -17,30 +17,28 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import express, { json, Router, urlencoded } from 'express';
+import type { PCGLRequestWithUser } from '@/common/types/auth.js';
+import { authConfig } from '@/config/authConfig.js';
 
-import dataController from '@/controllers/dataController.js';
-import { lyricProvider } from '@/core/provider.js';
-import { authMiddleware } from '@/middleware/auth.js';
+/**
+ * Determines whether the incoming request should bypass authentication,
+ * based on the application's authentication configuration.
+ * Returns true if authentication should be bypassed, false otherwise.
+ * @param req
+ * @returns
+ */
+export const shouldBypassAuth = (req: PCGLRequestWithUser) => {
+	const { enabled, protectedMethods } = authConfig;
+	if (!enabled) {
+		// bypass auth if it's globally disabled
+		return true;
+	}
 
-export const dataRouter: Router = (() => {
-	const router = express.Router();
-	router.use(json());
-	router.use(urlencoded({ extended: false }));
+	// Skip auth if configured protectedMethods is a valid array and does not include the request method
+	if (!protectedMethods.some((method) => method === req.method)) {
+		return true;
+	}
 
-	router.use(authMiddleware());
-
-	// PCGL specific endpoint
-	router.get('/entity/:entityName/:externalId/exists', dataController.getDataIdExists);
-
-	// Lyric endpoints extended
-	router.get('/category/:categoryId', dataController.getCategoryById);
-	router.get('/category/:categoryId/id/:systemId', dataController.getCategoryBySystemId);
-	router.get('/category/:categoryId/organization/:organization', dataController.getCategoryByOrganization);
-	router.post('/category/:categoryId/organization/:organization/query', dataController.getSubmittedDataByQuery);
-	router.get('/category/:categoryId/stream', dataController.getSubmittedDataStream);
-
-	router.use('', lyricProvider.routers.submittedData);
-
-	return router;
-})();
+	// Default: required auth
+	return false;
+};
