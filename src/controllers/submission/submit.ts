@@ -60,7 +60,7 @@ export const submit = validateRequest(submitRequestSchema, async (req, res, next
 
 		const study = results[0];
 
-		if (study?.category_id !== categoryId) {
+		if (study?.category_id !== categoryId && study?.study_name === organization) {
 			throw new lyricProvider.utils.errors.BadRequest(
 				`Study ${study?.study_id} is being submitted to the incorrect category`,
 			);
