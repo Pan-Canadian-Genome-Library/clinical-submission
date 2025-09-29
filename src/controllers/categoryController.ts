@@ -92,7 +92,7 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 		res.status(200).json(response);
 		return;
 	} catch (exception) {
-		logger.error('Error in deleteCategoryById', exception);
+		logger.error(exception,'Error in deleteCategoryById');
 		next(exception);
 	}
 });
