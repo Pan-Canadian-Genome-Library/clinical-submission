@@ -14,7 +14,7 @@ const upload = multer({ dest: '/tmp', limits: { fileSize: fileSizeLimit } });
 export const submissionRouter: Router = (() => {
 	const router = express.Router();
 
-	router.get('/:submissionId', authMiddleware(), getSubmissionController.getCategoryById);
+	router.get('/:submissionId', authMiddleware(), getSubmissionController.getSubmissionById);
 	router.get('/category/:categoryId', authMiddleware(), getSubmissionController.getSubmissionsByCategory);
 	router.post('/category/:categoryId/data', authMiddleware(), upload.array('files'), submit);
 	router.put('/category/:categoryId/data', authMiddleware(), upload.array('files'), editData);

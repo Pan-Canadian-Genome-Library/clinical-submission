@@ -21,7 +21,7 @@ import { lyricProvider } from '@/core/provider.js';
 import { hasAllowedAccess } from '@/external/pcglAuthZClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 
-const getCategoryById = validateRequest(
+const getSubmissionById = validateRequest(
 	lyricProvider.utils.schema.submissionByIdRequestSchema,
 	async (req, res, next) => {
 		try {
@@ -101,4 +101,4 @@ const getSubmissionsByCategory = validateRequest(
 	},
 );
 
-export default { getCategoryById, getSubmissionsByCategory };
+export default { getSubmissionById, getSubmissionsByCategory };
