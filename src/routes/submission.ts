@@ -3,7 +3,7 @@ import multer from 'multer';
 
 import { env } from '@/config/envConfig.js';
 import { editData } from '@/controllers/submission/editData.js';
-import getSubmissionController from '@/controllers/submission/getSubmit.js';
+import getSubmissionController from '@/controllers/submission/getSubmission.js';
 import { submit } from '@/controllers/submission/submit.js';
 import { lyricProvider } from '@/core/provider.js';
 import { authMiddleware } from '@/middleware/auth.js';
