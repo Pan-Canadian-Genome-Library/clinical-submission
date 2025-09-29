@@ -67,7 +67,7 @@ export const exchangeCodeForTokens = async (
 		const parsedTokenResponse = oidcTokenResponseSchema.safeParse(tokenResponse.data);
 
 		if (!parsedTokenResponse.success) {
-			logger.error(`OIDC Provider returned tokens with unexpected format`, parsedTokenResponse.error.message);
+			logger.error(`OIDC Provider returned tokens with unexpected format: ${parsedTokenResponse.error.message}`);
 			throw new lyricProvider.utils.errors.InternalServerError(`Token response has unexpected format.`);
 		}
 		return parsedTokenResponse.data;
@@ -82,7 +82,7 @@ export const exchangeCodeForTokens = async (
 			}
 		}
 
-		logger.error(`Unexpected error exchanging auth code for tokens.`, error);
+		logger.error(error, `Unexpected error exchanging auth code for tokens.`);
 		throw new lyricProvider.utils.errors.InternalServerError(`Unable to retrieve user tokens from OIDC provider.`);
 	}
 };
@@ -106,8 +106,7 @@ export const refreshUserSession = async (
 
 		if (!parsedTokenResponse.success) {
 			logger.error(
-				`OIDC Provider returned tokens for refresh request with unexpected format`,
-				parsedTokenResponse.error.message,
+				`OIDC Provider returned tokens for refresh request with unexpected format: ${parsedTokenResponse.error.message}`,
 			);
 			throw new lyricProvider.utils.errors.InternalServerError(
 				`Token response from refresh request has unexpected format.`,
@@ -125,7 +124,7 @@ export const refreshUserSession = async (
 			}
 		}
 
-		logger.error(`Unexpected error using refresh_token to retrieve user tokens.`, error);
+		logger.error(error, `Unexpected error using refresh_token to retrieve user tokens.`);
 		throw new lyricProvider.utils.errors.InternalServerError(`Unable to refresh user session from OIDC provider.`);
 	}
 };
@@ -137,14 +136,14 @@ export const getUserInfo = async (authConfig: AuthConfig, accessToken: string) =
 		});
 		const parsedUserinfoResponse = oidcUserInfoResponseSchema.safeParse(userResponse.data);
 		if (!parsedUserinfoResponse.success) {
-			logger.debug(`Userinfo response has unexpected format.`, parsedUserinfoResponse.error);
+			logger.debug(`Userinfo response has unexpected format. ${parsedUserinfoResponse.error.message}`);
 			throw new lyricProvider.utils.errors.InternalServerError(`Unable to retrieve user info from OIDC Provider.`);
 		}
 		return parsedUserinfoResponse.data;
 	} catch (error) {
 		// This could be an error for invalid access token, but there is no different error handling
 		// we'll just log the result and return a system error
-		logger.error(`Unexpected error occurred fetching OIDC User Info.`, error);
+		logger.error(error, `Unexpected error occurred fetching OIDC User Info.`);
 		throw new lyricProvider.utils.errors.InternalServerError(`Unable to retrieve user info from OIDC Provider.`);
 	}
 };

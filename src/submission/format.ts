@@ -25,7 +25,7 @@ export const extractFileExtension = (fileName: string): SupportedFileExtensions 
 		// Parse to validate the extension against the Zod enum
 		return SUPPORTED_FILE_EXTENSIONS.parse(fileExtension);
 	} catch (error) {
-		logger.error(`Error extracting file extension`, error);
+		logger.error(error, `Error extracting file extension`);
 		return;
 	}
 };

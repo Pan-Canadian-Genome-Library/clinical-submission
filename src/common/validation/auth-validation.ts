@@ -17,6 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import type { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
 import { z } from 'zod';
 
@@ -88,7 +89,7 @@ export interface OIDCCodeParams extends ParsedQs {
 	code: string;
 }
 
-export const OIDCCodeResponse: RequestValidation<object, OIDCCodeParams, string> = {
+export const OIDCCodeResponse: RequestValidation<object, OIDCCodeParams, ParamsDictionary> = {
 	query: z.object({
 		code: stringNotEmpty,
 	}),
