@@ -48,7 +48,6 @@ interface EditRequestPathParams extends ParamsDictionary {
 
 export const editDataRequestSchema: RequestValidation<
 	{
-		studyId: any;
 		organization: string;
 	},
 	ParsedQs,
@@ -56,7 +55,6 @@ export const editDataRequestSchema: RequestValidation<
 > = {
 	body: z.object({
 		organization: z.string(),
-		studyId: z.string(),
 	}),
 	pathParams: z.object({
 		categoryId: z.string(),

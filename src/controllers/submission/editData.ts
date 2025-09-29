@@ -40,7 +40,6 @@ export const editData = validateRequest(editDataRequestSchema, async (req, res, 
 		const categoryId = Number(req.params.categoryId);
 		const files = Array.isArray(req.files) ? req.files : [];
 		const organization = req.body.organization;
-		const studyId = req.body.studyId;
 		const db = getDbInstance();
 		const studySvc = studyService(db);
 
@@ -54,14 +53,18 @@ export const editData = validateRequest(editDataRequestSchema, async (req, res, 
 			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 		}
 
-		const results = await studySvc.getStudyById(studyId);
+		const results = await studySvc.getStudiesByCategoryId(categoryId);
 
 		if (!results) {
-			throw new lyricProvider.utils.errors.NotFound(`No Study with ID - ${studyId} found.`);
+			throw new lyricProvider.utils.errors.NotFound(`No Study with categoryId - ${categoryId} found.`);
 		}
 
-		if (results.categoryId != categoryId) {
-			throw new lyricProvider.utils.errors.BadRequest(`Study ${studyId} is being submitted to the incorrect category`);
+		const study = results[0];
+
+		if (study?.category_id != categoryId) {
+			throw new lyricProvider.utils.errors.BadRequest(
+				`Study with categoryId ${categoryId} is being submitted to the incorrect category`,
+			);
 		}
 
 		const username = user.username;
