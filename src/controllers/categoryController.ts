@@ -86,7 +86,7 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 
 		const response = {
 			...foundCategory,
-			studyId: linkedStudies[0]?.category_id,
+			studyId: linkedStudies[0]?.study_id,
 		};
 
 		res.status(200).json(response);
