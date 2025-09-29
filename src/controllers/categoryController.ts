@@ -45,9 +45,7 @@ const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, 
 			throw new lyricProvider.utils.errors.NotFound(`No Category with ID - ${categoryId} found.`);
 		}
 
-		const submittedDataCountPromise = lyricProvider.repositories.submittedData.getTotalRecordsByCategoryId(categoryId);
-
-		const submittedDataCount = await submittedDataCountPromise;
+		const submittedDataCount = await lyricProvider.repositories.submittedData.getTotalRecordsByCategoryId(categoryId);
 		if (submittedDataCount > 0) {
 			throw new lyricProvider.utils.errors.BadRequest(
 				`Cannot delete category ${categoryId} because it is linked to ${submittedDataCount} records in submittedData`,
