@@ -167,7 +167,7 @@ const studyService = (db: PostgresDb) => ({
 		try {
 			return await db.select().from(study).where(inArray(study.category_id, categoryIds));
 		} catch (error) {
-			logger.error('Error at getStudiesByCategoryIds service', error);
+			logger.error(error,'Error at getStudiesByCategoryIds service');
 			throw new lyricProvider.utils.errors.InternalServerError(
 				'Something went wrong while fetching studies for category. Please try again later.',
 			);
