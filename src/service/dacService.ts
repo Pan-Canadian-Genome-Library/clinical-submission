@@ -58,7 +58,7 @@ const dacService = (db: PostgresDb) => {
 
 				return dacRecord;
 			} catch (error) {
-				logger.error('Error at getAllDac service', error);
+				logger.error(error, 'Error at getAllDac service');
 
 				throw new lyricProvider.utils.errors.InternalServerError(
 					'Something went wrong while fetching your dac users. Please try again later.',
@@ -83,7 +83,7 @@ const dacService = (db: PostgresDb) => {
 
 				return dacRecord[0];
 			} catch (error) {
-				logger.error('Error at getDacById service', error);
+				logger.error(error, 'Error at getDacById service');
 
 				throw new lyricProvider.utils.errors.InternalServerError(
 					'Something went wrong while fetching your dac user. Please try again later.',
@@ -120,7 +120,7 @@ const dacService = (db: PostgresDb) => {
 
 				return dacRecord[0];
 			} catch (error) {
-				logger.error('Error at saveDac service', error);
+				logger.error(error, 'Error at saveDac service');
 
 				const postgresError = isPostgresError(error);
 
@@ -142,7 +142,7 @@ const dacService = (db: PostgresDb) => {
 
 				return dacRecord[0];
 			} catch (error) {
-				logger.error('Error at deleteDac service', error);
+				logger.error(error, 'Error at deleteDac service');
 
 				throw new lyricProvider.utils.errors.InternalServerError(
 					'Something went wrong while deleting your dac user. Please try again later.',
@@ -178,7 +178,7 @@ const dacService = (db: PostgresDb) => {
 
 				return dacRecord[0];
 			} catch (error) {
-				logger.error('Error at updateDacById service', error);
+				logger.error(error, 'Error at updateDacById service');
 
 				throw new lyricProvider.utils.errors.InternalServerError(
 					'Something went wrong while updating your dac user. Please try again later.',

@@ -20,6 +20,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { logger } from '@/common/logger.js';
+import type { PCGLRequestWithUser, PCGLUserSessionResult } from '@/common/types/auth.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { extractAccessTokenFromHeader, fetchUserData } from '@/external/pcglAuthZClient.js';
@@ -31,16 +32,10 @@ import { extractAccessTokenFromHeader, fetchUserData } from '@/external/pcglAuth
  */
 export const authMiddleware = () => {
 	const { enabled } = authConfig;
-	return async (req: Request, _: Response, next: NextFunction) => {
+	return async (req: PCGLRequestWithUser, _: Response, next: NextFunction) => {
 		try {
 			// If auth is disabled, then skip fetching user information
 			if (!enabled) {
-				// TODO: Move admin logic into this middleware
-				req.user = {
-					username: 'DisabledAuth',
-					isAdmin: true,
-					allowedWriteOrganizations: [],
-				};
 				return next();
 			}
 			const token = extractAccessTokenFromHeader(req);
@@ -68,18 +63,14 @@ export const authMiddleware = () => {
  * @param req request object
  * @returns
  */
-export const lyricAuthMiddleware = async (req: Request) => {
+export const lyricAuthMiddleware = async (req: Request): Promise<PCGLUserSessionResult> => {
 	const { enabled } = authConfig;
 
 	try {
 		// If auth is disabled, then skip fetching user information
 		if (!enabled) {
 			return {
-				user: {
-					username: `AUTH DISABLED`,
-					isAdmin: true,
-					allowedWriteOrganizations: [],
-				},
+				user: undefined,
 			};
 		}
 
