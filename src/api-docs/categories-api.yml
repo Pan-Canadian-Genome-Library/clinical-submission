@@ -53,7 +53,7 @@
   delete:
     summary: Delete a category by ID
     tags:
-      - Category (Admin)
+      - Category
     parameters:
       - name: categoryId
         in: path
