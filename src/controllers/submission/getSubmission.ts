@@ -29,6 +29,8 @@ const getSubmissionById = validateRequest(
 			const submissionId = Number(req.params.submissionId);
 			const user = req.user;
 
+			const authEnabled = !shouldBypassAuth(req);
+
 			const submission = await lyricProvider.services.submission.getSubmissionById(submissionId);
 
 			if (!submission) {
@@ -37,10 +39,7 @@ const getSubmissionById = validateRequest(
 
 			const organization = submission?.organization;
 
-			if (
-				!shouldBypassAuth(req) &&
-				(!user || !hasAllowedAccess(organization, user.allowedReadOrganizations, user.isAdmin))
-			) {
+			if (authEnabled && (!user || !hasAllowedAccess(organization, user.allowedReadOrganizations, user.isAdmin))) {
 				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 			}
 
