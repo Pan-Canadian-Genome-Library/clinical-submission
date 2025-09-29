@@ -41,7 +41,7 @@ const getCategoryById = validateRequest(
 
 			const organization = submission?.organization;
 
-			if (!hasAllowedAccess(organization, user.allowedWriteOrganizations, user.isAdmin)) {
+			if (!hasAllowedAccess(organization, user.allowedReadOrganizations, user.isAdmin)) {
 				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 			}
 
