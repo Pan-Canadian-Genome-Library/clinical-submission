@@ -36,10 +36,6 @@ const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, 
 			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 		}
 
-		if (isNaN(categoryId)) {
-			throw new lyricProvider.utils.errors.BadRequest(`Invalid categoryId: ${categoryId}`);
-		}
-
 		const foundCategory = await lyricProvider.services.category.getDetails(categoryId);
 		if (!foundCategory) {
 			throw new lyricProvider.utils.errors.NotFound(`No Category with ID - ${categoryId} found.`);

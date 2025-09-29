@@ -35,6 +35,15 @@ const registerDictionary = validateRequest(registerDictionaryValidation, async (
 			throw new lyricProvider.utils.errors.NotFound(`Study with ID ${studyId} not found`);
 		}
 
+		if (foundStudy.categoryId) {
+			const category = await lyricProvider.repositories.category.getCategoryById(foundStudy.categoryId);
+			if (category?.name != categoryName) {
+				throw new lyricProvider.utils.errors.BadRequest(
+					`Study with ID ${studyId} does not belong to category with name ${categoryName}`,
+				);
+			}
+		}
+
 		const { dictionary, category } = await lyricProvider.services.dictionary.register({
 			categoryName,
 			dictionaryName,
