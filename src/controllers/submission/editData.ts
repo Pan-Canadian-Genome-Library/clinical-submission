@@ -47,12 +47,6 @@ export const editData = validateRequest(editDataRequestSchema, async (req, res, 
 
 		const username = user.username;
 
-		logger.info(
-			`Edit Data Submission Request: categoryId '${categoryId}'`,
-			` organization '${organization}'`,
-			` files: '${files?.map((f) => f.originalname)}'`,
-		);
-
 		if (!files || files.length == 0) {
 			throw new lyricProvider.utils.errors.BadRequest(
 				'The "files" parameter is missing or empty. Please include files in the request for processing.',

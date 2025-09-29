@@ -35,7 +35,7 @@ const copyToken = () => {
 };
 
 const refreshToken = () => {
-	window.location.replace('/auth/redirect');
+	window.location.replace('/auth/login');
 };
 
 /**
@@ -67,10 +67,4 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	const refreshTokenButton = document.getElementById('refreshTokenButton');
 	refreshTokenButton.addEventListener('click', refreshToken);
-
-	const validTillElement = document.getElementById('validTilTime');
-	const validTillTime = Number(validTillElement.innerText);
-	validTillElement.innerText = '-';
-
-	renderExpireCountdown(validTillTime, validTillElement);
 });

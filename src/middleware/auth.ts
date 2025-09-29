@@ -20,6 +20,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { logger } from '@/common/logger.js';
+import type { PCGLRequestWithUser, PCGLUserSessionResult } from '@/common/types/auth.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { extractAccessTokenFromHeader, fetchUserData } from '@/external/pcglAuthZClient.js';
@@ -31,7 +32,7 @@ import { extractAccessTokenFromHeader, fetchUserData } from '@/external/pcglAuth
  */
 export const authMiddleware = () => {
 	const { enabled } = authConfig;
-	return async (req: Request, _: Response, next: NextFunction) => {
+	return async (req: PCGLRequestWithUser, _: Response, next: NextFunction) => {
 		try {
 			// If auth is disabled, then skip fetching user information
 			if (!enabled) {
@@ -56,24 +57,20 @@ export const authMiddleware = () => {
 };
 
 /**
- * Auth Middleware that checks specifically for admin user.
+ * Auth Middleware that checks specifically for lyric endpoints
  * Used for lyric endpoints, and is provided as a custom configuration in the appConfig of lyricProvider
  *
  * @param req request object
  * @returns
  */
-export const adminMiddleware = async (req: Request) => {
+export const lyricAuthMiddleware = async (req: Request): Promise<PCGLUserSessionResult> => {
 	const { enabled } = authConfig;
 
 	try {
 		// If auth is disabled, then skip fetching user information
 		if (!enabled) {
 			return {
-				user: {
-					username: `AUTH DISABLED`,
-					isAdmin: true,
-					allowedWriteOrganizations: [],
-				},
+				user: undefined,
 			};
 		}
 
@@ -87,13 +84,6 @@ export const adminMiddleware = async (req: Request) => {
 		}
 
 		const result = await fetchUserData(token);
-
-		if (!result.user?.isAdmin) {
-			return {
-				errorCode: 403,
-				errorMessage: 'Forbidden: You must be an admin to access this resource',
-			};
-		}
 
 		return result;
 	} catch (error) {

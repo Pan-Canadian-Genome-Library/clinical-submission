@@ -17,15 +17,54 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { UserSessionResult } from '@overture-stack/lyric';
 import { Request } from 'express';
 import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
-import { PCGLUserSessionResult, UserDataResponseErrorType } from '@/common/types/auth.js';
+import { type PCGLUserSession, PCGLUserSessionResult, UserDataResponseErrorType } from '@/common/types/auth.js';
 import { Groups, userDataResponseSchema, UserDataResponseSchemaType } from '@/common/validation/auth-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
+
+/**
+ * Store the service token fetched form AuthZ. This service token is used
+ * to identify the service that is requesting user information. It will expire
+ * periodically and require being fetched again.
+ */
+let serviceToken: string | undefined = undefined;
+
+/**
+ * Function to fetch AuthZ serviceToken to append to header requirement X-Service-Token
+ */
+const refreshAuthZServiceToken = async () => {
+	const { AUTHZ_ENDPOINT } = authConfig;
+
+	try {
+		const url = urlJoin(AUTHZ_ENDPOINT, `/service/${authConfig.service.id}/verify`);
+
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				service_uuid: authConfig.service.uuid,
+			}),
+		});
+		if (!response.ok) {
+			throw new lyricProvider.utils.errors.InternalServerError(
+				`Failed to fetch sevice token with status ${response.status}`,
+			);
+		}
+		const tokenResponse = await response.json();
+		serviceToken = tokenResponse.token;
+	} catch (error) {
+		logger.error(error, `[AUTHZ]: Something went wrong fetching authz service token.`);
+		throw new lyricProvider.utils.errors.InternalServerError(
+			`Bad request: Something went wrong fetching from authz service`,
+		);
+	}
+};
 
 /**
  *  Function to perform fetch requests to AUTHZ service
@@ -36,34 +75,63 @@ import { lyricProvider } from '@/core/provider.js';
  *
  */
 const fetchAuthZResource = async (resource: string, token: string, options?: RequestInit) => {
-	const { AUTHZ_ENDPOINT } = authConfig;
+	/**
+	 * Internal function that does the work of fetching the resource from AuthZ.
+	 * We will need to retry this if this is rejected due to an expired serviceToken.
+	 */
+	async function _fetchFromAuthZ() {
+		const { AUTHZ_ENDPOINT } = authConfig;
 
-	const url = urlJoin(AUTHZ_ENDPOINT, resource);
-	const headers = new Headers({
-		Authorization: `Bearer ${token}`,
-		'Content-Type': 'application/json',
-	});
+		const url = urlJoin(AUTHZ_ENDPOINT, resource);
+		const headers = new Headers({
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json',
+			'X-Service-ID': `${authConfig.service.id}`,
+			'X-Service-Token': `${serviceToken}`,
+		});
 
-	try {
-		return await fetch(url, { headers, ...options });
-	} catch (error) {
-		logger.error(`[AUTHZ]: Something went wrong fetching authz service. ${error}`);
-		throw new lyricProvider.utils.errors.InternalServerError(`Bad request: Something went wrong verifying user data`);
+		try {
+			return await fetch(url, { headers, ...options });
+		} catch (error) {
+			logger.error(`[AUTHZ]: Something went wrong fetching authz service. ${error}`);
+			throw new lyricProvider.utils.errors.InternalServerError(`Bad request: Something went wrong verifying user data`);
+		}
 	}
+
+	// If the serviceToken doesn't exist, then call refresh service token
+	if (serviceToken === undefined) {
+		await refreshAuthZServiceToken();
+	}
+
+	const firstResponse = await _fetchFromAuthZ();
+	// CASE-1: Bad bearer token
+	if (!firstResponse.ok && firstResponse.status === 401) {
+		logger.error(`[AUTHZ]: Bearer token is invalid`);
+
+		throw new Error('Something went wrong while verifying PCGL user account information, please try again later.');
+	}
+	// CASE-2: Bad serviceToken
+	// Trigger refresh service token and recall with the new token
+	if (!firstResponse.ok && firstResponse.status === 403) {
+		await refreshAuthZServiceToken();
+		return await _fetchFromAuthZ();
+	}
+
+	return firstResponse;
 };
 
 /**
- *	Fetches user data from authz. This user information is then return as a user object PCGLUserSessionResult or UserSessionResult
+ *	Fetches user data from authz. This user information is then return as a user object PCGLUserSessionResult
  * @param token Access token from Authz
  * @returns validated object of UserDataResponse
  */
-export const fetchUserData = async (token: string): Promise<PCGLUserSessionResult | UserSessionResult> => {
+export const fetchUserData = async (token: string): Promise<PCGLUserSessionResult> => {
 	const response = await fetchAuthZResource(`/user/me`, token);
 
 	if (!response.ok) {
 		const errorResponse: UserDataResponseErrorType = await response.json();
 
-		logger.error(`[AUTHZ]: Unable to verify user response from AUTHZ. ${errorResponse}`);
+		logger.error(`[AUTHZ]: Unable to verify user response from AUTHZ. ${JSON.stringify(errorResponse)}`);
 
 		const responseMessage =
 			'Something went wrong while verifying PCGL user account information, please try again later.';
@@ -102,6 +170,29 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 	};
 
 	return userTokenInfo;
+};
+
+/**
+ * Retrieves the list of organizations a user has read access to.
+ * If the user is an admin, it returns undefined to indicate access to all organizations.
+ * If no user information is provided, it also returns undefined to allow all access (assuming authentication is not enabled).
+ * Otherwise, it returns the list of organizations the user is allowed to read from.
+ * @param organization
+ * @param user
+ * @returns
+ */
+export const getUserReadableOrganizations = (user?: PCGLUserSession) => {
+	if (!user) {
+		// no user info, authentication is not enabled, allow all access
+		return undefined;
+	}
+
+	if (user.isAdmin) {
+		// admin has access to all organizations
+		return undefined;
+	}
+
+	return user.allowedReadOrganizations;
 };
 
 /**

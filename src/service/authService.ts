@@ -17,19 +17,28 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { z } from 'zod';
+import type { PCGLRequestWithUser } from '@/common/types/auth.js';
+import { authConfig } from '@/config/authConfig.js';
 
-export const iimConfigObject = z.object({
-	entityName: z.string(),
-	fieldName: z.string(),
-	prefix: z.string(),
-	internalId: z.string().optional(),
-	paddingLength: z.number().int().positive().default(8),
-	parentEntityName: z.string().optional(),
-	parentFieldName: z.string().optional(),
-	sequenceStart: z.number().int().positive().default(1),
-});
-export type IIMConfigObject = z.infer<typeof iimConfigObject>;
+/**
+ * Determines whether the incoming request should bypass authentication,
+ * based on the application's authentication configuration.
+ * Returns true if authentication should be bypassed, false otherwise.
+ * @param req
+ * @returns
+ */
+export const shouldBypassAuth = (req: PCGLRequestWithUser) => {
+	const { enabled, protectedMethods } = authConfig;
+	if (!enabled) {
+		// bypass auth if it's globally disabled
+		return true;
+	}
 
-export const iimConfig = z.array(iimConfigObject);
-export type IIMConfig = z.infer<typeof iimConfig>;
+	// Skip auth if configured protectedMethods is a valid array and does not include the request method
+	if (!protectedMethods.some((method) => method === req.method)) {
+		return true;
+	}
+
+	// Default: required auth
+	return false;
+};

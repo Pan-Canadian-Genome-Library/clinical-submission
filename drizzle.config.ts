@@ -19,6 +19,8 @@
 
 import { defineConfig } from 'drizzle-kit';
 
+import { schemaName } from './src/db/schemas/generate.js';
+
 const PG_DATABASE = process.env.DB_NAME;
 const PG_USER = process.env.DB_USER;
 const PG_PASSWORD = process.env.DB_PASSWORD;
@@ -26,8 +28,6 @@ const PG_HOST = process.env.DB_HOST;
 const PG_PORT = process.env.DB_PORT;
 
 // Name of the schema that the tables will write into
-
-export const schemaName = `pcgl`;
 
 export const connectionString = `postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DATABASE}`;
 

@@ -17,6 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import type { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
 import { z } from 'zod';
 
@@ -72,8 +73,8 @@ export type OIDCUserInfoResponse = z.infer<typeof oidcUserInfoResponseSchema>;
 export const oidcTokenResponseSchema = z
 	.object({
 		access_token: z.string(),
-		refresh_token: z.string().optional(),
-		refresh_token_iat: z.number().optional(),
+		refresh_token: z.string(),
+		refresh_token_iat: z.number(),
 		id_token: z.string(),
 	})
 	.or(
@@ -88,7 +89,7 @@ export interface OIDCCodeParams extends ParsedQs {
 	code: string;
 }
 
-export const OIDCCodeResponse: RequestValidation<object, OIDCCodeParams, string> = {
+export const OIDCCodeResponse: RequestValidation<object, OIDCCodeParams, ParamsDictionary> = {
 	query: z.object({
 		code: stringNotEmpty,
 	}),
