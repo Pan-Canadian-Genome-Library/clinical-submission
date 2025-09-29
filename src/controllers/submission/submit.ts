@@ -58,7 +58,7 @@ export const submit = validateRequest(submitRequestSchema, async (req, res, next
 			throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId - ${categoryId}.`);
 		}
 
-		const study = results[0]!;
+		const study = results[0];
 
 		if (study.category_id !== categoryId) {
 			throw new lyricProvider.utils.errors.BadRequest(
