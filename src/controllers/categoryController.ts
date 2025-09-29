@@ -80,7 +80,7 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 		if (linkedStudies.length == 0) {
 			logger.info('Category is misconfigured, no associated study');
 			throw new lyricProvider.utils.errors.NotFound(
-				`category is misconfigured, no associated Study ID - ${categoryId}.`,
+				`Category is misconfigured, no associated study ID - ${categoryId}.`,
 			);
 		}
 
