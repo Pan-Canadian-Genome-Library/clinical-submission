@@ -78,9 +78,11 @@ const getSubmissionsByCategory = validateRequest(
 				throw new lyricProvider.utils.errors.NotFound(`Submission not found`);
 			}
 
-			const org = submissionsResult.result[0]?.organization;
+			const retrievedOrg = submissionsResult.result[0]?.organization;
+			// User can provide an organization optionally, if they do, we check against that input instead of the returned org from submission
+			const orgToCheck = organization ?? retrievedOrg;
 
-			if (!org || !hasAllowedAccess(org, user.allowedReadOrganizations, user.isAdmin)) {
+			if (!orgToCheck || !hasAllowedAccess(orgToCheck, user.allowedReadOrganizations, user.isAdmin)) {
 				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 			}
 
