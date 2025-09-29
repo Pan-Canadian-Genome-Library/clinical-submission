@@ -3,6 +3,8 @@
     summary: Retrieve boolean if record exists
     tags:
       - Data
+    security:
+      - bearerAuth: []
     parameters:
       - name: externalId
         description: External Id which represents the PHI value. (e.g. a participant ID "ABC1234")
@@ -47,6 +49,8 @@
     summary: Retrieve Submitted Data for a specific Category
     tags:
       - Data
+    security:
+      - bearerAuth: []
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
       - name: entityName
@@ -84,6 +88,8 @@
     summary: Retrieve Submitted Data Record for a System ID
     tags:
       - Data
+    security:
+      - bearerAuth: []
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
       - name: systemId
@@ -116,6 +122,8 @@
     summary: Retrieve Submitted Data for a specific Category and Organization
     tags:
       - Data
+    security:
+      - bearerAuth: []
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
       - $ref: '#/components/parameters/path/Organization'
@@ -154,6 +162,8 @@
     summary: Retrieve Submitted Data filtered by search parameters provided in the request body
     tags:
       - Data
+    security:
+      - bearerAuth: []
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
       - $ref: '#/components/parameters/path/Organization'
@@ -249,6 +259,8 @@
     summary: Stream Submitted Data for a specific Category
     tags:
       - Data
+    security:
+      - bearerAuth: []
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
       - $ref: '#/components/parameters/query/View'
