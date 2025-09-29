@@ -20,6 +20,7 @@
 import { lyricProvider } from '@/core/provider.js';
 import { hasAllowedAccess } from '@/external/pcglAuthZClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
+import { shouldBypassAuth } from '@/service/authService.js';
 
 const getSubmissionById = validateRequest(
 	lyricProvider.utils.schema.submissionByIdRequestSchema,
@@ -34,14 +35,12 @@ const getSubmissionById = validateRequest(
 				throw new lyricProvider.utils.errors.NotFound(`Submission not found`);
 			}
 
-			// AUTH CHECK
-			if (!user) {
-				throw new lyricProvider.utils.errors.Forbidden('Unauthorized: Unable to authorize user');
-			}
-
 			const organization = submission?.organization;
 
-			if (!hasAllowedAccess(organization, user.allowedReadOrganizations, user.isAdmin)) {
+			if (
+				!shouldBypassAuth(req) &&
+				(!user || !hasAllowedAccess(organization, user.allowedReadOrganizations, user.isAdmin))
+			) {
 				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 			}
 
@@ -63,27 +62,32 @@ const getSubmissionsByCategory = validateRequest(
 			const pageSize = parseInt(String(req.query.pageSize)) || 20;
 			const user = req.user;
 
-			// AUTH CHECK
-			if (!user) {
+			const authEnabled = !shouldBypassAuth(req);
+
+			// Early check to prevent auth db action
+			if (authEnabled && !user) {
 				throw new lyricProvider.utils.errors.Forbidden('Unauthorized: Unable to authorize user');
 			}
 
 			const submissionsResult = await lyricProvider.services.submission.getSubmissionsByCategory(
 				categoryId,
 				{ page, pageSize },
-				{ onlyActive, username: user.username, organization },
+				{ onlyActive, username: user?.username ?? 'AUTH-DISABLED', organization },
 			);
 
 			if (submissionsResult.metadata.totalRecords === 0) {
 				throw new lyricProvider.utils.errors.NotFound(`Submission not found`);
 			}
 
-			const retrievedOrg = submissionsResult.result[0]?.organization;
-			// User can provide an organization optionally, if they do, we check against that input instead of the returned org from submission
-			const orgToCheck = organization ?? retrievedOrg;
+			// Auth enabled only logic
+			if (authEnabled) {
+				const retrievedOrg = submissionsResult.result[0]?.organization;
+				// User can provide an organization optionally, if they do, we check against that input instead of the returned org from submissionsResult
+				const orgToCheck = organization ?? retrievedOrg;
 
-			if (!orgToCheck || !hasAllowedAccess(orgToCheck, user.allowedReadOrganizations, user.isAdmin)) {
-				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
+				if (!orgToCheck || !user || !hasAllowedAccess(orgToCheck, user.allowedReadOrganizations, user.isAdmin)) {
+					throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
+				}
 			}
 
 			const response = {
