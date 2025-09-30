@@ -1,27 +1,33 @@
+/*
+ * Copyright (c) 2025 The Ontario Institute for Cancer Research. All rights reserved
+ *
+ * This program and the accompanying materials are made available under the terms of
+ * the GNU Affero General Public License v3.0. You should have received a copy of the
+ * GNU Affero General Public License along with this program.
+ *  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+ * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 import { BATCH_ERROR_TYPE, type BatchError } from '@overture-stack/lyric';
-import type { ParamsDictionary } from 'express-serve-static-core';
-import type { ParsedQs } from 'qs';
-import { z } from 'zod';
 
 import { logger } from '@/common/logger.js';
+import { editDataRequestSchema } from '@/common/validation/submit-validation.js';
 import { lyricProvider } from '@/core/provider.js';
+import { getDbInstance } from '@/db/index.js';
 import { hasAllowedAccess } from '@/external/pcglAuthZClient.js';
-import { type RequestValidation, validateRequest } from '@/middleware/requestValidation.js';
+import { validateRequest } from '@/middleware/requestValidation.js';
+import { studyService } from '@/service/studyService.js';
 import { prevalidateEditFile } from '@/submission/fileValidation.js';
 import { parseFileToRecords } from '@/submission/readFile.js';
-
-interface EditRequestPathParams extends ParamsDictionary {
-	categoryId: string;
-}
-
-export const editDataRequestSchema: RequestValidation<{ organization: string }, ParsedQs, EditRequestPathParams> = {
-	body: z.object({
-		organization: z.string(),
-	}),
-	pathParams: z.object({
-		categoryId: z.string(),
-	}),
-};
 
 const EDIT_DATA_SUBMISSION_STATUS = {
 	PROCESSING: 'PROCESSING',
@@ -34,6 +40,8 @@ export const editData = validateRequest(editDataRequestSchema, async (req, res, 
 		const categoryId = Number(req.params.categoryId);
 		const files = Array.isArray(req.files) ? req.files : [];
 		const organization = req.body.organization;
+		const db = getDbInstance();
+		const studySvc = studyService(db);
 
 		const user = req.user;
 
@@ -43,6 +51,19 @@ export const editData = validateRequest(editDataRequestSchema, async (req, res, 
 
 		if (!hasAllowedAccess(organization, user.allowedWriteOrganizations, user.isAdmin)) {
 			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
+		}
+
+		const results = await studySvc.getStudiesByCategoryId(categoryId);
+
+		if (!results?.length) {
+			throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${categoryId}".`);
+		}
+		const study = results[0];
+
+		if (study?.study_name !== organization) {
+			throw new lyricProvider.utils.errors.BadRequest(
+				`Study ${organization} is being submitted to the incorrect category.`,
+			);
 		}
 
 		const username = user.username;
