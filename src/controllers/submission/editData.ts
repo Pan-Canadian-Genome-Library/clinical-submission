@@ -61,9 +61,9 @@ export const editData = validateRequest(editDataRequestSchema, async (req, res, 
 
 		const study = results[0];
 
-		if (study?.category_id !== categoryId || study?.study_name !== organization) {
+		if (study?.study_name !== organization) {
 			throw new lyricProvider.utils.errors.BadRequest(
-				`Study with categoryId ${categoryId} is being submitted to the incorrect category or organization`,
+				`Study ${organization} is being submitted to the incorrect category.`,
 			);
 		}
 
