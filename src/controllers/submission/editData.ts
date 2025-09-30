@@ -55,10 +55,9 @@ export const editData = validateRequest(editDataRequestSchema, async (req, res, 
 
 		const results = await studySvc.getStudiesByCategoryId(categoryId);
 
-		if (!results) {
-			throw new lyricProvider.utils.errors.NotFound(`No Study with categoryId - ${categoryId} found.`);
+		if (!results?.length) {
+			throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${categoryId}".`);
 		}
-
 		const study = results[0];
 
 		if (study?.study_name !== organization) {
