@@ -48,7 +48,7 @@ const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, 
 			);
 		}
 
-		const linkedStudies = await studySvc.getStudiesByCategoryId(categoryId);
+		const linkedStudies = await studySvc.getStudiesByCategoryIds([categoryId]);
 		if (linkedStudies.length > 0) {
 			await studySvc.unlinkStudiesFromCategory(categoryId);
 		}
@@ -61,4 +61,74 @@ const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, 
 	}
 });
 
-export default { deleteCategoryById };
+const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res, next) => {
+	const categoryId = Number(req.params.categoryId);
+	const database = getDbInstance();
+	const categoryService = lyricProvider.services.category;
+	const studySvc = await studyService(database);
+
+	try {
+		const foundCategory = await categoryService.getDetails(categoryId);
+		if (!foundCategory) {
+			throw new lyricProvider.utils.errors.NotFound(`No Category with ID - ${categoryId} found.`);
+		}
+
+		const linkedStudies = await studySvc.getStudiesByCategoryIds([categoryId]);
+
+		if (linkedStudies.length === 0) {
+			logger.info('Category is misconfigured, no associated study');
+			throw new lyricProvider.utils.errors.NotFound(
+				`Category is misconfigured, no associated study ID - ${categoryId}.`,
+			);
+		}
+
+		const response = {
+			...foundCategory,
+			studyId: linkedStudies[0]?.study_id,
+		};
+
+		res.status(200).json(response);
+		return;
+	} catch (exception) {
+		logger.error(exception,'Error in deleteCategoryById');
+		next(exception);
+	}
+});
+
+const listAllCategories = validateRequest({}, async (req, res, next) => {
+	const categoryService = lyricProvider.services.category;
+	const database = getDbInstance();
+	const studySvc = await studyService(database);
+
+	try {
+		const categories = await categoryService.listAll();
+		if (!categories || categories.length === 0) {
+			return res.status(200).json([]);
+		}
+
+		const categoryIds = categories.map((c) => c.id);
+
+		const linkedStudies = await studySvc.getStudiesByCategoryIds(categoryIds);
+
+		const studiesByCategory: Record<number, string> = {};
+		for (const linkedStudy of linkedStudies) {
+			if (!linkedStudy.category_id) {
+				continue;
+			}
+			studiesByCategory[linkedStudy.category_id] = linkedStudy.study_id;
+		}
+
+		const response = categories.map((cat) => ({
+			...cat,
+			studyId: studiesByCategory[cat.id],
+		}));
+
+		res.status(200).json(response);
+		return;
+	} catch (exception) {
+		logger.error(exception, 'Error in listAllCategories');
+		next(exception);
+	}
+});
+
+export default { deleteCategoryById, getCategoryById, listAllCategories };

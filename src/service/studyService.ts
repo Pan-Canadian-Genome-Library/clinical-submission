@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { asc, desc, eq, sql } from 'drizzle-orm';
+import { asc, desc, eq, inArray, sql } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
 import type { StudyDTO } from '@/common/types/study.js';
@@ -158,6 +158,16 @@ const studyService = (db: PostgresDb) => ({
 			return await db.select().from(study).where(eq(study.category_id, categoryId));
 		} catch (error) {
 			logger.error(error, 'Error at getStudiesByCategoryId service');
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'Something went wrong while fetching studies for category. Please try again later.',
+			);
+		}
+	},
+	getStudiesByCategoryIds: async (categoryIds: number[]) => {
+		try {
+			return await db.select().from(study).where(inArray(study.category_id, categoryIds));
+		} catch (error) {
+			logger.error(error,'Error at getStudiesByCategoryIds service');
 			throw new lyricProvider.utils.errors.InternalServerError(
 				'Something went wrong while fetching studies for category. Please try again later.',
 			);
