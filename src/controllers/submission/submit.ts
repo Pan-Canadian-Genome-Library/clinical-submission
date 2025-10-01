@@ -18,29 +18,16 @@
  */
 
 import { BATCH_ERROR_TYPE, type BatchError, type EntityData } from '@overture-stack/lyric';
-import type { ParamsDictionary } from 'express-serve-static-core';
-import type { ParsedQs } from 'qs';
-import { z } from 'zod';
 
 import { logger } from '@/common/logger.js';
+import { submitRequestSchema } from '@/common/validation/submit-validation.js';
 import { lyricProvider } from '@/core/provider.js';
+import { getDbInstance } from '@/db/index.js';
 import { hasAllowedAccess } from '@/external/pcglAuthZClient.js';
-import { type RequestValidation, validateRequest } from '@/middleware/requestValidation.js';
+import { validateRequest } from '@/middleware/requestValidation.js';
+import { studyService } from '@/service/studyService.js';
 import { prevalidateNewDataFile } from '@/submission/fileValidation.js';
 import { parseFileToRecords } from '@/submission/readFile.js';
-
-interface SubmitRequestPathParams extends ParamsDictionary {
-	categoryId: string;
-}
-
-export const submitRequestSchema: RequestValidation<{ organization: string }, ParsedQs, SubmitRequestPathParams> = {
-	body: z.object({
-		organization: z.string(),
-	}),
-	pathParams: z.object({
-		categoryId: z.string(),
-	}),
-};
 
 const CREATE_SUBMISSION_STATUS = {
 	PROCESSING: 'PROCESSING',
@@ -54,6 +41,8 @@ export const submit = validateRequest(submitRequestSchema, async (req, res, next
 		const files = Array.isArray(req.files) ? req.files : [];
 		const organization = req.body.organization;
 		const user = req.user;
+		const db = getDbInstance();
+		const studySvc = studyService(db);
 
 		if (!user) {
 			throw new lyricProvider.utils.errors.Forbidden('Unauthorized: Unable to authorize user');
@@ -61,6 +50,20 @@ export const submit = validateRequest(submitRequestSchema, async (req, res, next
 
 		if (!hasAllowedAccess(organization, user.allowedWriteOrganizations, user.isAdmin)) {
 			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
+		}
+
+		const results = await studySvc.getStudiesByCategoryId(categoryId);
+
+		if (!results?.length) {
+			throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId - ${categoryId}.`);
+		}
+
+		const study = results[0];
+
+		if (study?.study_name !== organization) {
+			throw new lyricProvider.utils.errors.BadRequest(
+				`Study ${organization} is being submitted to the incorrect category.`,
+			);
 		}
 
 		const username = user.username;

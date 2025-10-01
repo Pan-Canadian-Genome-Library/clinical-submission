@@ -17,42 +17,46 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { study } from '@/db/schemas/studiesSchema.js';
+import type { ParamsDictionary } from 'express-serve-static-core';
+import type { ParsedQs } from 'qs';
+import { z } from 'zod';
 
-export const StudyStatus = {
-	ONGOING: 'ONGOING',
-	COMPLETED: 'COMPLETED',
-} as const;
+import { type RequestValidation } from '@/middleware/requestValidation.js';
 
-export type StudyStatusValues = (typeof StudyStatus)[keyof typeof StudyStatus];
+interface SubmitRequestPathParams extends ParamsDictionary {
+	categoryId: string;
+}
 
-export const StudyContext = {
-	CLINICAL: 'CLINICAL',
-	RESEARCH: 'RESEARCH',
-} as const;
-
-export type StudyContextValues = (typeof StudyContext)[keyof typeof StudyContext];
-
-export type StudyDTO = {
-	studyId: string;
-	dacId: string;
-	studyName: string;
-	studyDescription: string;
-	programName?: string | null;
-	keywords?: string[] | null;
-	status: StudyStatusValues;
-	context: StudyContextValues;
-	domain: string[];
-	participantCriteria?: string | null;
-	principalInvestigators: string[];
-	leadOrganizations: string[];
-	collaborators?: string[] | null;
-	fundingSources: string[];
-	publicationLinks?: string[] | null;
-	createdAt: Date;
-	updatedAt?: Date | null;
-	categoryId?: number | null;
+export const submitRequestSchema: RequestValidation<
+	{
+		organization: string;
+	},
+	ParsedQs,
+	SubmitRequestPathParams
+> = {
+	body: z.object({
+		organization: z.string(),
+	}),
+	pathParams: z.object({
+		categoryId: z.string(),
+	}),
 };
 
-export type StudyRecord = typeof study.$inferSelect;
-export type StudyModel = typeof study.$inferInsert;
+interface EditRequestPathParams extends ParamsDictionary {
+	categoryId: string;
+}
+
+export const editDataRequestSchema: RequestValidation<
+	{
+		organization: string;
+	},
+	ParsedQs,
+	EditRequestPathParams
+> = {
+	body: z.object({
+		organization: z.string(),
+	}),
+	pathParams: z.object({
+		categoryId: z.string(),
+	}),
+};

@@ -17,42 +17,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { study } from '@/db/schemas/studiesSchema.js';
+import express, { json, Router, urlencoded } from 'express';
 
-export const StudyStatus = {
-	ONGOING: 'ONGOING',
-	COMPLETED: 'COMPLETED',
-} as const;
+import categoryController from '@/controllers/categoryController.js';
+import { lyricProvider } from '@/core/provider.js';
+import { authMiddleware } from '@/middleware/auth.js';
 
-export type StudyStatusValues = (typeof StudyStatus)[keyof typeof StudyStatus];
-
-export const StudyContext = {
-	CLINICAL: 'CLINICAL',
-	RESEARCH: 'RESEARCH',
-} as const;
-
-export type StudyContextValues = (typeof StudyContext)[keyof typeof StudyContext];
-
-export type StudyDTO = {
-	studyId: string;
-	dacId: string;
-	studyName: string;
-	studyDescription: string;
-	programName?: string | null;
-	keywords?: string[] | null;
-	status: StudyStatusValues;
-	context: StudyContextValues;
-	domain: string[];
-	participantCriteria?: string | null;
-	principalInvestigators: string[];
-	leadOrganizations: string[];
-	collaborators?: string[] | null;
-	fundingSources: string[];
-	publicationLinks?: string[] | null;
-	createdAt: Date;
-	updatedAt?: Date | null;
-	categoryId?: number | null;
-};
-
-export type StudyRecord = typeof study.$inferSelect;
-export type StudyModel = typeof study.$inferInsert;
+export const categoryRouter: Router = (() => {
+	const router = express.Router();
+	router.use(json());
+	router.use(urlencoded({ extended: false }));
+	router.delete('/:categoryId', authMiddleware(), categoryController.deleteCategoryById);
+	router.use('', lyricProvider.routers.category);
+	return router;
+})();
