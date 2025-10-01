@@ -89,8 +89,9 @@ const getCategoryById = validateRequest(
 			const pageSize = parseInt(String(req.query.pageSize)) || defaultPageSize;
 			const view = convertToViewType(req.query.view) || defaultView;
 			const user = req.user;
+			const authEnabled = !shouldBypassAuth(req);
 
-			if (!shouldBypassAuth(req) && !user) {
+			if (authEnabled && !user) {
 				throw new lyricProvider.utils.errors.Forbidden(`User is not authorized to read submitted data`);
 			}
 
@@ -124,6 +125,8 @@ const getCategoryBySystemId = validateRequest(
 
 			const user = req.user;
 
+			const authEnabled = !shouldBypassAuth(req);
+
 			// Send submission data, organized by entity.
 			const submitResult = await lyricProvider.services.submittedData.getSubmittedDataBySystemId(categoryId, systemId, {
 				view,
@@ -134,10 +137,7 @@ const getCategoryBySystemId = validateRequest(
 				return;
 			}
 
-			if (
-				!shouldBypassAuth(req) &&
-				(!user || !hasAllowedAccess(submitResult.result.organization, user.allowedReadOrganizations, user.isAdmin))
-			) {
+			if (authEnabled && !hasAllowedAccess(submitResult.result.organization, 'READ', user)) {
 				throw new lyricProvider.utils.errors.Forbidden(
 					`User is not authorized to read submitted data for organization '${submitResult.result.organization}'`,
 				);
@@ -168,10 +168,9 @@ const getCategoryByOrganization = validateRequest(
 
 			const user = req.user;
 
-			if (
-				!shouldBypassAuth(req) &&
-				(!user || !hasAllowedAccess(organization, user.allowedReadOrganizations, user.isAdmin))
-			) {
+			const authEnabled = !shouldBypassAuth(req);
+
+			if (authEnabled && !hasAllowedAccess(organization, 'READ', user)) {
 				throw new lyricProvider.utils.errors.Forbidden(
 					`User is not authorized to read submitted data for organization '${organization}'`,
 				);
@@ -217,11 +216,9 @@ const getSubmittedDataByQuery = validateRequest(
 			const view = convertToViewType(String(req.query.view)) || defaultView;
 
 			const user = req.user;
+			const authEnabled = !shouldBypassAuth(req);
 
-			if (
-				!shouldBypassAuth(req) &&
-				(!user || !hasAllowedAccess(organization, user.allowedReadOrganizations, user.isAdmin))
-			) {
+			if (authEnabled && !hasAllowedAccess(organization, 'READ', user)) {
 				throw new lyricProvider.utils.errors.Forbidden(
 					`User is not authorized to read submitted data for organization '${organization}'`,
 				);

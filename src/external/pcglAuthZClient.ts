@@ -21,7 +21,13 @@ import { Request } from 'express';
 import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
-import { type PCGLUserSession, PCGLUserSessionResult, UserDataResponseErrorType } from '@/common/types/auth.js';
+import {
+	ActionIDs,
+	ActionIDsValues,
+	type PCGLUserSession,
+	PCGLUserSessionResult,
+	UserDataResponseErrorType,
+} from '@/common/types/auth.js';
 import { Groups, userDataResponseSchema, UserDataResponseSchemaType } from '@/common/validation/auth-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
@@ -201,15 +207,26 @@ export const getUserReadableOrganizations = (user?: PCGLUserSession) => {
  * @param userStudies An array of user studies
  * @returns True or false depending if the user has access to the study
  */
-export const hasAllowedAccess = (study: string, userStudies: string[], isAdmin: boolean): boolean => {
+export const hasAllowedAccess = (study: string, action: ActionIDsValues, user?: PCGLUserSession): boolean => {
 	const { enabled } = authConfig;
 
 	// If auth is disabled or if the user is an admin, skip all auth steps
-	if (!enabled || isAdmin) {
+	if (!enabled || user?.isAdmin) {
 		return true;
 	}
 
-	return userStudies.some((currentStudy) => currentStudy === study);
+	if (user === undefined) {
+		return false;
+	}
+
+	switch (action) {
+		case ActionIDs.READ:
+			return user.allowedReadOrganizations.some((currentStudy) => currentStudy === study);
+		case ActionIDs.WRITE:
+			return user.allowedWriteOrganizations.some((currentStudy) => currentStudy === study);
+		default:
+			return user.allowedWriteOrganizations.some((currentStudy) => currentStudy === study);
+	}
 };
 
 /**

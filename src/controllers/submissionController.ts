@@ -43,14 +43,11 @@ const editData = validateRequest(editDataRequestSchema, async (req, res, next) =
 		const organization = req.body.organization;
 		const db = getDbInstance();
 		const studySvc = studyService(db);
+		const authEnabled = !shouldBypassAuth(req);
 
 		const user = req.user;
 
-		if (!user) {
-			throw new lyricProvider.utils.errors.Forbidden('Unauthorized: Unable to authorize user');
-		}
-
-		if (!hasAllowedAccess(organization, user.allowedWriteOrganizations, user.isAdmin)) {
+		if (authEnabled && !hasAllowedAccess(organization, 'WRITE', user)) {
 			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 		}
 
@@ -67,7 +64,7 @@ const editData = validateRequest(editDataRequestSchema, async (req, res, next) =
 			);
 		}
 
-		const username = user.username;
+		const username = user?.username;
 
 		if (!files || files.length == 0) {
 			throw new lyricProvider.utils.errors.BadRequest(
@@ -113,7 +110,7 @@ const editData = validateRequest(editDataRequestSchema, async (req, res, next) =
 					entityName,
 					categoryId,
 					organization,
-					username,
+					username: username ?? '',
 				});
 
 				submissionId = uploadResult.submissionId;
@@ -161,12 +158,9 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 		const user = req.user;
 		const db = getDbInstance();
 		const studySvc = studyService(db);
+		const authEnabled = !shouldBypassAuth(req);
 
-		if (!user) {
-			throw new lyricProvider.utils.errors.Forbidden('Unauthorized: Unable to authorize user');
-		}
-
-		if (!hasAllowedAccess(organization, user.allowedWriteOrganizations, user.isAdmin)) {
+		if (authEnabled && !hasAllowedAccess(organization, 'WRITE', user)) {
 			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 		}
 
@@ -184,7 +178,7 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 			);
 		}
 
-		const username = user.username;
+		const username = user?.username;
 
 		logger.info(
 			`Upload Submission Request: categoryId '${categoryId}'` +
@@ -243,7 +237,7 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 			data: entityData,
 			categoryId,
 			organization,
-			username,
+			username: username ?? '',
 		});
 
 		// Entity names that are sent for Submission
@@ -294,7 +288,7 @@ const getSubmissionById = validateRequest(
 
 			const organization = submission?.organization;
 
-			if (authEnabled && (!user || !hasAllowedAccess(organization, user.allowedReadOrganizations, user.isAdmin))) {
+			if (authEnabled && !hasAllowedAccess(organization, 'READ', user)) {
 				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 			}
 
@@ -344,7 +338,7 @@ const getSubmissionsByCategory = validateRequest(
 				// User can provide an organization optionally, if they do, we check against that input instead of the returned org from submissionsResult
 				const orgToCheck = organization ?? retrievedOrg;
 
-				if (!orgToCheck || !user || !hasAllowedAccess(orgToCheck, user.allowedReadOrganizations, user.isAdmin)) {
+				if (authEnabled && !hasAllowedAccess(orgToCheck || '', 'READ', user)) {
 					throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 				}
 			}
