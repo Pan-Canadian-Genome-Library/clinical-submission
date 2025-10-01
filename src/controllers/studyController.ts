@@ -36,6 +36,7 @@ import {
 	retrieveIIMConfiguration,
 } from '@/internal/id-manager/utils.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
+import { shouldBypassAuth } from '@/service/authService.js';
 import { convertToRecordFromStudyDTO } from '@/service/dtoConversion.js';
 import iimService from '@/service/idManagerService.js';
 import { studyService } from '@/service/studyService.js';
@@ -79,8 +80,10 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 	const iimRepo = iimService(db);
 	const user = req.user;
 
+	const authEnabled = !shouldBypassAuth(req);
+
 	try {
-		if (!user?.isAdmin) {
+		if (!user?.isAdmin || authEnabled) {
 			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 		}
 
@@ -161,8 +164,10 @@ export const deleteStudyById = validateRequest(getOrDeleteStudyByID, async (req,
 	const studyRepo = studyService(db);
 	const user = req.user;
 
+	const authEnabled = !shouldBypassAuth(req);
+
 	try {
-		if (!user?.isAdmin) {
+		if (!user?.isAdmin || authEnabled) {
 			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 		}
 

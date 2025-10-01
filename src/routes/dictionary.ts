@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import express, { Router, json, urlencoded } from 'express';
+import express, { json, Router, urlencoded } from 'express';
 
 import dictionaryController from '@/controllers/dictionaryController.js';
 import { lyricProvider } from '@/core/provider.js';
