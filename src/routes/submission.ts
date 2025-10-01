@@ -18,6 +18,8 @@ export const submissionRouter: Router = (() => {
 	router.get('/category/:categoryId', authMiddleware(), getSubmissionController.getSubmissionsByCategory);
 	router.post('/category/:categoryId/data', authMiddleware(), upload.array('files'), submit);
 	router.put('/category/:categoryId/data', authMiddleware(), upload.array('files'), editData);
+	router.delete('/:submissionId', authMiddleware(), getSubmissionController.deleteSubmissionById);
+	router.delete('/:submissionId/:actionType', authMiddleware(), getSubmissionController.deleteEntityName);
 
 	router.use('', lyricProvider.routers.submission);
 

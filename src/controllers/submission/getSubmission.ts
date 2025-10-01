@@ -117,12 +117,13 @@ const getSubmissionsByCategory = validateRequest(
 );
 
 /**
- * Custom lyric Delete Submission by Id
+ * Custom Lyric Delete Active Submission by Id
  * @extends lyricProvider.controllers.submission.delete
  * @description Extends functionality of lyric delete submissions by adding
  * an additional auth check if the user attempting the delete action is the same user who create the submission regardless of user belongs to said organization
  */
-const deleteSubmissionsById = validateRequest(
+// Note: I tried to name this controller the same as lyrics (delete) but typescript complains cause strict mode
+const deleteSubmissionById = validateRequest(
 	lyricProvider.utils.schema.submissionDeleteRequestSchema,
 	async (req, res, next) => {
 		try {
@@ -147,4 +148,37 @@ const deleteSubmissionsById = validateRequest(
 		}
 	},
 );
-export default { getSubmissionById, getSubmissionsByCategory, deleteSubmissionsById };
+
+/**
+ * Custom Lyric Delete Active Submission by EntityName
+ * @extends lyricProvider.controllers.submission.deleteEntityName
+ * @description Extends functionality of lyric delete submissions by adding
+ * an additional auth check if the user attempting the delete action is the same user who create the submission regardless of user belongs to said organization
+ */
+const deleteEntityName = validateRequest(
+	lyricProvider.utils.schema.submissionDeleteEntityNameRequestSchema,
+	async (req, res, next) => {
+		try {
+			const submissionId = Number(req.params.submissionId);
+			const user = req.user;
+			const authEnabled = !shouldBypassAuth(req);
+
+			const submission = await lyricProvider.services.submission.getSubmissionById(submissionId);
+			if (!submission) {
+				throw new lyricProvider.utils.errors.BadRequest(`Submission '${submissionId}' not found`);
+			}
+
+			if (authEnabled && user?.username !== submission?.createdBy) {
+				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to delete this resource');
+			}
+
+			const response = lyricProvider.controllers.submission.deleteEntityName(req, res, next);
+
+			return res.status(200).send(response);
+		} catch (error) {
+			next(error);
+		}
+	},
+);
+
+export default { getSubmissionById, getSubmissionsByCategory, deleteSubmissionById, deleteEntityName };
