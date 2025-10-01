@@ -22,6 +22,11 @@ import { hasAllowedAccess } from '@/external/pcglAuthZClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import { shouldBypassAuth } from '@/service/authService.js';
 
+/**
+ * Custom lyric Get Submission by Category Id
+ * @override lyricProvider.controllers.submission.getSubmissionById
+ * @description Overrides functionality of lyric getSubmissionById and implements auth
+ */
 const getSubmissionById = validateRequest(
 	lyricProvider.utils.schema.submissionByIdRequestSchema,
 	async (req, res, next) => {
@@ -50,6 +55,11 @@ const getSubmissionById = validateRequest(
 	},
 );
 
+/**
+ * Custom lyric Get Submission by Category Id
+ * @override lyricProvider.controllers.submission.getSubmissionsByCategory
+ * @description Overrides functionality of lyric getSubmissionsByCategory and implements auth
+ */
 const getSubmissionsByCategory = validateRequest(
 	lyricProvider.utils.schema.submissionsByCategoryRequestSchema,
 	async (req, res, next) => {
@@ -106,4 +116,35 @@ const getSubmissionsByCategory = validateRequest(
 	},
 );
 
-export default { getSubmissionById, getSubmissionsByCategory };
+/**
+ * Custom lyric Delete Submission by Id
+ * @extends lyricProvider.controllers.submission.delete
+ * @description Extends functionality of lyric delete submissions by adding
+ * an additional auth check if the user attempting the delete action is the same user who create the submission regardless of user belongs to said organization
+ */
+const deleteSubmissionsById = validateRequest(
+	lyricProvider.utils.schema.submissionDeleteRequestSchema,
+	async (req, res, next) => {
+		try {
+			const submissionId = Number(req.params.submissionId);
+			const user = req.user;
+			const authEnabled = !shouldBypassAuth(req);
+
+			const submission = await lyricProvider.services.submission.getSubmissionById(submissionId);
+			if (!submission) {
+				throw new lyricProvider.utils.errors.BadRequest(`Submission '${submissionId}' not found`);
+			}
+
+			if (authEnabled && user?.username !== submission?.createdBy) {
+				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to delete this resource');
+			}
+
+			const response = lyricProvider.controllers.submission.delete(req, res, next);
+
+			return res.status(200).send(response);
+		} catch (error) {
+			next(error);
+		}
+	},
+);
+export default { getSubmissionById, getSubmissionsByCategory, deleteSubmissionsById };
