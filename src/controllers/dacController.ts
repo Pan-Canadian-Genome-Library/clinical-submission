@@ -28,6 +28,7 @@ import {
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
+import { shouldBypassAuth } from '@/service/authService.js';
 import dacService from '@/service/dacService.js';
 
 const getAllDac = validateRequest(getAllDacData, async (req, res, next) => {
@@ -79,8 +80,9 @@ const createDac = validateRequest(createDacData, async (req, res, next) => {
 
 		const dacFields = req.body;
 		const user = req.user;
+		const authEnabled = !shouldBypassAuth(req);
 
-		if (!user?.isAdmin) {
+		if (authEnabled && !user?.isAdmin) {
 			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 		}
 
@@ -101,7 +103,9 @@ const deleteDac = validateRequest(deleteDacByIdData, async (req, res, next) => {
 		const dacId = req.params.dacId;
 		const user = req.user;
 
-		if (!user?.isAdmin) {
+		const authEnabled = !shouldBypassAuth(req);
+
+		if (authEnabled && !user?.isAdmin) {
 			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 		}
 

@@ -83,7 +83,7 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 	const authEnabled = !shouldBypassAuth(req);
 
 	try {
-		if (!user?.isAdmin || authEnabled) {
+		if (authEnabled && !user?.isAdmin) {
 			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 		}
 
@@ -167,7 +167,7 @@ export const deleteStudyById = validateRequest(getOrDeleteStudyByID, async (req,
 	const authEnabled = !shouldBypassAuth(req);
 
 	try {
-		if (!user?.isAdmin || authEnabled) {
+		if (authEnabled && !user?.isAdmin) {
 			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 		}
 
