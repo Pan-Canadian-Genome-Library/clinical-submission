@@ -89,7 +89,6 @@ app.use('/auth', authRouter);
 
 // Lyric Routes
 app.use('/audit', lyricProvider.routers.audit);
-app.use('/data', lyricProvider.routers.submittedData);
 app.use('/validator', lyricProvider.routers.validator);
 
 /**
