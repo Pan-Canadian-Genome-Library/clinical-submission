@@ -10,7 +10,6 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"@ant-design/icons": "5.x",
 		"@overture-stack/lectern-ui": "0.0.1-beta.0",
 		"react": "^19.1.1",
 		"react-dom": "^19.1.1"

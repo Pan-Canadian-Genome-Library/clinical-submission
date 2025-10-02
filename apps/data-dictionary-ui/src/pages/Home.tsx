@@ -21,23 +21,13 @@ import HeaderPCGL from '@/components/Header';
 import '../styles/App.css';
 import { DictionaryTable } from '@overture-stack/lectern-ui';
 import Footer from '@/components/Footer';
-import { UpCircleOutlined } from '@ant-design/icons';
 
 function Home() {
-	const scrollToTop = () => {
-		window.scrollTo(0, 0);
-	};
 	return (
 		<div className="container">
 			<HeaderPCGL />
 			<main className="wrapper">
 				<DictionaryTable lecternUrl={__API_PROXY_PATH__} dictionaryName={__BASE_DICTIONARY_SCHEMA__} />
-
-				<div className="scroll">
-					<button onClick={scrollToTop}>
-						<UpCircleOutlined />
-					</button>
-				</div>
 			</main>
 			<Footer />
 		</div>
