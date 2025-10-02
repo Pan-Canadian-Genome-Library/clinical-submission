@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * */
 
-import { UserSession, UserSessionResult } from '@overture-stack/lyric';
+import { type RequestWithUser, UserSession, UserSessionResult } from '@overture-stack/lyric';
 
 export const ActionIDs = {
 	WRITE: 'WRITE',
@@ -34,15 +34,15 @@ export type UserDataResponseErrorType = {
 	error: string;
 };
 
-// Lyrics UserSessionResult's UserSession needs to be extended to include groups
-export type PCGLUserSessionResult = Omit<UserSessionResult, 'user'> & {
-	user?: UserSession & UserSessionExtended;
-};
-
 export type UserSessionExtended = {
 	groups: string[];
-	allowedReadOrganizations: string[];
 };
+
+export type PCGLUserSession = UserSession & UserSessionExtended;
+
+export type PCGLRequestWithUser = RequestWithUser<PCGLUserSession>;
+
+export type PCGLUserSessionResult = UserSessionResult<PCGLUserSession>;
 
 /**
  * JWT Token returned by CILogon on successful authentication. Note that some

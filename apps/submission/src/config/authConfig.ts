@@ -40,6 +40,8 @@ const authConfigSchema = z.object({
 	AUTH_CLIENT_SECRET: z.string(),
 	AUTHZ_GROUP_ADMIN: z.string(),
 	AUTHZ_GROUP_SUBMITTERS: z.string(),
+	AUTHZ_SERVICE_ID: z.string(),
+	AUTHZ_SERVICE_UUID: z.string(),
 });
 
 const parseResult = authConfigSchema.safeParse(process.env);
@@ -50,13 +52,18 @@ if (!parseResult.success) {
 
 export const authConfig = {
 	...parseResult.data,
+	enabled,
+	protectedMethods: env.AUTH_PROTECT_METHODS,
 	groups: {
 		admin: parseResult.data.AUTHZ_GROUP_ADMIN,
 		submitter: parseResult.data.AUTHZ_GROUP_SUBMITTERS,
 	},
-	enabled,
 	loginRedirectPath: urlJoin(env.API_HOST, '/auth/token'),
 	logoutRedirectPath: urlJoin(env.API_HOST, '/api-docs/'),
+	service: {
+		id: parseResult.data.AUTHZ_SERVICE_ID,
+		uuid: parseResult.data.AUTHZ_SERVICE_UUID,
+	},
 };
 
 export type AuthConfig = typeof authConfig;

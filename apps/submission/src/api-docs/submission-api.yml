@@ -10,6 +10,8 @@
         in: path
         type: string
         required: true
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Submission details
@@ -120,6 +122,8 @@
       - $ref: '#/components/parameters/query/PageSize'
       - $ref: '#/components/parameters/query/OnlyActive'
       - $ref: '#/components/parameters/query/OrganizationFilter'
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Submissions details
@@ -187,11 +191,17 @@
             properties:
               files:
                 type: array
+                description: >
+                  One or multiple files containing the data to insert.  
+                  Each file must be based on the template for the corresponding entity  
+                  (e.g., **participant.csv**).
                 items:
                   type: string
                   format: binary
               organization:
                 type: string
+                description: >
+                  Organization the Submission belongs to.
             required:
               - files
               - organization
@@ -228,11 +238,21 @@
             properties:
               files:
                 type: array
+                description: >
+                  One or multiple files containing the data to edit.  
+                  Each file must be based on the template for the corresponding entity  
+                  (e.g., **participant.csv**).  
+
+                  In addition to the template fields, each file must include an extra column named  
+                  **systemId**, which represents the unique system identifier used to match and update  
+                  existing records in the system.
                 items:
                   type: string
                   format: binary
               organization:
                 type: string
+                description: >
+                  Organization the Submission belongs to.
             required:
               - files
               - organization

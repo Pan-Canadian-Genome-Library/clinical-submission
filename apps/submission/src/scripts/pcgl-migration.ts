@@ -41,6 +41,6 @@ try {
 		migrationsSchema: 'pcgl_drizzle',
 	});
 } catch (error) {
-	logger.error(`Error processing PCGL migrations`, error);
+	logger.error(error, `Error processing PCGL migrations`);
 	process.exit(1);
 }

@@ -17,42 +17,30 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { study } from '@/db/schemas/studiesSchema.js';
+import express, { json, Router, urlencoded } from 'express';
 
-export const StudyStatus = {
-	ONGOING: 'ONGOING',
-	COMPLETED: 'COMPLETED',
-} as const;
+import dataController from '@/controllers/dataController.js';
+import { lyricProvider } from '@/core/provider.js';
+import { authMiddleware } from '@/middleware/auth.js';
 
-export type StudyStatusValues = (typeof StudyStatus)[keyof typeof StudyStatus];
+export const dataRouter: Router = (() => {
+	const router = express.Router();
+	router.use(json());
+	router.use(urlencoded({ extended: false }));
 
-export const StudyContext = {
-	CLINICAL: 'CLINICAL',
-	RESEARCH: 'RESEARCH',
-} as const;
+	router.use(authMiddleware());
 
-export type StudyContextValues = (typeof StudyContext)[keyof typeof StudyContext];
+	// PCGL specific endpoint
+	router.get('/entity/:entityName/:externalId/exists', dataController.getDataIdExists);
 
-export type StudyDTO = {
-	studyId: string;
-	dacId: string;
-	studyName: string;
-	studyDescription: string;
-	programName?: string | null;
-	keywords?: string[] | null;
-	status: StudyStatusValues;
-	context: StudyContextValues;
-	domain: string[];
-	participantCriteria?: string | null;
-	principalInvestigators: string[];
-	leadOrganizations: string[];
-	collaborators?: string[] | null;
-	fundingSources: string[];
-	publicationLinks?: string[] | null;
-	createdAt: Date;
-	updatedAt?: Date | null;
-	categoryId?: number | null;
-};
+	// Lyric endpoints extended
+	router.get('/category/:categoryId', dataController.getCategoryById);
+	router.get('/category/:categoryId/id/:systemId', dataController.getCategoryBySystemId);
+	router.get('/category/:categoryId/organization/:organization', dataController.getCategoryByOrganization);
+	router.post('/category/:categoryId/organization/:organization/query', dataController.getSubmittedDataByQuery);
+	router.get('/category/:categoryId/stream', dataController.getSubmittedDataStream);
 
-export type StudyRecord = typeof study.$inferSelect;
-export type StudyModel = typeof study.$inferInsert;
+	router.use('', lyricProvider.routers.submittedData);
+
+	return router;
+})();

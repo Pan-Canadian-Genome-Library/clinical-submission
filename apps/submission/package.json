@@ -1,15 +1,12 @@
 {
-	"name": "@clinical-submission/submission",
+	"name": "clinical-submission",
 	"version": "0.2.0",
-	"description": "",
-	"main": "dist/index.js",
 	"private": true,
 	"author": "Leonardo Rivera <lrivera@oicr.com>",
 	"license": "AGPL-3.0-or-later",
 	"type": "module",
-	"aliases": {
-		"@": "src"
-	},
+	"description": "",
+	"main": "dist/index.js",
 	"scripts": {
 		"studio": "NODE_OPTIONS='--import tsx' drizzle-kit studio",
 		"db:generate": "NODE_OPTIONS='--import tsx' drizzle-kit generate",
@@ -23,15 +20,14 @@
 		"lint": "eslint .",
 		"lint:fix": "eslint --fix .",
 		"migrate:db:dev": "tsx src/scripts/migration.ts && pnpm db:migrate",
-		"dev": "pnpm migrate:db:dev && tsx watch --clear-screen=false src/index.ts | pino-pretty",
-		"start:dev:all": "pnpm migrate:db:dev && tsx watch --clear-screen=false src/index.ts | pino-pretty",
+		"start:dev": "pnpm migrate:db:dev && tsx watch --clear-screen=false src/index.ts | pino-pretty",
 		"\n========  Prod environment (compiled) =======": "",
 		"migrate:pcgl:db:prod": "node --import=./register.js src/scripts/pcgl-migration.js",
 		"migrate:db:prod": "node --import=./register.js src/scripts/migration.js",
 		"start:prod": "pnpm migrate:db:prod && pnpm migrate:pcgl:db:prod && NODE_ENV=production node --import=./register.js src/index.js"
 	},
 	"dependencies": {
-		"@overture-stack/lyric": "^0.11.0",
+		"@overture-stack/lyric": "^0.13.0",
 		"axios": "^1.10.0",
 		"bytes": "^3.1.2",
 		"cors": "^2.8.5",
@@ -47,7 +43,7 @@
 		"multer": "1.4.5-lts.1",
 		"nunjucks": "^3.2.4",
 		"pg": "^8.16.0",
-		"pino": "9.2.0",
+		"pino": "^9.11.0",
 		"pino-http": "^10.1.0",
 		"swagger-jsdoc": "^6.2.8",
 		"swagger-ui-express": "^5.0.1",
@@ -79,5 +75,8 @@
 		"tsx": "^4.15.7",
 		"typescript": "^5.4.5",
 		"typescript-eslint": "^7.13.1"
+	},
+	"aliases": {
+		"@": "src"
 	}
 }

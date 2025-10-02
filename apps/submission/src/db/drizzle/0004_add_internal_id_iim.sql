@@ -1,0 +1,1 @@
+ALTER TABLE "pcgl"."id_generation_config" ADD COLUMN "internal_id" varchar(50);

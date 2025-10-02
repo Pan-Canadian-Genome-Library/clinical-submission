@@ -17,42 +17,30 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { study } from '@/db/schemas/studiesSchema.js';
+import { ParamsDictionary } from 'express-serve-static-core';
+import { ParsedQs } from 'qs';
+import { z } from 'zod';
 
-export const StudyStatus = {
-	ONGOING: 'ONGOING',
-	COMPLETED: 'COMPLETED',
-} as const;
+import { RequestValidation } from '@/middleware/requestValidation.js';
 
-export type StudyStatusValues = (typeof StudyStatus)[keyof typeof StudyStatus];
+import { stringNotEmpty, stringNotEmptyOptional } from './common.js';
 
-export const StudyContext = {
-	CLINICAL: 'CLINICAL',
-	RESEARCH: 'RESEARCH',
-} as const;
+interface DataIdParams extends ParamsDictionary {
+	externalId: string;
+	entityName: string;
+}
 
-export type StudyContextValues = (typeof StudyContext)[keyof typeof StudyContext];
+interface DataIdExistsQuery extends ParsedQs {
+	parentId?: string;
+}
 
-export type StudyDTO = {
-	studyId: string;
-	dacId: string;
-	studyName: string;
-	studyDescription: string;
-	programName?: string | null;
-	keywords?: string[] | null;
-	status: StudyStatusValues;
-	context: StudyContextValues;
-	domain: string[];
-	participantCriteria?: string | null;
-	principalInvestigators: string[];
-	leadOrganizations: string[];
-	collaborators?: string[] | null;
-	fundingSources: string[];
-	publicationLinks?: string[] | null;
-	createdAt: Date;
-	updatedAt?: Date | null;
-	categoryId?: number | null;
+export const getDataById: RequestValidation<object, DataIdExistsQuery, DataIdParams> = {
+	pathParams: z.object({
+		externalId: stringNotEmpty,
+		entityName: stringNotEmpty,
+		parentId: stringNotEmptyOptional,
+	}),
+	query: z.object({
+		parentId: stringNotEmptyOptional,
+	}),
 };
-
-export type StudyRecord = typeof study.$inferSelect;
-export type StudyModel = typeof study.$inferInsert;

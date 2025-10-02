@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { asc, desc, eq, sql } from 'drizzle-orm';
+import { asc, desc, eq, inArray, sql } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
 import type { StudyDTO } from '@/common/types/study.js';
@@ -28,9 +28,9 @@ import { study } from '@/db/schemas/studiesSchema.js';
 import { PostgresTransaction } from '@/db/types.js';
 import { isPostgresError, PostgresErrors } from '@/db/utils.js';
 import {
+	convertFromRecordToStudyDTO,
 	convertToRecordFromPartialStudyDTO,
 	convertToRecordFromStudyDTO,
-	convertFromRecordToStudyDTO,
 } from '@/service/dtoConversion.js';
 
 const studyService = (db: PostgresDb) => ({
@@ -52,7 +52,7 @@ const studyService = (db: PostgresDb) => ({
 				.limit(pageSize)
 				.offset((page - 1) * pageSize);
 		} catch (exception) {
-			logger.error('Error at listStudies', exception);
+			logger.error(exception, 'Error at listStudies');
 			throw new lyricProvider.utils.errors.InternalServerError(
 				'Something went wrong while fetching studies. Please try again later.',
 			);
@@ -65,7 +65,7 @@ const studyService = (db: PostgresDb) => ({
 		try {
 			studyRecords = await db.select().from(study).where(eq(study.study_id, studyId));
 		} catch (exception) {
-			logger.error('Error at getStudyById', exception);
+			logger.error(exception, 'Error at getStudyById');
 			throw new lyricProvider.utils.errors.InternalServerError(
 				'Something went wrong while fetching your requested study. Please try again later.',
 			);
@@ -105,7 +105,7 @@ const studyService = (db: PostgresDb) => ({
 						`${studyData.dacId} does not appear to be a valid DAC ID, please ensure this DAC record exists prior to creating a study.`,
 					);
 				default:
-					logger.error('Error at createStudy in StudyService', error);
+					logger.error(error, 'Error at createStudy in StudyService');
 					throw new lyricProvider.utils.errors.InternalServerError(
 						'Something went wrong while creating a new study. Please try again later.',
 					);
@@ -122,7 +122,7 @@ const studyService = (db: PostgresDb) => ({
 
 			return deletedRecord[0];
 		} catch (error) {
-			logger.error('Error at deleteStudy in StudyService', error);
+			logger.error(error, 'Error at deleteStudy in StudyService');
 
 			throw new lyricProvider.utils.errors.InternalServerError(
 				'Something went wrong while deleting this requested study. Please try again later.',
@@ -146,10 +146,40 @@ const studyService = (db: PostgresDb) => ({
 
 			return updatedRecord[0];
 		} catch (error) {
-			logger.error('Error at updateStudy in StudyService', error);
+			logger.error(error, 'Error at updateStudy in StudyService');
 
 			throw new lyricProvider.utils.errors.InternalServerError(
 				'Something went wrong while updating the requested study. Please try again later.',
+			);
+		}
+	},
+	getStudiesByCategoryId: async (categoryId: number) => {
+		try {
+			return await db.select().from(study).where(eq(study.category_id, categoryId));
+		} catch (error) {
+			logger.error(error, 'Error at getStudiesByCategoryId service');
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'Something went wrong while fetching studies for category. Please try again later.',
+			);
+		}
+	},
+	getStudiesByCategoryIds: async (categoryIds: number[]) => {
+		try {
+			return await db.select().from(study).where(inArray(study.category_id, categoryIds));
+		} catch (error) {
+			logger.error(error,'Error at getStudiesByCategoryIds service');
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'Something went wrong while fetching studies for category. Please try again later.',
+			);
+		}
+	},
+	unlinkStudiesFromCategory: async (categoryId: number) => {
+		try {
+			return await db.update(study).set({ category_id: null }).where(eq(study.category_id, categoryId));
+		} catch (error) {
+			logger.error(error, 'Error at unlinkStudiesFromCategory service');
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'Something went wrong while unlinking studies from category. Please try again later.',
 			);
 		}
 	},

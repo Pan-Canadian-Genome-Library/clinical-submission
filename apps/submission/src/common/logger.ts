@@ -1,4 +1,4 @@
-import { LoggerOptions, pino } from 'pino';
+import { LoggerOptions, pino, stdTimeFunctions } from 'pino';
 
 import { env } from '@/config/envConfig.js';
 
@@ -9,7 +9,7 @@ const pinoConfig: LoggerOptions = {
 			return { level: label.toUpperCase() };
 		},
 	},
-	timestamp: pino.stdTimeFunctions.isoTime,
+	timestamp: stdTimeFunctions.isoTime,
 };
 
 export const logger = pino(pinoConfig);
