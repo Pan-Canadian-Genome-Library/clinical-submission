@@ -10,8 +10,8 @@
 	"scripts": {
 		"\n==================  LOCAL  ==================": "",
 		"build": "pnpm run build:api && pnpm run build:ui",
-		"build:api": "pnpm --filter ./apps/data-dictionary-ui run build",
-		"build:ui": "pnpm --filter ./apps/submission run build:all",
+		"build:ui": "pnpm --filter ./apps/data-dictionary-ui run build",
+		"build:api": "pnpm --filter ./apps/submission run build:all",
 		"\n==================  NX  ==================": "",
 		"\n IMPORT-NOTE: NX currently doesn't like to run when building docker images. This does work locally though. But for our ci/cd pipelines, we utilize LOCAL scripts.": "",
 		"build:all": "nx run-many --all --target=build:all",
