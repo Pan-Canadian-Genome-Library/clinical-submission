@@ -17,10 +17,10 @@ The repository is organized with the following directory structure:
     └── submission
 ```
 
-| Component                                   | Package Name             | Path     | Description                                            |
-| ------------------------------------------- | ------------------------ | -------- | ------------------------------------------------------ |
-| [Data Dictionary UI](apps/ui/README.md)     | @clinical-submission/ui  | apps/ui  | React SPA website for Data Dictionary UI.              |
-| [Submission API](apps/submission/README.md) | @clinical-submission/api | apps/api | ExpressJS backend service for submitting clinical data |
+| Component                                               | Package Name             | Path     | Description                                            |
+| ------------------------------------------------------- | ------------------------ | -------- | ------------------------------------------------------ |
+| [Data Dictionary UI](apps/data-dictionary-ui/README.md) | @clinical-submission/ui  | apps/ui  | React SPA website for Data Dictionary UI.              |
+| [Submission API](apps/submission/README.md)             | @clinical-submission/api | apps/api | ExpressJS backend service for submitting clinical data |
 
 - **apps/** - Standalone processes meant to be run.
 
