@@ -331,7 +331,7 @@ const getSubmissionsByCategory = validateRequest(
 			const submissionsResult = await lyricProvider.services.submission.getSubmissionsByCategory(
 				categoryId,
 				{ page, pageSize },
-				{ onlyActive, username: user?.username ?? 'AUTH-DISABLED', organization },
+				{ onlyActive, username: user?.username, organization },
 			);
 
 			if (submissionsResult.metadata.totalRecords === 0) {
