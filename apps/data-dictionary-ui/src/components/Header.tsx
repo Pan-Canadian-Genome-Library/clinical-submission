@@ -22,7 +22,7 @@ const Header = () => {
 	return (
 		<header className="header">
 			<div className="header-body">
-				<img className="header-image" src={PCGL} alt="PCGL DACO Home" />
+				<img className="header-image" src={PCGL} alt="PCGL Clinical Submission Home" />
 				<h2>Clinical Submission Dictionary</h2>
 			</div>
 		</header>
