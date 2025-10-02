@@ -1,89 +1,54 @@
-# Pan Canadian Genome Library Data Submission Service
+# Pan Canadian Genome Library Clinical Submission
 
 <img src="./docs/img/pcgl-logo.png" height="90" align="right" />
 
-> The Pan-Canadian Genome Library (PCGL) is a large collaborative effort to unify Canada's genome sequencing efforts. The PCGL is an open-source and open-science initiative, building upon Canadian-made foundational components and datasets, and utilizing international standards such as GA4GH to unify Canada’s human genome sequencing efforts.
+Canada boasts world-leading expertise in genomics, including developing data-sharing policies and tools. However, we lack a national strategy to aggregate, store and share Canadian data equitably, securely and sustainably. At the same time, the size and complexity of human genomics datasets and their associated clinical data are growing rapidly.
 
-This repository acts as a wrapper around the [@overture-stack/lyric](https://github.com/overture-stack/lyric) package, enabling efficient handling and management of data submissions. It adapts Lyric's functionality to meet PCGL requirements, ensuring reliable data submission and data management.
+The Pan-Canadian Genome Library (PCGL) is a large collaborative effort to unify Canada's genome sequencing efforts. The PCGL is an open-source and open-science initiative, building upon Canadian-made foundational components and datasets, and utilizing international standards such as GA4GH to unify Canada’s human genome sequencing efforts.
 
-## Getting started
+## Repository Structure
 
-### Development tools
+The repository is organized with the following directory structure:
 
-- [PNPM](https://pnpm.io/) Dependency manager
+```
+.
+├── apps/
+    ├── data-dictionary-ui
+    └── submission
+```
+
+| Component                                   | Package Name             | Path     | Description                                            |
+| ------------------------------------------- | ------------------------ | -------- | ------------------------------------------------------ |
+| [Data Dictionary UI](apps/ui/README.md)     | @clinical-submission/ui  | apps/ui  | React SPA website for Data Dictionary UI.              |
+| [Submission API](apps/submission/README.md) | @clinical-submission/api | apps/api | ExpressJS backend service for submitting clinical data |
+
+- **apps/** - Standalone processes meant to be run.
+
+## Local Development
+
+### Development Tools
+
+- [PNPM](https://pnpm.io/) Project manager
 - [Node.js](https://nodejs.org/en) Runtime environment (v20 or higher)
-- [VS Code](https://code.visualstudio.com/) As recommended code editor. Plugins recommended: ESLint, Prettier - Code formatter, Mocha Test Explorer
+- [VS Code](https://code.visualstudio.com/) As recommended code editor. Plugins recommended: ESLint, Prettier - Code formatter, Mocha Test Explorer, Monorepo Workspace
 
 ### System Dependencies
 
-- [Postgres Database](https://www.postgresql.org/) for data storage
-- [Dictionary Manager](https://github.com/Pan-Canadian-Genome-Library/dictionary-manager) PCGL Dictionary Management and validation
+- This project uses Node ^20.9, Typescript ^5.5, and PNPM ^9.10, and was created using Vite 5.4.1.
 
-> For development purpose, a `docker-compose.yml` is provided to spin up required services.
+### Setup
 
-### Quickstart Development
+Follow these steps to install and run all dependencies, then run all applications locally. The applications will run in development mode, monitoring the code base to rebuild and restart the applications when the code is updated.
 
-1. Install Dependencies:
+- Install PNPM: `npm i -g pnpm`
+- Install dependencies: `pnpm i`
+- Run dependencies: `docker compose up -d`
+- Start all apps in development mode: `pnpm dev:all`
+  - The Submission server will run at `http://localhost:3030`. Visit `http://localhost:3030/api-docs` for interactive swagger.
+    - NOTE: Running the application should run the migrations at start, if you wish to apply migrations manually, please refer to `README` in submission for more information.
+  - The Data Dictionary UI will be running at `http://localhost:5173`
+  - Lectern service will run at `http://localhost:3000`. Visit `http://localhost:3000/api-docs`
 
-   ```
-   pnpm i
-   ```
+## Support & Contributions
 
-2. Build the Workspace:
-
-   ```
-   pnpm build:all
-   ```
-
-3. Set Environment Variables:
-   Create a `.env` file based on `.env.schema`. See Environment Variables section below.
-
-4. Start the Server in Development Mode:
-
-   ```
-   pnpm start:dev
-   ```
-
-   Server runs on port `3030` by default.
-
-5. Interact with API Endpoints:
-   Access Swagger UI at `http://localhost:3030/api-docs/`
-
-### Environment Variables
-
-| Name                        | Description                                                                                                                                                                                                                                                                                                                                                                                                 | Default                                |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `API_HOST`                  | The domain name or URL of the API's host server. (Example: https://www.example.com)                                                                                                                                                                                                                                                                                                                         |                                        |
-| `ALLOWED_ORIGINS`           | Specifies a list of permitted origins for Cross-Origin Resource Sharing (CORS). These origins, separated by commas, are allowed to make requests to the server, ensuring only trusted domains can access resources. (Example: https://www.example.com,https://subdomain.example.com)                                                                                                                        |                                        |
-| `AUDIT_ENABLED`             | Ensures that any modifications to the submitted data are logged, providing a way to identify who made changes and when they were made.                                                                                                                                                                                                                                                                      | true                                   |
-| `AUTH_ENABLED`              | Enable authentication middleware.                                                                                                                                                                                                                                                                                                                                                                           | false                                  |
-| `AUTH_CLIENT_ID`            | Used to identify the application to the authentication server. Required when `AUTH_ENABLED` is enabled.                                                                                                                                                                                                                                                                                                     |                                        |
-| `AUTH_CLIENT_SECRET`        | A secret value used to authenticate the application with the authentication server. Required when `AUTH_ENABLED` is enabled.                                                                                                                                                                                                                                                                                |                                        |
-| `AUTH_PROVIDER_HOST`        | The domain or IP address of the authentication server. Required when `AUTH_ENABLED` is enabled.                                                                                                                                                                                                                                                                                                             |                                        |
-| `AUTH_PROTECT_METHODS`      | Specifies a list of HTTP methods to protect, separated by commas. (Example: DELETE,GET,POST,PUT).                                                                                                                                                                                                                                                                                                           | 'DELETE,GET,POST,PUT'                  |
-| `AUTHZ_ENDPOINT`            | The domain or IP address of the authorization server. Required when `AUTH_ENABLED` is enabled.                                                                                                                                                                                                                                                                                                              |                                        |
-| `AUTHZ_GROUP_ADMIN`         | Authorization group configuration for determining admin group                                                                                                                                                                                                                                                                                                                                               |                                        |
-| `DB_HOST`                   | Database Hostname                                                                                                                                                                                                                                                                                                                                                                                           |                                        |
-| `DB_NAME`                   | Database Name                                                                                                                                                                                                                                                                                                                                                                                               |                                        |
-| `DB_PASSWORD`               | Database Password                                                                                                                                                                                                                                                                                                                                                                                           |                                        |
-| `DB_PORT`                   | Database Port                                                                                                                                                                                                                                                                                                                                                                                               |                                        |
-| `DB_USER`                   | Database User                                                                                                                                                                                                                                                                                                                                                                                               |                                        |
-| `ID_CUSTOM_ALPHABET`        | Custom Alphabet for local ID generation                                                                                                                                                                                                                                                                                                                                                                     | '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ' |
-| `ID_CUSTOM_SIZE`            | Custom size of ID for local ID generation                                                                                                                                                                                                                                                                                                                                                                   | 21                                     |
-| `ID_USELOCAL`               | Generate ID locally                                                                                                                                                                                                                                                                                                                                                                                         | true                                   |
-| `ID_MANAGER_CONFIG`         | JSON string containing configuration options for the internal ID generation system. This defines how unique identifiers should be generated for different entities within the system. Example: [{ "entityName": "Participant", "fieldName": "participantId", "prefix": "PT", "paddingLength": 8, "parentEntityName": "Study", "parentFieldName": "studyId" }]                                               |                                        |
-| `ID_MANAGER_SECRET`         | A secret value utilized in the hashing process as a salt                                                                                                                                                                                                                                                                                                                                                    |                                        |
-| `LECTERN_URL`               | PCGL Dictionary Management (Schema Management) URL                                                                                                                                                                                                                                                                                                                                                          |                                        |
-| `LOG_LEVEL`                 | Log Level                                                                                                                                                                                                                                                                                                                                                                                                   | 'info'                                 |
-| `PLURALIZE_SCHEMAS_ENABLED` | This feature automatically convert schema names to their plural forms when handling compound documents. Pluralization assumes the words are in English                                                                                                                                                                                                                                                      | true                                   |
-| `SERVER_PORT`               | Server Port                                                                                                                                                                                                                                                                                                                                                                                                 | 3030                                   |
-| `UPLOAD_LIMIT`              | Limit upload file size in string or number. <br>Supported units and abbreviations are as follows and are case-insensitive: <br> - b for bytes<br> - kb for kilobytes<br>- mb for megabytes<br>- gb for gigabytes<br>- tb for terabytes<br>- pb for petabytes<br>Any other text is considered as byte                                                                                                        | '10mb'                                 |
-| `VALIDATOR_CONFIG`          | Defines a configurable endpoint for validating the existence of a record with a specific value. The configuration is provided as an array of objects, where each object must include 'categoryId', 'entityName', and 'fieldName'. These entries determine which entity-field combinations are enabled for validation. (Example: `[{"categoryId": "1", "entityName": "sample", "fieldName": "sample_id" }]`) |                                        |
-
-### Script Commands
-
-| Command           | Description                                             |
-| ----------------- | ------------------------------------------------------- |
-| `pnpm build:all`  | Compile typescript code and generate database schemas   |
-| `pnpm start:dev`  | Run database migration and start Server for development |
-| `pnpm start:prod` | Run database migration and start Server for production  |
+- Filing an [issue](https://github.com/Pan-Canadian-Genome-Library/clinical-submission/issues)
