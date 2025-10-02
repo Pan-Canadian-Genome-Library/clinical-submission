@@ -19,6 +19,6 @@
 
 import { pgSchema } from 'drizzle-orm/pg-core';
 
-import { schemaName } from '../../../drizzle.config.js'; // note: Import is outside alias
+export const schemaName = `pcgl`;
 
 export const pcglSchema = pgSchema(schemaName);

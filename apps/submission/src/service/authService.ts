@@ -17,42 +17,28 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { study } from '@/db/schemas/studiesSchema.js';
+import type { PCGLRequestWithUser } from '@/common/types/auth.js';
+import { authConfig } from '@/config/authConfig.js';
 
-export const StudyStatus = {
-	ONGOING: 'ONGOING',
-	COMPLETED: 'COMPLETED',
-} as const;
+/**
+ * Determines whether the incoming request should bypass authentication,
+ * based on the application's authentication configuration.
+ * Returns true if authentication should be bypassed, false otherwise.
+ * @param req
+ * @returns
+ */
+export const shouldBypassAuth = (req: PCGLRequestWithUser) => {
+	const { enabled, protectedMethods } = authConfig;
+	if (!enabled) {
+		// bypass auth if it's globally disabled
+		return true;
+	}
 
-export type StudyStatusValues = (typeof StudyStatus)[keyof typeof StudyStatus];
+	// Skip auth if configured protectedMethods is a valid array and does not include the request method
+	if (!protectedMethods.some((method) => method === req.method)) {
+		return true;
+	}
 
-export const StudyContext = {
-	CLINICAL: 'CLINICAL',
-	RESEARCH: 'RESEARCH',
-} as const;
-
-export type StudyContextValues = (typeof StudyContext)[keyof typeof StudyContext];
-
-export type StudyDTO = {
-	studyId: string;
-	dacId: string;
-	studyName: string;
-	studyDescription: string;
-	programName?: string | null;
-	keywords?: string[] | null;
-	status: StudyStatusValues;
-	context: StudyContextValues;
-	domain: string[];
-	participantCriteria?: string | null;
-	principalInvestigators: string[];
-	leadOrganizations: string[];
-	collaborators?: string[] | null;
-	fundingSources: string[];
-	publicationLinks?: string[] | null;
-	createdAt: Date;
-	updatedAt?: Date | null;
-	categoryId?: number | null;
+	// Default: required auth
+	return false;
 };
-
-export type StudyRecord = typeof study.$inferSelect;
-export type StudyModel = typeof study.$inferInsert;

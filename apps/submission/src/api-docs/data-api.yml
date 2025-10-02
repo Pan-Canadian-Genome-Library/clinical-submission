@@ -1,8 +1,56 @@
+/data/entity/{entityName}/{externalId}/exists:
+  get:
+    summary: Retrieve boolean if record exists
+    tags:
+      - Data
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: externalId
+        description: External Id which represents the PHI value. (e.g. a participant ID "ABC1234")
+        in: path
+        schema:
+          type: string
+        required: true
+      - name: entityName
+        description: Name of the entity. (e.g. "participant")
+        in: path
+        schema:
+          type: string
+        required: true
+        # TODO: Feature to be added
+      # - name: parentId
+      #   description: Internal ID. The PCGL sequential ID for its parent. (e.g. a study ID "S00000001")
+      #   in: query
+      #   schema:
+      #     type: string
+      #   required: false
+    responses:
+      200:
+        description: Successful response indicating a boolean result
+        content:
+          application/json:
+            schema:
+              type: boolean
+            example: true
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/UnauthorizedError'
+      404:
+        $ref: '#/components/responses/NotFound'
+      500:
+        $ref: '#/components/responses/ServerError'
+      503:
+        $ref: '#/components/responses/ServiceUnavailableError'
+
 /data/category/{categoryId}:
   get:
     summary: Retrieve Submitted Data for a specific Category
     tags:
       - Data
+    security:
+      - bearerAuth: []
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
       - name: entityName
@@ -40,6 +88,8 @@
     summary: Retrieve Submitted Data Record for a System ID
     tags:
       - Data
+    security:
+      - bearerAuth: []
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
       - name: systemId
@@ -72,6 +122,8 @@
     summary: Retrieve Submitted Data for a specific Category and Organization
     tags:
       - Data
+    security:
+      - bearerAuth: []
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
       - $ref: '#/components/parameters/path/Organization'
@@ -110,6 +162,8 @@
     summary: Retrieve Submitted Data filtered by search parameters provided in the request body
     tags:
       - Data
+    security:
+      - bearerAuth: []
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
       - $ref: '#/components/parameters/path/Organization'
@@ -190,6 +244,42 @@
           application/json:
             schema:
               $ref: '#/components/schemas/GetSubmittedDataResult'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/UnauthorizedError'
+      404:
+        $ref: '#/components/responses/NotFound'
+      500:
+        $ref: '#/components/responses/ServerError'
+      503:
+        $ref: '#/components/responses/ServiceUnavailableError'
+/data/category/{categoryId}/stream:
+  get:
+    summary: Stream Submitted Data for a specific Category
+    tags:
+      - Data
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/path/CategoryId'
+      - $ref: '#/components/parameters/query/View'
+      - name: entityName
+        description: Array of strings to filter by entity names. Incompatible with `compound` view
+        in: query
+        required: false
+        schema:
+          collectionFormat: multi
+          type: array
+          items:
+            type: string
+    responses:
+      200:
+        description: Submitted Data
+        content:
+          application/x-ndjson:
+            schema:
+              $ref: '#/components/schemas/SubmittedDataRecord'
       400:
         $ref: '#/components/responses/BadRequest'
       401:

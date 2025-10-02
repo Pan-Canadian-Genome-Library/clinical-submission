@@ -8,15 +8,16 @@
 	"license": "AGPL-3.0-or-later",
 	"type": "module",
 	"scripts": {
-		"\n==================  NX  ==================": "",
-		"build:all": "nx run-many --all --target=build:all",
-		"dev:all": "concurrently --names=data-dictionary-ui,submission \"pnpm -w dev:ui\" \"pnpm -w dev:api\"",
-		"dev:api": "nx run @clinical-submission/submission:dev",
-		"dev:ui": "nx run @clinical-submission/ui:dev",
 		"\n==================  LOCAL  ==================": "",
 		"build": "pnpm run build:api && pnpm run build:ui",
 		"build:api": "pnpm --filter ./apps/data-dictionary-ui run build",
-		"build:ui": "pnpm --filter ./apps/submission run build:all"
+		"build:ui": "pnpm --filter ./apps/submission run build:all",
+		"\n==================  NX  ==================": "",
+		"\n IMPORT-NOTE: NX currently doesn't like to run when building docker images. This does work locally though. But for our ci/cd pipelines, we utilize LOCAL scripts.": "",
+		"build:all": "nx run-many --all --target=build:all",
+		"dev:all": "concurrently --names=data-dictionary-ui,submission \"pnpm -w dev:ui\" \"pnpm -w dev:api\"",
+		"dev:api": "nx run @clinical-submission/submission:start:dev",
+		"dev:ui": "nx run @clinical-submission/data-dictionary-ui:dev"
 	},
 	"devDependencies": {
 		"concurrently": "^9.1.2",

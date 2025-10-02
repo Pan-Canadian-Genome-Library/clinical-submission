@@ -33,7 +33,10 @@ import { openAPIRouter } from '@/routes/openApi.js';
 import { submissionRouter } from '@/routes/submission.js';
 
 import { authRouter } from './routes/auth.js';
+import { categoryRouter } from './routes/categoryRouter.js';
 import { dacRouter } from './routes/dac.js';
+import { dataRouter } from './routes/data.js';
+import { dictionaryRouter } from './routes/dictionary.js';
 import { studyRouter } from './routes/study.js';
 
 const app = express();
@@ -78,19 +81,24 @@ app.use('/static', express.static(path.join(__dirname, 'views', 'static')));
 // Request logging
 app.use(requestLogger);
 
-//PCGL Specific Routes
+// PCGL Specific Routes
 app.use('/dac', dacRouter);
 app.use('/health', healthCheckRouter);
 app.use('/study', studyRouter);
 app.use('/auth', authRouter);
 
-// Lyric routes
+// Lyric Routes
 app.use('/audit', lyricProvider.routers.audit);
-app.use('/category', lyricProvider.routers.category);
-app.use('/data', lyricProvider.routers.submittedData);
-app.use('/dictionary', lyricProvider.routers.dictionary);
-app.use('/submission', submissionRouter);
 app.use('/validator', lyricProvider.routers.validator);
+
+/**
+ * Lyric Custom Routes
+ * Implements lyrics default routes with extra configurations tailored for PCGL
+ */
+app.use('/submission', submissionRouter);
+app.use('/data', dataRouter);
+app.use('/category', categoryRouter);
+app.use('/dictionary', dictionaryRouter);
 
 // Swagger route
 app.use('/api-docs', openAPIRouter);

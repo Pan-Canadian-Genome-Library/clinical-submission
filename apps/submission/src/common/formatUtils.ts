@@ -17,42 +17,34 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { study } from '@/db/schemas/studiesSchema.js';
+import { VIEW_TYPE, ViewType } from '@overture-stack/lyric';
 
-export const StudyStatus = {
-	ONGOING: 'ONGOING',
-	COMPLETED: 'COMPLETED',
-} as const;
-
-export type StudyStatusValues = (typeof StudyStatus)[keyof typeof StudyStatus];
-
-export const StudyContext = {
-	CLINICAL: 'CLINICAL',
-	RESEARCH: 'RESEARCH',
-} as const;
-
-export type StudyContextValues = (typeof StudyContext)[keyof typeof StudyContext];
-
-export type StudyDTO = {
-	studyId: string;
-	dacId: string;
-	studyName: string;
-	studyDescription: string;
-	programName?: string | null;
-	keywords?: string[] | null;
-	status: StudyStatusValues;
-	context: StudyContextValues;
-	domain: string[];
-	participantCriteria?: string | null;
-	principalInvestigators: string[];
-	leadOrganizations: string[];
-	collaborators?: string[] | null;
-	fundingSources: string[];
-	publicationLinks?: string[] | null;
-	createdAt: Date;
-	updatedAt?: Date | null;
-	categoryId?: number | null;
+/**
+ * Ensure a value is wrapped in an array.
+ *
+ * If passed an array, return it returns the same array. If passed a single item, wrap it in an array.
+ * The function then filters out any empty strings and `undefined` values
+ * @param val an item or array
+ * @return an array
+ */
+export const asArray = <T>(val: T | T[]): T[] => {
+	const result = Array.isArray(val) ? val : [val];
+	return result.filter((item) => item !== null && item !== '' && item !== undefined);
 };
 
-export type StudyRecord = typeof study.$inferSelect;
-export type StudyModel = typeof study.$inferInsert;
+/**
+ * Convert a value into it's View type if it matches.
+ * Otherwise it returns `undefined`
+ * @param {unknown} value
+ * @returns {ViewType | undefined}
+ */
+export const convertToViewType = (value: unknown): ViewType | undefined => {
+	if (typeof value === 'string') {
+		const parseResult = VIEW_TYPE.safeParse(value.trim().toLowerCase());
+
+		if (parseResult.success) {
+			return parseResult.data;
+		}
+	}
+	return undefined;
+};
