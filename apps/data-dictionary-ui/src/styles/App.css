@@ -1,4 +1,6 @@
 * {
+	margin: 0;
+	padding: 0;
 	box-sizing: border-box;
 }
 
@@ -16,7 +18,7 @@
 	--h3-font-size: 1rem;
 
 	/* SPACING */
-	--inline-spacing: 2rem;
+	--inline-spacing: 4rem;
 	--vertical-spacing: 1rem;
 }
 
@@ -80,8 +82,40 @@ h3,
 		justify-content: space-between;
 	}
 }
+.container {
+	position: relative;
+	height: 100%;
+	width: 100%;
+}
 
 .wrapper {
-	max-width: 1480px;
+	position: relative;
+	/* max-width: 1480px; */
 	margin: 0 auto;
+	padding-inline: var(--inline-spacing);
+	width: 100%;
+	.scroll {
+		width: 100%;
+		position: sticky;
+		display: flex;
+		justify-content: flex-end;
+		bottom: 20px;
+		margin-bottom: 35px;
+		margin-left: 35px;
+		button {
+			cursor: pointer;
+			transition: all 0.3s ease-in-out;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 20px;
+			width: 20px;
+			background-color: rgba(255, 255, 255, 0);
+			border: 0;
+			font-size: 35px;
+			&:hover {
+				transform: scale(1.2);
+			}
+		}
+	}
 }
