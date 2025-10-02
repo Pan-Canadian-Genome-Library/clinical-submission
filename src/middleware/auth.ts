@@ -41,7 +41,7 @@ export const authMiddleware = () => {
 			const token = extractAccessTokenFromHeader(req);
 
 			if (!token) {
-				throw new lyricProvider.utils.errors.Forbidden('Unauthorized: No Access token provided');
+				throw new lyricProvider.utils.errors.Forbidden('Unauthorized: No access token provided');
 			}
 
 			const result = await fetchUserData(token);
