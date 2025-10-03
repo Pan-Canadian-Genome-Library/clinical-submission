@@ -42,6 +42,7 @@ Follow these steps to install and run all dependencies, then run all application
 
 - Install PNPM: `npm i -g pnpm`
 - Install dependencies: `pnpm i`
+- Go into `apps/*` folders and create a `.env` derived from the `.env.schema` file
 - Run dependencies: `docker compose up -d`
 - Start all apps in development mode: `pnpm dev:all`
   - The Submission server will run at `http://localhost:3030`. Visit `http://localhost:3030/api-docs` for interactive swagger.
