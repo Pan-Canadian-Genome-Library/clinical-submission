@@ -21,14 +21,8 @@ import { Request } from 'express';
 import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
-import {
-	ActionIDs,
-	ActionIDsValues,
-	type PCGLUserSession,
-	PCGLUserSessionResult,
-	UserDataResponseErrorType,
-} from '@/common/types/auth.js';
-import { Groups, userDataResponseSchema, UserDataResponseSchemaType } from '@/common/validation/auth-validation.js';
+import { ActionIDs, type ActionIDsValues, type PCGLUserSession, PCGLUserSessionResult } from '@/common/types/auth.js';
+import { Groups, ServiceTokenResponse, userDataResponseSchema } from '@/common/validation/auth-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 
@@ -59,11 +53,18 @@ const refreshAuthZServiceToken = async () => {
 		});
 		if (!response.ok) {
 			throw new lyricProvider.utils.errors.InternalServerError(
-				`Failed to fetch sevice token with status ${response.status}`,
+				`Failed to fetch service token with status ${response.status}`,
 			);
 		}
 		const tokenResponse = await response.json();
-		serviceToken = tokenResponse.token;
+
+		const validatedAuthZData = ServiceTokenResponse.safeParse(tokenResponse);
+
+		if (!validatedAuthZData.success) {
+			throw new Error(`Malformed token response`);
+		}
+
+		serviceToken = validatedAuthZData.data.token;
 	} catch (error) {
 		logger.error(error, `[AUTHZ]: Something went wrong fetching authz service token.`);
 		throw new lyricProvider.utils.errors.InternalServerError(
@@ -135,7 +136,7 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 	const response = await fetchAuthZResource(`/user/me`, token);
 
 	if (!response.ok) {
-		const errorResponse: UserDataResponseErrorType = await response.json();
+		const errorResponse = await response.json();
 
 		logger.error(`[AUTHZ]: Unable to verify user response from AUTHZ. ${JSON.stringify(errorResponse)}`);
 
@@ -155,7 +156,7 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 		}
 	}
 
-	const result: UserDataResponseSchemaType = await response.json();
+	const result = await response.json();
 
 	const responseValidation = userDataResponseSchema.safeParse(result);
 

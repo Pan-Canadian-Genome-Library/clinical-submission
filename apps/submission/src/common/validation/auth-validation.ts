@@ -94,3 +94,8 @@ export const OIDCCodeResponse: RequestValidation<object, OIDCCodeParams, ParamsD
 		code: stringNotEmpty,
 	}),
 };
+
+export const ServiceTokenResponse = z.object({
+	token: z.string(),
+});
+export type ServiceTokenResponse = z.infer<typeof ServiceTokenResponse>;

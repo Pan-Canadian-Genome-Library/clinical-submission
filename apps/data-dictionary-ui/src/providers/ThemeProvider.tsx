@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /*
  * Copyright (c) 2025 The Ontario Institute for Cancer Research. All rights reserved
  *
@@ -17,29 +18,35 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { defineConfig } from 'drizzle-kit';
+import { ThemeProvider } from '@overture-stack/lectern-ui';
 
-import { schemaName } from './src/db/schemas/generate.js';
+export const pcglColours = {
+	// Main Colors
+	primary: '#C41D7F',
+	secondary: '#520339',
+	tertiary: '#FFF0F6',
+	quaternary: '#FFD6E7',
+	grey: '#d9d9d99e',
+	alternateRow: '#fff0f659',
+	darkGrey: 'rgba(0, 0, 0, 0.45)',
+};
 
-const PG_DATABASE = process.env.DB_NAME;
-const PG_USER = process.env.DB_USER;
-const PG_PASSWORD = process.env.DB_PASSWORD;
-const PG_HOST = process.env.DB_HOST;
-const PG_PORT = process.env.DB_PORT;
+const PCGLThemeProvider = ({ children }: { children: React.ReactElement }) => {
+	return (
+		<ThemeProvider
+			theme={{
+				colors: {
+					background_overlay: pcglColours.darkGrey, // Modal background color
+					accent: pcglColours.primary, // Modal title color
+					accent_1: pcglColours.tertiary, // Button hover
+					background_alternate: pcglColours.alternateRow,
+					background_muted: pcglColours.grey, // Col box
+				},
+			}}
+		>
+			{children}
+		</ThemeProvider>
+	);
+};
 
-// Name of the schema that the tables will write into
-
-export const connectionString = `postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DATABASE}`;
-
-export default defineConfig({
-	out: './src/db/drizzle',
-	schema: ['./src/db/schemas/index.ts'],
-	dialect: 'postgresql',
-	migrations: {
-		table: '__drizzle_migrations',
-		schema: `${schemaName}_drizzle`,
-	},
-	dbCredentials: {
-		url: connectionString!,
-	},
-});
+export default PCGLThemeProvider;
