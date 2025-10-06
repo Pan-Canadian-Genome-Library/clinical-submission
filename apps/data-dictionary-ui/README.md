@@ -1,10 +1,10 @@
-# PCGL DACO UI
+# PCGL Data Dictionary UI
 
 Client application for the Pan Canadian Genome Library Data Dictionary
 
 ## Local Development
 
-To run the PCGL DACO UI directly:
+To run the PCGL Data Dictionary UI directly:
 
 1. Make sure all npm dependencies have been installed: `pnpm i`
 2. Create a `.env` from the `.env.schema` file and fill in variables
