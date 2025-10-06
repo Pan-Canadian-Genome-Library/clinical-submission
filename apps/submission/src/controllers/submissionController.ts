@@ -174,7 +174,13 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 			throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId - ${categoryId}.`);
 		}
 
-		if (authEnabled) {
+		const foundStudy = results[0];
+
+		if (foundStudy?.study_id !== organization) {
+			throw new lyricProvider.utils.errors.BadRequest(`Study Name as per CategoryId does not match org name `);
+		}
+
+		if (authEnabled && results?.length) {
 			const study = results[0];
 
 			if (study?.study_name !== organization) {
