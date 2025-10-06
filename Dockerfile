@@ -64,7 +64,7 @@ RUN pnpm install --prod
 ######################
 # Configure server image
 ######################
-FROM base AS server
+FROM base AS clinical-submission
 
 ARG APP_USER
 ARG WORKDIR
