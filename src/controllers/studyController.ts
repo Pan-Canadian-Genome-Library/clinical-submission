@@ -119,6 +119,16 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 			);
 		}
 
+		if (studyData.categoryId) {
+			const foundStudy = await studyRepo.getStudiesByCategoryId(studyData.categoryId);
+
+			if (foundStudy[0]) {
+				throw new lyricProvider.utils.errors.BadRequest(
+					`Study already present with categoryId ${studyData.categoryId}`,
+				);
+			}
+		}
+
 		const nextSequence = await getNextSequenceValue(studyConfig.sequenceName);
 		if (!nextSequence) {
 			logger.error(
@@ -151,7 +161,8 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 			}
 		});
 
-		res.status(201).send(studyTransaction);
+		const { categoryId, ...responseBody } = studyTransaction ?? {};
+		res.status(201).send(responseBody);
 		return;
 	} catch (exception) {
 		next(exception);
