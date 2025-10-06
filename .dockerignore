@@ -1,12 +1,21 @@
-# Dependency directories
-node_modules
+# Deny All
+*
 
-# VSCode settings
-.vscode
+# Allow select paths
+!apps/*
+!packages/*
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!tsconfig.base.json
+!tsconfig.json
+!nx.json
 
-# dotenv environment variable files
-.env
-.env.schema
+# Ignore hidden files from sub-directories
+**/.*
 
-# Distribution directories
-dist
+# Ignore test folders
+**/test/
+
+# Ignore nested node_modules
+**/node_modules/
