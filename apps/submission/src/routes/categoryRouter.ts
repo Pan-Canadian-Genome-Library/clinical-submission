@@ -27,7 +27,13 @@ export const categoryRouter: Router = (() => {
 	const router = express.Router();
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
-	router.delete('/:categoryId', authMiddleware(), categoryController.deleteCategoryById);
+
+	router.delete('/:categoryId', authMiddleware({ requireAdmin: true }), categoryController.deleteCategoryById);
+
+	// Public endpoints – do not require authentication
+	router.get('/', lyricProvider.controllers.category.listAll);
+	router.get('/:categoryId', lyricProvider.controllers.category.getDetails);
+
 	router.use('', lyricProvider.routers.category);
 	return router;
 })();

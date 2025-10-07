@@ -175,6 +175,7 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 			groups: extractUserGroups({ groups: responseValidation.data.groups }),
 		},
 	};
+	logger.info(`userTokenInfo:${JSON.stringify(userTokenInfo)}`)
 
 	return userTokenInfo;
 };
