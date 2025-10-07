@@ -62,7 +62,7 @@
         $ref: '#/components/responses/ServerError'
 /dictionary/register:
   post:
-    summary: Register new dictionary
+    summary: Register new dictionary. (🔒 Admin only)
     tags:
       - Dictionary
     requestBody:
@@ -104,6 +104,8 @@
         $ref: '#/components/responses/BadRequest'
       401:
         $ref: '#/components/responses/UnauthorizedError'
+      403:
+        $ref: '#/components/responses/ForbiddenError'
       404:
         $ref: '#/components/responses/NotFound'
       500:
