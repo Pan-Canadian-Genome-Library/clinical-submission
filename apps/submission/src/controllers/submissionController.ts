@@ -180,16 +180,6 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 			throw new lyricProvider.utils.errors.BadRequest(`Study Name as per CategoryId does not match org name `);
 		}
 
-		if (results?.length) {
-			const study = results[0];
-
-			if (study?.study_id !== organization) {
-				throw new lyricProvider.utils.errors.BadRequest(
-					`Study ${organization} is being submitted to the incorrect category.`,
-				);
-			}
-		}
-
 		const username = user?.username;
 
 		logger.info(
