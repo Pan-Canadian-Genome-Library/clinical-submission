@@ -25,7 +25,7 @@
       503:
         $ref: '#/components/responses/ServiceUnavailableError'
   delete:
-    summary: Delete DAC by their ID
+    summary: Delete DAC by their ID. (🔒 Admin only)
     tags:
       - DAC
     parameters:
@@ -46,7 +46,7 @@
       503:
         $ref: '#/components/responses/ServiceUnavailableError'
   patch:
-    summary: Update DAC by their ID
+    summary: Update DAC by their ID. (🔒Admin only)
     tags:
       - DAC
     parameters:
@@ -91,7 +91,7 @@
 
 /dac/create:
   post:
-    summary: Create DAC
+    summary: Create DAC. (🔒 Admin only)
     tags:
       - DAC
     requestBody:

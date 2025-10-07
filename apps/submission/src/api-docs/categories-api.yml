@@ -51,7 +51,7 @@
       503:
         $ref: '#/components/responses/ServiceUnavailableError'
   delete:
-    summary: Delete a category by ID
+    summary: Delete a category by ID. (🔒 Admin only)
     tags:
       - Category
     parameters:

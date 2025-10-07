@@ -24,7 +24,7 @@
         $ref: '#/components/responses/ServerError'
 
   post:
-    summary: Creates a new study.
+    summary: Creates a new study. (🔒 Admin only)
     tags:
       - Study
     requestBody:
@@ -147,7 +147,7 @@
         $ref: '#/components/responses/ServerError'
 
   patch:
-    summary: Updates a study with new data, barring some properties such as studyId.
+    summary: Updates a study with new data, barring some properties such as studyId. (🔒 Admin only)
     tags:
       - Study
     requestBody:
@@ -244,7 +244,7 @@
         $ref: '#/components/responses/ServerError'
 
   delete:
-    summary: Delete a study by study ID,
+    summary: Delete a study by study ID. (🔒 Admin only)
     parameters:
       - name: studyId
         in: path
