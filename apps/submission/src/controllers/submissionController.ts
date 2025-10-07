@@ -61,7 +61,7 @@ const editData = validateRequest(editDataRequestSchema, async (req, res, next) =
 		if (authEnabled) {
 			const study = results[0];
 
-			if (study?.study_name !== organization) {
+			if (study?.study_id !== organization) {
 				throw new lyricProvider.utils.errors.BadRequest(
 					`Study ${organization} is being submitted to the incorrect category.`,
 				);
@@ -183,7 +183,7 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 		if (results?.length) {
 			const study = results[0];
 
-			if (study?.study_name !== organization) {
+			if (study?.study_id !== organization) {
 				throw new lyricProvider.utils.errors.BadRequest(
 					`Study ${organization} is being submitted to the incorrect category.`,
 				);

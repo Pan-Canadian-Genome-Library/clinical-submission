@@ -119,15 +119,15 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 			);
 		}
 
-		if (studyData.categoryId) {
-			const foundStudy = await studyRepo.getStudiesByCategoryId(studyData.categoryId);
+		// if (studyData.categoryId) {
+		// 	const foundStudy = await studyRepo.getStudiesByCategoryId(studyData.categoryId);
 
-			if (foundStudy[0]) {
-				throw new lyricProvider.utils.errors.BadRequest(
-					`Study already present with categoryId ${studyData.categoryId}`,
-				);
-			}
-		}
+		// 	if (foundStudy[0]) {
+		// 		throw new lyricProvider.utils.errors.BadRequest(
+		// 			`Study already present with categoryId ${studyData.categoryId}`,
+		// 		);
+		// 	}
+		// }
 
 		const nextSequence = await getNextSequenceValue(studyConfig.sequenceName);
 		if (!nextSequence) {
@@ -161,8 +161,16 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 			}
 		});
 
-		const { categoryId, ...responseBody } = studyTransaction ?? {};
-		res.status(201).send(responseBody);
+		if (!studyTransaction) {
+			logger.info(
+				`[Study/IIM]: Create study transaction returned undefined but was still was able to create resource.`,
+			);
+			res.status(201).send({});
+			return;
+		}
+
+		delete studyTransaction['categoryId'];
+		res.status(201).send(studyTransaction);
 		return;
 	} catch (exception) {
 		next(exception);
