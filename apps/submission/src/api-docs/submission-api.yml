@@ -143,7 +143,7 @@
 
 /submission/category/{categoryId}/commit/{submissionId}:
   post:
-    summary: Commit Active Submission
+    summary: Commit Active Submission. (⚠️ this is the final action; all staged changes — inserts, updates, or deletions — will be applied)
     tags:
       - Submission
     parameters:
@@ -174,7 +174,7 @@
 
 /submission/category/{categoryId}/data:
   post:
-    summary: Add new data to a submission for the specified category. Returns an Active Submission containing the newly created records
+    summary: Creates a Submission to add new data for the specified category (⚠️ changes applied only after commit). Returns an Active Submission with the records to be created.
     tags:
       - Submission
     consumes:
@@ -221,7 +221,7 @@
       503:
         $ref: '#/components/responses/ServiceUnavailableError'
   put:
-    summary: Modifies existing data for a submission. Returns an Active Submission containing the records that will be updated
+    summary: Creates a Submission to modify existing data (⚠️ changes applied only after commit). Returns an Active Submission with the records to be updated.
     tags:
       - Submission
     consumes:
@@ -274,7 +274,7 @@
 
 /submission/category/{categoryId}/data/{systemId}:
   delete:
-    summary: Removes data from a submission using the System ID. Returns an Active Submission containing the records that will be deleted
+    summary: Creates a Submission to delete existing data by System ID (⚠️ changes applied only after commit). Returns an Active Submission with the records to be deleted.
     tags:
       - Submission
     parameters:
