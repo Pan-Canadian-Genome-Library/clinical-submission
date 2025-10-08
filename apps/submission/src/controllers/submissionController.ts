@@ -21,11 +21,11 @@ import { BATCH_ERROR_TYPE, type BatchError, EntityData } from '@overture-stack/l
 
 import { logger } from '@/common/logger.js';
 import { editDataRequestSchema, submitRequestSchema } from '@/common/validation/submit-validation.js';
+import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { hasAllowedAccess } from '@/external/pcglAuthZClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
-import { shouldBypassAuth } from '@/service/authService.js';
 import { studyService } from '@/service/studyService.js';
 import { prevalidateEditFile, prevalidateNewDataFile } from '@/submission/fileValidation.js';
 import { parseFileToRecords } from '@/submission/readFile.js';
@@ -43,11 +43,10 @@ const editData = validateRequest(editDataRequestSchema, async (req, res, next) =
 		const organization = req.body.organization;
 		const db = getDbInstance();
 		const studySvc = studyService(db);
-		const authEnabled = !shouldBypassAuth(req);
 
 		const user = req.user;
 
-		if (authEnabled && !hasAllowedAccess(organization, 'WRITE', user)) {
+		if (!hasAllowedAccess(organization, 'WRITE', user)) {
 			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 		}
 
@@ -57,15 +56,12 @@ const editData = validateRequest(editDataRequestSchema, async (req, res, next) =
 			throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${categoryId}".`);
 		}
 
-		// Don't need to check if auth disabled
-		if (authEnabled) {
-			const study = results[0];
+		const study = results[0];
 
-			if (study?.study_name !== organization) {
-				throw new lyricProvider.utils.errors.BadRequest(
-					`Study ${organization} is being submitted to the incorrect category.`,
-				);
-			}
+		if (study?.study_name !== organization) {
+			throw new lyricProvider.utils.errors.BadRequest(
+				`Study ${organization} is being submitted to the incorrect category.`,
+			);
 		}
 
 		const username = user?.username;
@@ -162,9 +158,8 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 		const user = req.user;
 		const db = getDbInstance();
 		const studySvc = studyService(db);
-		const authEnabled = !shouldBypassAuth(req);
 
-		if (authEnabled && !hasAllowedAccess(organization, 'WRITE', user)) {
+		if (!hasAllowedAccess(organization, 'WRITE', user)) {
 			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 		}
 
@@ -174,22 +169,20 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 			throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId - ${categoryId}.`);
 		}
 
-		if (authEnabled) {
-			const study = results[0];
+		const study = results[0];
 
-			if (study?.study_name !== organization) {
-				throw new lyricProvider.utils.errors.BadRequest(
-					`Study ${organization} is being submitted to the incorrect category.`,
-				);
-			}
+		if (study?.study_name !== organization) {
+			throw new lyricProvider.utils.errors.BadRequest(
+				`Study ${organization} is being submitted to the incorrect category.`,
+			);
 		}
 
 		const username = user?.username;
 
 		logger.info(
 			`Upload Submission Request: categoryId '${categoryId}'` +
-				` organization '${organization}'` +
-				` files: '${files?.map((f) => f.originalname)}'`,
+			` organization '${organization}'` +
+			` files: '${files?.map((f) => f.originalname)}'`,
 		);
 
 		if (!files || files.length == 0) {
@@ -284,8 +277,6 @@ const getSubmissionById = validateRequest(
 			const submissionId = Number(req.params.submissionId);
 			const user = req.user;
 
-			const authEnabled = !shouldBypassAuth(req);
-
 			const submission = await lyricProvider.services.submission.getSubmissionById(submissionId);
 
 			if (!submission) {
@@ -294,7 +285,7 @@ const getSubmissionById = validateRequest(
 
 			const organization = submission?.organization;
 
-			if (authEnabled && !hasAllowedAccess(organization, 'READ', user)) {
+			if (!hasAllowedAccess(organization, 'READ', user)) {
 				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 			}
 
@@ -321,13 +312,6 @@ const getSubmissionsByCategory = validateRequest(
 			const pageSize = parseInt(String(req.query.pageSize)) || 20;
 			const user = req.user;
 
-			const authEnabled = !shouldBypassAuth(req);
-
-			// Early check to prevent auth db action
-			if (authEnabled && !user) {
-				throw new lyricProvider.utils.errors.Forbidden('Unauthorized: Unable to authorize user');
-			}
-
 			const submissionsResult = await lyricProvider.services.submission.getSubmissionsByCategory(
 				categoryId,
 				{ page, pageSize },
@@ -338,15 +322,12 @@ const getSubmissionsByCategory = validateRequest(
 				throw new lyricProvider.utils.errors.NotFound(`Submission not found`);
 			}
 
-			// Auth enabled only logic
-			if (authEnabled) {
-				const retrievedOrg = submissionsResult.result[0]?.organization;
-				// User can provide an organization optionally, if they do, we check against that input instead of the returned org from submissionsResult
-				const orgToCheck = organization ?? retrievedOrg;
+			const retrievedOrg = submissionsResult.result[0]?.organization;
+			// User can provide an organization optionally, if they do, we check against that input instead of the returned org from submissionsResult
+			const orgToCheck = organization ?? retrievedOrg;
 
-				if (authEnabled && !hasAllowedAccess(orgToCheck || '', 'READ', user)) {
-					throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
-				}
+			if (!hasAllowedAccess(orgToCheck || '', 'READ', user)) {
+				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 			}
 
 			const response = {
@@ -379,7 +360,7 @@ const deleteSubmissionById = validateRequest(
 		try {
 			const submissionId = Number(req.params.submissionId);
 			const user = req.user;
-			const authEnabled = !shouldBypassAuth(req);
+			const authEnabled = authConfig.enabled;
 
 			const submission = await lyricProvider.services.submission.getSubmissionById(submissionId);
 			if (!submission) {
@@ -411,7 +392,7 @@ const deleteEntityName = validateRequest(
 		try {
 			const submissionId = Number(req.params.submissionId);
 			const user = req.user;
-			const authEnabled = !shouldBypassAuth(req);
+			const authEnabled = authConfig.enabled;
 
 			const submission = await lyricProvider.services.submission.getSubmissionById(submissionId);
 			if (!submission) {

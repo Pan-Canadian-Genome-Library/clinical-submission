@@ -29,7 +29,11 @@ export const dictionaryRouter: Router = (() => {
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
 
-	router.post('/register', authMiddleware(), dictionaryController.registerDictionary);
+	router.post('/register', authMiddleware({ requireAdmin: true }), dictionaryController.registerDictionary);
+
+	// Public endpoints – do not require authentication
+	router.get('/category/:categoryId', lyricProvider.controllers.dictionary.getDictionaryJson);
+	router.get('/category/:categoryId/templates', lyricProvider.controllers.dictionary.downloadDataFileTemplates);
 
 	router.use('', lyricProvider.routers.dictionary);
 

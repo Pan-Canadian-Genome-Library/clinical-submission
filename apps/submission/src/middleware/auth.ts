@@ -27,10 +27,11 @@ import { extractAccessTokenFromHeader, fetchUserData } from '@/external/pcglAuth
 
 /**
  * Middleware to handle authentication that returns PCGLUserSessionResult to req.user.
- * Only validation is checking if token exists or not, then returned user object/information from authz is added to req.user.
- * To check if a user has permissions to any specific endpoints must be done on the controller level from the passed req.user object
+ * The middleware validates whether a token exists; if valid, the user information returned from the authz service is added to `req.user`.
+ * Optionally, when `requireAdmin` is `true`, the middleware restricts access to admin users only.
+ * Any additional checks for user permissions must be done on the controller level from the passed `req.user` object
  */
-export const authMiddleware = () => {
+export const authMiddleware = ({ requireAdmin = false }: { requireAdmin?: boolean } = {}) => {
 	const { enabled } = authConfig;
 	return async (req: PCGLRequestWithUser, _: Response, next: NextFunction) => {
 		try {
@@ -45,6 +46,10 @@ export const authMiddleware = () => {
 			}
 
 			const result = await fetchUserData(token);
+
+			if (requireAdmin && !result.user?.isAdmin) {
+				throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
+			}
 
 			req.user = result.user;
 			return next();
