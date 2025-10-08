@@ -57,15 +57,12 @@ const editData = validateRequest(editDataRequestSchema, async (req, res, next) =
 			throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${categoryId}".`);
 		}
 
-		// Don't need to check if auth disabled
-		if (authEnabled) {
-			const study = results[0];
+		const study = results[0];
 
-			if (study?.study_id !== organization) {
-				throw new lyricProvider.utils.errors.BadRequest(
-					`Study ${organization} is being submitted to the incorrect category.`,
-				);
-			}
+		if (study?.study_id !== organization) {
+			throw new lyricProvider.utils.errors.BadRequest(
+				`Study ${organization} is being submitted to the incorrect category.`,
+			);
 		}
 
 		const username = user?.username;
@@ -177,7 +174,9 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 		const foundStudy = results[0];
 
 		if (foundStudy?.study_id !== organization) {
-			throw new lyricProvider.utils.errors.BadRequest(`Study Name as per CategoryId does not match org name `);
+			throw new lyricProvider.utils.errors.BadRequest(
+				`The provided organization '${organization}' is not associated with categoryId '${categoryId}'. Please verify that you are submitting to the correct categoryId  for the organization `,
+			);
 		}
 
 		const username = user?.username;

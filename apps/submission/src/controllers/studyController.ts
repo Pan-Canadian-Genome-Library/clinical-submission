@@ -151,15 +151,6 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 			}
 		});
 
-		if (!studyTransaction) {
-			logger.info(
-				`[Study/IIM]: Create study transaction returned undefined but was still was able to create resource.`,
-			);
-			res.status(201).send({});
-			return;
-		}
-
-		delete studyTransaction['categoryId'];
 		res.status(201).send(studyTransaction);
 		return;
 	} catch (exception) {
