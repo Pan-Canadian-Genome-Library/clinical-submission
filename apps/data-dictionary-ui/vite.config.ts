@@ -10,6 +10,7 @@ const API_PROXY_PATH = '/api';
 export default ({ mode }: { mode: string }) => {
 	process.env = { ...process.env, ...loadEnv(mode, process.cwd(), ['VITE', 'API']) };
 	const apiHost = process.env.API_URL || 'http://localhost:3000';
+	const dictionarySchema = process.env.VITE_BASE_DICTIONARY_SCHEMA ?? 'REPLACE_DICTIONARY_SCHEMA';
 
 	// https://vitejs.dev/config/
 	return defineConfig({
@@ -32,7 +33,7 @@ export default ({ mode }: { mode: string }) => {
 		},
 		define: {
 			__API_PROXY_PATH__: JSON.stringify(API_PROXY_PATH),
-			__BASE_DICTIONARY_SCHEMA__: JSON.stringify(process.env.VITE_BASE_DICTIONARY_SCHEMA),
+			__BASE_DICTIONARY_SCHEMA__: JSON.stringify(dictionarySchema),
 		},
 		resolve: {
 			alias: {
