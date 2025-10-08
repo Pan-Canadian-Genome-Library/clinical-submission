@@ -114,14 +114,22 @@ RUN mkdir -p /etc/nginx/ssl/ && \
 
 RUN touch /var/run/nginx.pid && \
 	chown -R ${APP_USER}:${APP_USER} /var/run/nginx.pid /run/nginx.pid
+	
+RUN	chown -R ${APP_USER}:${APP_USER} /docker-entrypoint.d && \
+    chown -R ${APP_USER}:${APP_USER} /usr/share/nginx/html 
 
 # Switch to new user
 USER ${APP_USER}
+
+# Copy the runtime environmental variable replacement script
+COPY --from=build ${DATA_DICTIONARY_UI_DIR}/docker/replace-env-script.sh /docker-entrypoint.d/replace-env-script.sh
+RUN chmod +x /docker-entrypoint.d/replace-env-script.sh
 
 # Copy site and nginx config
 COPY --from=build ${DATA_DICTIONARY_UI_DIR}/dist /usr/share/nginx/html
 COPY --from=build ${DATA_DICTIONARY_UI_DIR}/docker/nginx.conf.template /etc/nginx/templates/nginx.conf.template
 RUN rm -f /etc/nginx/conf.d/default.conf
 
+ENTRYPOINT ["/docker-entrypoint.sh"] 
 EXPOSE 3001
 CMD ["nginx", "-g", "daemon off;"]
