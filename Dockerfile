@@ -123,7 +123,6 @@ USER ${APP_USER}
 
 # Copy the runtime environmental variable replacement script
 COPY --from=build ${DATA_DICTIONARY_UI_DIR}/docker/replace-env-script.sh /docker-entrypoint.d/replace-env-script.sh
-RUN dos2unix /docker-entrypoint.d/replace-env-script.sh
 RUN chmod +x /docker-entrypoint.d/replace-env-script.sh
 
 # Copy site and nginx config
