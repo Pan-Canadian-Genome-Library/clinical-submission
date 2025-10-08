@@ -13,7 +13,7 @@ TARGET_ENV=REPLACE_ # Ensure only env with this prefix is replaced
 # Check if the directory exists
 if [ ! -d "$ASSETS_DIRECTORY" ]; then
     echo "Directory '$ASSETS_DIRECTORY' not found, please point to correct directory."
-    continue
+    exit 
 fi
 
 # Display the current directory being scanned
