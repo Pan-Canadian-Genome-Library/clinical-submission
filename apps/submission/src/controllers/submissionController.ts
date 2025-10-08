@@ -58,7 +58,7 @@ const editData = validateRequest(editDataRequestSchema, async (req, res, next) =
 
 		const study = results[0];
 
-		if (study?.study_name !== organization) {
+		if (study?.study_id !== organization) {
 			throw new lyricProvider.utils.errors.BadRequest(
 				`Study ${organization} is being submitted to the incorrect category.`,
 			);
@@ -169,11 +169,11 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 			throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId - ${categoryId}.`);
 		}
 
-		const study = results[0];
+		const foundStudy = results[0];
 
-		if (study?.study_name !== organization) {
+		if (foundStudy?.study_id !== organization) {
 			throw new lyricProvider.utils.errors.BadRequest(
-				`Study ${organization} is being submitted to the incorrect category.`,
+				`The provided organization '${organization}' is not associated with categoryId '${categoryId}'. Please verify that you are submitting to the correct categoryId  for the organization `,
 			);
 		}
 
