@@ -1,27 +1,6 @@
 version: '3.9'
 
 services:
-  server:
-    container_name: submission
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: clinical-submission
-    env_file: ./apps/submission/.env
-    ports:
-      - 3030:3030
-  ui:
-    container_name: ui
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: data-dictionary-ui
-    environment:
-      API_URL: http://host.docker.internal:3000
-      # Real values for your frontend to consume
-      VITE_DICTIONARY_SCHEMA: prod_pcgl_schema
-    ports:
-      - 3001:3001
   postgres:
     container_name: submission.postgres
     image: postgres:15-alpine
