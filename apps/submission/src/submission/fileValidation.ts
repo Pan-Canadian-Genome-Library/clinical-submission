@@ -41,10 +41,7 @@ export const prevalidateNewDataFile = async (
 	const firstLine = await readHeaders(file);
 	const fileHeaders = firstLine.split(separatorCharacter).map((str) => str.trim());
 
-	const missingRequiredFields = schema.fields
-		.filter((field) => field.restrictions && 'required' in field.restrictions) // filter required fields
-		.map((field) => field.meta?.displayName?.toString() || field.name) // map displayName if exists
-		.filter((fieldName) => !fileHeaders.includes(fieldName));
+	const missingRequiredFields = findMissingRequiredFields(schema, fileHeaders);
 	if (missingRequiredFields.length > 0) {
 		const message = `Missing required fields '${JSON.stringify(missingRequiredFields)}'`;
 		logger.info(`Prevalidation file '${file.originalname}' failed - ${message}`);
@@ -109,10 +106,7 @@ export const prevalidateEditFile = async (
 		};
 	}
 
-	const missingRequiredFields = schema.fields
-		.filter((field) => field.restrictions && 'required' in field.restrictions) // filter required fields
-		.map((field) => field.meta?.displayName?.toString() || field.name) // map displayName if exists
-		.filter((fieldName) => !fileHeaders.includes(fieldName));
+	const missingRequiredFields = findMissingRequiredFields(schema, fileHeaders);
 	if (missingRequiredFields.length > 0) {
 		const message = `Missing required fields '${JSON.stringify(missingRequiredFields)}'`;
 		logger.info(`Prevalidation file '${file.originalname}' failed - ${message}`);
@@ -126,4 +120,16 @@ export const prevalidateEditFile = async (
 		};
 	}
 	return { file };
+};
+
+/**
+ * This function checks that every required field in the schema exists in the file headers,
+ * matching whether as field displayName or field name.
+ * Returns the field names that are missing
+ */
+const findMissingRequiredFields = (schema: Schema, fileHeaders: string[]) => {
+	return schema.fields
+		.filter((field) => field.restrictions && 'required' in field.restrictions) // filter required fields
+		.filter((field) => !fileHeaders.includes(field.meta?.displayName?.toString() || field.name))
+		.map((field) => field.name);
 };
