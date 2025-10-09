@@ -36,9 +36,9 @@ export const studyRouter: Router = (() => {
 	router.get('/:studyId', authMiddleware(), getStudyById);
 	router.get('/', authMiddleware(), getAllStudies);
 
-	router.post('/', authMiddleware(), createNewStudy);
-	router.delete('/:studyId', authMiddleware(), deleteStudyById);
-	router.patch('/:studyId', authMiddleware(), updateStudyById);
+	router.post('/', authMiddleware({ requireAdmin: true }), createNewStudy);
+	router.delete('/:studyId', authMiddleware({ requireAdmin: true }), deleteStudyById);
+	router.patch('/:studyId', authMiddleware({ requireAdmin: true }), updateStudyById);
 
 	return router;
 })();

@@ -29,8 +29,6 @@ import { generateHash } from '@/internal/id-manager/utils.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import iimService from '@/service/idManagerService.js';
 
-import { shouldBypassAuth } from '../service/authService.js';
-
 const defaultPage = 1;
 const defaultPageSize = 20;
 const defaultView = VIEW_TYPE.Values.flat;
@@ -41,11 +39,6 @@ const getDataIdExists = validateRequest(getDataById, async (req, res, next) => {
 
 	try {
 		const { externalId, entityName } = req.params;
-		const user = req.user;
-
-		if (!shouldBypassAuth(req) && !user) {
-			throw new lyricProvider.utils.errors.Forbidden(`User is not authorized to read submitted data`);
-		}
 
 		const idConfigResult = await iimRepo.getIIMConfig(entityName);
 
@@ -89,11 +82,6 @@ const getCategoryById = validateRequest(
 			const pageSize = parseInt(String(req.query.pageSize)) || defaultPageSize;
 			const view = convertToViewType(req.query.view) || defaultView;
 			const user = req.user;
-			const authEnabled = !shouldBypassAuth(req);
-
-			if (authEnabled && !user) {
-				throw new lyricProvider.utils.errors.Forbidden(`User is not authorized to read submitted data`);
-			}
 
 			const readableOrganizations = getUserReadableOrganizations(user);
 
@@ -125,8 +113,6 @@ const getCategoryBySystemId = validateRequest(
 
 			const user = req.user;
 
-			const authEnabled = !shouldBypassAuth(req);
-
 			// Send submission data, organized by entity.
 			const submitResult = await lyricProvider.services.submittedData.getSubmittedDataBySystemId(categoryId, systemId, {
 				view,
@@ -137,7 +123,7 @@ const getCategoryBySystemId = validateRequest(
 				return;
 			}
 
-			if (authEnabled && !hasAllowedAccess(submitResult.result.organization, 'READ', user)) {
+			if (!hasAllowedAccess(submitResult.result.organization, 'READ', user)) {
 				throw new lyricProvider.utils.errors.Forbidden(
 					`User is not authorized to read submitted data for organization '${submitResult.result.organization}'`,
 				);
@@ -168,9 +154,7 @@ const getCategoryByOrganization = validateRequest(
 
 			const user = req.user;
 
-			const authEnabled = !shouldBypassAuth(req);
-
-			if (authEnabled && !hasAllowedAccess(organization, 'READ', user)) {
+			if (!hasAllowedAccess(organization, 'READ', user)) {
 				throw new lyricProvider.utils.errors.Forbidden(
 					`User is not authorized to read submitted data for organization '${organization}'`,
 				);
@@ -216,9 +200,8 @@ const getSubmittedDataByQuery = validateRequest(
 			const view = convertToViewType(String(req.query.view)) || defaultView;
 
 			const user = req.user;
-			const authEnabled = !shouldBypassAuth(req);
 
-			if (authEnabled && !hasAllowedAccess(organization, 'READ', user)) {
+			if (!hasAllowedAccess(organization, 'READ', user)) {
 				throw new lyricProvider.utils.errors.Forbidden(
 					`User is not authorized to read submitted data for organization '${organization}'`,
 				);
@@ -252,11 +235,6 @@ const getSubmittedDataStream = validateRequest(
 			const categoryId = Number(req.params.categoryId);
 			const entityName = asArray(req.query.entityName || []);
 			const view = convertToViewType(String(req.query.view)) || defaultView;
-			const user = req.user;
-
-			if (!shouldBypassAuth(req) && !user) {
-				throw new lyricProvider.utils.errors.Forbidden(`User is not authorized to read submitted data`);
-			}
 
 			res.setHeader('Transfer-Encoding', 'chunked');
 			res.setHeader('Content-Type', 'application/x-ndjson');

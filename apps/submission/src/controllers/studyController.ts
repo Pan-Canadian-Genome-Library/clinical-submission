@@ -36,7 +36,6 @@ import {
 	retrieveIIMConfiguration,
 } from '@/internal/id-manager/utils.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
-import { shouldBypassAuth } from '@/service/authService.js';
 import { convertToRecordFromStudyDTO } from '@/service/dtoConversion.js';
 import iimService from '@/service/idManagerService.js';
 import { studyService } from '@/service/studyService.js';
@@ -73,19 +72,12 @@ export const getStudyById = validateRequest(getOrDeleteStudyByID, async (req, re
 });
 
 export const createNewStudy = validateRequest(createStudy, async (req, res, next) => {
-	const IIM_CONFIG_NAME = 'study';
-	const studyData = req.body;
-	const db = getDbInstance();
-	const studyRepo = studyService(db);
-	const iimRepo = iimService(db);
-	const user = req.user;
-
-	const authEnabled = !shouldBypassAuth(req);
-
 	try {
-		if (authEnabled && !user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
-		}
+		const IIM_CONFIG_NAME = 'study';
+		const studyData = req.body;
+		const db = getDbInstance();
+		const studyRepo = studyService(db);
+		const iimRepo = iimService(db);
 
 		const studyConfig = await retrieveIIMConfiguration(IIM_CONFIG_NAME);
 
@@ -159,17 +151,10 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 });
 
 export const deleteStudyById = validateRequest(getOrDeleteStudyByID, async (req, res, next) => {
-	const studyId = req.params.studyId;
-	const db = getDbInstance();
-	const studyRepo = studyService(db);
-	const user = req.user;
-
-	const authEnabled = !shouldBypassAuth(req);
-
 	try {
-		if (authEnabled && !user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
-		}
+		const studyId = req.params.studyId;
+		const db = getDbInstance();
+		const studyRepo = studyService(db);
 
 		const results = await studyRepo.deleteStudy(studyId);
 
@@ -187,18 +172,12 @@ export const deleteStudyById = validateRequest(getOrDeleteStudyByID, async (req,
 });
 
 export const updateStudyById = validateRequest(updateStudy, async (req, res, next) => {
-	const studyId = req.params.studyId;
-	const updateData = req.body;
-
-	const db = getDbInstance();
-	const studyRepo = studyService(db);
-
-	const user = req.user;
-
 	try {
-		if (!user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
-		}
+		const studyId = req.params.studyId;
+		const updateData = req.body;
+
+		const db = getDbInstance();
+		const studyRepo = studyService(db);
 
 		const results = await studyRepo.updateStudy(studyId, updateData);
 

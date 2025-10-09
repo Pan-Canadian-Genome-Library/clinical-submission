@@ -9,6 +9,13 @@ components:
           schema:
             $ref: '#/components/responses/Error'
 
+    ForbiddenError:
+      description: The user does not have sufficient permissions to perform this operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/responses/Error'
+
     Error:
       type: object
       properties:

@@ -25,16 +25,11 @@ import { validateRequest } from '@/middleware/requestValidation.js';
 import { studyService } from '@/service/studyService.js';
 
 const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res, next) => {
-	const categoryId = Number(req.params.categoryId);
-	const database = getDbInstance();
-
-	const studySvc = await studyService(database);
-	const user = req.user;
-
 	try {
-		if (!user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
-		}
+		const categoryId = Number(req.params.categoryId);
+		const database = getDbInstance();
+
+		const studySvc = await studyService(database);
 
 		const foundCategory = await lyricProvider.services.category.getDetails(categoryId);
 		if (!foundCategory) {
@@ -90,7 +85,7 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 		res.status(200).json(response);
 		return;
 	} catch (exception) {
-		logger.error(exception,'Error in deleteCategoryById');
+		logger.error(exception, 'Error in deleteCategoryById');
 		next(exception);
 	}
 });

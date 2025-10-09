@@ -34,6 +34,7 @@ export default ({ mode }: { mode: string }) => {
 		define: {
 			__API_PROXY_PATH__: JSON.stringify(API_PROXY_PATH),
 			__BASE_DICTIONARY_SCHEMA__: JSON.stringify(dictionarySchema),
+			__BASE_DICTIONARY_SCHEMA__: JSON.stringify(dictionarySchema),
 		},
 		resolve: {
 			alias: {

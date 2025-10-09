@@ -28,7 +28,6 @@ import {
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
-import { shouldBypassAuth } from '@/service/authService.js';
 import dacService from '@/service/dacService.js';
 
 const getAllDac = validateRequest(getAllDacData, async (req, res, next) => {
@@ -79,12 +78,6 @@ const createDac = validateRequest(createDacData, async (req, res, next) => {
 		const dacSvc = await dacService(database);
 
 		const dacFields = req.body;
-		const user = req.user;
-		const authEnabled = !shouldBypassAuth(req);
-
-		if (authEnabled && !user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
-		}
 
 		const result = await dacSvc.saveDac(dacFields);
 
@@ -101,13 +94,6 @@ const deleteDac = validateRequest(deleteDacByIdData, async (req, res, next) => {
 		const dacSvc = await dacService(database);
 
 		const dacId = req.params.dacId;
-		const user = req.user;
-
-		const authEnabled = !shouldBypassAuth(req);
-
-		if (authEnabled && !user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
-		}
 
 		const result = await dacSvc.deleteDacById(dacId);
 
@@ -131,11 +117,6 @@ const updateDac = validateRequest(updateDacByIdData, async (req, res, next) => {
 
 		const dacId = req.params.dacId;
 		const dacFields = req.body;
-		const user = req.user;
-
-		if (!user?.isAdmin) {
-			throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
-		}
 
 		const result = await dacSvc.updateDacById(dacId, dacFields);
 
