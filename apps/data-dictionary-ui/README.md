@@ -20,7 +20,7 @@ To use environment variables locally, copy the file `.env.schema` to `.env` and 
 
 ### Production Environment Variables
 
-Vite statically build the app for production, meaning that the environment variables are not inserted at run-time and instead when the application is built. Data dictionary requires a run-time solution so to resolve this, a script was made to run when the container starts which will search through placeholder values and replace them in the docker environment.
+Vite statically build the app for production, meaning that the environment variables are not inserted at run-time and instead when the application is built. Data dictionary requires a run-time solution so to resolve this, a script was made to run when the container starts which will search through placeholder values and replace them in the docker environment. This script can be found in `docker/replace-env-script.sh` for the implementation.
 
 On production build, vite will insert `VITE_DICTIONARY_SCHEMA` as a placeholder(defined in [.env.production](https://vite.dev/guide/env-and-mode.html#env-files)), this `VITE_DICTIONARY_SCHEMA` is read in our script then the placeholder replaced by the value we provide in our docker env configuration.
 
