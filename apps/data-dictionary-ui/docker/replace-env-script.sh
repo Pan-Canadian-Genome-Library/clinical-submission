@@ -4,10 +4,10 @@
 set -e
 
 ASSETS_DIRECTORY=/usr/share/nginx/html # Target directory to start replacement script, should point to built app
-TARGET_ENV=REPLACE_ # Ensure only env with this prefix is replaced
+TARGET_ENV=VITE_ # Ensure only env with this prefix is replaced
 
 # Check if TARGET_ENV and ASSETS_DIRECTORY is set 
-: "${TARGET_ENV:?TARGET_ENV must be set (e.g. TARGET_ENV='REPLACE_')}"
+: "${TARGET_ENV:?TARGET_ENV must be set (e.g. TARGET_ENV='VITE_')}"
 : "${ASSETS_DIRECTORY:?Must set ASSETS_DIRECTORY to one path}"
 
 # Check if the directory exists
