@@ -4,6 +4,7 @@ import { logger } from '@/common/logger.js';
 
 import { getSeparatorCharacter } from './format.js';
 import { readHeaders } from './readFile.js';
+import { asArray } from '../common/formatUtils.js';
 
 /**
  * Pre-validates a new data file before submission.
@@ -43,7 +44,8 @@ export const prevalidateNewDataFile = async (
 
 	const missingRequiredFields = findMissingRequiredFields(schema, fileHeaders);
 	if (missingRequiredFields.length > 0) {
-		const message = `Missing required fields '${JSON.stringify(missingRequiredFields)}'`;
+		const fieldNames = missingRequiredFields.map((field) => field.name);
+		const message = `Missing required fields '${JSON.stringify(fieldNames)}'`;
 		logger.info(`Prevalidation file '${file.originalname}' failed - ${message}`);
 		return {
 			error: {
@@ -108,7 +110,8 @@ export const prevalidateEditFile = async (
 
 	const missingRequiredFields = findMissingRequiredFields(schema, fileHeaders);
 	if (missingRequiredFields.length > 0) {
-		const message = `Missing required fields '${JSON.stringify(missingRequiredFields)}'`;
+		const fieldNames = missingRequiredFields.map((field) => field.name);
+		const message = `Missing required fields '${JSON.stringify(fieldNames)}'`;
 		logger.info(`Prevalidation file '${file.originalname}' failed - ${message}`);
 		return {
 			error: {
@@ -125,11 +128,18 @@ export const prevalidateEditFile = async (
 /**
  * This function checks that every required field in the schema exists in the file headers,
  * matching whether as field displayName or field name.
- * Returns the field names that are missing
+ * Returns the fields that are missing
  */
 const findMissingRequiredFields = (schema: Schema, fileHeaders: string[]) => {
 	return schema.fields
 		.filter((field) => field.restrictions && 'required' in field.restrictions) // filter required fields
-		.filter((field) => !fileHeaders.includes(field.meta?.displayName?.toString() || field.name))
-		.map((field) => field.name);
+		.filter((field) => {
+			const possibleNames = asArray([
+				field.meta?.displayName?.toString() || '',
+				field.displayName?.toString() || '',
+				field.name,
+			]);
+
+			return !possibleNames.some((name) => fileHeaders.includes(name));
+		});
 };

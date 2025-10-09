@@ -58,7 +58,7 @@ export const parseFileToRecords = async (
 	let headers: string[] = [];
 
 	const schemaDisplayNames = schema.fields.reduce<Record<string, string>>((acc, field) => {
-		acc[field.meta?.displayName?.toString() || field.name] = field.name;
+		acc[field.displayName?.toString() || field.meta?.displayName?.toString() || field.name] = field.name;
 		return acc;
 	}, {});
 
@@ -87,7 +87,7 @@ export const parseFileToRecords = async (
 
 		stream.on('close', () => {
 			stream.destroy();
-			fs.unlink(file.path, () => {});
+			fs.unlink(file.path, () => { });
 		});
 	});
 };
