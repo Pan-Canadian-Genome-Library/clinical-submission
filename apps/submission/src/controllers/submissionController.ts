@@ -367,7 +367,7 @@ const deleteSubmissionById = validateRequest(
 				throw new lyricProvider.utils.errors.BadRequest(`Submission '${submissionId}' not found`);
 			}
 
-			if (authEnabled && (user?.isAdmin || user?.username !== submission?.createdBy)) {
+			if (authEnabled && !user?.isAdmin && user?.username !== submission?.createdBy) {
 				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to delete this resource');
 			}
 
@@ -399,7 +399,7 @@ const deleteEntityName = validateRequest(
 				throw new lyricProvider.utils.errors.BadRequest(`Submission '${submissionId}' not found`);
 			}
 
-			if (authEnabled && (user?.isAdmin || user?.username !== submission?.createdBy)) {
+			if (authEnabled && !user?.isAdmin && user?.username !== submission?.createdBy) {
 				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to delete this resource');
 			}
 
