@@ -18,10 +18,10 @@
  */
 
 import {
-	DataRecordNested,
+	type DataRecordNested,
 	isDataRecordValue,
-	SubmittedDataPaginatedResponse,
-	SubmittedDataResponse,
+	type SubmittedDataPaginatedResponse,
+	type SubmittedDataResponse,
 	VIEW_TYPE,
 } from '@overture-stack/lyric';
 
