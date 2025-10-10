@@ -20,14 +20,14 @@ To use environment variables locally, copy the file `.env.schema` to `.env` and 
 
 ### Production Environment Variables
 
-Vite statically build the app for production, meaning that the environment variables are not inserted at run-time and instead when the application is built. Data dictionary requires a run-time solution so to resolve this, a script was made to run when the container starts which will search through placeholder values and replace them in the docker environment. This script can be found in `docker/replace-env-script.sh` for the implementation.
+Vite statically built for production, meaning that the environment variables are not inserted at run-time and instead when the application is built. Data dictionary requires a run-time solution so to resolve this, a script was made to run when the container starts which will search through placeholder values and replace them in the docker environment. This script can be found in `docker/replace-env-script.sh` for the implementation.
 
-On production build, vite will insert `VITE_DICTIONARY_SCHEMA` as a placeholder(defined in [.env.production](https://vite.dev/guide/env-and-mode.html#env-files)), this `VITE_DICTIONARY_SCHEMA` is read in our script then the placeholder replaced by the value we provide in our docker env configuration.
+If needed to add more environment variables to be used in production, please add it `.env.production` with the value the same as the key(for visual sake, the following example uses a different value). Local does not need to do this and can just use the desired value.
 
-If needed to add more environment variables to be used in production, please add it `.env.production` with the value the same as the key. Local does not need to do this and can just use the desire value.
+As an example, on production build, we defined `VITE_DICTIONARY_SCHEMA = VITE_PLACEHOLDER_VALUE` in our `.env.production`. Vite will insert `VITE_PLACEHOLDER_VALUE` as a placeholder(defined in [.env.production](https://vite.dev/guide/env-and-mode.html#env-files)), this `VITE_PLACEHOLDER_VALUE` is read in our script then the placeholder replaced by the value we provide in our docker env configuration.
 
 > [!IMPORTANT]  
-> Environment variables on the client MUST be prefixed with `VITE_` so that the script understands what to replace.
+> Environment variables that we want to replace in the client MUST be prefixed with `VITE_` so that the script understands what to replace.
 
 Example of .env.production:
 
