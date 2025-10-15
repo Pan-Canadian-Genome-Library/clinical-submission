@@ -181,8 +181,8 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 
 		logger.info(
 			`Upload Submission Request: categoryId '${categoryId}'` +
-			` organization '${organization}'` +
-			` files: '${files?.map((f) => f.originalname)}'`,
+				` organization '${organization}'` +
+				` files: '${files?.map((f) => f.originalname)}'`,
 		);
 
 		if (!files || files.length == 0) {
@@ -393,6 +393,20 @@ const deleteEntityName = validateRequest(
 			const submissionId = Number(req.params.submissionId);
 			const user = req.user;
 			const authEnabled = authConfig.enabled;
+			const index = req.query;
+
+			if (index == undefined) {
+				throw new lyricProvider.utils.errors.NotFound('Index not found');
+			}
+
+			const parsedIndex = Number(index);
+			if (isNaN(parsedIndex)) {
+				throw new lyricProvider.utils.errors.BadRequest('Index must be a valid number');
+			}
+
+			if (parsedIndex < 0) {
+				throw new lyricProvider.utils.errors.BadRequest('Index cannot be negative');
+			}
 
 			const submission = await lyricProvider.services.submission.getSubmissionById(submissionId);
 			if (!submission) {
