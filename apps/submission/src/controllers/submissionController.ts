@@ -393,11 +393,9 @@ const deleteEntityName = validateRequest(
 			const submissionId = Number(req.params.submissionId);
 			const user = req.user;
 			const authEnabled = authConfig.enabled;
-			const index = req.query;
-
-			if (index == undefined) {
-				throw new lyricProvider.utils.errors.NotFound('Index not found');
-			}
+			const index = req.query.index;
+			const actionType = req.params.actionType;
+			const entityName = req.query.entityName;
 
 			const parsedIndex = Number(index);
 			if (isNaN(parsedIndex)) {
@@ -411,6 +409,30 @@ const deleteEntityName = validateRequest(
 			const submission = await lyricProvider.services.submission.getSubmissionById(submissionId);
 			if (!submission) {
 				throw new lyricProvider.utils.errors.BadRequest(`Submission '${submissionId}' not found`);
+			}
+
+			let actionObj;
+
+			if (actionType == 'inserts') {
+				actionObj = submission.errors?.inserts;
+			} else if (actionType == 'updates') {
+				actionObj = submission.errors?.updates;
+			} else if (actionType == 'deletes') {
+				actionObj = submission.errors?.deletes;
+			} else {
+				throw new lyricProvider.utils.errors.BadRequest(`Invalid actionType '${actionType}'`);
+			}
+
+			if (!actionObj) {
+				throw new lyricProvider.utils.errors.BadRequest(`Action type '${actionType}' not found in submission data`);
+			}
+			const entityObj = actionObj[entityName];
+
+			if (!entityObj) {
+				throw new lyricProvider.utils.errors.NotFound(`Entity with name '${entityName}' not found`);
+			}
+			if (!Array.isArray(entityObj) || entityObj[parsedIndex] === undefined) {
+				throw new lyricProvider.utils.errors.NotFound(`Index '${index}' not found`);
 			}
 
 			if (authEnabled && !user?.isAdmin && user?.username !== submission?.createdBy) {
