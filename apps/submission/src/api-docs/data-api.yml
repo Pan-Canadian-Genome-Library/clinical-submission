@@ -3,8 +3,6 @@
     summary: Retrieve boolean if record exists
     tags:
       - Data
-    security:
-      - bearerAuth: []
     parameters:
       - name: externalId
         description: External Id which represents the PHI value. (e.g. a participant ID "ABC1234")
@@ -266,7 +264,7 @@
         $ref: '#/components/responses/ServiceUnavailableError'
 /data/category/{categoryId}/stream:
   get:
-    summary: Stream Submitted Data for a specific Category
+    summary: Stream Submitted Data for a specific Category. (🔒 Admin only)
     tags:
       - Data
     security:
