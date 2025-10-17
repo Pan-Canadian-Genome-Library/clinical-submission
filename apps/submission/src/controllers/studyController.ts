@@ -27,6 +27,7 @@ import {
 import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
+import { getUserReadableOrganizations } from '@/external/pcglAuthZClient.js';
 import {
 	findIDByHash,
 	generateHash,
@@ -44,10 +45,23 @@ export const getAllStudies = validateRequest(listAllStudies, async (req, res, ne
 	const db = getDbInstance();
 	const { page, orderBy, pageSize } = req.query;
 	const studyRepo = studyService(db);
+	const user = req.user;
 
 	try {
 		const results = await studyRepo.listStudies({ page: Number(page), orderBy, pageSize: Number(pageSize) });
-		res.status(200).send(results);
+
+		const readableOrganizations = getUserReadableOrganizations(user);
+
+		if (readableOrganizations == undefined) {
+			res.status(200).send(results);
+			return;
+		}
+
+		const studyIdsFromResults = results.map((r) => r.studyId);
+
+		const commonOrganizations = studyIdsFromResults.filter((org) => readableOrganizations?.includes(org));
+
+		res.status(200).send(commonOrganizations);
 		return;
 	} catch (exception) {
 		next(exception);
@@ -58,14 +72,26 @@ export const getStudyById = validateRequest(getOrDeleteStudyByID, async (req, re
 	const studyId = req.params.studyId;
 	const db = getDbInstance();
 	const studyRepo = studyService(db);
+	const user = req.user;
 
 	try {
 		const results = await studyRepo.getStudyById(studyId);
 		if (!results) {
 			throw new lyricProvider.utils.errors.NotFound(`No Study with ID - ${studyId} found.`);
 		}
-		res.status(200).send(results);
-		return;
+		const readableOrganizations = getUserReadableOrganizations(user);
+
+		if (readableOrganizations == undefined) {
+			res.status(200).send(results);
+			return;
+		}
+
+		if (!readableOrganizations?.includes(studyId)) {
+			throw new lyricProvider.utils.errors.Forbidden(`User does not have access to study with id ${studyId}`);
+		} else {
+			res.status(200).send(results);
+			return;
+		}
 	} catch (exception) {
 		next(exception);
 	}

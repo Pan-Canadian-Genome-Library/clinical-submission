@@ -24,6 +24,17 @@ import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import { studyService } from '@/service/studyService.js';
 
+export interface CategoryDTO {
+	categoryId: number;
+	studyId: string | undefined;
+	categoryName: string;
+	organizations: string[];
+	createdAt: string;
+	createdBy: string;
+	updatedAt: string;
+	updatedBy: string;
+}
+
 const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res, next) => {
 	try {
 		const categoryId = Number(req.params.categoryId);
@@ -77,9 +88,20 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 			);
 		}
 
-		const response = {
-			...foundCategory,
+		const result: CategoryDTO = {
+			categoryId: foundCategory.id,
+			categoryName: foundCategory.name,
 			studyId: linkedStudies[0]?.study_id,
+			organizations: foundCategory.organizations,
+			createdAt: foundCategory.createdAt,
+			createdBy: foundCategory.createdBy,
+			updatedAt: foundCategory.updatedAt,
+			updatedBy: foundCategory.updatedBy,
+		};
+
+		const response = {
+			...result,
+			dictionary: foundCategory.dictionary,
 		};
 
 		res.status(200).json(response);
@@ -114,7 +136,8 @@ const listAllCategories = validateRequest({}, async (req, res, next) => {
 		}
 
 		const response = categories.map((cat) => ({
-			...cat,
+			categoryId: cat.id,
+			categoryName: cat.name,
 			studyId: studiesByCategory[cat.id],
 		}));
 
