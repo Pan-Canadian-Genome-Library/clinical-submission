@@ -88,40 +88,15 @@ components:
     CategoryDetails:
       type: object
       properties:
-        id:
+        categoryId:
           type: number
           description: ID of the Category
         studyId:
           type: string
           description: study id belonging to the category
-        dictionary:
-          type: object
-          description: Dictionary used to validate the submission
-          properties:
-            name:
-              type: string
-            version:
-              type: string
-        name:
+        categoryName:
           type: string
           description: Name of the Category
-        organizations:
-          type: array
-          items:
-            type: string
-            description: List of organizations on this category
-        createdAt:
-          type: string
-          description: Date and time of creation
-        createdBy:
-          type: string
-          description: User name who created the submission
-        udpatedAt:
-          type: string
-          description: Date and time of latest update
-        updatedBy:
-          type: string
-          description: User name who last updated the submission
 
     ChangeHistorySummaryResult:
       type: object
