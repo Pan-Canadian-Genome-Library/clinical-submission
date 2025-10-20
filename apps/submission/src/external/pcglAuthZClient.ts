@@ -180,29 +180,6 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 };
 
 /**
- * Retrieves the list of organizations a user has read access to.
- * If the user is an admin, it returns undefined to indicate access to all organizations.
- * If no user information is provided, it also returns undefined to allow all access (assuming authentication is not enabled).
- * Otherwise, it returns the list of organizations the user is allowed to read from.
- * @param organization
- * @param user
- * @returns
- */
-export const getUserReadableOrganizations = (user?: PCGLUserSession) => {
-	if (!user) {
-		// no user info, authentication is not enabled, allow all access
-		return undefined;
-	}
-
-	if (user.isAdmin) {
-		// admin has access to all organizations
-		return undefined;
-	}
-
-	return user.allowedReadOrganizations;
-};
-
-/**
  *
  * @param study Study user is trying to get access to
  * @param userStudies An array of user studies
