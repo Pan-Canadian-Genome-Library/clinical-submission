@@ -51,8 +51,9 @@ export const getAllStudies = validateRequest(listAllStudies, async (req, res, ne
 		const results = await studyRepo.listStudies({ page: Number(page), orderBy, pageSize: Number(pageSize) });
 
 		const readableOrganizations = getUserReadableOrganizations(user);
+		logger.info(readableOrganizations);
 
-		if (readableOrganizations == undefined) {
+		if (readableOrganizations === undefined) {
 			res.status(200).send(results);
 			return;
 		}
@@ -81,7 +82,7 @@ export const getStudyById = validateRequest(getOrDeleteStudyByID, async (req, re
 		}
 		const readableOrganizations = getUserReadableOrganizations(user);
 
-		if (readableOrganizations == undefined) {
+		if (readableOrganizations === undefined) {
 			res.status(200).send(results);
 			return;
 		}

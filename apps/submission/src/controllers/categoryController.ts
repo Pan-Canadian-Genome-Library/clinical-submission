@@ -24,17 +24,6 @@ import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import { studyService } from '@/service/studyService.js';
 
-export interface CategoryDTO {
-	categoryId: number;
-	studyId: string | undefined;
-	categoryName: string;
-	organizations: string[];
-	createdAt: string;
-	createdBy: string;
-	updatedAt: string;
-	updatedBy: string;
-}
-
 const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res, next) => {
 	try {
 		const categoryId = Number(req.params.categoryId);
@@ -81,14 +70,7 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 
 		const linkedStudies = await studySvc.getStudiesByCategoryIds([categoryId]);
 
-		if (linkedStudies.length === 0) {
-			logger.info('Category is misconfigured, no associated study');
-			throw new lyricProvider.utils.errors.NotFound(
-				`Category is misconfigured, no associated study ID - ${categoryId}.`,
-			);
-		}
-
-		const result: CategoryDTO = {
+		const result = {
 			categoryId: foundCategory.id,
 			categoryName: foundCategory.name,
 			studyId: linkedStudies[0]?.study_id,
