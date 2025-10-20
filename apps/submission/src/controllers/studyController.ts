@@ -80,7 +80,7 @@ export const getStudyById = validateRequest(getOrDeleteStudyByID, async (req, re
 			throw new lyricProvider.utils.errors.NotFound(`No Study with ID - ${studyId} found.`);
 		}
 		const readableOrganizations = getUserReadableOrganizations(user);
-
+// If readableOrganizations is undefined, that means auth is disabled OR user is admin
 		if (readableOrganizations == undefined) {
 			res.status(200).send(results);
 			return;
