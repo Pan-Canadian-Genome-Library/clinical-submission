@@ -8,7 +8,7 @@ tags:
   - name: Data
     description: Retrieve Submitted Data using filters and pagination
   - name: Dictionary
-    description: Dictionary registration. Uses Lectern as a Data Dictionary Schema Manager
+    description: Dictionary registration. Uses Dictionary Manager as source of truth for Dictionaries
   - name: Health
     description: Service status monitoring
   - name: Submission

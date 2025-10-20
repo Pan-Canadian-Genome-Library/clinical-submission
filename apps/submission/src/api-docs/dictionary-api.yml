@@ -62,7 +62,7 @@
         $ref: '#/components/responses/ServerError'
 /dictionary/register:
   post:
-    summary: Register new dictionary. (🔒 Admin only)
+    summary: Associates the provided dictionary and version from the Dictionary Manager with a new category linked to the specified study ID. (🔒 Admin only)
     tags:
       - Dictionary
     requestBody:
@@ -73,16 +73,16 @@
             properties:
               studyId:
                 type: string
-                description: A user-defined studyId
+                description: The unique identifier of the study, which must be already created by the Data Admin.
               categoryName:
                 type: string
                 description: A user-defined classification to group and organize data based on shared characteristics or criteria
               dictionaryName:
                 type: string
-                description: A matching Dictionary Name defined on Dictionary Manager (Lectern)
+                description: A matching Dictionary Name defined on Dictionary Manager
               dictionaryVersion:
                 type: string
-                description: A matching Dictionary Version defined on Dictionary Manager (Lectern)
+                description: A matching Dictionary Version defined on Dictionary Manager
               defaultCentricEntity:
                 type: string
                 description: The default centric entity name
