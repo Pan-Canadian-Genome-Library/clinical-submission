@@ -57,9 +57,9 @@ export const getAllStudies = validateRequest(listAllStudies, async (req, res, ne
 			return;
 		}
 
-		const studyIdsFromResults = results.map((r) => r.studyId);
+		const studyIdsFromResults = results.filter((study) => readableOrganizations.includes(study.studyId));
 
-		const commonOrganizations = studyIdsFromResults.filter((org) => readableOrganizations?.includes(org));
+		const commonOrganizations = studyIdsFromResults.filter((org) => readableOrganizations?.includes(org.studyId));
 
 		res.status(200).send(commonOrganizations);
 		return;
@@ -80,18 +80,13 @@ export const getStudyById = validateRequest(getOrDeleteStudyByID, async (req, re
 			throw new lyricProvider.utils.errors.NotFound(`No Study with ID - ${studyId} found.`);
 		}
 		const readableOrganizations = getUserReadableOrganizations(user);
-// If readableOrganizations is undefined, that means auth is disabled OR user is admin
-		if (readableOrganizations === undefined) {
+		// If readableOrganizations is undefined, that means auth is disabled OR user is admin
+		if (readableOrganizations === undefined || readableOrganizations.includes(studyId)) {
 			res.status(200).send(results);
 			return;
 		}
 
-		if (!readableOrganizations?.includes(studyId)) {
-			throw new lyricProvider.utils.errors.Forbidden(`User does not have access to study with id ${studyId}`);
-		} else {
-			res.status(200).send(results);
-			return;
-		}
+		throw new lyricProvider.utils.errors.Forbidden(`User does not have access to study with id ${studyId}`);
 	} catch (exception) {
 		next(exception);
 	}

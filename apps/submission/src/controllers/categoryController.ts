@@ -70,20 +70,11 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 
 		const linkedStudies = await studySvc.getStudiesByCategoryIds([categoryId]);
 
-		const result = {
+		const response = {
+			...foundCategory,
 			categoryId: foundCategory.id,
 			categoryName: foundCategory.name,
 			studyId: linkedStudies[0]?.study_id,
-			organizations: foundCategory.organizations,
-			createdAt: foundCategory.createdAt,
-			createdBy: foundCategory.createdBy,
-			updatedAt: foundCategory.updatedAt,
-			updatedBy: foundCategory.updatedBy,
-		};
-
-		const response = {
-			...result,
-			dictionary: foundCategory.dictionary,
 		};
 
 		res.status(200).json(response);

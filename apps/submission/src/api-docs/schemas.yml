@@ -105,9 +105,6 @@ components:
               type: string
             version:
               type: string
-        name:
-          type: string
-          description: Name of the Category
         organizations:
           type: array
           items:
