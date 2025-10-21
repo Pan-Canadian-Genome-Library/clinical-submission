@@ -27,7 +27,6 @@ import {
 import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
-import { getUserReadableOrganizations } from '@/external/pcglAuthZClient.js';
 import {
 	findIDByHash,
 	generateHash,
@@ -50,9 +49,10 @@ export const getAllStudies = validateRequest(listAllStudies, async (req, res, ne
 	try {
 		const results = await studyRepo.listStudies({ page: Number(page), orderBy, pageSize: Number(pageSize) });
 
-		const readableOrganizations = getUserReadableOrganizations(user);
+		const readableOrganizations = user?.allowedReadOrganizations;
+		logger.info(readableOrganizations);
 
-		if (readableOrganizations === undefined) {
+		if (user?.isAdmin || readableOrganizations === undefined) {
 			res.status(200).send(results);
 			return;
 		}
@@ -79,9 +79,9 @@ export const getStudyById = validateRequest(getOrDeleteStudyByID, async (req, re
 		if (!results) {
 			throw new lyricProvider.utils.errors.NotFound(`No Study with ID - ${studyId} found.`);
 		}
-		const readableOrganizations = getUserReadableOrganizations(user);
+		const readableOrganizations = user?.allowedWriteOrganizations;
 		// If readableOrganizations is undefined, that means auth is disabled OR user is admin
-		if (readableOrganizations === undefined || readableOrganizations.includes(studyId)) {
+		if (user?.isAdmin || readableOrganizations === undefined || readableOrganizations.includes(studyId)) {
 			res.status(200).send(results);
 			return;
 		}
