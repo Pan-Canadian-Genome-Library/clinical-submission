@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { BATCH_ERROR_TYPE, type BatchError, EntityData } from '@overture-stack/lyric';
+import { BATCH_ERROR_TYPE, type BatchError, EntityData, SUBMISSION_ACTION_TYPE } from '@overture-stack/lyric';
 
 import { logger } from '@/common/logger.js';
 import { editDataRequestSchema, submitRequestSchema } from '@/common/validation/submit-validation.js';
@@ -394,16 +394,19 @@ const deleteEntityName = validateRequest(
 			const user = req.user;
 			const authEnabled = authConfig.enabled;
 			const index = req.query.index;
-			const actionType = req.params.actionType;
+			const actionType = req.params.actionType.toUpperCase();
 			const entityName = req.query.entityName;
 
-			const parsedIndex = Number(index);
-			if (isNaN(parsedIndex)) {
-				throw new lyricProvider.utils.errors.BadRequest('Index must be a valid number');
-			}
+			let parsedIndex;
 
-			if (parsedIndex < 0) {
-				throw new lyricProvider.utils.errors.BadRequest('Index cannot be negative');
+			if (parsedIndex != undefined) {
+				parsedIndex = Number(index);
+				if (isNaN(parsedIndex)) {
+					throw new lyricProvider.utils.errors.BadRequest('Index must be a valid number');
+				}
+				if (parsedIndex < 0) {
+					throw new lyricProvider.utils.errors.BadRequest('Index cannot be negative');
+				}
 			}
 
 			const submission = await lyricProvider.services.submission.getSubmissionById(submissionId);
@@ -413,12 +416,12 @@ const deleteEntityName = validateRequest(
 
 			let actionObj;
 
-			if (actionType == 'inserts') {
-				actionObj = submission.errors?.inserts;
-			} else if (actionType == 'updates') {
-				actionObj = submission.errors?.updates;
-			} else if (actionType == 'deletes') {
-				actionObj = submission.errors?.deletes;
+			if (actionType === SUBMISSION_ACTION_TYPE.enum.INSERTS) {
+				actionObj = submission.data?.inserts;
+			} else if (actionType == SUBMISSION_ACTION_TYPE.enum.UPDATES) {
+				actionObj = submission.data?.updates;
+			} else if (actionType == SUBMISSION_ACTION_TYPE.enum.DELETES) {
+				actionObj = submission.data?.deletes;
 			} else {
 				throw new lyricProvider.utils.errors.BadRequest(`Invalid actionType '${actionType}'`);
 			}
@@ -431,7 +434,10 @@ const deleteEntityName = validateRequest(
 			if (!entityObj) {
 				throw new lyricProvider.utils.errors.NotFound(`Entity with name '${entityName}' not found`);
 			}
-			if (!Array.isArray(entityObj) || entityObj[parsedIndex] === undefined) {
+
+			const records = (entityObj as any)?.records ?? [];
+
+			if (!Array.isArray(records) || (parsedIndex && records[parsedIndex] === undefined)) {
 				throw new lyricProvider.utils.errors.NotFound(`Index '${index}' not found`);
 			}
 
