@@ -23,10 +23,9 @@ import { z } from 'zod';
 
 import { logger } from '@/common/logger.js';
 import { lyricProvider } from '@/core/provider.js';
-
-import { getDbInstance } from '../db/index.js';
-import { type RequestValidation, validateRequest } from '../middleware/requestValidation.js';
-import { studyService as getStudyService } from '../service/studyService.js';
+import { getDbInstance } from '@/db/index.js';
+import { type RequestValidation, validateRequest } from '@/middleware/requestValidation.js';
+import { studyService as getStudyService } from '@/service/studyService.js';
 
 interface PropertyExistsPathParamSchema extends ParamsDictionary {
 	entityName: string;
