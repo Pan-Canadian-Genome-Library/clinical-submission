@@ -398,6 +398,7 @@ const deleteEntityName = validateRequest(deleteEntityRequestSchema, async (req, 
 		const index = Number(req.query.index);
 		const actionType = SUBMISSION_ACTION_TYPE.parse(req.params.actionType.toUpperCase());
 		const entityName = req.query.entityName;
+		const authEnabled = authConfig.enabled;
 
 		const submission = await lyricProvider.services.submission.getSubmissionById(submissionId);
 
@@ -405,7 +406,7 @@ const deleteEntityName = validateRequest(deleteEntityRequestSchema, async (req, 
 			throw new lyricProvider.utils.errors.BadRequest(`Submission '${submissionId}' not found`);
 		}
 
-		if (!hasAllowedAccess(submission.organization, 'WRITE', user) && user?.username !== submission?.createdBy) {
+		if (authEnabled && !user?.isAdmin && user?.username !== submission?.createdBy) {
 			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to delete this resource');
 		}
 
