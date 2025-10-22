@@ -435,7 +435,15 @@ const deleteEntityName = validateRequest(
 				throw new lyricProvider.utils.errors.NotFound(`Entity with name '${entityName}' not found`);
 			}
 
-			const records = (entityObj as any)?.records ?? [];
+        let records;
+
+	// This means its of type SubmissionUpdateData[] | SubmissionDeleteData[]
+	if (Array.isArray(entityObj)) {
+		records = entityObj;
+	} else {
+		records = entityObj.records;
+	}
+
 
 			if (!Array.isArray(records) || (parsedIndex && records[parsedIndex] === undefined)) {
 				throw new lyricProvider.utils.errors.NotFound(`Index '${index}' not found`);
