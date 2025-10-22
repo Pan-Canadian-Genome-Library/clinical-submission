@@ -21,7 +21,10 @@ import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
 import { z } from 'zod';
 
+import { lyricProvider } from '@/core/provider.js';
 import { type RequestValidation } from '@/middleware/requestValidation.js';
+
+import { nonNegativeInteger, positiveInteger } from './common.js';
 
 interface SubmitRequestPathParams extends ParamsDictionary {
 	categoryId: string;
@@ -58,5 +61,36 @@ export const editDataRequestSchema: RequestValidation<
 	}),
 	pathParams: z.object({
 		categoryId: z.string(),
+	}),
+};
+
+export interface submissionDeleteEntityNameParams extends ParamsDictionary {
+	actionType: string;
+	submissionId: string;
+}
+
+export interface submissionDeleteEntityNameQueryParams extends ParsedQs {
+	entityName: string;
+	index?: string;
+}
+
+const submissionActionTypeSchema = z
+	.string()
+	.trim()
+	.min(1)
+	.refine((value) => lyricProvider.utils.audit.isSubmissionActionTypeValid(value), 'Invalid Submission Action Type');
+
+export const deleteEntityRequestSchema: RequestValidation<
+	object,
+	submissionDeleteEntityNameQueryParams,
+	submissionDeleteEntityNameParams
+> = {
+	query: z.object({
+		entityName: z.string().trim().min(1),
+		index: nonNegativeInteger.optional(),
+	}),
+	pathParams: z.object({
+		actionType: submissionActionTypeSchema,
+		submissionId: positiveInteger,
 	}),
 };

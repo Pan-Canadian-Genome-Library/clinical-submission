@@ -58,6 +58,26 @@ export const positiveInteger = z.string().superRefine((value, ctx) => {
 	}
 });
 
+export const nonNegativeInteger = z.string().superRefine((value, ctx) => {
+	const parsed = parseInt(value);
+	if (isNaN(parsed)) {
+		ctx.addIssue({
+			code: z.ZodIssueCode.invalid_type,
+			expected: 'number',
+			received: 'nan',
+		});
+	}
+
+	if (parsed < 0) {
+		ctx.addIssue({
+			code: z.ZodIssueCode.too_small,
+			minimum: 0,
+			inclusive: true,
+			type: 'number',
+		});
+	}
+});
+
 export interface PaginationParams extends ParsedQs {
 	orderBy?: string;
 	page?: string;

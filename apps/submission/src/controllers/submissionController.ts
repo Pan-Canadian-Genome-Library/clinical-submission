@@ -20,7 +20,11 @@
 import { BATCH_ERROR_TYPE, type BatchError, EntityData, SUBMISSION_ACTION_TYPE } from '@overture-stack/lyric';
 
 import { logger } from '@/common/logger.js';
-import { editDataRequestSchema, submitRequestSchema } from '@/common/validation/submit-validation.js';
+import {
+	deleteEntityRequestSchema,
+	editDataRequestSchema,
+	submitRequestSchema,
+} from '@/common/validation/submit-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
@@ -386,34 +390,27 @@ const deleteSubmissionById = validateRequest(
  * @description Extends functionality of lyric delete submissions by adding
  * an additional auth check if the user attempting the delete action is the same user who create the submission regardless of user belongs to said organization
  */
-const deleteEntityName = validateRequest(
-	lyricProvider.utils.schema.submissionDeleteEntityNameRequestSchema,
-	async (req, res, next) => {
-		try {
-			const submissionId = Number(req.params.submissionId);
-			const user = req.user;
-			const authEnabled = authConfig.enabled;
-			const index = req.query.index;
-			const actionType = req.params.actionType.toUpperCase();
-			const entityName = req.query.entityName;
+const deleteEntityName = validateRequest(deleteEntityRequestSchema, async (req, res, next) => {
+	try {
+		const user = req.user;
 
-			let parsedIndex;
+		const submissionId = Number(req.params.submissionId);
+		const index = Number(req.query.index);
+		const actionType = SUBMISSION_ACTION_TYPE.parse(req.params.actionType.toUpperCase());
+		const entityName = req.query.entityName;
 
-			if (parsedIndex != undefined) {
-				parsedIndex = Number(index);
-				if (isNaN(parsedIndex)) {
-					throw new lyricProvider.utils.errors.BadRequest('Index must be a valid number');
-				}
-				if (parsedIndex < 0) {
-					throw new lyricProvider.utils.errors.BadRequest('Index cannot be negative');
-				}
-			}
+		const submission = await lyricProvider.services.submission.getSubmissionById(submissionId);
 
-			const submission = await lyricProvider.services.submission.getSubmissionById(submissionId);
-			if (!submission) {
-				throw new lyricProvider.utils.errors.BadRequest(`Submission '${submissionId}' not found`);
-			}
+		if (!submission) {
+			throw new lyricProvider.utils.errors.BadRequest(`Submission '${submissionId}' not found`);
+		}
 
+		if (!hasAllowedAccess(submission.organization, 'WRITE', user) && user?.username !== submission?.createdBy) {
+			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to delete this resource');
+		}
+
+		// If index doesn't exists, we can skip validation here
+		if (index) {
 			let actionObj;
 
 			switch (actionType) {
@@ -442,29 +439,32 @@ const deleteEntityName = validateRequest(
 
 			let records;
 
-			// This means its of type SubmissionUpdateData[] | SubmissionDeleteData[]
+			// Check of its array, if it is then we are removing index of SubmissionUpdateData[] | SubmissionDeleteData[]
 			if (Array.isArray(entityObj)) {
 				records = entityObj;
 			} else {
-				records = entityObj.records;
+				// if its not an array, then its of type SubmissionInsertData which we will remove index from DataRecord[]
+				records = entityObj.records; //
 			}
 
-			if (!Array.isArray(records) || (parsedIndex && records[parsedIndex] === undefined)) {
+			if (records[index] === undefined) {
 				throw new lyricProvider.utils.errors.NotFound(`Index '${index}' not found`);
 			}
-
-			if (authEnabled && !user?.isAdmin && user?.username !== submission?.createdBy) {
-				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to delete this resource');
-			}
-
-			const response = lyricProvider.controllers.submission.deleteEntityName(req, res, next);
-
-			return res.status(200).send(response);
-		} catch (error) {
-			next(error);
 		}
-	},
-);
+
+		const username = user?.username || '';
+
+		const response = await lyricProvider.services.submission.deleteActiveSubmissionEntity(submissionId, username, {
+			actionType,
+			entityName,
+			index,
+		});
+
+		return res.status(200).send(response);
+	} catch (error) {
+		next(error);
+	}
+});
 
 export default {
 	getSubmissionById,
