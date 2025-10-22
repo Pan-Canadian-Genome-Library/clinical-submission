@@ -444,7 +444,7 @@ const deleteEntityName = validateRequest(deleteEntityRequestSchema, async (req, 
 				records = entityObj;
 			} else {
 				// if its not an array, then its of type SubmissionInsertData which we will remove index from DataRecord[]
-				records = entityObj.records; //
+				records = entityObj.records;
 			}
 
 			if (records[index] === undefined) {
