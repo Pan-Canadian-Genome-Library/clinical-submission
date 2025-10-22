@@ -386,8 +386,8 @@ const deleteSubmissionById = validateRequest(
 
 /**
  * Custom Lyric Delete Active Submission by EntityName
- * @extends lyricProvider.controllers.submission.deleteEntityName
- * @description Extends functionality of lyric delete submissions by adding
+ * @override lyricProvider.controllers.submission.deleteEntityName
+ * @description Override functionality of lyric delete submissions controller by adding
  * an additional auth check if the user attempting the delete action is the same user who create the submission regardless of user belongs to said organization
  */
 const deleteEntityName = validateRequest(deleteEntityRequestSchema, async (req, res, next) => {
@@ -409,7 +409,7 @@ const deleteEntityName = validateRequest(deleteEntityRequestSchema, async (req, 
 			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to delete this resource');
 		}
 
-		// If index doesn't exists, we can skip validation here
+		// If index exists, we have to do additional validation checks
 		if (index) {
 			let actionObj;
 
