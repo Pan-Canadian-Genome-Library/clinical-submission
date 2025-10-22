@@ -94,9 +94,9 @@
           type: integer
         description: |
           An optional query parameter used to specify the index of the item within the submission type to be deleted. 
+          <br/> If not provided all the items within the submission type will be deleted.
           <br/>
           <br/> `NOTE: First record/index will start at 0, not 1`
-          <br/> If not provided all the items within the submission type will be deleted.
     security:
       - bearerAuth: []
     responses:
