@@ -4,7 +4,7 @@
 
 > The Pan-Canadian Genome Library (PCGL) is a large collaborative effort to unify Canada's genome sequencing efforts. The PCGL is an open-source and open-science initiative, building upon Canadian-made foundational components and datasets, and utilizing international standards such as GA4GH to unify Canada’s human genome sequencing efforts.
 
-This repository acts as a wrapper around the [@overture-stack/lyric](https://github.com/overture-stack/lyric) package, enabling efficient handling and management of data submissions. It adapts Lyric's functionality to meet PCGL requirements, ensuring reliable data submission and data management.
+This application is a wrapper around the [@overture-stack/lyric](https://github.com/overture-stack/lyric) package, enabling efficient handling and management of data submissions. It adapts Lyric's functionality to meet PCGL requirements, ensuring reliable data submission and data management.
 
 ## Getting started
 
@@ -78,12 +78,4 @@ This repository acts as a wrapper around the [@overture-stack/lyric](https://git
 | `PLURALIZE_SCHEMAS_ENABLED` | This feature automatically convert schema names to their plural forms when handling compound documents. Pluralization assumes the words are in English                                                                                                                                                                                                                                                      | true                                   |
 | `SERVER_PORT`               | Server Port                                                                                                                                                                                                                                                                                                                                                                                                 | 3030                                   |
 | `UPLOAD_LIMIT`              | Limit upload file size in string or number. <br>Supported units and abbreviations are as follows and are case-insensitive: <br> - b for bytes<br> - kb for kilobytes<br>- mb for megabytes<br>- gb for gigabytes<br>- tb for terabytes<br>- pb for petabytes<br>Any other text is considered as byte                                                                                                        | '10mb'                                 |
-| `VALIDATOR_CONFIG`          | Defines a configurable endpoint for validating the existence of a record with a specific value. The configuration is provided as an array of objects, where each object must include 'categoryId', 'entityName', and 'fieldName'. These entries determine which entity-field combinations are enabled for validation. (Example: `[{"categoryId": "1", "entityName": "sample", "fieldName": "sample_id" }]`) |                                        |
 
-### Script Commands
-
-| Command           | Description                                             |
-| ----------------- | ------------------------------------------------------- |
-| `pnpm build:all`  | Compile typescript code and generate database schemas   |
-| `pnpm start:dev`  | Run database migration and start Server for development |
-| `pnpm start:prod` | Run database migration and start Server for production  |
