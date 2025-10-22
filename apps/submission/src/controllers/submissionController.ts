@@ -416,34 +416,38 @@ const deleteEntityName = validateRequest(
 
 			let actionObj;
 
-			if (actionType === SUBMISSION_ACTION_TYPE.enum.INSERTS) {
-				actionObj = submission.data?.inserts;
-			} else if (actionType == SUBMISSION_ACTION_TYPE.enum.UPDATES) {
-				actionObj = submission.data?.updates;
-			} else if (actionType == SUBMISSION_ACTION_TYPE.enum.DELETES) {
-				actionObj = submission.data?.deletes;
-			} else {
-				throw new lyricProvider.utils.errors.BadRequest(`Invalid actionType '${actionType}'`);
+			switch (actionType) {
+				case SUBMISSION_ACTION_TYPE.enum.INSERTS:
+					actionObj = submission.data?.inserts;
+					break;
+				case SUBMISSION_ACTION_TYPE.enum.UPDATES:
+					actionObj = submission.data?.updates;
+					break;
+				case SUBMISSION_ACTION_TYPE.enum.DELETES:
+					actionObj = submission.data?.deletes;
+					break;
+				default:
+					throw new lyricProvider.utils.errors.BadRequest(`Invalid actionType '${actionType}'`);
 			}
 
 			if (!actionObj) {
 				throw new lyricProvider.utils.errors.BadRequest(`Action type '${actionType}' not found in submission data`);
 			}
+
 			const entityObj = actionObj[entityName];
 
 			if (!entityObj) {
 				throw new lyricProvider.utils.errors.NotFound(`Entity with name '${entityName}' not found`);
 			}
 
-        let records;
+			let records;
 
-	// This means its of type SubmissionUpdateData[] | SubmissionDeleteData[]
-	if (Array.isArray(entityObj)) {
-		records = entityObj;
-	} else {
-		records = entityObj.records;
-	}
-
+			// This means its of type SubmissionUpdateData[] | SubmissionDeleteData[]
+			if (Array.isArray(entityObj)) {
+				records = entityObj;
+			} else {
+				records = entityObj.records;
+			}
 
 			if (!Array.isArray(records) || (parsedIndex && records[parsedIndex] === undefined)) {
 				throw new lyricProvider.utils.errors.NotFound(`Index '${index}' not found`);
