@@ -38,6 +38,7 @@ import { dacRouter } from './routes/dac.js';
 import { dataRouter } from './routes/data.js';
 import { dictionaryRouter } from './routes/dictionary.js';
 import { studyRouter } from './routes/study.js';
+import { validationRouter } from './routes/validationRouter.js';
 
 const app = express();
 
@@ -89,16 +90,16 @@ app.use('/auth', authRouter);
 
 // Lyric Routes
 app.use('/audit', lyricProvider.routers.audit);
-app.use('/validator', lyricProvider.routers.validator);
 
 /**
  * Lyric Custom Routes
  * Implements lyrics default routes with extra configurations tailored for PCGL
- */
+*/
 app.use('/submission', submissionRouter);
 app.use('/data', dataRouter);
 app.use('/category', categoryRouter);
 app.use('/dictionary', dictionaryRouter);
+app.use('/validator', validationRouter);
 
 // Swagger route
 app.use('/api-docs', openAPIRouter);

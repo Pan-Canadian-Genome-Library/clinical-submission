@@ -22,6 +22,13 @@ components:
         schema:
           type: string
         required: true
+      FieldName:
+        description: The name of the Field
+        name: fieldName
+        in: path
+        schema:
+          type: string
+        required: true
       Organization:
         name: organization
         in: path
@@ -77,6 +84,13 @@ components:
         schema:
           type: integer
         description: Optional query parameter to specify the number of results per page. Default value is 20
+      Study:
+        description: Study ID to check
+        name: study
+        in: query
+        schema:
+          type: string
+        required: true
       Value:
         name: value
         in: query
