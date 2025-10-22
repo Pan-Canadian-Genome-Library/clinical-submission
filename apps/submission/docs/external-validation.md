@@ -2,7 +2,7 @@
 
 The standard External Validation controller that Lyric provided has been replaced to accomodate the PCGL model for Study and Category management.
 
-PCGL is using a model where a unique data dictionary is being created for every study, while the original Lyric external Validation system was built to accomodate a small number of known categories. Since the study management system requires that every study has its own study, the default validation system would require a different URL (with a different category ID) for every study. However, we can lookup the category ID from the Study ID.
+PCGL is using a model where a unique data dictionary is being created for every study, while the original Lyric external Validation system was built to accomodate a small number of known categories. Since the study management system requires that every category has its own study, the default validation system would require a different URL (with a different category ID) for every study. However, we can lookup the category ID from the Study ID.
 
 Our objective is to allow PCGL File Manager to check for registered records when analyses are created, and this process will know the Study ID, but not the Category ID from the Submission Server. Therefore, we modified the path of the External Validation URL to use the Study ID only, and omit the Category ID.
 
