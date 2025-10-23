@@ -108,19 +108,19 @@
             properties:
               dacId:
                 type: string
-                description: 'Username of the DAC'
+                description: 'User defined identifier for the DAC.'
               dacName:
                 type: string
-                description: 'Full name of the DAC'
+                description: 'Full display name of the DAC.'
               dacDescription:
                 type: string
-                description: 'An in-depth description of the DAC, including its overall purpose, scope and responsibilities.'
+                description: 'An short description of the DAC. This should include its overall purpose, scope and responsibilities.'
               contactName:
                 type: string
-                description: 'The full name of the primary contact person. Please provide in the format: FirstName LastName E,g Jones Smith'
+                description: 'The full name of the primary contact person. Please provide in the format: "FirstName LastName", Ex. "Jones Smith".'
               contactEmail:
                 type: string
-                description: 'Contact email for communication'
+                description: 'Contact email to be used for communication.'
             required:
               - dacId
               - dacName

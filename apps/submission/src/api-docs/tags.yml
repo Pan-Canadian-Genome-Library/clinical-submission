@@ -16,4 +16,4 @@ tags:
   - name: Study
     description: Create, View, and Edit a Study. Study refers to a specific research project conducted as part of a larger program. It involves data collection, analysis, and interpretation related to the program's goals. Each study is focused on particular research questions related to set of objectives.
   - name: Validator
-    description: Operations related to validating records against existing data. This includes checking if a record exists based on category, organization, entity, and value
+    description: Operations to allow other services to validate if specific data records have been submitted. This includes checking if a record exists based on category, organization, entity, and value.

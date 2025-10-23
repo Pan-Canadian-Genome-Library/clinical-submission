@@ -1,12 +1,12 @@
-/validator/category/{categoryId}/entity/{entityName}/exists:
+/validator/entity/{entityName}/field/{fieldName}/exists:
   get:
     summary: Check if a record exists based on category, organization, entity, and value
     tags:
       - Validator
     parameters:
-      - $ref: '#/components/parameters/path/CategoryId'
       - $ref: '#/components/parameters/path/EntityName'
-      - $ref: '#/components/parameters/query/Organization'
+      - $ref: '#/components/parameters/path/FieldName'
+      - $ref: '#/components/parameters/query/Study'
       - $ref: '#/components/parameters/query/Value'
     security:
       - bearerAuth: []
