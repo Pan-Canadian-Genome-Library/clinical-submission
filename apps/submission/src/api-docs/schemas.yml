@@ -93,7 +93,7 @@ components:
           description: ID of the Category
         studyId:
           type: string
-          description: study id belonging to the category
+          description: Study id belonging to the category
         categoryName:
           type: string
           description: Name of the Category
@@ -116,7 +116,7 @@ components:
         createdBy:
           type: string
           description: User name who created the submission
-        udpatedAt:
+        updatedAt:
           type: string
           description: Date and time of latest update
         updatedBy:

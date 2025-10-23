@@ -64,6 +64,7 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 
 	try {
 		const foundCategory = await categoryService.getDetails(categoryId);
+
 		if (!foundCategory) {
 			throw new lyricProvider.utils.errors.NotFound(`No Category with ID - ${categoryId} found.`);
 		}
@@ -71,10 +72,15 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 		const linkedStudies = await studySvc.getStudiesByCategoryIds([categoryId]);
 
 		const response = {
-			...foundCategory,
 			categoryId: foundCategory.id,
-			categoryName: foundCategory.name,
 			studyId: linkedStudies[0]?.study_id,
+			dictionary: foundCategory.dictionary,
+			categoryName: foundCategory.name,
+			organizations: foundCategory.organizations,
+			createdAt: foundCategory.createdAt,
+			createdBy: foundCategory.createdBy,
+			updatedAt: foundCategory.updatedAt,
+			updatedBy: foundCategory.updatedBy,
 		};
 
 		res.status(200).json(response);
