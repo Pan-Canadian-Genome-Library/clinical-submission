@@ -26,6 +26,7 @@ import { studyService } from '@/service/studyService.js';
 const registerDictionary = validateRequest(registerDictionaryValidation, async (req, res, next) => {
 	try {
 		const { studyId, categoryName, dictionaryName, dictionaryVersion, defaultCentricEntity } = req.body;
+		const user = req.user;
 
 		const db = getDbInstance();
 		const studyRepo = studyService(db);
@@ -49,6 +50,7 @@ const registerDictionary = validateRequest(registerDictionaryValidation, async (
 			dictionaryName,
 			dictionaryVersion,
 			defaultCentricEntity,
+			username: user?.username,
 		});
 
 		await studyRepo.updateStudy(studyId, { categoryId: category.id });
