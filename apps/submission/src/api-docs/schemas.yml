@@ -88,13 +88,10 @@ components:
     CategoryDetails:
       type: object
       properties:
-        categoryId:
+        id:
           type: number
           description: ID of the Category
-        studyId:
-          type: string
-          description: Study id belonging to the category
-        categoryName:
+        name:
           type: string
           description: Name of the Category
         dictionary:
