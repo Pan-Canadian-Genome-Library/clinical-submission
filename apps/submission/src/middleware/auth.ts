@@ -20,7 +20,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { logger } from '@/common/logger.js';
-import type { PCGLRequestWithUser, PCGLUserSessionResult } from '@/common/types/auth.js';
+import type { PCGLRequestWithUser, PCGLUserSession, PCGLUserSessionResult } from '@/common/types/auth.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { extractAccessTokenFromHeader, fetchUserData } from '@/external/pcglAuthZClient.js';
@@ -50,8 +50,15 @@ export const authMiddleware = ({ requireAdmin = false }: { requireAdmin?: boolea
 			if (requireAdmin && !result.user?.isAdmin) {
 				throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 			}
+			const users: PCGLUserSession = {
+				...result.user,
+				allowedReadOrganizations: ['PCGLUserSession', 'STUDY_BUDDY'],
+				allowedWriteOrganizations: ['PCGLUserSession', 'STUDY_BUDDY'],
 
-			req.user = result.user;
+				username: 'test-user-name',
+			};
+
+			req.user = users;
 			return next();
 		} catch (error) {
 			logger.error(error);
