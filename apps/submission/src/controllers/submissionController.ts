@@ -17,10 +17,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { BATCH_ERROR_TYPE, type BatchError, EntityData } from '@overture-stack/lyric';
+import { BATCH_ERROR_TYPE, type BatchError, EntityData, SUBMISSION_ACTION_TYPE } from '@overture-stack/lyric';
 
 import { logger } from '@/common/logger.js';
-import { editDataRequestSchema, submitRequestSchema } from '@/common/validation/submit-validation.js';
+import {
+	deleteEntityRequestSchema,
+	editDataRequestSchema,
+	submitRequestSchema,
+} from '@/common/validation/submit-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
@@ -181,8 +185,8 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 
 		logger.info(
 			`Upload Submission Request: categoryId '${categoryId}'` +
-			` organization '${organization}'` +
-			` files: '${files?.map((f) => f.originalname)}'`,
+				` organization '${organization}'` +
+				` files: '${files?.map((f) => f.originalname)}'`,
 		);
 
 		if (!files || files.length == 0) {
@@ -382,35 +386,86 @@ const deleteSubmissionById = validateRequest(
 
 /**
  * Custom Lyric Delete Active Submission by EntityName
- * @extends lyricProvider.controllers.submission.deleteEntityName
- * @description Extends functionality of lyric delete submissions by adding
+ * @override lyricProvider.controllers.submission.deleteEntityName
+ * @description Override functionality of lyric delete submissions controller by adding
  * an additional auth check if the user attempting the delete action is the same user who create the submission regardless of user belongs to said organization
  */
-const deleteEntityName = validateRequest(
-	lyricProvider.utils.schema.submissionDeleteEntityNameRequestSchema,
-	async (req, res, next) => {
-		try {
-			const submissionId = Number(req.params.submissionId);
-			const user = req.user;
-			const authEnabled = authConfig.enabled;
+const deleteEntityName = validateRequest(deleteEntityRequestSchema, async (req, res, next) => {
+	try {
+		const user = req.user;
 
-			const submission = await lyricProvider.services.submission.getSubmissionById(submissionId);
-			if (!submission) {
-				throw new lyricProvider.utils.errors.BadRequest(`Submission '${submissionId}' not found`);
-			}
+		const submissionId = Number(req.params.submissionId);
+		const index = Number(req.query.index);
+		const actionType = SUBMISSION_ACTION_TYPE.parse(req.params.actionType.toUpperCase());
+		const entityName = req.query.entityName;
+		const authEnabled = authConfig.enabled;
 
-			if (authEnabled && !user?.isAdmin && user?.username !== submission?.createdBy) {
-				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to delete this resource');
-			}
+		const submission = await lyricProvider.services.submission.getSubmissionById(submissionId);
 
-			const response = lyricProvider.controllers.submission.deleteEntityName(req, res, next);
-
-			return res.status(200).send(response);
-		} catch (error) {
-			next(error);
+		if (!submission) {
+			throw new lyricProvider.utils.errors.BadRequest(`Submission '${submissionId}' not found`);
 		}
-	},
-);
+
+		if (authEnabled && !user?.isAdmin && user?.username !== submission?.createdBy) {
+			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to delete this resource');
+		}
+
+		// If index exists, we have to do additional validation checks
+		if (index) {
+			let actionObj;
+
+			switch (actionType) {
+				case SUBMISSION_ACTION_TYPE.enum.INSERTS:
+					actionObj = submission.data?.inserts;
+					break;
+				case SUBMISSION_ACTION_TYPE.enum.UPDATES:
+					actionObj = submission.data?.updates;
+					break;
+				case SUBMISSION_ACTION_TYPE.enum.DELETES:
+					actionObj = submission.data?.deletes;
+					break;
+				default:
+					throw new lyricProvider.utils.errors.BadRequest(`Invalid actionType '${actionType}'`);
+			}
+
+			if (!actionObj) {
+				throw new lyricProvider.utils.errors.BadRequest(`Action type '${actionType}' not found in submission data`);
+			}
+
+			const entityObj = actionObj[entityName];
+
+			if (!entityObj) {
+				throw new lyricProvider.utils.errors.NotFound(`Entity with name '${entityName}' not found`);
+			}
+
+			let records;
+
+			// Check of its array, if it is then we are removing index of SubmissionUpdateData[] | SubmissionDeleteData[]
+			if (Array.isArray(entityObj)) {
+				records = entityObj;
+			} else {
+				// if its not an array, then its of type SubmissionInsertData which we will remove index from DataRecord[]
+				records = entityObj.records;
+			}
+
+			if (records[index] === undefined) {
+				throw new lyricProvider.utils.errors.NotFound(`Index '${index}' not found`);
+			}
+		}
+
+		const username = user?.username || '';
+
+		const response = await lyricProvider.services.submission.deleteActiveSubmissionEntity(submissionId, username, {
+			actionType,
+			entityName,
+			index,
+		});
+
+		return res.status(200).send(response);
+	} catch (error) {
+		next(error);
+	}
+});
 
 export default {
 	getSubmissionById,
