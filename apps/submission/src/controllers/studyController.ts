@@ -27,6 +27,7 @@ import {
 import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
+import { hasAllowedAccess } from '@/external/pcglAuthZClient.js';
 import {
 	findIDByHash,
 	generateHash,
@@ -50,7 +51,6 @@ export const getAllStudies = validateRequest(listAllStudies, async (req, res, ne
 		const results = await studyRepo.listStudies({ page: Number(page), orderBy, pageSize: Number(pageSize) });
 
 		const readableOrganizations = user?.allowedReadOrganizations;
-		logger.info(readableOrganizations);
 
 		if (user?.isAdmin || readableOrganizations === undefined) {
 			res.status(200).send(results);
@@ -79,14 +79,12 @@ export const getStudyById = validateRequest(getOrDeleteStudyByID, async (req, re
 		if (!results) {
 			throw new lyricProvider.utils.errors.NotFound(`No Study with ID - ${studyId} found.`);
 		}
-		const readableOrganizations = user?.allowedWriteOrganizations;
-		// If readableOrganizations is undefined, that means auth is disabled OR user is admin
-		if (user?.isAdmin || readableOrganizations === undefined || readableOrganizations.includes(studyId)) {
-			res.status(200).send(results);
-			return;
+
+		if (!hasAllowedAccess(studyId, 'READ', user)) {
+			throw new lyricProvider.utils.errors.Forbidden(`User does not have access to study with id ${studyId}`);
 		}
 
-		throw new lyricProvider.utils.errors.Forbidden(`User does not have access to study with id ${studyId}`);
+		res.status(200).send(results);
 	} catch (exception) {
 		next(exception);
 	}
