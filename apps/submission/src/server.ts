@@ -58,8 +58,8 @@ app.use(
 				return callback(null, true);
 			} else if (
 				env.ALLOWED_ORIGINS?.split(',')
-				   .map(allowed => allowed.trim())
-				   .includes(origin)
+					.map((allowed) => allowed.trim())
+					.includes(origin)
 			) {
 				// Allow if origin is in the whitelist
 				return callback(null, true);
