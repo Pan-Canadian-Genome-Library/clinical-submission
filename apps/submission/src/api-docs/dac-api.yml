@@ -57,7 +57,7 @@
       - $ref: '#/components/parameters/path/DacId'
     requestBody:
       content:
-        application/x-www-form-urlencoded:
+        application/json:
           schema:
             type: object
             properties:
@@ -102,7 +102,7 @@
       - DAC
     requestBody:
       content:
-        application/x-www-form-urlencoded:
+        application/json:
           schema:
             type: object
             properties:
