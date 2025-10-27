@@ -21,7 +21,7 @@ import { ParsedQs } from 'qs';
 import { z } from 'zod';
 
 export const stringNotEmpty = z.string().trim().min(1);
-export const stringNotEmptyOptional = stringNotEmpty.or(z.literal(''));
+export const stringNotEmptyOptional = stringNotEmpty.or(z.literal('')).optional();
 export const orderByString = z.literal('asc').or(z.literal('desc'));
 
 /**
