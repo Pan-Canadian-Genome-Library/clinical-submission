@@ -23,7 +23,7 @@ import { z } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
-import { stringNotEmpty } from './common.js';
+import { stringNotEmpty, stringNotEmptyOptional } from './common.js';
 
 type RegisterDictionaryBody = {
 	studyId: string;
@@ -39,6 +39,6 @@ export const registerDictionaryValidation: RequestValidation<RegisterDictionaryB
 		categoryName: stringNotEmpty,
 		dictionaryName: stringNotEmpty,
 		dictionaryVersion: stringNotEmpty,
-		defaultCentricEntity: stringNotEmpty,
+		defaultCentricEntity: stringNotEmptyOptional,
 	}),
 };
