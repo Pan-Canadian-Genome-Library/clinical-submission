@@ -56,10 +56,15 @@ app.use(
 			} else if (!origin) {
 				// allow requests with no origin
 				return callback(null, true);
-			} else if (env.ALLOWED_ORIGINS && env.ALLOWED_ORIGINS.split(',').indexOf(origin) !== -1) {
+			} else if (
+				env.ALLOWED_ORIGINS?.split(',')
+					.map((allowed) => allowed.trim())
+					.includes(origin)
+			) {
 				// Allow if origin is in the whitelist
 				return callback(null, true);
 			}
+
 			const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
 			return callback(new Error(msg), false);
 		},
