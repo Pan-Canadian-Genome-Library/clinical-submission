@@ -71,10 +71,12 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 
 		const linkedStudies = await studySvc.getStudiesByCategoryIds([categoryId]);
 
-		const study = linkedStudies[0]?.study_id ?? [];
+		const study = linkedStudies[0]?.study_id;
+
 		const response = {
 			...foundCategory,
-			organizations: study,
+			studyId: study,
+			organizations: undefined, // Remove organizations in-favor of studyId
 		};
 
 		res.status(200).json(response);
@@ -109,8 +111,6 @@ const listAllCategories = validateRequest({}, async (req, res, next) => {
 		}
 
 		const response = categories.map((cat) => ({
-			categoryId: cat.id,
-			categoryName: cat.name,
 			studyId: studiesByCategory[cat.id],
 		}));
 

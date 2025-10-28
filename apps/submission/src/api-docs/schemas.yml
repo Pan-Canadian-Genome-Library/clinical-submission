@@ -102,11 +102,11 @@ components:
               type: string
             version:
               type: string
-        organizations:
-          type: array
+        studyId:
+          type: string
           items:
             type: string
-            description: List of organizations on this category
+            description: Associated study to this category
         createdAt:
           type: string
           description: Date and time of creation
@@ -291,6 +291,9 @@ components:
           name:
             type: string
             description: Name of the Category
+          studyId:
+            type: string
+            description: Associated study with category
 
     RegisterDictionaryResult:
       type: object
