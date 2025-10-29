@@ -111,6 +111,7 @@ const listAllCategories = validateRequest({}, async (req, res, next) => {
 		}
 
 		const response = categories.map((cat) => ({
+			...cat,
 			studyId: studiesByCategory[cat.id],
 		}));
 
