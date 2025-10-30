@@ -28,7 +28,11 @@ export const categoryRouter: Router = (() => {
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
 
-	router.delete('/:categoryId', authMiddleware({ requireAdmin: true }), categoryController.deleteCategoryById);
+	router.delete(
+		'/:categoryId/study',
+		authMiddleware({ requireAdmin: true }),
+		categoryController.unlinkStudiesFromCategory,
+	);
 
 	// Public endpoints – do not require authentication
 	router.get('/', lyricProvider.controllers.category.listAll);

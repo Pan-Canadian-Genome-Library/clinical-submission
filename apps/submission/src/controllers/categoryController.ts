@@ -18,13 +18,16 @@
  */
 
 import { logger } from '@/common/logger.js';
-import { getOrDeleteCategoryByID } from '@/common/validation/category-validation.js';
+import {
+	getCategoryByIDReqValidation,
+	removeStudyLinkFromCategoryReqValidation,
+} from '@/common/validation/category-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import { studyService } from '@/service/studyService.js';
 
-const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res, next) => {
+const unlinkStudiesFromCategory = validateRequest(removeStudyLinkFromCategoryReqValidation, async (req, res, next) => {
 	try {
 		const categoryId = Number(req.params.categoryId);
 		const database = getDbInstance();
@@ -39,7 +42,7 @@ const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, 
 		const submittedDataCount = await lyricProvider.repositories.submittedData.getTotalRecordsByCategoryId(categoryId);
 		if (submittedDataCount > 0) {
 			throw new lyricProvider.utils.errors.BadRequest(
-				`Cannot delete category ${categoryId} because it is linked to ${submittedDataCount} records in submittedData`,
+				`Cannot remove study link from category ${categoryId} because it has ${submittedDataCount} records submitted`,
 			);
 		}
 
@@ -51,12 +54,12 @@ const deleteCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, 
 		res.status(204).send();
 		return;
 	} catch (exception) {
-		logger.error(exception, 'Error in deleteCategoryById');
+		logger.error(exception, 'Error in unlinkStudiesFromCategory');
 		next(exception);
 	}
 });
 
-const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res, next) => {
+const getCategoryById = validateRequest(getCategoryByIDReqValidation, async (req, res, next) => {
 	const categoryId = Number(req.params.categoryId);
 	const database = getDbInstance();
 	const categoryService = lyricProvider.services.category;
@@ -85,7 +88,7 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 		res.status(200).json(response);
 		return;
 	} catch (exception) {
-		logger.error(exception, 'Error in deleteCategoryById');
+		logger.error(exception, 'Error in getCategoryById');
 		next(exception);
 	}
 });
@@ -126,4 +129,4 @@ const listAllCategories = validateRequest({}, async (req, res, next) => {
 	}
 });
 
-export default { deleteCategoryById, getCategoryById, listAllCategories };
+export default { unlinkStudiesFromCategory, getCategoryById, listAllCategories };
