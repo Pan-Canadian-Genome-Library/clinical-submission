@@ -91,9 +91,9 @@ components:
         id:
           type: number
           description: ID of the Category
-        studyId:
+        name:
           type: string
-          description: study id belonging to the category
+          description: Name of the Category
         dictionary:
           type: object
           description: Dictionary used to validate the submission
@@ -102,21 +102,16 @@ components:
               type: string
             version:
               type: string
-        name:
+        studyId:
           type: string
-          description: Name of the Category
-        organizations:
-          type: array
-          items:
-            type: string
-            description: List of organizations on this category
+          description: Associated study to this category
         createdAt:
           type: string
           description: Date and time of creation
         createdBy:
           type: string
           description: User name who created the submission
-        udpatedAt:
+        updatedAt:
           type: string
           description: Date and time of latest update
         updatedBy:
@@ -294,6 +289,9 @@ components:
           name:
             type: string
             description: Name of the Category
+          studyId:
+            type: string
+            description: Associated study with category
 
     RegisterDictionaryResult:
       type: object

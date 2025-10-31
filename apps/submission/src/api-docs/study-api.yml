@@ -1,14 +1,13 @@
 /study:
   get:
-    summary: Gets all available studies.
+    summary: |
+      Gets all available studies. (PUBLIC endpoint, user is not required to be authenticated)
     parameters:
       - $ref: '#/components/parameters/query/OrderBy'
       - $ref: '#/components/parameters/query/Page'
       - $ref: '#/components/parameters/query/PageSize'
     tags:
       - Study
-    security:
-      - bearerAuth: []
     responses:
       200:
         description: An array of all studies will be listed. Will return an empty array if no studies are present.
@@ -122,7 +121,8 @@
 
 /study/{studyId}:
   get:
-    summary: Get a study by a study ID.
+    summary: |
+      Get a study by a study ID. (PUBLIC endpoint, user is not required to be authenticated)
     parameters:
       - name: studyId
         in: path
@@ -132,8 +132,6 @@
         description: Unique identifier of the study in PCGL.
     tags:
       - Study
-    security:
-      - bearerAuth: []
     responses:
       200:
         description: Returns a record containing all information available on the study.

@@ -33,8 +33,8 @@ export const studyRouter: Router = (() => {
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
 
-	router.get('/:studyId', authMiddleware(), getStudyById);
-	router.get('/', authMiddleware(), getAllStudies);
+	router.get('/:studyId', getStudyById);
+	router.get('/', getAllStudies);
 
 	router.post('/', authMiddleware({ requireAdmin: true }), createNewStudy);
 	router.delete('/:studyId', authMiddleware({ requireAdmin: true }), deleteStudyById);

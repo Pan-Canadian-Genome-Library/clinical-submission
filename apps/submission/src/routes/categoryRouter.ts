@@ -31,8 +31,8 @@ export const categoryRouter: Router = (() => {
 	router.delete('/:categoryId', authMiddleware({ requireAdmin: true }), categoryController.deleteCategoryById);
 
 	// Public endpoints – do not require authentication
-	router.get('/', lyricProvider.controllers.category.listAll);
-	router.get('/:categoryId', lyricProvider.controllers.category.getDetails);
+	router.get('/', categoryController.listAllCategories);
+	router.get('/:categoryId', categoryController.getCategoryById);
 
 	router.use('', lyricProvider.routers.category);
 	return router;

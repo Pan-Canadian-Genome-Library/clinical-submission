@@ -64,22 +64,19 @@ const getCategoryById = validateRequest(getOrDeleteCategoryByID, async (req, res
 
 	try {
 		const foundCategory = await categoryService.getDetails(categoryId);
+
 		if (!foundCategory) {
 			throw new lyricProvider.utils.errors.NotFound(`No Category with ID - ${categoryId} found.`);
 		}
 
 		const linkedStudies = await studySvc.getStudiesByCategoryIds([categoryId]);
 
-		if (linkedStudies.length === 0) {
-			logger.info('Category is misconfigured, no associated study');
-			throw new lyricProvider.utils.errors.NotFound(
-				`Category is misconfigured, no associated study ID - ${categoryId}.`,
-			);
-		}
+		const study = linkedStudies[0]?.study_id;
 
 		const response = {
 			...foundCategory,
-			studyId: linkedStudies[0]?.study_id,
+			studyId: study,
+			organizations: undefined, // Remove organizations in-favor of studyId
 		};
 
 		res.status(200).json(response);

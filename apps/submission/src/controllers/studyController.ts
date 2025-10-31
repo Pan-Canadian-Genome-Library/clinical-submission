@@ -46,8 +46,14 @@ export const getAllStudies = validateRequest(listAllStudies, async (req, res, ne
 	const studyRepo = studyService(db);
 
 	try {
-		const results = await studyRepo.listStudies({ page: Number(page), orderBy, pageSize: Number(pageSize) });
+		const results = await studyRepo.listStudies({
+			page: Number(page),
+			orderBy,
+			pageSize: Number(pageSize),
+		});
+
 		res.status(200).send(results);
+
 		return;
 	} catch (exception) {
 		next(exception);
@@ -61,11 +67,12 @@ export const getStudyById = validateRequest(getOrDeleteStudyByID, async (req, re
 
 	try {
 		const results = await studyRepo.getStudyById(studyId);
+
 		if (!results) {
 			throw new lyricProvider.utils.errors.NotFound(`No Study with ID - ${studyId} found.`);
 		}
+
 		res.status(200).send(results);
-		return;
 	} catch (exception) {
 		next(exception);
 	}
