@@ -29,7 +29,13 @@ interface CategoryIDParams extends ParamsDictionary {
 	categoryId: string;
 }
 
-export const getOrDeleteCategoryByID: RequestValidation<object, ParsedQs, CategoryIDParams> = {
+export const getCategoryByIDReqValidation: RequestValidation<object, ParsedQs, CategoryIDParams> = {
+	pathParams: z.object({
+		categoryId: stringNotEmpty,
+	}),
+};
+
+export const removeStudyLinkFromCategoryReqValidation: RequestValidation<object, ParsedQs, CategoryIDParams> = {
 	pathParams: z.object({
 		categoryId: stringNotEmpty,
 	}),

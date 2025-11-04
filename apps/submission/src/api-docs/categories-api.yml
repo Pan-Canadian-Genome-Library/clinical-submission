@@ -46,8 +46,10 @@
         $ref: '#/components/responses/ServerError'
       503:
         $ref: '#/components/responses/ServiceUnavailableError'
+
+/category/{categoryId}/study:
   delete:
-    summary: Delete a category by ID. (🔒 Admin only)
+    summary: Remove the study link from a category (🔒 Admin only)
     tags:
       - Category
     parameters:
@@ -56,12 +58,12 @@
         required: true
         schema:
           type: string
-        description: ID of the category to delete
+        description: ID of the category whose study link will be removed
     security:
       - bearerAuth: []
     responses:
       204:
-        description: Category deleted successfully (no content)
+        description: Study link successfully removed (no content)
       400:
         $ref: '#/components/responses/BadRequest'
       401:
