@@ -85,8 +85,8 @@ importers:
   apps/submission:
     dependencies:
       '@overture-stack/lyric':
-        specifier: ^0.13.1
-        version: 0.13.1(@types/pg@8.15.5)
+        specifier: ^0.14.0
+        version: 0.14.0(@types/pg@8.15.5)
       axios:
         specifier: ^1.10.0
         version: 1.12.2
@@ -1633,8 +1633,8 @@ packages:
       zod: 3.25.76
     dev: false
 
-  /@overture-stack/lyric-data-model@0.13.1(@types/pg@8.15.5):
-    resolution: {integrity: sha512-YXKRm1ZI74t3yjXDLztglrMasuYFVlFOJP2rJ40aoOC6qjHBy+fH2o30RNUgw1dzKmDSmA+jDDqaOQo+h9+vew==}
+  /@overture-stack/lyric-data-model@0.14.0(@types/pg@8.15.5):
+    resolution: {integrity: sha512-5bxnkad5Agl8IKoVjPdGMm7WwoWqZRouKOoLUhyPca/Sg+jEp8NwEHRikjA1aFdtpPFC4lYJdkAI17gaG6EOng==}
     dependencies:
       '@overture-stack/lectern-client': 2.0.0-beta.5
       copyfiles: 2.4.1
@@ -1667,12 +1667,12 @@ packages:
       - sqlite3
     dev: false
 
-  /@overture-stack/lyric@0.13.1(@types/pg@8.15.5):
-    resolution: {integrity: sha512-K6EccM8uhHtizGLZOZJGgIMQqiiq+RyvPslx8Gbzc3ZqSnY3rr3f1lHiiRtksv1FMDlllz96Hb9csZynoVBnOQ==}
+  /@overture-stack/lyric@0.14.0(@types/pg@8.15.5):
+    resolution: {integrity: sha512-qws7Ngfu/x07AuO2v0aI1gXU8yeSdMP7u2sCt1JjB7N16mnbYBwcMbsVGo35ldlJWtdLFlVd4qTrTD4lm1hXbw==}
     engines: {node: '>=20.0.0'}
     dependencies:
       '@overture-stack/lectern-client': 2.0.0-beta.5
-      '@overture-stack/lyric-data-model': 0.13.1(@types/pg@8.15.5)
+      '@overture-stack/lyric-data-model': 0.14.0(@types/pg@8.15.5)
       '@overture-stack/sqon-builder': 1.1.0
       dotenv: 16.6.1
       drizzle-orm: 0.29.5(@types/pg@8.15.5)(pg@8.16.3)
