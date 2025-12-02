@@ -237,7 +237,7 @@
       503:
         $ref: '#/components/responses/ServiceUnavailableError'
   put:
-    summary: Creates a Submission to modify existing data (⚠️ changes applied only after commit). Returns an Active Submission with the records to be updated.
+    summary: Creates a Submission to modify existing data (⚠️ changes applied only after commit). Returns an Active Submission with the records to be updated. (🔒 Admin only)
     tags:
       - Submission
     consumes:
@@ -292,7 +292,7 @@
 
 /submission/category/{categoryId}/data/{systemId}:
   delete:
-    summary: Creates a Submission to delete existing data by System ID (⚠️ changes applied only after commit). Returns an Active Submission with the records to be deleted.
+    summary: Creates a Submission to delete existing data by System ID (⚠️ changes applied only after commit). Returns an Active Submission with the records to be deleted. (🔒 Admin only)
     tags:
       - Submission
     parameters:

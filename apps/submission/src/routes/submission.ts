@@ -31,12 +31,25 @@ const upload = multer({ dest: '/tmp', limits: { fileSize: fileSizeLimit } });
 export const submissionRouter: Router = (() => {
 	const router = express.Router();
 
+	// Submission endpoints
 	router.get('/:submissionId', authMiddleware(), submissionController.getSubmissionById);
-	router.get('/category/:categoryId', authMiddleware(), submissionController.getSubmissionsByCategory);
-	router.post('/category/:categoryId/data', authMiddleware(), upload.array('files'), submissionController.submit);
-	router.put('/category/:categoryId/data', authMiddleware(), upload.array('files'), submissionController.editData);
 	router.delete('/:submissionId', authMiddleware(), submissionController.deleteSubmissionById);
 	router.delete('/:submissionId/:actionType', authMiddleware(), submissionController.deleteEntityName);
+
+	// Submissions by Category ID endpoints
+	router.get('/category/:categoryId', authMiddleware(), submissionController.getSubmissionsByCategory);
+	router.post('/category/:categoryId/data', authMiddleware(), upload.array('files'), submissionController.submit);
+	router.put(
+		'/category/:categoryId/data',
+		authMiddleware({ requireAdmin: true }),
+		upload.array('files'),
+		submissionController.editData,
+	);
+	router.delete(
+		'/category/:categoryId/data/:systemId',
+		authMiddleware({ requireAdmin: true }),
+		lyricProvider.controllers.submission.deleteSubmittedDataBySystemId,
+	);
 
 	router.use('', lyricProvider.routers.submission);
 
