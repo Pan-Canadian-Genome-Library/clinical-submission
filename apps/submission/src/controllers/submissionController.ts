@@ -395,7 +395,7 @@ const deleteEntityName = validateRequest(deleteEntityRequestSchema, async (req, 
 		const user = req.user;
 
 		const submissionId = Number(req.params.submissionId);
-		const index = Number(req.query.index);
+		const index = req.query.index ? Number(req.query.index) : null;
 		const actionType = SUBMISSION_ACTION_TYPE.parse(req.params.actionType.toUpperCase());
 		const entityName = req.query.entityName;
 		const authEnabled = authConfig.enabled;
