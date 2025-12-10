@@ -84,8 +84,7 @@ const editData = validateRequest(editDataRequestSchema, async (req, res, next) =
 		}
 
 		const fileErrors: BatchError[] = [];
-		let submissionId: number | undefined;
-		const entityList: string[] = [];
+		const entityData: EntityData = {};
 
 		for (const file of files) {
 			try {
@@ -109,21 +108,21 @@ const editData = validateRequest(editDataRequestSchema, async (req, res, next) =
 
 				const extractedData = await parseFileToRecords(prevalidatedFile, schema);
 
-				const uploadResult = await lyricProvider.services.submittedData.editSubmittedData({
-					records: extractedData,
-					entityName,
-					categoryId,
-					organization,
-					username: username ?? '',
-				});
-
-				submissionId = uploadResult.submissionId;
-				entityList.push(entityName);
+				entityData[entityName] = extractedData;
 			} catch (error) {
 				logger.error(`File processing failed. Error: ${error}`);
 				throw new lyricProvider.utils.errors.BadRequest(`File processing failed`, error);
 			}
 		}
+
+		const uploadResult = await lyricProvider.services.submittedData.editSubmittedData({
+			data: entityData,
+			categoryId,
+			organization,
+			username: username ?? '',
+		});
+
+		const entityList = Object.keys(entityData);
 
 		let status: string = EDIT_DATA_SUBMISSION_STATUS.PROCESSING;
 		if (entityList.length === 0) {
@@ -138,7 +137,7 @@ const editData = validateRequest(editDataRequestSchema, async (req, res, next) =
 
 		// This response provides the details of file Submission
 		return res.status(200).send({
-			submissionId,
+			submissionId: uploadResult.submissionId,
 			status,
 			batchErrors: fileErrors,
 			inProcessEntities: entityList,
