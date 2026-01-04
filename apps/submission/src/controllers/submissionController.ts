@@ -163,6 +163,16 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 		const db = getDbInstance();
 		const studySvc = studyService(db);
 
+		const orgExists = await studySvc.getStudyById(organization);
+
+		if (!orgExists) {
+			throw new lyricProvider.utils.errors.NotFound(`Unable to submit data. Study ${organization} does not exist`);
+		}
+
+		if (!hasAllowedAccess(organization, 'WRITE', user)) {
+			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
+		}
+
 		const results = await studySvc.getStudiesByCategoryId(categoryId);
 
 		if (!results?.length) {
@@ -175,10 +185,6 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 			throw new lyricProvider.utils.errors.BadRequest(
 				`The provided organization '${organization}' is not associated with categoryId '${categoryId}'. Please verify that you are submitting to the correct categoryId for the organization`,
 			);
-		}
-
-		if (!hasAllowedAccess(organization, 'WRITE', user)) {
-			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 		}
 
 		const username = user?.username;
