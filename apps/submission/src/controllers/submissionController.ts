@@ -163,10 +163,6 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 		const db = getDbInstance();
 		const studySvc = studyService(db);
 
-		if (!hasAllowedAccess(organization, 'WRITE', user)) {
-			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
-		}
-
 		const results = await studySvc.getStudiesByCategoryId(categoryId);
 
 		if (!results?.length) {
@@ -177,8 +173,12 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 
 		if (foundStudy?.study_id !== organization) {
 			throw new lyricProvider.utils.errors.BadRequest(
-				`The provided organization '${organization}' is not associated with categoryId '${categoryId}'. Please verify that you are submitting to the correct categoryId  for the organization `,
+				`The provided organization '${organization}' is not associated with categoryId '${categoryId}'. Please verify that you are submitting to the correct categoryId for the organization`,
 			);
+		}
+
+		if (!hasAllowedAccess(organization, 'WRITE', user)) {
+			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 		}
 
 		const username = user?.username;
