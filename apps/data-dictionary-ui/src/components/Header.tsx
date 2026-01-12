@@ -23,7 +23,7 @@ const Header = () => {
 		<header className="header">
 			<div className="header-body">
 				<img className="header-image" src={PCGL} alt="PCGL Clinical Submission Home" />
-				<h2>Clinical Submission Dictionary</h2>
+				<h2>Submission Dictionary</h2>
 			</div>
 		</header>
 	);
