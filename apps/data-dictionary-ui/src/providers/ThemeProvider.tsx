@@ -27,7 +27,7 @@ export const pcglColours = {
 	tertiary: '#FFF0F6',
 	quaternary: '#FFD6E7',
 	grey: '#d9d9d99e',
-	alternateRow: '#fff0f659',
+	alternateRow: '#FFF7FB',
 	darkGrey: 'rgba(0, 0, 0, 0.45)',
 };
 
