@@ -29,6 +29,8 @@ export const pcglColours = {
 	grey: '#d9d9d99e',
 	alternateRow: '#FFF7FB',
 	darkGrey: 'rgba(0, 0, 0, 0.45)',
+	black: '#000000',
+	white: '#FFFFFF',
 };
 
 const PCGLThemeProvider = ({ children }: { children: React.ReactElement }) => {
@@ -39,6 +41,7 @@ const PCGLThemeProvider = ({ children }: { children: React.ReactElement }) => {
 					background_overlay: pcglColours.darkGrey, // Modal background color
 					accent: pcglColours.primary, // Modal title color
 					accent_1: pcglColours.tertiary, // Button hover
+					accent_dark: pcglColours.black, // Title color
 					background_alternate: pcglColours.alternateRow,
 					background_muted: pcglColours.grey, // Col box
 				},
