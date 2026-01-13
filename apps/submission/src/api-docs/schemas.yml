@@ -246,6 +246,40 @@ components:
           type: string
           description: Last Updated date of the DAC record
 
+    DeleteSubmissionEntityResult:
+      required:
+        - status
+        - description
+      type: object
+      properties:
+        description:
+          type: string
+          description: Description of deleting partially Submission data
+        status:
+          type: string
+          description: Result of deleting Submission data
+          enum: ['PROCESSING']
+        submissionId:
+          type: string
+          description: ID of the Submission
+
+    DeleteSubmissionResult:
+      required:
+        - status
+        - description
+      type: object
+      properties:
+        description:
+          type: string
+          description: Description of closing the Submission
+        status:
+          type: string
+          description: Result of closing the Submission
+          enum: ['CLOSED']
+        submissionId:
+          type: string
+          description: ID of the Submission
+
     GetSubmittedDataResult:
       type: object
       properties:
@@ -390,7 +424,7 @@ components:
           nullable: true
           description: Last Updated date of the Study record, will be null if never updated.
 
-    SubmissionResult:
+    SubmissionDetailsResult:
       type: object
       properties:
         id:
@@ -496,7 +530,7 @@ components:
           type: string
           description: User name who last updated the submission
 
-    SubmissionsSummaryResult:
+    ListSubmissionsResult:
       type: object
       properties:
         pagination:
@@ -513,9 +547,9 @@ components:
         records:
           type: array
           items:
-            $ref: '#/components/schemas/SubmissionSummary'
+            $ref: '#/components/schemas/SubmissionResult'
 
-    SubmissionSummary:
+    SubmissionResult:
       type: object
       properties:
         id:
@@ -571,21 +605,24 @@ components:
             inserts:
               type: object
               additionalProperties:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ValidationError'
+                type: object
+                properties:
+                  recordsCount:
+                    type: number
             updates:
               type: object
               additionalProperties:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ValidationError'
+                type: object
+                properties:
+                  recordsCount:
+                    type: number
             deletes:
               type: object
               additionalProperties:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ValidationError'
+                type: object
+                properties:
+                  recordsCount:
+                    type: number
         organization:
           type: string
           description: Organization the Submission belongs to

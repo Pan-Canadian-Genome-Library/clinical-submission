@@ -381,7 +381,10 @@ const deleteSubmissionById = validateRequest(
 				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to delete this resource');
 			}
 
-			const response = lyricProvider.controllers.submission.delete(req, res, next);
+			const response = await lyricProvider.services.submission.deleteActiveSubmissionById(
+				submissionId,
+				user?.username || '',
+			);
 
 			return res.status(200).send(response);
 		} catch (error) {
@@ -444,17 +447,8 @@ const deleteEntityName = validateRequest(deleteEntityRequestSchema, async (req, 
 				throw new lyricProvider.utils.errors.NotFound(`Entity with name '${entityName}' not found`);
 			}
 
-			let records;
-
-			// Check of its array, if it is then we are removing index of SubmissionUpdateData[] | SubmissionDeleteData[]
-			if (Array.isArray(entityObj)) {
-				records = entityObj;
-			} else {
-				// if its not an array, then its of type SubmissionInsertData which we will remove index from DataRecord[]
-				records = entityObj.records;
-			}
-
-			if (records[index] === undefined) {
+			// Index should be between 0 and length -1
+			if (index < 0 || index >= entityObj.recordsCount) {
 				throw new lyricProvider.utils.errors.NotFound(`Index '${index}' not found`);
 			}
 		}
