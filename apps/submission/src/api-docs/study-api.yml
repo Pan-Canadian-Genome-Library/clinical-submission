@@ -36,7 +36,7 @@
             properties:
               context:
                 type: string
-                enum: ['CLINICAL', 'RESEARCH']
+                enum: ['Clinical', 'Research']
                 description: Indicate if the study was conducted in a clinical setting or as part of a research project.
               collaborators:
                 type: array
@@ -97,7 +97,7 @@
                 description: A detailed description of the study’s purpose, hypothesis, and design.
               status:
                 type: string
-                enum: ['COMPLETED', 'ONGOING']
+                enum: ['Completed', 'Ongoing']
                 description: Indicate if the study is completed or ongoing.
     security:
       - bearerAuth: []
@@ -162,7 +162,7 @@
             properties:
               context:
                 type: string
-                enum: ['CLINICAL', 'RESEARCH']
+                enum: ['Clinical', 'Research']
                 description: Indicate if the study was conducted in a clinical setting or as part of a research project.
               collaborators:
                 type: array
@@ -220,7 +220,7 @@
                 description: A detailed description of the study’s purpose, hypothesis, and design.
               status:
                 type: string
-                enum: ['COMPLETED', 'ONGOING']
+                enum: ['Completed', 'Ongoing']
                 description: Indicate if the study is completed or ongoing.
     parameters:
       - name: studyId
