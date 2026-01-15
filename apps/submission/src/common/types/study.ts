@@ -20,15 +20,15 @@
 import { study } from '@/db/schemas/studiesSchema.js';
 
 export const StudyStatus = {
-	ONGOING: 'ONGOING',
-	COMPLETED: 'COMPLETED',
+	ONGOING: 'Ongoing',
+	COMPLETED: 'Completed',
 } as const;
 
 export type StudyStatusValues = (typeof StudyStatus)[keyof typeof StudyStatus];
 
 export const StudyContext = {
-	CLINICAL: 'CLINICAL',
-	RESEARCH: 'RESEARCH',
+	CLINICAL: 'Clinical',
+	RESEARCH: 'Research',
 } as const;
 
 export type StudyContextValues = (typeof StudyContext)[keyof typeof StudyContext];
