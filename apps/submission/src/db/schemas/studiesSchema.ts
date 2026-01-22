@@ -23,8 +23,8 @@ import { foreignKey, integer, text, timestamp, varchar } from 'drizzle-orm/pg-co
 import { dac } from './dacSchema.js';
 import { pcglSchema } from './generate.js';
 
-export const studyStatus = pcglSchema.enum('study_status', ['ONGOING', 'COMPLETED']);
-export const studyContext = pcglSchema.enum('study_context', ['CLINICAL', 'RESEARCH']);
+export const studyStatus = pcglSchema.enum('study_status', ['Ongoing', 'Completed']);
+export const studyContext = pcglSchema.enum('study_context', ['Clinical', 'Research']);
 
 export const study = pcglSchema.table(
 	'study',
