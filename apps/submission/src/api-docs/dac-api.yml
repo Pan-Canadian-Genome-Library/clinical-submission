@@ -1,12 +1,10 @@
 /dac/{dacId}:
   get:
-    summary: Get DAC by their ID. (🔒 Admin only)
+    summary: Get DAC by their ID. ( PUBLIC )
     tags:
       - DAC
     parameters:
       - $ref: '#/components/parameters/path/DacId'
-    security:
-      - bearerAuth: []
     responses:
       200:
         description: Returns DAC data
@@ -150,7 +148,7 @@
         $ref: '#/components/responses/ServiceUnavailableError'
 /dac:
   get:
-    summary: Get all DACs. (🔒 Admin only)
+    summary: Get all DACs. ( PUBLIC )
     tags:
       - DAC
     parameters:

@@ -27,8 +27,8 @@ export const dacRouter: Router = (() => {
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
 
-	router.get('/:dacId', authMiddleware({ requireAdmin: true }), dacController.getDacById);
-	router.get('/', authMiddleware({ requireAdmin: true }), dacController.getAllDac);
+	router.get('/:dacId', dacController.getDacById);
+	router.get('/', dacController.getAllDac);
 	router.post('/create', authMiddleware({ requireAdmin: true }), dacController.createDac);
 	router.delete('/:dacId', authMiddleware({ requireAdmin: true }), dacController.deleteDac);
 	router.patch('/:dacId', authMiddleware({ requireAdmin: true }), dacController.updateDac);
