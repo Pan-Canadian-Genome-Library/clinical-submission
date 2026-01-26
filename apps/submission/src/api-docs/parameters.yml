@@ -39,6 +39,13 @@ components:
       StudyId:
         name: studyId
         description: The Unique identifier of the study in PCGL.
+      SubmissionId:
+        name: submissionId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: The ID of the Submission
     query:
       OnlyActive:
         description: Optional query parameter to filter results to include only active submissions. Default value is false

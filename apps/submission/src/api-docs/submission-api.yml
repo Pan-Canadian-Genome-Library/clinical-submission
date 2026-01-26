@@ -6,10 +6,7 @@
     tags:
       - Submission
     parameters:
-      - name: submissionId
-        in: path
-        type: string
-        required: true
+      - $ref: '#/components/parameters/path/SubmissionId'
     security:
       - bearerAuth: []
     responses:
@@ -19,7 +16,8 @@
           application/json:
             schema:
               $ref: '#/components/schemas/SubmissionResult'
-
+      400:
+        $ref: '#/components/responses/BadRequest'
       401:
         $ref: '#/components/responses/UnauthorizedError'
       403:
@@ -36,10 +34,7 @@
     tags:
       - Submission
     parameters:
-      - name: submissionId
-        in: path
-        type: string
-        required: true
+      - $ref: '#/components/parameters/path/SubmissionId'
     security:
       - bearerAuth: []
     responses:
@@ -66,14 +61,30 @@
 
 /submission/{submissionId}/details:
   get:
-    summary: Get detailed submission information
+    summary: Fetch Submission Data records. Sorted in their original file order and grouped by `inserts`, `updates`, and `deletes`.
     tags:
       - Submission
     parameters:
-      - name: submissionId
-        in: path
-        type: string
-        required: true
+      - $ref: '#/components/parameters/path/SubmissionId'
+      - name: actionTypes
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+            enum: [inserts, updates, deletes]
+        uniqueItems: true
+        description: Filters the Submission Data records by action type. Valid values are `inserts`, `updates`, and `deletes` (case insensitive). If not provided, all action types are returned.
+      - name: entityNames
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        uniqueItems: true
+        description: Filters the Submission Data records by entity name. Must match names listed in the Submission Summary endpoint. If not provided, all entity names are returned.
+      - $ref: '#/components/parameters/query/Page'
+      - $ref: '#/components/parameters/query/PageSize'
     responses:
       200:
         description: Full submission payload
@@ -99,11 +110,7 @@
     tags:
       - Submission
     parameters:
-      - name: submissionId
-        in: path
-        type: string
-        required: true
-        description: The ID of the Submission
+      - $ref: '#/components/parameters/path/SubmissionId'
       - name: actionType
         in: path
         required: true
@@ -189,10 +196,7 @@
       - Submission
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
-      - name: submissionId
-        in: path
-        type: string
-        required: true
+      - $ref: '#/components/parameters/path/SubmissionId'
     security:
       - bearerAuth: []
     responses:
