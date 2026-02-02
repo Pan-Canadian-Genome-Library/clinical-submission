@@ -1,5 +1,5 @@
 {
-  "id": "74d0ffee-e6d8-47ac-b524-9cd0f5fa67fa",
+  "id": "8c0f468f-a2e4-4236-814d-be09418a893a",
   "prevId": "d38e8a8c-c234-4b75-980c-649b6b7374cd",
   "version": "7",
   "dialect": "postgresql",
@@ -346,6 +346,13 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
+        "study_study_name_unique": {
+          "name": "study_study_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "study_name"
+          ]
+        },
         "study_category_id_unique": {
           "name": "study_category_id_unique",
           "nullsNotDistinct": false,

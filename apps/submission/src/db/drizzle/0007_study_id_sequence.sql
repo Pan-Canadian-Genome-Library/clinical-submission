@@ -5,4 +5,5 @@ ALTER TABLE "pcgl"."study" ALTER COLUMN "study_id" SET DEFAULT
 		4,
 		'0'
 	)
-;
+;--> statement-breakpoint
+ALTER TABLE "pcgl"."study" ADD CONSTRAINT "study_study_name_unique" UNIQUE("study_name");

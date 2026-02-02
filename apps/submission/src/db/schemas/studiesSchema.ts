@@ -49,7 +49,7 @@ export const study = pcglSchema.table(
 	{
 		study_id: text().primaryKey().default(studyIdDefault),
 		dac_id: text().notNull(),
-		study_name: varchar({ length: 255 }).notNull(),
+		study_name: varchar({ length: 255 }).unique().notNull(),
 		study_description: text().notNull(), // Assuming the description is large
 		program_name: varchar({ length: 255 }),
 		keywords: text().array(),
