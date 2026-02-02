@@ -91,7 +91,6 @@ const dacService = (db: PostgresDb) => {
 			}
 		},
 		saveDac: async ({
-			dacId,
 			contactEmail,
 			contactName,
 			dacDescription,
@@ -102,7 +101,6 @@ const dacService = (db: PostgresDb) => {
 				dacRecord = await db
 					.insert(dac)
 					.values({
-						dac_id: dacId,
 						dac_name: dacName,
 						dac_description: dacDescription,
 						contact_name: contactName,
@@ -127,7 +125,7 @@ const dacService = (db: PostgresDb) => {
 				switch (postgresError?.code) {
 					case PostgresErrors.UNIQUE_KEY_VIOLATION:
 						throw new lyricProvider.utils.errors.BadRequest(
-							`${dacId} already exists in DAC. DAC Id name must be unique.`,
+							`${dacName} already exists in DAC. DAC name must be unique.`,
 						);
 					default:
 						throw new lyricProvider.utils.errors.InternalServerError(
