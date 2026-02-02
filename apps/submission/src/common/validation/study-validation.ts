@@ -78,7 +78,7 @@ export const getOrDeleteStudyByID: RequestValidation<object, ParsedQs, StudyIDPa
 	}),
 };
 
-export type CreateStudyFields = Omit<StudyDTO, 'createdAt' | 'updatedAt'>;
+export type CreateStudyFields = Omit<StudyDTO, 'studyId' | 'createdAt' | 'updatedAt'>;
 export const createStudy: RequestValidation<CreateStudyFields, ParsedQs, ParamsDictionary> = {
 	body: createStudyProperties,
 };

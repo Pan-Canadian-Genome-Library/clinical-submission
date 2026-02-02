@@ -86,9 +86,6 @@
                 items:
                   type: string
                 description: List of URL links to academic papers or reports associated with the study.
-              studyId:
-                type: string
-                description: Unique identifier of the study in PCGL.
               studyName:
                 type: string
                 description: The official name of the study
