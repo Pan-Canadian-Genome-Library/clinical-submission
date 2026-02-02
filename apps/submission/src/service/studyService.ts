@@ -96,6 +96,10 @@ const studyService = (db: PostgresDb) => ({
 			const postgresError = isPostgresError(error);
 
 			switch (postgresError?.code) {
+				case PostgresErrors.UNIQUE_KEY_VIOLATION:
+					throw new lyricProvider.utils.errors.BadRequest(
+						`${studyData.studyName} already exists in studies. Study name must be unique.`,
+					);
 				case PostgresErrors.FOREIGN_KEY_VIOLATION:
 					throw new lyricProvider.utils.errors.BadRequest(
 						`${studyData.dacId} does not appear to be a valid DAC ID, please ensure this DAC record exists prior to creating a study.`,
