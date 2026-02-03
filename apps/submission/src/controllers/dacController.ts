@@ -79,6 +79,13 @@ const createDac = validateRequest(createDacData, async (req, res, next) => {
 
 		const dacFields = req.body;
 
+		const dacFound = await dacSvc.getDacByName(dacFields.dacName);
+		if (dacFound) {
+			throw new lyricProvider.utils.errors.BadRequest(
+				`${dacFields.dacName} already exists in DAC. DAC name must be unique.`,
+			);
+		}
+
 		const result = await dacSvc.saveDac(dacFields);
 
 		res.status(201).send(result);
