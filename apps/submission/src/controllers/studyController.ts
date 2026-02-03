@@ -26,6 +26,7 @@ import {
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
+import dacService from '@/service/dacService.js';
 import { studyService } from '@/service/studyService.js';
 
 export const getAllStudies = validateRequest(listAllStudies, async (req, res, next) => {
@@ -70,11 +71,26 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 	try {
 		const studyData = req.body;
 		const db = getDbInstance();
-		const studyRepo = studyService(db);
+		const { getStudyByName, createStudy } = studyService(db);
+		const { getDacById } = dacService(db);
 
 		const studyTransaction = await db.transaction(async (transaction) => {
 			try {
-				const results = await studyRepo.createStudy(studyData, transaction);
+				const studyFound = await getStudyByName(studyData.studyName);
+				if (studyFound) {
+					throw new lyricProvider.utils.errors.BadRequest(
+						`${studyData.studyName} already exists in studies. Study name must be unique.`,
+					);
+				}
+
+				const dacFound = await getDacById(studyData.dacId);
+				if (!dacFound) {
+					throw new lyricProvider.utils.errors.BadRequest(
+						`${studyData.dacId} does not appear to be a valid DAC ID, please ensure this DAC record exists prior to creating a study.`,
+					);
+				}
+
+				const results = await createStudy(studyData, transaction);
 
 				if (!results) {
 					throw new lyricProvider.utils.errors.BadRequest(`Unable to create study with provided data.`);
