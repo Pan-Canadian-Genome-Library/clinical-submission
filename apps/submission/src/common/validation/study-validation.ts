@@ -44,7 +44,6 @@ const ALLOWED_DOMAINS = [
 
 const createStudyProperties = z
 	.object({
-		studyId: stringNotEmpty,
 		dacId: stringNotEmpty,
 		studyName: stringNotEmpty,
 		studyDescription: stringNotEmpty,
@@ -78,7 +77,7 @@ export const getOrDeleteStudyByID: RequestValidation<object, ParsedQs, StudyIDPa
 	}),
 };
 
-export type CreateStudyFields = Omit<StudyDTO, 'createdAt' | 'updatedAt'>;
+export type CreateStudyFields = Omit<StudyDTO, 'studyId' | 'createdAt' | 'updatedAt'>;
 export const createStudy: RequestValidation<CreateStudyFields, ParsedQs, ParamsDictionary> = {
 	body: createStudyProperties,
 };
@@ -91,7 +90,7 @@ export const updateStudy: RequestValidation<
 	pathParams: z.object({
 		studyId: stringNotEmpty,
 	}),
-	body: createStudyProperties.omit({ studyId: true }).partial().strict({
+	body: createStudyProperties.partial().strict({
 		message:
 			'Unrecognized keys in object. Updating the following properties: studyId, updatedAt, or createdAt is disallowed.',
 	}),
