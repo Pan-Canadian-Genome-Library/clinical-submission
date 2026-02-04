@@ -90,8 +90,31 @@ const dacService = (db: PostgresDb) => {
 				);
 			}
 		},
+		getDacByName: async (dacName: string): Promise<DACFields | undefined> => {
+			try {
+				const [dacRecord] = await db
+					.select({
+						dacId: dac.dac_id,
+						dacName: dac.dac_name,
+						dacDescription: dac.dac_description,
+						contactName: dac.contact_name,
+						contactEmail: dac.contact_email,
+						createdAt: dac.created_at,
+						updatedAt: dac.updated_at,
+					})
+					.from(dac)
+					.where(eq(dac.dac_name, dacName));
+
+				return dacRecord;
+			} catch (error) {
+				logger.error(error, 'Error at getDacByName service');
+
+				throw new lyricProvider.utils.errors.InternalServerError(
+					'Something went wrong while fetching your dac user. Please try again later.',
+				);
+			}
+		},
 		saveDac: async ({
-			dacId,
 			contactEmail,
 			contactName,
 			dacDescription,
@@ -102,7 +125,6 @@ const dacService = (db: PostgresDb) => {
 				dacRecord = await db
 					.insert(dac)
 					.values({
-						dac_id: dacId,
 						dac_name: dacName,
 						dac_description: dacDescription,
 						contact_name: contactName,
@@ -127,7 +149,7 @@ const dacService = (db: PostgresDb) => {
 				switch (postgresError?.code) {
 					case PostgresErrors.UNIQUE_KEY_VIOLATION:
 						throw new lyricProvider.utils.errors.BadRequest(
-							`${dacId} already exists in DAC. DAC Id name must be unique.`,
+							`${dacName} already exists in DAC. DAC name must be unique.`,
 						);
 					default:
 						throw new lyricProvider.utils.errors.InternalServerError(

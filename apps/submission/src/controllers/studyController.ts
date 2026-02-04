@@ -17,27 +17,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { logger } from '@/common/logger.js';
 import {
 	createStudy,
 	getOrDeleteStudyByID,
 	listAllStudies,
 	updateStudy,
 } from '@/common/validation/study-validation.js';
-import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
-import {
-	findIDByHash,
-	generateHash,
-	generateID,
-	getNextSequenceValue,
-	isValidStudyField,
-	retrieveIIMConfiguration,
-} from '@/internal/id-manager/utils.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
-import { convertToRecordFromStudyDTO } from '@/service/dtoConversion.js';
-import iimService from '@/service/idManagerService.js';
+import dacService from '@/service/dacService.js';
 import { studyService } from '@/service/studyService.js';
 
 export const getAllStudies = validateRequest(listAllStudies, async (req, res, next) => {
@@ -80,67 +69,30 @@ export const getStudyById = validateRequest(getOrDeleteStudyByID, async (req, re
 
 export const createNewStudy = validateRequest(createStudy, async (req, res, next) => {
 	try {
-		const IIM_CONFIG_NAME = 'study';
 		const studyData = req.body;
 		const db = getDbInstance();
-		const studyRepo = studyService(db);
-		const iimRepo = iimService(db);
+		const { getStudyByName, createStudy } = studyService(db);
+		const { getDacById } = dacService(db);
 
-		const studyConfig = await retrieveIIMConfiguration(IIM_CONFIG_NAME);
-
-		if (!studyConfig) {
-			logger.error(`[Study/IIM]: ID Generation is misconfigured! Study table ID Generation does NOT exist.`);
-			throw new lyricProvider.utils.errors.InternalServerError(
-				'Study table ID generation config does not exist. Unable to create studies.',
-			);
-		}
-
-		const convertedStudyData = convertToRecordFromStudyDTO(studyData);
-
-		if (!isValidStudyField(studyConfig.fieldName)) {
-			logger.error(
-				`[Study/IIM]: ID Generation is misconfigured! ${studyConfig.fieldName} does NOT exist within the study table!`,
-			);
-			throw new lyricProvider.utils.errors.InternalServerError(
-				`ID generation is misconfigured! ${studyConfig.fieldName} doesn't exist in study table.`,
-			);
-		}
-
-		const entityToHash = studyConfig.fieldName;
-		const hashableData: string = String(convertedStudyData[entityToHash]);
-		const idmHash = generateHash(hashableData, env.ID_MANAGER_SECRET);
-
-		const existingHashEntry = await findIDByHash(idmHash);
-
-		if (existingHashEntry) {
-			throw new lyricProvider.utils.errors.BadRequest(
-				`${studyData.studyId} already exists in studies. Study name must be unique.`,
-			);
-		}
-
-		const nextSequence = await getNextSequenceValue(studyConfig.sequenceName);
-		if (!nextSequence) {
-			logger.error(
-				`[Study/IIM]: Error creating study. IIM Config somehow references an unknown sequence? ${studyConfig.sequenceName}`,
-			);
-			throw new lyricProvider.utils.errors.InternalServerError('Unable to create study. Cannot generate ID.');
-		}
-
-		const generatedID = generateID(nextSequence, studyConfig.prefix, studyConfig.paddingLength);
 		const studyTransaction = await db.transaction(async (transaction) => {
 			try {
-				const createID = await iimRepo.createIDRecord(
-					{
-						sourceHash: idmHash,
-						configId: studyConfig.id,
-						generatedId: generatedID,
-					},
-					transaction,
-				);
+				const studyFound = await getStudyByName(studyData.studyName);
+				if (studyFound) {
+					throw new lyricProvider.utils.errors.BadRequest(
+						`${studyData.studyName} already exists in studies. Study name must be unique.`,
+					);
+				}
 
-				const results = await studyRepo.createStudy(studyData, transaction);
+				const dacFound = await getDacById(studyData.dacId);
+				if (!dacFound) {
+					throw new lyricProvider.utils.errors.BadRequest(
+						`${studyData.dacId} does not appear to be a valid DAC ID, please ensure this DAC record exists prior to creating a study.`,
+					);
+				}
 
-				if (!results || !createID) {
+				const results = await createStudy(studyData, transaction);
+
+				if (!results) {
 					throw new lyricProvider.utils.errors.BadRequest(`Unable to create study with provided data.`);
 				}
 

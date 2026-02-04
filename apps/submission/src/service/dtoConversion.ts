@@ -43,10 +43,9 @@ export const convertFromRecordToStudyDTO = (study: StudyRecord): StudyDTO => {
 };
 
 export const convertToRecordFromStudyDTO = (
-	studyData: Omit<StudyDTO, 'updatedAt' | 'createdAt'>,
-): Omit<StudyModel, 'created_at' | 'updated_at'> => {
+	studyData: Omit<StudyDTO, 'studyId' | 'updatedAt' | 'createdAt'>,
+): Omit<StudyModel, 'study_id' | 'created_at' | 'updated_at'> => {
 	return {
-		study_id: studyData.studyId,
 		dac_id: studyData.dacId,
 		study_name: studyData.studyName,
 		study_description: studyData.studyDescription,

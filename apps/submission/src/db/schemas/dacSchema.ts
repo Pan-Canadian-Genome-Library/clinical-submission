@@ -17,13 +17,32 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { sql } from 'drizzle-orm';
 import { text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { pcglSchema } from './generate.js';
 
+const DAC_ID_PADDING = 4 as const;
+const DAC_ID_PREFIX = 'PCGLDA' as const;
+const DAC_ID_SEQUENCE_NAME = 'dac_id_seq' as const;
+
+export const dacIdSequence = pcglSchema.sequence(DAC_ID_SEQUENCE_NAME, {
+	startWith: 1,
+	increment: 1,
+	maxValue: 9999,
+});
+
+export const dacIdDefault = sql.raw(`
+	'${DAC_ID_PREFIX}' || lpad(
+		nextval('${pcglSchema.schemaName}.${DAC_ID_SEQUENCE_NAME}')::text,
+		${DAC_ID_PADDING},
+		'0'
+	)
+`);
+
 export const dac = pcglSchema.table('dac', {
-	dac_id: text().primaryKey().notNull(),
-	dac_name: varchar({ length: 255 }).notNull(),
+	dac_id: text().primaryKey().default(dacIdDefault),
+	dac_name: varchar({ length: 255 }).unique().notNull(),
 	dac_description: text().notNull(),
 	contact_name: varchar({ length: 255 }).notNull(),
 	contact_email: varchar({ length: 255 }).notNull(),
