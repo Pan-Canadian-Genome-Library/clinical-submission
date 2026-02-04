@@ -1,6 +1,6 @@
 {
 	"name": "@clinical-submission/submission",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"private": true,
 	"author": "Leonardo Rivera <lrivera@oicr.com>",
 	"license": "AGPL-3.0-or-later",

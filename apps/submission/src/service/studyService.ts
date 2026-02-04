@@ -77,6 +77,21 @@ const studyService = (db: PostgresDb) => ({
 
 		return studyRecords[0];
 	},
+	getStudyByName: async (studyName: string): Promise<StudyDTO | undefined> => {
+		try {
+			const [studyRecords] = await db.select().from(study).where(eq(study.study_name, studyName));
+			if (studyRecords) {
+				return convertFromRecordToStudyDTO(studyRecords);
+			}
+
+			return;
+		} catch (exception) {
+			logger.error(exception, 'Error at getStudyByName');
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'Something went wrong while fetching your requested study. Please try again later.',
+			);
+		}
+	},
 
 	createStudy: async (
 		studyData: CreateStudyFields,
@@ -98,7 +113,7 @@ const studyService = (db: PostgresDb) => ({
 			switch (postgresError?.code) {
 				case PostgresErrors.UNIQUE_KEY_VIOLATION:
 					throw new lyricProvider.utils.errors.BadRequest(
-						`${studyData.studyId} already exists in studies. Study name must be unique.`,
+						`${studyData.studyName} already exists in studies. Study name must be unique.`,
 					);
 				case PostgresErrors.FOREIGN_KEY_VIOLATION:
 					throw new lyricProvider.utils.errors.BadRequest(

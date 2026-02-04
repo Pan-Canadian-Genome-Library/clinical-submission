@@ -44,11 +44,10 @@ export const getDacByIdData: RequestValidation<object, ParsedQs, DacIdParams> = 
 	}),
 };
 
-export type CreateDacDataFields = Omit<DACFields, 'updatedAt' | 'createdAt'>;
+export type CreateDacDataFields = Omit<DACFields, 'dacId' | 'updatedAt' | 'createdAt'>;
 
 export const createDacData: RequestValidation<CreateDacDataFields, ParsedQs, ParamsDictionary> = {
 	body: z.object({
-		dacId: stringNotEmpty,
 		dacName: stringNotEmpty,
 		dacDescription: stringNotEmpty,
 		contactName: stringNotEmpty,
