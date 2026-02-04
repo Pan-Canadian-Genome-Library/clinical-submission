@@ -1,55 +1,62 @@
 {
-	"version": "7",
-	"dialect": "postgresql",
-	"entries": [
-		{
-			"idx": 0,
-			"version": "7",
-			"when": 1748873487417,
-			"tag": "0000_dac_study_table_init",
-			"breakpoints": true
-		},
-		{
-			"idx": 1,
-			"version": "7",
-			"when": 1749236350650,
-			"tag": "0001_pluralise_collab_add_dac_fk",
-			"breakpoints": true
-		},
-		{
-			"idx": 2,
-			"version": "7",
-			"when": 1751908412532,
-			"tag": "0002_id_generation_config",
-			"breakpoints": true
-		},
-		{
-			"idx": 3,
-			"version": "7",
-			"when": 1754592604595,
-			"tag": "0003_id_config_change_unique_constraint_on_entity_name",
-			"breakpoints": true
-		},
-		{
-			"idx": 4,
-			"version": "7",
-			"when": 1758642317849,
-			"tag": "0004_add_internal_id_iim",
-			"breakpoints": true
-		},
-		{
-			"idx": 5,
-			"version": "7",
-			"when": 1758654340008,
-			"tag": "0005_add_category_id_to_study",
-			"breakpoints": true
-		},
-		{
-			"idx": 6,
-			"version": "7",
-			"when": 1769031957808,
-			"tag": "0006_rename_study_enums",
-			"breakpoints": true
-		}
-	]
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1748873487417,
+      "tag": "0000_dac_study_table_init",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1749236350650,
+      "tag": "0001_pluralise_collab_add_dac_fk",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1751908412532,
+      "tag": "0002_id_generation_config",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1754592604595,
+      "tag": "0003_id_config_change_unique_constraint_on_entity_name",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1758642317849,
+      "tag": "0004_add_internal_id_iim",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1758654340008,
+      "tag": "0005_add_category_id_to_study",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1769031957808,
+      "tag": "0006_rename_study_enums",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1770059102313,
+      "tag": "0007_study_id_sequence",
+      "breakpoints": true
+    }
+  ]
 }
