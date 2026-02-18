@@ -85,6 +85,8 @@
         description: Filters the Submission Data records by entity name. Must match names listed in the Submission Summary endpoint. If not provided, all entity names are returned.
       - $ref: '#/components/parameters/query/Page'
       - $ref: '#/components/parameters/query/PageSize'
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Full submission payload

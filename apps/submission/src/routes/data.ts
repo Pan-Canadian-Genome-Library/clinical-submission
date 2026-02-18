@@ -20,7 +20,6 @@
 import express, { json, Router, urlencoded } from 'express';
 
 import dataController from '@/controllers/dataController.js';
-import { lyricProvider } from '@/core/provider.js';
 import { authMiddleware } from '@/middleware/auth.js';
 
 export const dataRouter: Router = (() => {
@@ -51,8 +50,6 @@ export const dataRouter: Router = (() => {
 		authMiddleware({ requireAdmin: true }),
 		dataController.getSubmittedDataStream,
 	);
-
-	router.use('', lyricProvider.routers.submittedData);
 
 	return router;
 })();

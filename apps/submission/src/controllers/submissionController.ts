@@ -17,7 +17,13 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { BATCH_ERROR_TYPE, type BatchError, EntityData, SUBMISSION_ACTION_TYPE } from '@overture-stack/lyric';
+import {
+	BATCH_ERROR_TYPE,
+	type BatchError,
+	EntityData,
+	parseSubmissionActionTypes,
+	SUBMISSION_ACTION_TYPE,
+} from '@overture-stack/lyric';
 
 import { logger } from '@/common/logger.js';
 import {
@@ -34,11 +40,16 @@ import { studyService } from '@/service/studyService.js';
 import { prevalidateEditFile, prevalidateNewDataFile } from '@/submission/fileValidation.js';
 import { parseFileToRecords } from '@/submission/readFile.js';
 
+import { asArray } from '../common/formatUtils.js';
+
 const EDIT_DATA_SUBMISSION_STATUS = {
 	PROCESSING: 'PROCESSING',
 	INVALID_SUBMISSION: 'INVALID_SUBMISSION',
 	PARTIAL_SUBMISSION: 'PARTIAL_SUBMISSION',
 } as const;
+
+const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE_SIZE = 20;
 
 const editData = validateRequest(editDataRequestSchema, async (req, res, next) => {
 	try {
@@ -275,6 +286,48 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 	}
 });
 
+const commit = validateRequest(lyricProvider.utils.schema.submissionCommitRequestSchema, async (req, res, next) => {
+	try {
+		const categoryId = Number(req.params.categoryId);
+		const submissionId = Number(req.params.submissionId);
+		const user = req.user;
+
+		const username = user?.username;
+
+		if (!username) {
+			throw new lyricProvider.utils.errors.Forbidden('You must be an authenticated user to access this resource.');
+		}
+
+		const submission = await lyricProvider.services.submission.getSubmissionById(submissionId);
+
+		if (!submission) {
+			throw new lyricProvider.utils.errors.NotFound(`Submission not found`);
+		}
+
+		const organization = submission?.organization;
+
+		if (!hasAllowedAccess(organization, 'WRITE', user)) {
+			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource.');
+		}
+
+		if (categoryId !== submission.dictionaryCategory.id) {
+			throw new lyricProvider.utils.errors.BadRequest(
+				'Mismatch between category ID and submission ID. No submission with the given ID exists for the specified category.',
+			);
+		}
+
+		const commitSubmission = await lyricProvider.services.submission.commitSubmission(
+			categoryId,
+			submissionId,
+			user?.username,
+		);
+
+		return res.status(200).send(commitSubmission);
+	} catch (error) {
+		next(error);
+	}
+});
+
 /**
  * Custom lyric Get Submission by Category Id
  * @override lyricProvider.controllers.submission.getSubmissionById
@@ -308,6 +361,50 @@ const getSubmissionById = validateRequest(
 
 /**
  * Custom lyric Get Submission by Category Id
+ * @override lyricProvider.controllers.submission.getSubmissionById
+ * @description Overrides functionality of lyric getSubmissionById and implements auth
+ */
+const getSubmissionDetailsById = validateRequest(
+	lyricProvider.utils.schema.submissionDetailsRequestSchema,
+	async (req, res, next) => {
+		try {
+			const submissionId = Number(req.params.submissionId);
+			const entityNames = asArray(req.query.entityNames || []);
+
+			const actionTypes = parseSubmissionActionTypes(req.query.actionTypes || SUBMISSION_ACTION_TYPE.options);
+
+			// query params
+			const page = parseInt(String(req.query.page)) || DEFAULT_PAGE;
+			const pageSize = parseInt(String(req.query.pageSize)) || DEFAULT_PAGE_SIZE;
+			const user = req.user;
+
+			const submission = await lyricProvider.services.submission.getSubmissionById(submissionId);
+
+			if (!submission) {
+				throw new lyricProvider.utils.errors.NotFound(`Submission not found`);
+			}
+
+			const organization = submission.organization;
+
+			if (!hasAllowedAccess(organization, 'READ', user)) {
+				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
+			}
+
+			const submissionDetails = await lyricProvider.services.submission.getSubmissionDetailsById({
+				submissionId,
+				paginationOptions: { page, pageSize },
+				filterOptions: { entityNames, actionTypes },
+			});
+
+			return res.status(200).send(submissionDetails);
+		} catch (error) {
+			next(error);
+		}
+	},
+);
+
+/**
+ * Custom lyric Get Submission by Category Id
  * @override lyricProvider.controllers.submission.getSubmissionsByCategory
  * @description Overrides functionality of lyric getSubmissionsByCategory and implements auth
  */
@@ -318,8 +415,8 @@ const getSubmissionsByCategory = validateRequest(
 			const categoryId = Number(req.params.categoryId);
 			const onlyActive = req.query.onlyActive?.toLowerCase() === 'true';
 			const organization = req.query.organization;
-			const page = parseInt(String(req.query.page)) || 1;
-			const pageSize = parseInt(String(req.query.pageSize)) || 20;
+			const page = parseInt(String(req.query.page)) || DEFAULT_PAGE;
+			const pageSize = parseInt(String(req.query.pageSize)) || DEFAULT_PAGE_SIZE;
 			const user = req.user;
 
 			const submissionsResult = await lyricProvider.services.submission.getSubmissionsByCategory(
@@ -468,10 +565,12 @@ const deleteEntityName = validateRequest(deleteEntityRequestSchema, async (req, 
 });
 
 export default {
-	getSubmissionById,
-	getSubmissionsByCategory,
-	deleteSubmissionById,
+	commit,
 	deleteEntityName,
+	deleteSubmissionById,
 	editData,
+	getSubmissionById,
+	getSubmissionDetailsById,
+	getSubmissionsByCategory,
 	submit,
 };
