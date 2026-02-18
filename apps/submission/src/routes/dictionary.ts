@@ -35,7 +35,5 @@ export const dictionaryRouter: Router = (() => {
 	router.get('/category/:categoryId', lyricProvider.controllers.dictionary.getDictionaryJson);
 	router.get('/category/:categoryId/templates', lyricProvider.controllers.dictionary.downloadDataFileTemplates);
 
-	router.use('', lyricProvider.routers.dictionary);
-
 	return router;
 })();

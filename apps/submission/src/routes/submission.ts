@@ -31,9 +31,11 @@ const upload = multer({ dest: '/tmp', limits: { fileSize: fileSizeLimit } });
 export const submissionRouter: Router = (() => {
 	const router = express.Router();
 
-	// Submission endpoints
+	// Submission by ID
 	router.get('/:submissionId', authMiddleware(), submissionController.getSubmissionById);
 	router.delete('/:submissionId', authMiddleware(), submissionController.deleteSubmissionById);
+
+	router.get('/:submissionId/details', authMiddleware(), submissionController.getSubmissionDetailsById);
 	router.delete('/:submissionId/:actionType', authMiddleware(), submissionController.deleteEntityName);
 
 	// Submissions by Category ID endpoints
@@ -51,7 +53,7 @@ export const submissionRouter: Router = (() => {
 		lyricProvider.controllers.submission.deleteSubmittedDataBySystemId,
 	);
 
-	router.use('', lyricProvider.routers.submission);
+	router.post('/category/:categoryId/commit/:submissionId', authMiddleware(), submissionController.commit);
 
 	return router;
 })();

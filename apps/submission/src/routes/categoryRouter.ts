@@ -20,7 +20,6 @@
 import express, { json, Router, urlencoded } from 'express';
 
 import categoryController from '@/controllers/categoryController.js';
-import { lyricProvider } from '@/core/provider.js';
 import { authMiddleware } from '@/middleware/auth.js';
 
 export const categoryRouter: Router = (() => {
@@ -38,6 +37,5 @@ export const categoryRouter: Router = (() => {
 	router.get('/', categoryController.listAllCategories);
 	router.get('/:categoryId', categoryController.getCategoryById);
 
-	router.use('', lyricProvider.routers.category);
 	return router;
 })();
