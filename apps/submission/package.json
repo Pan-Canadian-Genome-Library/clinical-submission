@@ -1,6 +1,6 @@
 {
 	"name": "@clinical-submission/submission",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"private": true,
 	"author": "Leonardo Rivera <lrivera@oicr.com>",
 	"license": "AGPL-3.0-or-later",
@@ -27,7 +27,7 @@
 		"start:prod": "pnpm migrate:db:prod && pnpm migrate:pcgl:db:prod && NODE_ENV=production node --import=./register.js src/index.js"
 	},
 	"dependencies": {
-		"@overture-stack/lyric": "^0.16.0",
+		"@overture-stack/lyric": "^0.16.1",
 		"axios": "^1.10.0",
 		"bytes": "^3.1.2",
 		"cors": "^2.8.5",

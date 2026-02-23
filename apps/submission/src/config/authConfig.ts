@@ -39,7 +39,6 @@ const authConfigSchema = z.object({
 	AUTH_CLIENT_ID: z.string(),
 	AUTH_CLIENT_SECRET: z.string(),
 	AUTHZ_GROUP_ADMIN: z.string(),
-	AUTHZ_GROUP_SUBMITTERS: z.string(),
 	AUTHZ_SERVICE_ID: z.string(),
 	AUTHZ_SERVICE_UUID: z.string(),
 });
@@ -56,7 +55,6 @@ export const authConfig = {
 	protectedMethods: env.AUTH_PROTECT_METHODS,
 	groups: {
 		admin: parseResult.data.AUTHZ_GROUP_ADMIN,
-		submitter: parseResult.data.AUTHZ_GROUP_SUBMITTERS,
 	},
 	loginRedirectPath: urlJoin(env.API_HOST, '/auth/token'),
 	logoutRedirectPath: urlJoin(env.API_HOST, '/api-docs/'),
