@@ -1,0 +1,1 @@
+ALTER TABLE "pcgl"."dac" ADD COLUMN "isPCGLDAC" boolean DEFAULT false NOT NULL;
