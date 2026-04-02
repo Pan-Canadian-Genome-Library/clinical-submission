@@ -18,7 +18,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { boolean, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { pcglSchema } from './generate.js';
 
@@ -46,6 +46,7 @@ export const dac = pcglSchema.table('dac', {
 	dac_description: text().notNull(),
 	contact_name: varchar({ length: 255 }).notNull(),
 	contact_email: varchar({ length: 255 }).notNull(),
+	is_pcgl_dac: boolean().notNull().default(false),
 	created_at: timestamp().notNull().defaultNow(),
 	updated_at: timestamp(),
 });
