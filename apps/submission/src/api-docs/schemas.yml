@@ -239,6 +239,9 @@ components:
         contactEmail:
           type: string
           description: DAC associated email address
+        isPCGLDAC:
+          type: boolean
+          description: Whether the DAC is a PCGL DAC or Local DAC
         createdAt:
           type: string
           description: Created date of the DAC record

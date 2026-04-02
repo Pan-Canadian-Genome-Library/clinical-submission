@@ -71,6 +71,9 @@
               contactEmail:
                 type: string
                 description: 'Contact email for communication'
+              isPCGLDAC:
+                type: boolean
+                description: 'Whether the DAC is a PCGL DAC or Local DAC'
     security:
       - bearerAuth: []
     responses:
@@ -122,6 +125,7 @@
               - dacDescription
               - contactName
               - contactEmail
+              - isPCGLDAC
     security:
       - bearerAuth: []
     responses:
