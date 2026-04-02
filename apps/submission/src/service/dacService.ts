@@ -48,6 +48,7 @@ const dacService = (db: PostgresDb) => {
 						dacDescription: dac.dac_description,
 						contactName: dac.contact_name,
 						contactEmail: dac.contact_email,
+						isPCGLDAC: dac.is_pcgl_dac,
 						createdAt: dac.created_at,
 						updatedAt: dac.updated_at,
 					})
@@ -75,6 +76,7 @@ const dacService = (db: PostgresDb) => {
 						dacDescription: dac.dac_description,
 						contactName: dac.contact_name,
 						contactEmail: dac.contact_email,
+						isPCGLDAC: dac.is_pcgl_dac,
 						createdAt: dac.created_at,
 						updatedAt: dac.updated_at,
 					})
@@ -99,6 +101,7 @@ const dacService = (db: PostgresDb) => {
 						dacDescription: dac.dac_description,
 						contactName: dac.contact_name,
 						contactEmail: dac.contact_email,
+						isPCGLDAC: dac.is_pcgl_dac,
 						createdAt: dac.created_at,
 						updatedAt: dac.updated_at,
 					})
@@ -119,6 +122,7 @@ const dacService = (db: PostgresDb) => {
 			contactName,
 			dacDescription,
 			dacName,
+			isPCGLDAC,
 		}: CreateDacDataFields): Promise<DACFields | undefined> => {
 			let dacRecord: DACFields[];
 			try {
@@ -129,6 +133,7 @@ const dacService = (db: PostgresDb) => {
 						dac_description: dacDescription,
 						contact_name: contactName,
 						contact_email: contactEmail,
+						is_pcgl_dac: isPCGLDAC,
 					})
 					.returning({
 						dacId: dac.dac_id,
@@ -136,6 +141,7 @@ const dacService = (db: PostgresDb) => {
 						dacDescription: dac.dac_description,
 						contactName: dac.contact_name,
 						contactEmail: dac.contact_email,
+						isPCGLDAC: dac.is_pcgl_dac,
 						createdAt: dac.created_at,
 						updatedAt: dac.updated_at,
 					});
@@ -173,7 +179,7 @@ const dacService = (db: PostgresDb) => {
 		},
 		updateDacById: async (
 			dacId: string,
-			{ dacName, contactEmail, contactName, dacDescription }: UpdateDacDataFields,
+			{ dacName, contactEmail, contactName, dacDescription, isPCGLDAC }: UpdateDacDataFields,
 		): Promise<DACFields | undefined> => {
 			let dacRecord: DACFields[];
 
@@ -185,6 +191,7 @@ const dacService = (db: PostgresDb) => {
 						dac_description: dacDescription,
 						contact_name: contactName,
 						contact_email: contactEmail,
+						is_pcgl_dac: isPCGLDAC,
 						updated_at: sql`NOW()`,
 					})
 					.where(eq(dac.dac_id, dacId))
@@ -194,6 +201,7 @@ const dacService = (db: PostgresDb) => {
 						dacDescription: dac.dac_description,
 						contactName: dac.contact_name,
 						contactEmail: dac.contact_email,
+						isPCGLDAC: dac.is_pcgl_dac,
 						createdAt: dac.created_at,
 						updatedAt: dac.updated_at,
 					});
