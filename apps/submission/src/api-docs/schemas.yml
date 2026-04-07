@@ -239,7 +239,7 @@ components:
         contactEmail:
           type: string
           description: DAC associated email address
-        isPCGLDAC:
+        isPcglDac:
           type: boolean
           description: Whether the DAC is a PCGL DAC or Local DAC
         createdAt:

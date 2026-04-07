@@ -71,7 +71,7 @@
               contactEmail:
                 type: string
                 description: 'Contact email for communication'
-              isPCGLDAC:
+              isPcglDac:
                 type: boolean
                 default: false
                 optional: true
@@ -121,7 +121,7 @@
               contactEmail:
                 type: string
                 description: 'Contact email to be used for communication.'
-              isPCGLDAC:
+              isPcglDac:
                 type: boolean
                 default: false
                 optional: true
@@ -132,7 +132,7 @@
               - dacDescription
               - contactName
               - contactEmail
-              - isPCGLDAC
+              - isPcglDac
     security:
       - bearerAuth: []
     responses:

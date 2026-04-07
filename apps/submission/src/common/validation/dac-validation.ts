@@ -52,7 +52,7 @@ export const createDacData: RequestValidation<CreateDacDataFields, ParsedQs, Par
 		dacDescription: stringNotEmpty,
 		contactName: stringNotEmpty,
 		contactEmail: stringNotEmpty,
-		isPCGLDAC: z.boolean(),
+		isPcglDac: z.boolean(),
 	}),
 };
 
@@ -73,6 +73,6 @@ export const updateDacByIdData: RequestValidation<UpdateDacDataFields, ParsedQs,
 		dacDescription: stringNotEmptyOptional,
 		contactName: stringNotEmptyOptional,
 		contactEmail: stringNotEmptyOptional,
-		isPCGLDAC: z.boolean(),
+		isPcglDac: z.boolean(),
 	}),
 };
