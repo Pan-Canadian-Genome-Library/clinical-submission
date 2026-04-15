@@ -57,6 +57,9 @@ const appConfig: AppConfig = {
 		url: env.LECTERN_URL,
 	},
 	validator: env.VALIDATOR_CONFIG,
+	submissionService: {
+		maxFileSize: 0, // Set to 0 to disable file size limit in lyricProvider
+	},
 };
 
 export const lyricProvider = provider(appConfig);

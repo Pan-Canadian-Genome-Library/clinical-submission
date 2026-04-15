@@ -134,7 +134,7 @@ const getCategoryById = validateRequest(
 );
 
 const getCategoryBySystemId = validateRequest(
-	lyricProvider.utils.schema.dataGetBySystemIdRequestSchema,
+	lyricProvider.utils.schema.DataGetBySystemIdRequestSchema,
 	async (req, res, next) => {
 		try {
 			const db = getDbInstance();
