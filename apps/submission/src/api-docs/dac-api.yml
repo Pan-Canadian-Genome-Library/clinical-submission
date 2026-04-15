@@ -71,6 +71,11 @@
               contactEmail:
                 type: string
                 description: 'Contact email for communication'
+              isPcglDac:
+                type: boolean
+                default: false
+                optional: true
+                description: 'Whether the DAC is a PCGL DAC.'
     security:
       - bearerAuth: []
     responses:
@@ -116,12 +121,18 @@
               contactEmail:
                 type: string
                 description: 'Contact email to be used for communication.'
+              isPcglDac:
+                type: boolean
+                default: false
+                optional: true
+                description: 'Whether the DAC is a PCGL DAC.'
             required:
               - dacId
               - dacName
               - dacDescription
               - contactName
               - contactEmail
+              - isPcglDac
     security:
       - bearerAuth: []
     responses:

@@ -35,6 +35,7 @@
       - Submission
     parameters:
       - $ref: '#/components/parameters/path/SubmissionId'
+      - $ref: '#/components/parameters/query/ForceDeleteSubmission'
     security:
       - bearerAuth: []
     responses:

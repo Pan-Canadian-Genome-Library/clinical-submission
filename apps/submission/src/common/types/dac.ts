@@ -23,6 +23,7 @@ export type DACFields = {
 	dacDescription: string;
 	contactName: string;
 	contactEmail: string;
+	isPcglDac: boolean;
 	createdAt: Date;
 	updatedAt: Date | null;
 };

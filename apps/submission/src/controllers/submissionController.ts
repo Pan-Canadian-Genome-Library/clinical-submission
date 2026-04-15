@@ -270,13 +270,16 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 		} else if (fileErrors.length > 0) {
 			logger.info('Submission processed with some errors');
 			status = CREATE_SUBMISSION_STATUS.PARTIAL_SUBMISSION;
+		} else if (submitResult.status === 'UNKNOWN_CATEGORY') {
+			status = CREATE_SUBMISSION_STATUS.INVALID_SUBMISSION;
+			logger.info('Unable to process the submission');
 		} else {
 			logger.info(`Submission processed successfully`);
 		}
 
 		// This response provides the details of file Submission
 		return res.status(200).send({
-			submissionId: submitResult.submissionId,
+			submissionId: submitResult.status === 'UNKNOWN_CATEGORY' ? undefined : submitResult.submissionId,
 			status,
 			batchErrors: fileErrors,
 			inProcessEntities: entityList,
@@ -468,6 +471,7 @@ const deleteSubmissionById = validateRequest(
 			const submissionId = Number(req.params.submissionId);
 			const user = req.user;
 			const authEnabled = authConfig.enabled;
+			const forceDelete = req.query.force?.toLowerCase() === 'true';
 
 			const submission = await lyricProvider.services.submission.getSubmissionById(submissionId);
 			if (!submission) {
@@ -481,6 +485,7 @@ const deleteSubmissionById = validateRequest(
 			const response = await lyricProvider.services.submission.deleteActiveSubmissionById(
 				submissionId,
 				user?.username || '',
+				forceDelete,
 			);
 
 			return res.status(200).send(response);
