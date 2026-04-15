@@ -17,16 +17,15 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { relations } from 'drizzle-orm';
-import { foreignKey, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { text, timestamp, varchar } from 'drizzle-orm/pg-core';
 import { pcglSchema } from './generate.js';
 
 export const langagues = pcglSchema.enum('study_status', ['eng_ca', 'fr_ca']);
 
-export const study = pcglSchema.table('study_translations', {
+export const studyTranslations = pcglSchema.table('study_translations', {
 	study_translation_id: text().primaryKey(),
-	language_id: langagues().notNull(),
-	study_description: text().notNull(), // Assuming the description is large
+	language_id: langagues().notNull().unique(),
+	study_description: text().notNull(),
 	program_name: varchar({ length: 255 }),
 	keywords: text().array(),
 	participant_criteria: text(),

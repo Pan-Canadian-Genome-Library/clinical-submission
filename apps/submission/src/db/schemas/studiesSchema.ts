@@ -22,6 +22,7 @@ import { foreignKey, integer, text, timestamp, varchar } from 'drizzle-orm/pg-co
 
 import { dac } from './dacSchema.js';
 import { pcglSchema } from './generate.js';
+import { studyTranslations } from './studyTranslationsSchema.js';
 
 export const studyStatus = pcglSchema.enum('study_status', ['Ongoing', 'Completed']);
 export const studyContext = pcglSchema.enum('study_context', ['Clinical', 'Research']);
@@ -49,6 +50,7 @@ export const study = pcglSchema.table(
 	{
 		study_id: text().primaryKey().default(studyIdDefault),
 		dac_id: text().notNull(),
+		default_translation: text().notNull(),
 		study_name: varchar({ length: 255 }).unique().notNull(),
 		status: studyStatus().notNull(),
 		context: studyContext().notNull(),
@@ -67,6 +69,11 @@ export const study = pcglSchema.table(
 			foreignColumns: [dac.dac_id],
 			name: 'dac_id_fk',
 		}),
+		foreignKey({
+			columns: [table.default_translation],
+			foreignColumns: [studyTranslations.study_translation_id],
+			name: 'default_translation_fk',
+		}),
 	],
 );
 
@@ -74,5 +81,9 @@ export const studyRelations = relations(study, ({ one }) => ({
 	dac_id: one(dac, {
 		fields: [study.dac_id],
 		references: [dac.dac_id],
+	}),
+	default_translation: one(studyTranslations, {
+		fields: [study.default_translation],
+		references: [studyTranslations.study_translation_id],
 	}),
 }));
