@@ -20,11 +20,12 @@
 import { text, timestamp, varchar } from 'drizzle-orm/pg-core';
 import { pcglSchema } from './generate.js';
 
-export const langagues = pcglSchema.enum('study_status', ['eng_ca', 'fr_ca']);
+export const languages = pcglSchema.enum('languages', ['eng_ca', 'fr_ca']);
 
 export const studyTranslations = pcglSchema.table('study_translations', {
 	study_translation_id: text().primaryKey(),
-	language_id: langagues().notNull().unique(),
+	study_id: text().notNull(),
+	language_id: languages().notNull(),
 	study_description: text().notNull(),
 	program_name: varchar({ length: 255 }),
 	keywords: text().array(),
