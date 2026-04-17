@@ -23,7 +23,7 @@ import { z } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
-import { StudyContext, StudyDTO, StudyStatus } from '../types/study.js';
+import { AllowedLanguages, StudyContext, StudyDTO, UpsertStudyParams, StudyStatus } from '../types/study.js';
 import { orderByString, PaginationParams, positiveInteger, stringNotEmpty } from './common.js';
 
 const ALLOWED_DOMAINS = [
@@ -45,6 +45,7 @@ const ALLOWED_DOMAINS = [
 const createStudyProperties = z
 	.object({
 		dacId: stringNotEmpty,
+		defaultLanguage: z.nativeEnum(AllowedLanguages),
 		studyName: stringNotEmpty,
 		studyDescription: stringNotEmpty,
 		programName: z.string().optional(),
@@ -77,8 +78,8 @@ export const getOrDeleteStudyByID: RequestValidation<object, ParsedQs, StudyIDPa
 	}),
 };
 
-export type CreateStudyFields = Omit<StudyDTO, 'studyId' | 'createdAt' | 'updatedAt'>;
-export const createStudy: RequestValidation<CreateStudyFields, ParsedQs, ParamsDictionary> = {
+export type UpsertStudyFields = Omit<UpsertStudyParams, 'studyId' | 'createdAt' | 'updatedAt'>;
+export const createStudy: RequestValidation<UpsertStudyFields, ParsedQs, ParamsDictionary> = {
 	body: createStudyProperties,
 };
 
