@@ -71,13 +71,6 @@
 			"when": 1775147103923,
 			"tag": "0009_add_is_pcgl_dac",
 			"breakpoints": true
-		},
-		{
-			"idx": 10,
-			"version": "7",
-			"when": 1776278264326,
-			"tag": "0010_CUSTOM_add_study_translations_and_migrate_study_data",
-			"breakpoints": true
 		}
 	]
 }
