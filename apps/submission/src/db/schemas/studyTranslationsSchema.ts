@@ -17,13 +17,13 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { serial, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 import { pcglSchema } from './generate.js';
 
-export const languages = pcglSchema.enum('languages', ['eng_ca', 'fr_ca']);
+export const languages = pcglSchema.enum('languages', ['en_ca', 'fr_ca']);
 
 export const studyTranslations = pcglSchema.table('study_translations', {
-	study_translation_id: text().primaryKey(),
+	study_translation_id: serial('study_translation_id').primaryKey(),
 	study_id: text().notNull(),
 	language_id: languages().notNull(),
 	study_description: text().notNull(),

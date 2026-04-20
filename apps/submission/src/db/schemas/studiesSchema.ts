@@ -50,7 +50,7 @@ export const study = pcglSchema.table(
 	{
 		study_id: text().primaryKey().default(studyIdDefault),
 		dac_id: text().notNull(),
-		default_translation: text().notNull(),
+		default_translation: integer().notNull(),
 		study_name: varchar({ length: 255 }).unique().notNull(),
 		status: studyStatus().notNull(),
 		context: studyContext().notNull(),
