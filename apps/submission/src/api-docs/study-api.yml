@@ -96,6 +96,11 @@
                 type: string
                 enum: ['Completed', 'Ongoing']
                 description: Indicate if the study is completed or ongoing.
+              defaultLanguage:
+                type: string
+                enum: ['en_ca', 'fr_ca']
+                description: The default language for the study translation (English Canada or French Canada).
+
     security:
       - bearerAuth: []
     responses:
