@@ -56,6 +56,7 @@ export type StudyDTO = {
 	createdAt: Date;
 	updatedAt?: Date | null;
 	categoryId?: number | null;
+	translations?: StudyTranslation[];
 };
 
 export type TranslationFields = Omit<StudyTranslation, 'studyTranslationId' | 'createdAt' | 'updatedAt'>;

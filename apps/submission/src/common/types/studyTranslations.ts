@@ -20,15 +20,15 @@
 import { studyTranslations } from '@/db/schemas/studyTranslationsSchema.js';
 
 export type StudyTranslation = {
-	studyTranslationId: string | null;
+	studyTranslationId: number;
 	languageId: string;
 	studyDescription: string;
 	programName?: string | null;
 	keywords?: string[] | null;
 	participantCriteria?: string | null;
 	fundingSources: string[];
-	createdAt: string;
-	updatedAt?: string | null;
+	createdAt: string | Date;
+	updatedAt?: string | Date | null;
 };
 
 export type StudyTranslationRecord = typeof studyTranslations.$inferSelect;
