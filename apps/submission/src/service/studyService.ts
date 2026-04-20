@@ -21,6 +21,7 @@ import { asc, desc, eq, inArray, sql } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
 import type { StudyDTO, StudyRecord } from '@/common/types/study.js';
+import { StudyTranslation, StudyTranslationRecord } from '@/common/types/studyTranslations.js';
 import { UpsertStudyFields } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
@@ -45,6 +46,20 @@ const convertFromRecordToStudyDTO = (study: StudyRecord): StudyDTO => {
 		updatedAt: study.updated_at,
 		categoryId: study.category_id,
 	};
+};
+
+const convertStudyTranslations = (translations: StudyTranslationRecord[]): StudyTranslation[] => {
+	return translations.map((translation) => ({
+		studyTranslationId: translation.study_translation_id,
+		languageId: translation.language_id,
+		studyDescription: translation.study_description,
+		fundingSources: translation.funding_sources,
+		keywords: translation.keywords,
+		participantCriteria: translation.participant_criteria,
+		programName: translation.program_name,
+		createdAt: translation.created_at,
+		updatedAt: translation.updated_at,
+	}));
 };
 
 const studyService = (db: PostgresDb) => ({
@@ -127,14 +142,11 @@ const studyService = (db: PostgresDb) => ({
 						participant_criteria: studyData.participantCriteria,
 						funding_sources: studyData.fundingSources,
 					})
-					.returning({
-						study_translation_id: studyTranslations.study_translation_id,
-						study_id: studyTranslations.study_id,
-					}),
+					.returning(),
 			);
 
 			// Insert study using the translation_id from the CTE
-			const result = await dbDriver
+			const studyResult = await dbDriver
 				.with(insertTranslation)
 				.insert(study)
 				.values({
@@ -153,10 +165,26 @@ const studyService = (db: PostgresDb) => ({
 				})
 				.returning();
 
-			if (result[0]) {
-				return convertFromRecordToStudyDTO(result[0]);
+			if (!studyResult[0]) {
+				logger.error(`No results returned from the insertTranslation CTE for study ${studyData.studyName}`);
+				throw new Error();
 			}
 
+			// Format return object
+			const translationResult = await dbDriver
+				.select()
+				.from(studyTranslations)
+				.where(eq(studyTranslations.study_id, studyResult[0].study_id));
+
+			// Group translations into an array
+			if (translationResult.length > 0 && translationResult[0]) {
+				const resultTranslations = convertStudyTranslations(translationResult);
+
+				return {
+					...convertFromRecordToStudyDTO(studyResult[0]),
+					translations: resultTranslations,
+				};
+			}
 			return undefined;
 		} catch (error) {
 			const postgresError = isPostgresError(error);
