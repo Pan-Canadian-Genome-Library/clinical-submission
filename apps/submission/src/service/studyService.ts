@@ -24,7 +24,8 @@ import type { StudyDTO, StudyRecord } from '@/common/types/study.js';
 import { UpsertStudyFields } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
-import { study } from '@/db/schemas/studiesSchema.js';
+import { study, studyIdDefault } from '@/db/schemas/studiesSchema.js';
+import { studyTranslations } from '@/db/schemas/studyTranslationsSchema.js';
 import { PostgresTransaction } from '@/db/types.js';
 import { isPostgresError, PostgresErrors } from '@/db/utils.js';
 
@@ -113,9 +114,32 @@ const studyService = (db: PostgresDb) => ({
 		const dbDriver = transaction ? transaction : db;
 
 		try {
-			const newStudyRecord = await dbDriver
+			// Create CTE to insert translation first
+			const insertTranslation = dbDriver.$with('insert_translation').as(
+				dbDriver
+					.insert(studyTranslations)
+					.values({
+						study_id: studyIdDefault,
+						language_id: studyData.defaultLanguage,
+						study_description: studyData.studyDescription,
+						program_name: studyData.programName,
+						keywords: studyData.keywords,
+						participant_criteria: studyData.participantCriteria,
+						funding_sources: studyData.fundingSources,
+					})
+					.returning({
+						study_translation_id: studyTranslations.study_translation_id,
+						study_id: studyTranslations.study_id,
+					}),
+			);
+
+			// Insert study using the translation_id from the CTE
+			const result = await dbDriver
+				.with(insertTranslation)
 				.insert(study)
 				.values({
+					study_id: sql`(SELECT study_id FROM ${insertTranslation})`,
+					default_translation: sql`(SELECT study_translation_id FROM ${insertTranslation})`,
 					dac_id: studyData.dacId,
 					study_name: studyData.studyName,
 					status: studyData.status,
@@ -124,17 +148,16 @@ const studyService = (db: PostgresDb) => ({
 					principal_investigators: studyData.principalInvestigators,
 					lead_organizations: studyData.leadOrganizations,
 					collaborators: studyData.collaborators,
-					publication_links: studyData.publicationLinks,
 					category_id: studyData.categoryId,
-					default_translation: studyData.defaultLanguage,
+					publication_links: studyData.publicationLinks,
 				})
 				.returning();
 
-			if (newStudyRecord[0]) {
-				return convertFromRecordToStudyDTO(newStudyRecord[0]);
+			if (result[0]) {
+				return convertFromRecordToStudyDTO(result[0]);
 			}
 
-			return newStudyRecord[0];
+			return undefined;
 		} catch (error) {
 			const postgresError = isPostgresError(error);
 
@@ -144,6 +167,8 @@ const studyService = (db: PostgresDb) => ({
 						`${studyData.studyName} already exists in studies. Study name must be unique.`,
 					);
 				case PostgresErrors.FOREIGN_KEY_VIOLATION:
+					console.log(error);
+
 					throw new lyricProvider.utils.errors.BadRequest(
 						`${studyData.dacId} does not appear to be a valid DAC ID, please ensure this DAC record exists prior to creating a study.`,
 					);
