@@ -23,7 +23,7 @@ import { z } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
-import { AllowedLanguages, StudyContext, StudyDTO, UpsertStudyParams, StudyStatus } from '../types/study.js';
+import { AllowedLanguages, StudyContext, StudyDTO, StudyStatus, UpsertStudyParams } from '../types/study.js';
 import { orderByString, PaginationParams, positiveInteger, stringNotEmpty } from './common.js';
 
 const ALLOWED_DOMAINS = [

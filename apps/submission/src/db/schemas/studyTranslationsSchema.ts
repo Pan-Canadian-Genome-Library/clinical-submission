@@ -18,6 +18,7 @@
  */
 
 import { serial, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+
 import { pcglSchema } from './generate.js';
 
 export const languages = pcglSchema.enum('languages', ['en_ca', 'fr_ca']);
