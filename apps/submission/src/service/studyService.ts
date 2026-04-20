@@ -42,6 +42,7 @@ const convertFromRecordToStudyDTO = (study: StudyRecord): StudyDTO => {
 		leadOrganizations: study.lead_organizations,
 		collaborators: study.collaborators,
 		publicationLinks: study.publication_links,
+		defaultTranslation: study.default_translation,
 		createdAt: study.created_at,
 		updatedAt: study.updated_at,
 		categoryId: study.category_id,
@@ -50,7 +51,6 @@ const convertFromRecordToStudyDTO = (study: StudyRecord): StudyDTO => {
 
 const convertStudyTranslations = (translations: StudyTranslationRecord[]): StudyTranslation[] => {
 	return translations.map((translation) => ({
-		studyTranslationId: translation.study_translation_id,
 		languageId: translation.language_id,
 		studyDescription: translation.study_description,
 		fundingSources: translation.funding_sources,
@@ -195,8 +195,6 @@ const studyService = (db: PostgresDb) => ({
 						`${studyData.studyName} already exists in studies. Study name must be unique.`,
 					);
 				case PostgresErrors.FOREIGN_KEY_VIOLATION:
-					console.log(error);
-
 					throw new lyricProvider.utils.errors.BadRequest(
 						`${studyData.dacId} does not appear to be a valid DAC ID, please ensure this DAC record exists prior to creating a study.`,
 					);

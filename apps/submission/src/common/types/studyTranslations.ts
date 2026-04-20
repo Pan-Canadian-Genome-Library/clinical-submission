@@ -20,7 +20,7 @@
 import { studyTranslations } from '@/db/schemas/studyTranslationsSchema.js';
 
 export type StudyTranslation = {
-	studyTranslationId: number;
+	studyTranslationId?: number;
 	languageId: string;
 	studyDescription: string;
 	programName?: string | null;
