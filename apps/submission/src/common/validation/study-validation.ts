@@ -78,7 +78,7 @@ export const getOrDeleteStudyByID: RequestValidation<object, ParsedQs, StudyIDPa
 	}),
 };
 
-export type UpsertStudyFields = Omit<UpsertStudyParams, 'studyId' | 'createdAt' | 'updatedAt'>;
+export type UpsertStudyFields = Omit<UpsertStudyParams, 'studyId' | 'languageId' | 'createdAt' | 'updatedAt'>;
 export const createStudy: RequestValidation<UpsertStudyFields, ParsedQs, ParamsDictionary> = {
 	body: createStudyProperties,
 };
