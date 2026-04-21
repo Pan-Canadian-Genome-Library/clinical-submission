@@ -287,7 +287,9 @@ const studyService = (db: PostgresDb) => ({
 		}
 	},
 	// STUDY TRANSLATIONS
-	createStudyTranslation: async (translations: StudyTranslationFields & { studyId: string }) => {
+	createStudyTranslation: async (
+		translations: StudyTranslationFields & { studyId: string },
+	): Promise<StudyTranslationDTO | undefined> => {
 		try {
 			const result = await db
 				.insert(studyTranslations)
@@ -308,6 +310,8 @@ const studyService = (db: PostgresDb) => ({
 					keywords: studyTranslations.keywords,
 					participantCriteria: studyTranslations.participant_criteria,
 					fundingSources: studyTranslations.funding_sources,
+					createdAt: studyTranslations.created_at,
+					updatedAt: studyTranslations.updated_at,
 				});
 
 			return result[0];
@@ -328,7 +332,9 @@ const studyService = (db: PostgresDb) => ({
 			}
 		}
 	},
-	updateStudyTranslation: async (translations: StudyTranslationFields & { studyId: string }) => {
+	updateStudyTranslation: async (
+		translations: StudyTranslationFields & { studyId: string },
+	): Promise<StudyTranslationDTO | undefined> => {
 		try {
 			const result = await db
 				.update(studyTranslations)
@@ -353,6 +359,8 @@ const studyService = (db: PostgresDb) => ({
 					keywords: studyTranslations.keywords,
 					participantCriteria: studyTranslations.participant_criteria,
 					fundingSources: studyTranslations.funding_sources,
+					createdAt: studyTranslations.created_at,
+					updatedAt: studyTranslations.updated_at,
 				});
 
 			return result[0];
