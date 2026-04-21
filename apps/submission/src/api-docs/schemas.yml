@@ -427,12 +427,74 @@ components:
           nullable: true
           description: Last Updated date of the Study record, will be null if never updated.
 
-    StudyTranslationResult:
+    StudyResponse:
       type: object
       properties:
         studyId:
           type: string
-          description: Unique identifier of the study this translation belongs to.
+          description: Unique identifier of the study in PCGL.
+        dacId:
+          type: string
+          description: Unique identifier of the Data Access Committee (DAC) in PCGL to which the study is assigned.
+        studyName:
+          type: string
+          description: The official name of the study
+        status:
+          type: string
+          enum: ['Completed', 'Ongoing']
+          description: Indicate if the study is completed or ongoing.
+        context:
+          type: string
+          enum: ['Clinical', 'Research']
+          description: Indicate if the study was conducted in a clinical setting or as part of a research project.
+        domain:
+          type: array
+          items:
+            type: string
+          description: List of specific scientific or clinical domains addressed by the study.
+        principalInvestigators:
+          type: array
+          items:
+            type: string
+          description: 'List of lead researchers responsible for the study. Ex. John Doe, Example Research Institute'
+        leadOrganizations:
+          type: array
+          items:
+            type: string
+          description: List of institutions or organizations leading the study.
+        collaborators:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: List of researchers, institutions or companies involved in the study. Ex. FirstName LastName (if individual) or Organization full official name, Role.
+        publicationLinks:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: List of URL links to academic papers or reports associated with the study.
+        createdAt:
+          type: string
+          format: date-time
+          description: Created date of the Study record
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Last Updated date of the Study record, will be null if never updated.
+        categoryId:
+          type: integer
+          nullable: true
+          description: Category identifier for the study.
+        translations:
+          type: array
+          items:
+            $ref: '#/components/schemas/StudyTranslationResult'
+          description: Array of translations for this study in different languages.
+    StudyTranslationResult:
+      type: object
+      properties:
         languageId:
           type: string
           enum: ['en_ca', 'fr_ca']

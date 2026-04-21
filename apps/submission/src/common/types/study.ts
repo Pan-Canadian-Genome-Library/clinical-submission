@@ -56,9 +56,12 @@ export type StudyDTO = {
 	createdAt: Date;
 	updatedAt?: Date | null;
 	categoryId?: number | null;
-	translations?: StudyTranslationDTO[];
-	defaultTranslation?: number | null;
+	defaultTranslation?: number;
 };
+
+export type StudyResponse = {
+	translations?: StudyTranslationDTO[];
+} & StudyDTO;
 
 export type TranslationFields = Omit<StudyTranslationDTO, 'studyTranslationId' | 'createdAt' | 'updatedAt'>;
 
