@@ -90,7 +90,7 @@ const studyService = (db: PostgresDb) => ({
 		orderBy?: string;
 		page?: number;
 		pageSize?: number;
-	}): Promise<StudyDTO[]> => {
+	}): Promise<(StudyResponse | undefined)[]> => {
 		let studyRecords;
 		try {
 			studyRecords = await db
@@ -99,37 +99,39 @@ const studyService = (db: PostgresDb) => ({
 				.orderBy(orderBy === 'desc' ? desc(study.created_at) : asc(study.created_at))
 				.limit(pageSize)
 				.offset((page - 1) * pageSize);
+
+			const result = Promise.all(studyRecords.map(async (study) => await convertFromRecordToStudyResponse(study, db)));
+
+			return result;
 		} catch (exception) {
 			logger.error(exception, 'Error at listStudies');
 			throw new lyricProvider.utils.errors.InternalServerError(
 				'Something went wrong while fetching studies. Please try again later.',
 			);
 		}
-		return studyRecords.map((studies) => convertFromRecordToStudyDTO(studies));
 	},
-
-	getStudyById: async (studyId: string): Promise<StudyDTO | undefined> => {
+	getStudyById: async (studyId: string): Promise<StudyResponse | undefined> => {
 		let studyRecords;
 		try {
 			studyRecords = await db.select().from(study).where(eq(study.study_id, studyId));
+
+			if (studyRecords[0]) {
+				return await convertFromRecordToStudyResponse(studyRecords[0], db);
+			}
+
+			return;
 		} catch (exception) {
 			logger.error(exception, 'Error at getStudyById');
 			throw new lyricProvider.utils.errors.InternalServerError(
 				'Something went wrong while fetching your requested study. Please try again later.',
 			);
 		}
-
-		if (studyRecords[0]) {
-			return convertFromRecordToStudyDTO(studyRecords[0]);
-		}
-
-		return studyRecords[0];
 	},
-	getStudyByName: async (studyName: string): Promise<StudyDTO | undefined> => {
+	getStudyByName: async (studyName: string): Promise<StudyResponse | undefined> => {
 		try {
 			const [studyRecords] = await db.select().from(study).where(eq(study.study_name, studyName));
 			if (studyRecords) {
-				return convertFromRecordToStudyDTO(studyRecords);
+				return await convertFromRecordToStudyResponse(studyRecords, db);
 			}
 
 			return;
