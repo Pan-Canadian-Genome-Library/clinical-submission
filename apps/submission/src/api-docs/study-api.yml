@@ -109,7 +109,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudyResult'
+              $ref: '#/components/schemas/StudyResponse'
       400:
         $ref: '#/components/responses/BadRequest'
       401:
@@ -239,7 +239,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudyResult'
+              $ref: '#/components/schemas/StudyResponse'
       400:
         $ref: '#/components/responses/BadRequest'
       401:
