@@ -25,6 +25,7 @@ import { RequestValidation } from '@/middleware/requestValidation.js';
 
 import { AllowedLanguages, StudyContext, StudyDTO, StudyStatus, UpsertStudyParams } from '../types/study.js';
 import { orderByString, PaginationParams, positiveInteger, stringNotEmpty } from './common.js';
+import { StudyTranslation } from '../types/studyTranslations.js';
 
 const ALLOWED_DOMAINS = [
 	'AGING',
@@ -103,4 +104,18 @@ export const listAllStudies: RequestValidation<object, PaginationParams, ParamsD
 		page: positiveInteger.optional(),
 		pageSize: positiveInteger.optional(),
 	}),
+};
+
+export type StudyTranslationFields = Omit<StudyTranslation, 'createdAt' | 'updatedAt'>;
+export const createStudyTranslation: RequestValidation<StudyTranslationFields, ParsedQs, StudyIDParams> = {
+	body: z
+		.object({
+			languageId: z.nativeEnum(AllowedLanguages),
+			studyDescription: z.string(),
+			programName: z.string().optional(),
+			keywords: z.array(z.string()).optional(),
+			participantCriteria: z.string().optional(),
+			fundingSources: z.array(z.string()),
+		})
+		.strict(),
 };

@@ -19,6 +19,7 @@
 
 import {
 	createStudy,
+	createStudyTranslation,
 	getOrDeleteStudyByID,
 	listAllStudies,
 	updateStudy,
@@ -146,6 +147,28 @@ export const updateStudyById = validateRequest(updateStudy, async (req, res, nex
 
 		res.status(200).send(results);
 
+		return;
+	} catch (exception) {
+		next(exception);
+	}
+});
+export const createStudyTranslationById = validateRequest(createStudyTranslation, async (req, res, next) => {
+	try {
+		const studyId = req.params.studyId;
+		const translationData = req.body;
+
+		const db = getDbInstance();
+		const studyRepo = studyService(db);
+
+		const studyFound = await studyRepo.getStudyById(studyId);
+
+		if (!studyFound) {
+			throw new lyricProvider.utils.errors.NotFound(`No Study with ID - ${studyId} found.`);
+		}
+
+		const results = await studyRepo.createStudyTranslation({ ...translationData, studyId });
+
+		res.status(200).send(results);
 		return;
 	} catch (exception) {
 		next(exception);

@@ -21,6 +21,7 @@ import express, { json, Router, urlencoded } from 'express';
 
 import {
 	createNewStudy,
+	createStudyTranslationById,
 	deleteStudyById,
 	getAllStudies,
 	getStudyById,
@@ -39,6 +40,7 @@ export const studyRouter: Router = (() => {
 	router.post('/', authMiddleware({ requireAdmin: true }), createNewStudy);
 	router.delete('/:studyId', authMiddleware({ requireAdmin: true }), deleteStudyById);
 	router.patch('/:studyId', authMiddleware({ requireAdmin: true }), updateStudyById);
+	router.post('/translation/:studyId', authMiddleware({ requireAdmin: true }), createStudyTranslationById);
 
 	return router;
 })();

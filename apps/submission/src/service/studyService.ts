@@ -22,7 +22,7 @@ import { asc, desc, eq, inArray, sql } from 'drizzle-orm';
 import { logger } from '@/common/logger.js';
 import type { StudyDTO, StudyRecord } from '@/common/types/study.js';
 import { StudyTranslation, StudyTranslationRecord } from '@/common/types/studyTranslations.js';
-import { UpsertStudyFields } from '@/common/validation/study-validation.js';
+import { StudyTranslationFields, UpsertStudyFields } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
 import { study, studyIdDefault } from '@/db/schemas/studiesSchema.js';
@@ -284,6 +284,40 @@ const studyService = (db: PostgresDb) => ({
 			logger.error(error, 'Error at unlinkStudiesFromCategory service');
 			throw new lyricProvider.utils.errors.InternalServerError(
 				'Something went wrong while unlinking studies from category. Please try again later.',
+			);
+		}
+	},
+	// STUDY TRANSLATIONS
+	createStudyTranslation: async (translations: StudyTranslationFields & { studyId: string }) => {
+		console.log('transdlations', translations);
+
+		try {
+			const result = await db
+				.insert(studyTranslations)
+				.values({
+					study_id: translations.studyId,
+					language_id: translations.languageId,
+					study_description: translations.studyDescription,
+					program_name: translations.programName,
+					keywords: translations.keywords,
+					participant_criteria: translations.participantCriteria,
+					funding_sources: translations.fundingSources,
+				})
+				.returning({
+					studyId: studyTranslations.study_id,
+					languageId: studyTranslations.language_id,
+					studyDescription: studyTranslations.study_description,
+					programName: studyTranslations.program_name,
+					keywords: studyTranslations.keywords,
+					participantCriteria: studyTranslations.participant_criteria,
+					fundingSources: studyTranslations.funding_sources,
+				});
+
+			return result[0];
+		} catch (error) {
+			logger.error(error, 'Error at createStudyTranslation service');
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'Something went wrong while creating study translation. Please try again later.',
 			);
 		}
 	},
