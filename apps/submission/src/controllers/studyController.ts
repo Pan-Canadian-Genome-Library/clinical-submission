@@ -174,3 +174,26 @@ export const createStudyTranslationById = validateRequest(createStudyTranslation
 		next(exception);
 	}
 });
+
+export const updateStudyTranslationById = validateRequest(createStudyTranslation, async (req, res, next) => {
+	try {
+		const studyId = req.params.studyId;
+		const translationData = req.body;
+
+		const db = getDbInstance();
+		const studyRepo = studyService(db);
+
+		const studyFound = await studyRepo.getStudyById(studyId);
+
+		if (!studyFound) {
+			throw new lyricProvider.utils.errors.NotFound(`No Study with ID - ${studyId} found.`);
+		}
+
+		const results = await studyRepo.updateStudyTranslation({ ...translationData, studyId });
+
+		res.status(200).send(results);
+		return;
+	} catch (exception) {
+		next(exception);
+	}
+});
