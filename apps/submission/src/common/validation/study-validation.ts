@@ -24,8 +24,8 @@ import { z } from 'zod';
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
 import { AllowedLanguages, StudyContext, StudyDTO, StudyStatus, UpsertStudyParams } from '../types/study.js';
+import { StudyTranslationDTO } from '../types/studyTranslations.js';
 import { orderByString, PaginationParams, positiveInteger, stringNotEmpty } from './common.js';
-import { StudyTranslation } from '../types/studyTranslations.js';
 
 const ALLOWED_DOMAINS = [
 	'AGING',
@@ -106,7 +106,7 @@ export const listAllStudies: RequestValidation<object, PaginationParams, ParamsD
 	}),
 };
 
-export type StudyTranslationFields = Omit<StudyTranslation, 'createdAt' | 'updatedAt'>;
+export type StudyTranslationFields = Omit<StudyTranslationDTO, 'createdAt' | 'updatedAt'>;
 export const createStudyTranslation: RequestValidation<StudyTranslationFields, ParsedQs, StudyIDParams> = {
 	body: z
 		.object({
