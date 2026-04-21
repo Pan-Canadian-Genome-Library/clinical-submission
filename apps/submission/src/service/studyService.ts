@@ -21,7 +21,7 @@ import { asc, desc, eq, inArray, sql } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
 import type { StudyDTO, StudyRecord } from '@/common/types/study.js';
-import { StudyTranslation, StudyTranslationRecord } from '@/common/types/studyTranslations.js';
+import { StudyTranslationDTO, StudyTranslationRecord } from '@/common/types/studyTranslations.js';
 import { UpsertStudyFields } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
@@ -49,7 +49,7 @@ const convertFromRecordToStudyDTO = (study: StudyRecord): StudyDTO => {
 	};
 };
 
-const convertStudyTranslations = (translations: StudyTranslationRecord[]): StudyTranslation[] => {
+const convertStudyTranslations = (translations: StudyTranslationRecord[]): StudyTranslationDTO[] => {
 	return translations.map((translation) => ({
 		languageId: translation.language_id,
 		studyDescription: translation.study_description,

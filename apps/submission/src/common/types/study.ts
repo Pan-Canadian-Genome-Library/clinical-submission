@@ -19,7 +19,7 @@
 
 import { study } from '@/db/schemas/studiesSchema.js';
 
-import { StudyTranslation } from './studyTranslations.js';
+import { StudyTranslationDTO } from './studyTranslations.js';
 
 export const StudyStatus = {
 	ONGOING: 'Ongoing',
@@ -56,11 +56,11 @@ export type StudyDTO = {
 	createdAt: Date;
 	updatedAt?: Date | null;
 	categoryId?: number | null;
-	translations?: StudyTranslation[];
+	translations?: StudyTranslationDTO[];
 	defaultTranslation?: number | null;
 };
 
-export type TranslationFields = Omit<StudyTranslation, 'studyTranslationId' | 'createdAt' | 'updatedAt'>;
+export type TranslationFields = Omit<StudyTranslationDTO, 'studyTranslationId' | 'createdAt' | 'updatedAt'>;
 
 export type StudyAdditionalParams = {
 	defaultLanguage: AllowedLanguagesValues;
