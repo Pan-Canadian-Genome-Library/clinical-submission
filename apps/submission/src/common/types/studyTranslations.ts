@@ -19,9 +19,11 @@
 
 import { studyTranslations } from '@/db/schemas/studyTranslationsSchema.js';
 
-export type StudyTranslation = {
+import { AllowedLanguagesValues } from './study.js';
+
+export type StudyTranslationDTO = {
 	studyTranslationId?: number;
-	languageId: string;
+	languageId: AllowedLanguagesValues;
 	studyDescription: string;
 	programName?: string | null;
 	keywords?: string[] | null;
