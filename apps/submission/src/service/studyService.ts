@@ -20,7 +20,7 @@
 import { asc, desc, eq, inArray, sql } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
-import type { StudyDTO, StudyRecord } from '@/common/types/study.js';
+import type { StudyDTO, StudyRecord, StudyResponse } from '@/common/types/study.js';
 import { StudyTranslationDTO, StudyTranslationRecord } from '@/common/types/studyTranslations.js';
 import { UpsertStudyFields } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
@@ -30,7 +30,7 @@ import { studyTranslations } from '@/db/schemas/studyTranslationsSchema.js';
 import { PostgresTransaction } from '@/db/types.js';
 import { isPostgresError, PostgresErrors } from '@/db/utils.js';
 
-const convertFromRecordToStudyDTO = (study: StudyRecord): StudyDTO => {
+const convertFromRecordToStudyDTO = (study: StudyRecord): StudyResponse => {
 	return {
 		studyId: study.study_id,
 		dacId: study.dac_id,
@@ -60,6 +60,25 @@ const convertStudyTranslations = (translations: StudyTranslationRecord[]): Study
 		createdAt: translation.created_at,
 		updatedAt: translation.updated_at,
 	}));
+};
+
+const convertFromRecordToStudyResponse = async (
+	study: StudyRecord,
+	db: PostgresTransaction | PostgresDb,
+): Promise<StudyResponse | undefined> => {
+	// Format return object
+	const result = await db.select().from(studyTranslations).where(eq(studyTranslations.study_id, study.study_id));
+
+	// Group translations into an array
+	if (result.length > 0 && result[0]) {
+		const resultTranslations = convertStudyTranslations(result);
+
+		return {
+			...convertFromRecordToStudyDTO(study),
+			translations: resultTranslations,
+		};
+	}
+	return;
 };
 
 const studyService = (db: PostgresDb) => ({
@@ -121,11 +140,10 @@ const studyService = (db: PostgresDb) => ({
 			);
 		}
 	},
-
 	createStudy: async (
 		studyData: UpsertStudyFields,
 		transaction?: PostgresTransaction,
-	): Promise<StudyDTO | undefined> => {
+	): Promise<StudyResponse | undefined> => {
 		const dbDriver = transaction ? transaction : db;
 
 		try {
@@ -170,22 +188,9 @@ const studyService = (db: PostgresDb) => ({
 				throw new Error();
 			}
 
-			// Format return object
-			const translationResult = await dbDriver
-				.select()
-				.from(studyTranslations)
-				.where(eq(studyTranslations.study_id, studyResult[0].study_id));
+			const returnResult = await convertFromRecordToStudyResponse(studyResult[0], dbDriver);
 
-			// Group translations into an array
-			if (translationResult.length > 0 && translationResult[0]) {
-				const resultTranslations = convertStudyTranslations(translationResult);
-
-				return {
-					...convertFromRecordToStudyDTO(studyResult[0]),
-					translations: resultTranslations,
-				};
-			}
-			return undefined;
+			return returnResult;
 		} catch (error) {
 			const postgresError = isPostgresError(error);
 
@@ -223,8 +228,7 @@ const studyService = (db: PostgresDb) => ({
 			);
 		}
 	},
-
-	updateStudy: async (studyId: string, studyData: Partial<StudyDTO>): Promise<StudyDTO | undefined> => {
+	updateStudy: async (studyId: string, studyData: Partial<StudyDTO>): Promise<StudyResponse | undefined> => {
 		try {
 			const updatedRecord = await db
 				.update(study)
@@ -239,16 +243,16 @@ const studyService = (db: PostgresDb) => ({
 					collaborators: studyData.collaborators,
 					publication_links: studyData.publicationLinks,
 					category_id: studyData.categoryId,
+					default_translation: studyData.defaultTranslation,
 					updated_at: sql`NOW()`,
 				})
 				.where(eq(study.study_id, studyId))
 				.returning();
 
 			if (updatedRecord[0]) {
-				return convertFromRecordToStudyDTO(updatedRecord[0]);
+				return await convertFromRecordToStudyResponse(updatedRecord[0], db);
 			}
-
-			return updatedRecord[0];
+			return undefined;
 		} catch (error) {
 			logger.error(error, 'Error at updateStudy in StudyService');
 
