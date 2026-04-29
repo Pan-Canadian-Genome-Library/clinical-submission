@@ -30,7 +30,7 @@ import { studyTranslations } from '@/db/schemas/studyTranslationsSchema.js';
 import { PostgresTransaction } from '@/db/types.js';
 import { isPostgresError, PostgresErrors } from '@/db/utils.js';
 
-const convertFromRecordToStudyDTO = (study: StudyRecord): StudyResponse => {
+const convertFromRecordToStudyDTO = (study: StudyRecord): StudyDTO => {
 	return {
 		studyId: study.study_id,
 		dacId: study.dac_id,
@@ -252,7 +252,7 @@ const studyService = (db: PostgresDb) => ({
 				.returning();
 
 			if (updatedRecord[0]) {
-				return await convertFromRecordToStudyResponse(updatedRecord[0], db);
+				return convertFromRecordToStudyDTO(updatedRecord[0]);
 			}
 			return undefined;
 		} catch (error) {
