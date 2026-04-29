@@ -62,23 +62,30 @@ const convertStudyTranslations = (translations: StudyTranslationRecord[]): Study
 	}));
 };
 
+/*
+ * Converts a StudyRecord from the database into a StudyResponse DTO
+ * with associated translations.
+ * @param study - The StudyRecord to convert
+ * @param db - The database connection or transaction
+ * @returns A StudyResponse DTO with translations appended
+ */
 const convertFromRecordToStudyResponse = async (
 	study: StudyRecord,
 	db: PostgresTransaction | PostgresDb,
-): Promise<StudyResponse | undefined> => {
+): Promise<StudyResponse> => {
 	// Format return object
 	const result = await db.select().from(studyTranslations).where(eq(studyTranslations.study_id, study.study_id));
+	let resultTranslations: StudyTranslationDTO[] = [];
 
 	// Group translations into an array
 	if (result.length > 0 && result[0]) {
-		const resultTranslations = convertStudyTranslations(result);
-
-		return {
-			...convertFromRecordToStudyDTO(study),
-			translations: resultTranslations,
-		};
+		resultTranslations = convertStudyTranslations(result);
 	}
-	return;
+
+	return {
+		...convertFromRecordToStudyDTO(study),
+		translations: resultTranslations,
+	};
 };
 
 const studyService = (db: PostgresDb) => ({
@@ -90,10 +97,9 @@ const studyService = (db: PostgresDb) => ({
 		orderBy?: string;
 		page?: number;
 		pageSize?: number;
-	}): Promise<(StudyResponse | undefined)[]> => {
-		let studyRecords;
+	}): Promise<StudyResponse[]> => {
 		try {
-			studyRecords = await db
+			const studyRecords = await db
 				.select()
 				.from(study)
 				.orderBy(orderBy === 'desc' ? desc(study.created_at) : asc(study.created_at))
@@ -110,10 +116,14 @@ const studyService = (db: PostgresDb) => ({
 			);
 		}
 	},
+	/*
+	 * Get a study by Id
+	 * @param studyId - The ID of the study to fetch
+	 * @returns The study if found, undefined otherwise. Controller handles error cases
+	 */
 	getStudyById: async (studyId: string): Promise<StudyResponse | undefined> => {
-		let studyRecords;
 		try {
-			studyRecords = await db.select().from(study).where(eq(study.study_id, studyId));
+			const studyRecords = await db.select().from(study).where(eq(study.study_id, studyId));
 
 			if (studyRecords[0]) {
 				return await convertFromRecordToStudyResponse(studyRecords[0], db);
@@ -127,6 +137,11 @@ const studyService = (db: PostgresDb) => ({
 			);
 		}
 	},
+	/*
+	 * Get a study by name
+	 * @param studyName - The name of the study to fetch
+	 * @returns The created study or undefined if not found, error handled in controller
+	 */
 	getStudyByName: async (studyName: string): Promise<StudyResponse | undefined> => {
 		try {
 			const [studyRecords] = await db.select().from(study).where(eq(study.study_name, studyName));
@@ -142,6 +157,12 @@ const studyService = (db: PostgresDb) => ({
 			);
 		}
 	},
+	/*
+	 * Create a new study
+	 * @param studyData - The study data to create
+	 * @param transaction - Optional transaction object
+	 * @returns The created study or undefined if creation fails, will throw bad request in controller
+	 */
 	createStudy: async (
 		studyData: UpsertStudyFields,
 		transaction?: PostgresTransaction,
@@ -214,6 +235,11 @@ const studyService = (db: PostgresDb) => ({
 		}
 	},
 
+	/**
+	 * Delete a study by ID
+	 * @param studyId - The ID of the study to delete
+	 * @returns The deleted study as a StudyDTO, or undefined if not found. Controller handles undefined case.
+	 */
 	deleteStudy: async (studyId: string): Promise<StudyDTO | undefined> => {
 		try {
 			const deletedRecord = await db.delete(study).where(eq(study.study_id, studyId)).returning();
@@ -221,7 +247,7 @@ const studyService = (db: PostgresDb) => ({
 				return convertFromRecordToStudyDTO(deletedRecord[0]);
 			}
 
-			return deletedRecord[0];
+			return;
 		} catch (error) {
 			logger.error(error, 'Error at deleteStudy in StudyService');
 
@@ -230,6 +256,12 @@ const studyService = (db: PostgresDb) => ({
 			);
 		}
 	},
+	/**
+	 * Update a study by ID
+	 * @param studyId - The ID of the study to update
+	 * @param studyData - The data to update
+	 * @returns The updated study as a StudyResponse, or undefined if updatedRecord doesnt return a value. Controller handles undefined case.
+	 */
 	updateStudy: async (studyId: string, studyData: Partial<StudyDTO>): Promise<StudyResponse | undefined> => {
 		try {
 			const updatedRecord = await db
@@ -254,7 +286,7 @@ const studyService = (db: PostgresDb) => ({
 			if (updatedRecord[0]) {
 				return convertFromRecordToStudyDTO(updatedRecord[0]);
 			}
-			return undefined;
+			return;
 		} catch (error) {
 			logger.error(error, 'Error at updateStudy in StudyService');
 
