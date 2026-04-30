@@ -21,10 +21,12 @@ import express, { json, Router, urlencoded } from 'express';
 
 import {
 	createNewStudy,
+	createStudyTranslationById,
 	deleteStudyById,
 	getAllStudies,
 	getStudyById,
 	updateStudyById,
+	updateStudyTranslationById,
 } from '@/controllers/studyController.js';
 import { authMiddleware } from '@/middleware/auth.js';
 
@@ -39,6 +41,8 @@ export const studyRouter: Router = (() => {
 	router.post('/', authMiddleware({ requireAdmin: true }), createNewStudy);
 	router.delete('/:studyId', authMiddleware({ requireAdmin: true }), deleteStudyById);
 	router.patch('/:studyId', authMiddleware({ requireAdmin: true }), updateStudyById);
+	router.post('/translation/:studyId', authMiddleware({ requireAdmin: true }), createStudyTranslationById);
+	router.patch('/translation/:studyId', authMiddleware({ requireAdmin: true }), updateStudyTranslationById);
 
 	return router;
 })();

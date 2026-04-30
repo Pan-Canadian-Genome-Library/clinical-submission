@@ -17,12 +17,12 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { asc, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
 import type { StudyDTO, StudyRecord, StudyResponse } from '@/common/types/study.js';
 import { StudyTranslationDTO, StudyTranslationRecord } from '@/common/types/studyTranslations.js';
-import { UpsertStudyFields } from '@/common/validation/study-validation.js';
+import { StudyTranslationFields, UpsertStudyFields } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
 import { study, studyIdDefault } from '@/db/schemas/studiesSchema.js';
@@ -284,7 +284,7 @@ const studyService = (db: PostgresDb) => ({
 				.returning();
 
 			if (updatedRecord[0]) {
-				return convertFromRecordToStudyDTO(updatedRecord[0]);
+				return await convertFromRecordToStudyResponse(updatedRecord[0], db);
 			}
 			return;
 		} catch (error) {
@@ -323,6 +323,101 @@ const studyService = (db: PostgresDb) => ({
 			throw new lyricProvider.utils.errors.InternalServerError(
 				'Something went wrong while unlinking studies from category. Please try again later.',
 			);
+		}
+	},
+	// STUDY TRANSLATIONS
+	createStudyTranslation: async (
+		translations: StudyTranslationFields & { studyId: string },
+	): Promise<StudyTranslationDTO | undefined> => {
+		try {
+			const result = await db
+				.insert(studyTranslations)
+				.values({
+					study_id: translations.studyId,
+					language_id: translations.languageId,
+					study_description: translations.studyDescription,
+					program_name: translations.programName,
+					keywords: translations.keywords,
+					participant_criteria: translations.participantCriteria,
+					funding_sources: translations.fundingSources,
+				})
+				.returning({
+					studyId: studyTranslations.study_id,
+					languageId: studyTranslations.language_id,
+					studyDescription: studyTranslations.study_description,
+					programName: studyTranslations.program_name,
+					keywords: studyTranslations.keywords,
+					participantCriteria: studyTranslations.participant_criteria,
+					fundingSources: studyTranslations.funding_sources,
+					createdAt: studyTranslations.created_at,
+					updatedAt: studyTranslations.updated_at,
+				});
+
+			return result[0];
+		} catch (error) {
+			logger.error(error, 'Error at createStudyTranslation service');
+			const postgresError = isPostgresError(error);
+
+			switch (postgresError?.code) {
+				case PostgresErrors.UNIQUE_KEY_VIOLATION:
+					throw new lyricProvider.utils.errors.BadRequest(
+						`${translations.languageId} already exists in studies. Study name must be unique.`,
+					);
+				default:
+					logger.error(error, 'Error at createStudy in StudyService');
+					throw new lyricProvider.utils.errors.InternalServerError(
+						'Something went wrong while creating a new study. Please try again later.',
+					);
+			}
+		}
+	},
+	updateStudyTranslation: async (
+		translations: StudyTranslationFields & { studyId: string },
+	): Promise<StudyTranslationDTO | undefined> => {
+		try {
+			const result = await db
+				.update(studyTranslations)
+				.set({
+					study_description: translations.studyDescription,
+					program_name: translations.programName,
+					keywords: translations.keywords,
+					participant_criteria: translations.participantCriteria,
+					funding_sources: translations.fundingSources,
+				})
+				.where(
+					and(
+						eq(studyTranslations.language_id, translations.languageId),
+						eq(studyTranslations.study_id, translations.studyId),
+					),
+				)
+				.returning({
+					studyId: studyTranslations.study_id,
+					languageId: studyTranslations.language_id,
+					studyDescription: studyTranslations.study_description,
+					programName: studyTranslations.program_name,
+					keywords: studyTranslations.keywords,
+					participantCriteria: studyTranslations.participant_criteria,
+					fundingSources: studyTranslations.funding_sources,
+					createdAt: studyTranslations.created_at,
+					updatedAt: studyTranslations.updated_at,
+				});
+
+			return result[0];
+		} catch (error) {
+			logger.error(error, 'Error at updateStudyTranslation service');
+			const postgresError = isPostgresError(error);
+
+			switch (postgresError?.code) {
+				case PostgresErrors.UNIQUE_KEY_VIOLATION:
+					throw new lyricProvider.utils.errors.BadRequest(
+						`${translations.languageId} already exists in studies. Study name must be unique.`,
+					);
+				default:
+					logger.error(error, 'Error at createStudy in StudyService');
+					throw new lyricProvider.utils.errors.InternalServerError(
+						'Something went wrong while creating a new study. Please try again later.',
+					);
+			}
 		}
 	},
 });
