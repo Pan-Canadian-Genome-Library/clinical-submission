@@ -492,6 +492,7 @@ components:
           items:
             $ref: '#/components/schemas/StudyTranslationResult'
           description: Array of translations for this study in different languages.
+
     StudyTranslationResult:
       type: object
       properties:
