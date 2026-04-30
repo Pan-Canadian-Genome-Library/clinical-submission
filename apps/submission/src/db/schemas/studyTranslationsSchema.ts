@@ -17,8 +17,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export * from './dacSchema.js';
-export * from './generate.js';
-export * from './idGenerationConfig.js';
-export * from './studiesSchema.js';
-export * from './studyTranslationsSchema.js';
+import { serial, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+
+import { pcglSchema } from './generate.js';
+
+export const languages = pcglSchema.enum('languages', ['en_ca', 'fr_ca']);
+
+export const studyTranslations = pcglSchema.table('study_translations', {
+	study_translation_id: serial('study_translation_id').primaryKey(),
+	study_id: text().notNull(),
+	language_id: languages().notNull(),
+	study_description: text().notNull(),
+	program_name: varchar({ length: 255 }),
+	keywords: text().array(),
+	participant_criteria: text(),
+	funding_sources: text().array().notNull(),
+	created_at: timestamp().notNull().defaultNow(),
+	updated_at: timestamp(),
+});

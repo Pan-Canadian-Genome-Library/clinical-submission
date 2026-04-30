@@ -16,7 +16,7 @@
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/StudyResult'
+                $ref: '#/components/schemas/StudyResponse'
       401:
         $ref: '#/components/responses/UnauthorizedError'
       403:
@@ -96,6 +96,11 @@
                 type: string
                 enum: ['Completed', 'Ongoing']
                 description: Indicate if the study is completed or ongoing.
+              defaultLanguage:
+                type: string
+                enum: ['en_ca', 'fr_ca']
+                description: The default language for the study translation (English Canada or French Canada).
+
     security:
       - bearerAuth: []
     responses:
@@ -104,7 +109,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudyResult'
+              $ref: '#/components/schemas/StudyResponse'
       400:
         $ref: '#/components/responses/BadRequest'
       401:
@@ -135,7 +140,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudyResult'
+              $ref: '#/components/schemas/StudyResponse'
       400:
         $ref: '#/components/responses/BadRequest'
       401:
@@ -234,7 +239,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudyResult'
+              $ref: '#/components/schemas/StudyResponse'
       400:
         $ref: '#/components/responses/BadRequest'
       401:
