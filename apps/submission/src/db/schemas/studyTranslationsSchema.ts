@@ -17,32 +17,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import express, { json, Router, urlencoded } from 'express';
+import { serial, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
-import {
-	createNewStudy,
-	createStudyTranslationById,
-	deleteStudyById,
-	getAllStudies,
-	getStudyById,
-	updateStudyById,
-	updateStudyTranslationById,
-} from '@/controllers/studyController.js';
-import { authMiddleware } from '@/middleware/auth.js';
+import { pcglSchema } from './generate.js';
 
-export const studyRouter: Router = (() => {
-	const router = express.Router();
-	router.use(json());
-	router.use(urlencoded({ extended: false }));
+export const languages = pcglSchema.enum('languages', ['en_ca', 'fr_ca']);
 
-	router.get('/:studyId', getStudyById);
-	router.get('/', getAllStudies);
-
-	router.post('/', authMiddleware({ requireAdmin: true }), createNewStudy);
-	router.delete('/:studyId', authMiddleware({ requireAdmin: true }), deleteStudyById);
-	router.patch('/:studyId', authMiddleware({ requireAdmin: true }), updateStudyById);
-	router.post('/translation/:studyId', authMiddleware({ requireAdmin: true }), createStudyTranslationById);
-	router.patch('/translation/:studyId', authMiddleware({ requireAdmin: true }), updateStudyTranslationById);
-
-	return router;
-})();
+export const studyTranslations = pcglSchema.table('study_translations', {
+	study_translation_id: serial('study_translation_id').primaryKey(),
+	study_id: text().notNull(),
+	language_id: languages().notNull(),
+	study_description: text().notNull(),
+	program_name: varchar({ length: 255 }),
+	keywords: text().array(),
+	participant_criteria: text(),
+	funding_sources: text().array().notNull(),
+	created_at: timestamp().notNull().defaultNow(),
+	updated_at: timestamp(),
+});

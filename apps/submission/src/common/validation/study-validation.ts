@@ -23,7 +23,8 @@ import { z } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
-import { StudyContext, StudyDTO, StudyStatus } from '../types/study.js';
+import { AllowedLanguages, StudyContext, StudyDTO, StudyStatus, UpsertStudyParams } from '../types/study.js';
+import { StudyTranslationDTO } from '../types/studyTranslations.js';
 import { orderByString, PaginationParams, positiveInteger, stringNotEmpty } from './common.js';
 
 const ALLOWED_DOMAINS = [
@@ -45,6 +46,7 @@ const ALLOWED_DOMAINS = [
 const createStudyProperties = z
 	.object({
 		dacId: stringNotEmpty,
+		defaultLanguage: z.nativeEnum(AllowedLanguages),
 		studyName: stringNotEmpty,
 		studyDescription: stringNotEmpty,
 		programName: z.string().optional(),
@@ -77,8 +79,8 @@ export const getOrDeleteStudyByID: RequestValidation<object, ParsedQs, StudyIDPa
 	}),
 };
 
-export type CreateStudyFields = Omit<StudyDTO, 'studyId' | 'createdAt' | 'updatedAt'>;
-export const createStudy: RequestValidation<CreateStudyFields, ParsedQs, ParamsDictionary> = {
+export type UpsertStudyFields = Omit<UpsertStudyParams, 'studyId' | 'languageId' | 'createdAt' | 'updatedAt'>;
+export const createStudy: RequestValidation<UpsertStudyFields, ParsedQs, ParamsDictionary> = {
 	body: createStudyProperties,
 };
 
@@ -102,4 +104,18 @@ export const listAllStudies: RequestValidation<object, PaginationParams, ParamsD
 		page: positiveInteger.optional(),
 		pageSize: positiveInteger.optional(),
 	}),
+};
+
+export type StudyTranslationFields = Omit<StudyTranslationDTO, 'createdAt' | 'updatedAt'>;
+export const createStudyTranslation: RequestValidation<StudyTranslationFields, ParsedQs, StudyIDParams> = {
+	body: z
+		.object({
+			languageId: z.nativeEnum(AllowedLanguages),
+			studyDescription: z.string(),
+			programName: z.string().optional(),
+			keywords: z.array(z.string()).optional(),
+			participantCriteria: z.string().optional(),
+			fundingSources: z.array(z.string()),
+		})
+		.strict(),
 };
