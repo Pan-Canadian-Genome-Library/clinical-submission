@@ -99,7 +99,7 @@ app.use('/audit', lyricProvider.routers.audit);
 /**
  * Lyric Custom Routes
  * Implements lyrics default routes with extra configurations tailored for PCGL
-*/
+ */
 app.use('/submission', submissionRouter);
 app.use('/data', dataRouter);
 app.use('/category', categoryRouter);

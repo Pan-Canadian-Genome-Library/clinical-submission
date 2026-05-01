@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 The Ontario Institute for Cancer Research. All rights reserved
+ * Copyright (c) 2026 The Ontario Institute for Cancer Research. All rights reserved
  *
  * This program and the accompanying materials are made available under the terms of
  * the GNU Affero General Public License v3.0. You should have received a copy of the
@@ -17,21 +17,76 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { asc, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
-import type { StudyDTO } from '@/common/types/study.js';
-import { CreateStudyFields } from '@/common/validation/study-validation.js';
+import type { StudyDTO, StudyRecord, StudyResponse } from '@/common/types/study.js';
+import { StudyTranslationDTO, StudyTranslationRecord } from '@/common/types/studyTranslations.js';
+import { StudyTranslationFields, UpsertStudyFields } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
-import { study } from '@/db/schemas/studiesSchema.js';
+import { study, studyIdDefault } from '@/db/schemas/studiesSchema.js';
+import { studyTranslations } from '@/db/schemas/studyTranslationsSchema.js';
 import { PostgresTransaction } from '@/db/types.js';
 import { isPostgresError, PostgresErrors } from '@/db/utils.js';
-import {
-	convertFromRecordToStudyDTO,
-	convertToRecordFromPartialStudyDTO,
-	convertToRecordFromStudyDTO,
-} from '@/service/dtoConversion.js';
+
+const convertFromRecordToStudyDTO = (study: StudyRecord): StudyDTO => {
+	return {
+		studyId: study.study_id,
+		dacId: study.dac_id,
+		studyName: study.study_name,
+		status: study.status,
+		context: study.context,
+		domain: study.domain,
+		principalInvestigators: study.principal_investigators,
+		leadOrganizations: study.lead_organizations,
+		collaborators: study.collaborators,
+		publicationLinks: study.publication_links,
+		defaultTranslation: study.default_translation,
+		createdAt: study.created_at,
+		updatedAt: study.updated_at,
+		categoryId: study.category_id,
+	};
+};
+
+const convertStudyTranslations = (translations: StudyTranslationRecord[]): StudyTranslationDTO[] => {
+	return translations.map((translation) => ({
+		languageId: translation.language_id,
+		studyDescription: translation.study_description,
+		fundingSources: translation.funding_sources,
+		keywords: translation.keywords,
+		participantCriteria: translation.participant_criteria,
+		programName: translation.program_name,
+		createdAt: translation.created_at,
+		updatedAt: translation.updated_at,
+	}));
+};
+
+/*
+ * Converts a StudyRecord from the database into a StudyResponse DTO
+ * with associated translations.
+ * @param study - The StudyRecord to convert
+ * @param db - The database connection or transaction
+ * @returns A StudyResponse DTO with translations appended
+ */
+const convertFromRecordToStudyResponse = async (
+	study: StudyRecord,
+	db: PostgresTransaction | PostgresDb,
+): Promise<StudyResponse> => {
+	// Format return object
+	const result = await db.select().from(studyTranslations).where(eq(studyTranslations.study_id, study.study_id));
+	let resultTranslations: StudyTranslationDTO[] = [];
+
+	// Group translations into an array
+	if (result.length > 0 && result[0]) {
+		resultTranslations = convertStudyTranslations(result);
+	}
+
+	return {
+		...convertFromRecordToStudyDTO(study),
+		translations: resultTranslations,
+	};
+};
 
 const studyService = (db: PostgresDb) => ({
 	listStudies: async ({
@@ -42,46 +97,56 @@ const studyService = (db: PostgresDb) => ({
 		orderBy?: string;
 		page?: number;
 		pageSize?: number;
-	}): Promise<StudyDTO[]> => {
-		let studyRecords;
+	}): Promise<StudyResponse[]> => {
 		try {
-			studyRecords = await db
+			const studyRecords = await db
 				.select()
 				.from(study)
 				.orderBy(orderBy === 'desc' ? desc(study.created_at) : asc(study.created_at))
 				.limit(pageSize)
 				.offset((page - 1) * pageSize);
+
+			const result = Promise.all(studyRecords.map(async (study) => await convertFromRecordToStudyResponse(study, db)));
+
+			return result;
 		} catch (exception) {
 			logger.error(exception, 'Error at listStudies');
 			throw new lyricProvider.utils.errors.InternalServerError(
 				'Something went wrong while fetching studies. Please try again later.',
 			);
 		}
-		return studyRecords.map((studies) => convertFromRecordToStudyDTO(studies));
 	},
-
-	getStudyById: async (studyId: string): Promise<StudyDTO | undefined> => {
-		let studyRecords;
+	/*
+	 * Get a study by Id
+	 * @param studyId - The ID of the study to fetch
+	 * @returns The study if found, undefined otherwise. Controller handles error cases
+	 */
+	getStudyById: async (studyId: string): Promise<StudyResponse | undefined> => {
 		try {
-			studyRecords = await db.select().from(study).where(eq(study.study_id, studyId));
+			const studyRecords = await db.select().from(study).where(eq(study.study_id, studyId));
+
+			if (studyRecords[0]) {
+				return await convertFromRecordToStudyResponse(studyRecords[0], db);
+			}
+
+			return;
 		} catch (exception) {
 			logger.error(exception, 'Error at getStudyById');
 			throw new lyricProvider.utils.errors.InternalServerError(
 				'Something went wrong while fetching your requested study. Please try again later.',
 			);
 		}
-
-		if (studyRecords[0]) {
-			return convertFromRecordToStudyDTO(studyRecords[0]);
-		}
-
-		return studyRecords[0];
 	},
-	getStudyByName: async (studyName: string): Promise<StudyDTO | undefined> => {
+	/*
+	 * Get a study by name
+	 * @param studyName - The name of the study to fetch
+	 * @returns The created study or undefined if not found, error handled in controller
+	 */
+	getStudyByName: async (studyName: string): Promise<StudyResponse | undefined> => {
 		try {
 			const [studyRecords] = await db.select().from(study).where(eq(study.study_name, studyName));
 			if (studyRecords) {
-				return convertFromRecordToStudyDTO(studyRecords);
+				return await convertFromRecordToStudyResponse(studyRecords, db);
 			}
 
 			return;
@@ -92,21 +157,63 @@ const studyService = (db: PostgresDb) => ({
 			);
 		}
 	},
-
+	/*
+	 * Create a new study
+	 * @param studyData - The study data to create
+	 * @param transaction - Optional transaction object
+	 * @returns The created study or undefined if creation fails, will throw bad request in controller
+	 */
 	createStudy: async (
-		studyData: CreateStudyFields,
+		studyData: UpsertStudyFields,
 		transaction?: PostgresTransaction,
-	): Promise<StudyDTO | undefined> => {
+	): Promise<StudyResponse | undefined> => {
 		const dbDriver = transaction ? transaction : db;
 
 		try {
-			const newStudyRecord = await dbDriver.insert(study).values(convertToRecordFromStudyDTO(studyData)).returning();
+			// Create CTE to insert translation first
+			const insertTranslation = dbDriver.$with('insert_translation').as(
+				dbDriver
+					.insert(studyTranslations)
+					.values({
+						study_id: studyIdDefault,
+						language_id: studyData.defaultLanguage,
+						study_description: studyData.studyDescription,
+						program_name: studyData.programName,
+						keywords: studyData.keywords,
+						participant_criteria: studyData.participantCriteria,
+						funding_sources: studyData.fundingSources,
+					})
+					.returning(),
+			);
 
-			if (newStudyRecord[0]) {
-				return convertFromRecordToStudyDTO(newStudyRecord[0]);
+			// Insert study using the translation_id from the CTE
+			const studyResult = await dbDriver
+				.with(insertTranslation)
+				.insert(study)
+				.values({
+					study_id: sql`(SELECT study_id FROM ${insertTranslation})`,
+					default_translation: sql`(SELECT study_translation_id FROM ${insertTranslation})`,
+					dac_id: studyData.dacId,
+					study_name: studyData.studyName,
+					status: studyData.status,
+					context: studyData.context,
+					domain: studyData.domain.map((domains) => domains.toUpperCase()),
+					principal_investigators: studyData.principalInvestigators,
+					lead_organizations: studyData.leadOrganizations,
+					collaborators: studyData.collaborators,
+					category_id: studyData.categoryId,
+					publication_links: studyData.publicationLinks,
+				})
+				.returning();
+
+			if (!studyResult[0]) {
+				logger.error(`No results returned from the insertTranslation CTE for study ${studyData.studyName}`);
+				throw new Error();
 			}
 
-			return newStudyRecord[0];
+			const returnResult = await convertFromRecordToStudyResponse(studyResult[0], dbDriver);
+
+			return returnResult;
 		} catch (error) {
 			const postgresError = isPostgresError(error);
 
@@ -128,6 +235,11 @@ const studyService = (db: PostgresDb) => ({
 		}
 	},
 
+	/**
+	 * Delete a study by ID
+	 * @param studyId - The ID of the study to delete
+	 * @returns The deleted study as a StudyDTO, or undefined if not found. Controller handles undefined case.
+	 */
 	deleteStudy: async (studyId: string): Promise<StudyDTO | undefined> => {
 		try {
 			const deletedRecord = await db.delete(study).where(eq(study.study_id, studyId)).returning();
@@ -135,7 +247,7 @@ const studyService = (db: PostgresDb) => ({
 				return convertFromRecordToStudyDTO(deletedRecord[0]);
 			}
 
-			return deletedRecord[0];
+			return;
 		} catch (error) {
 			logger.error(error, 'Error at deleteStudy in StudyService');
 
@@ -144,22 +256,37 @@ const studyService = (db: PostgresDb) => ({
 			);
 		}
 	},
-
-	updateStudy: async (studyId: string, studyData: Partial<StudyDTO>): Promise<StudyDTO | undefined> => {
+	/**
+	 * Update a study by ID
+	 * @param studyId - The ID of the study to update
+	 * @param studyData - The data to update
+	 * @returns The updated study as a StudyResponse, or undefined if updatedRecord doesnt return a value. Controller handles undefined case.
+	 */
+	updateStudy: async (studyId: string, studyData: Partial<StudyDTO>): Promise<StudyResponse | undefined> => {
 		try {
-			const convertedStudyData = convertToRecordFromPartialStudyDTO(studyData);
-
 			const updatedRecord = await db
 				.update(study)
-				.set({ ...convertedStudyData, updated_at: sql`NOW()` })
+				.set({
+					dac_id: studyData.dacId,
+					study_name: studyData.studyName,
+					status: studyData.status,
+					context: studyData.context,
+					domain: studyData.domain?.map((domains) => domains.toUpperCase()),
+					principal_investigators: studyData.principalInvestigators,
+					lead_organizations: studyData.leadOrganizations,
+					collaborators: studyData.collaborators,
+					publication_links: studyData.publicationLinks,
+					category_id: studyData.categoryId,
+					default_translation: studyData.defaultTranslation,
+					updated_at: sql`NOW()`,
+				})
 				.where(eq(study.study_id, studyId))
 				.returning();
 
 			if (updatedRecord[0]) {
-				return convertFromRecordToStudyDTO(updatedRecord[0]);
+				return await convertFromRecordToStudyResponse(updatedRecord[0], db);
 			}
-
-			return updatedRecord[0];
+			return;
 		} catch (error) {
 			logger.error(error, 'Error at updateStudy in StudyService');
 
@@ -196,6 +323,101 @@ const studyService = (db: PostgresDb) => ({
 			throw new lyricProvider.utils.errors.InternalServerError(
 				'Something went wrong while unlinking studies from category. Please try again later.',
 			);
+		}
+	},
+	// STUDY TRANSLATIONS
+	createStudyTranslation: async (
+		translations: StudyTranslationFields & { studyId: string },
+	): Promise<StudyTranslationDTO | undefined> => {
+		try {
+			const result = await db
+				.insert(studyTranslations)
+				.values({
+					study_id: translations.studyId,
+					language_id: translations.languageId,
+					study_description: translations.studyDescription,
+					program_name: translations.programName,
+					keywords: translations.keywords,
+					participant_criteria: translations.participantCriteria,
+					funding_sources: translations.fundingSources,
+				})
+				.returning({
+					studyId: studyTranslations.study_id,
+					languageId: studyTranslations.language_id,
+					studyDescription: studyTranslations.study_description,
+					programName: studyTranslations.program_name,
+					keywords: studyTranslations.keywords,
+					participantCriteria: studyTranslations.participant_criteria,
+					fundingSources: studyTranslations.funding_sources,
+					createdAt: studyTranslations.created_at,
+					updatedAt: studyTranslations.updated_at,
+				});
+
+			return result[0];
+		} catch (error) {
+			logger.error(error, 'Error at createStudyTranslation service');
+			const postgresError = isPostgresError(error);
+
+			switch (postgresError?.code) {
+				case PostgresErrors.UNIQUE_KEY_VIOLATION:
+					throw new lyricProvider.utils.errors.BadRequest(
+						`${translations.languageId} already exists in studies. Study name must be unique.`,
+					);
+				default:
+					logger.error(error, 'Error at createStudy in StudyService');
+					throw new lyricProvider.utils.errors.InternalServerError(
+						'Something went wrong while creating a new study. Please try again later.',
+					);
+			}
+		}
+	},
+	updateStudyTranslation: async (
+		translations: StudyTranslationFields & { studyId: string },
+	): Promise<StudyTranslationDTO | undefined> => {
+		try {
+			const result = await db
+				.update(studyTranslations)
+				.set({
+					study_description: translations.studyDescription,
+					program_name: translations.programName,
+					keywords: translations.keywords,
+					participant_criteria: translations.participantCriteria,
+					funding_sources: translations.fundingSources,
+				})
+				.where(
+					and(
+						eq(studyTranslations.language_id, translations.languageId),
+						eq(studyTranslations.study_id, translations.studyId),
+					),
+				)
+				.returning({
+					studyId: studyTranslations.study_id,
+					languageId: studyTranslations.language_id,
+					studyDescription: studyTranslations.study_description,
+					programName: studyTranslations.program_name,
+					keywords: studyTranslations.keywords,
+					participantCriteria: studyTranslations.participant_criteria,
+					fundingSources: studyTranslations.funding_sources,
+					createdAt: studyTranslations.created_at,
+					updatedAt: studyTranslations.updated_at,
+				});
+
+			return result[0];
+		} catch (error) {
+			logger.error(error, 'Error at updateStudyTranslation service');
+			const postgresError = isPostgresError(error);
+
+			switch (postgresError?.code) {
+				case PostgresErrors.UNIQUE_KEY_VIOLATION:
+					throw new lyricProvider.utils.errors.BadRequest(
+						`${translations.languageId} already exists in studies. Study name must be unique.`,
+					);
+				default:
+					logger.error(error, 'Error at createStudy in StudyService');
+					throw new lyricProvider.utils.errors.InternalServerError(
+						'Something went wrong while creating a new study. Please try again later.',
+					);
+			}
 		}
 	},
 });

@@ -22,6 +22,7 @@ import { foreignKey, integer, text, timestamp, varchar } from 'drizzle-orm/pg-co
 
 import { dac } from './dacSchema.js';
 import { pcglSchema } from './generate.js';
+import { studyTranslations } from './studyTranslationsSchema.js';
 
 export const studyStatus = pcglSchema.enum('study_status', ['Ongoing', 'Completed']);
 export const studyContext = pcglSchema.enum('study_context', ['Clinical', 'Research']);
@@ -49,18 +50,14 @@ export const study = pcglSchema.table(
 	{
 		study_id: text().primaryKey().default(studyIdDefault),
 		dac_id: text().notNull(),
+		default_translation: integer().notNull(),
 		study_name: varchar({ length: 255 }).unique().notNull(),
-		study_description: text().notNull(), // Assuming the description is large
-		program_name: varchar({ length: 255 }),
-		keywords: text().array(),
 		status: studyStatus().notNull(),
 		context: studyContext().notNull(),
 		domain: text().array().notNull(),
-		participant_criteria: text(),
 		principal_investigators: text().array().notNull(),
 		lead_organizations: text().array().notNull(),
 		collaborators: text().array(),
-		funding_sources: text().array().notNull(),
 		publication_links: text().array(),
 		created_at: timestamp().notNull().defaultNow(),
 		updated_at: timestamp(),
@@ -72,6 +69,16 @@ export const study = pcglSchema.table(
 			foreignColumns: [dac.dac_id],
 			name: 'dac_id_fk',
 		}),
+		foreignKey({
+			columns: [table.study_id],
+			foreignColumns: [studyTranslations.study_id],
+			name: 'study_id_fk',
+		}),
+		foreignKey({
+			columns: [table.default_translation],
+			foreignColumns: [studyTranslations.study_translation_id],
+			name: 'default_translation_fk',
+		}),
 	],
 );
 
@@ -79,5 +86,13 @@ export const studyRelations = relations(study, ({ one }) => ({
 	dac_id: one(dac, {
 		fields: [study.dac_id],
 		references: [dac.dac_id],
+	}),
+	study_id: one(studyTranslations, {
+		fields: [study.study_id],
+		references: [studyTranslations.study_id],
+	}),
+	default_translation: one(studyTranslations, {
+		fields: [study.default_translation],
+		references: [studyTranslations.study_translation_id],
 	}),
 }));

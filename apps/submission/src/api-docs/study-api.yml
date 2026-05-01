@@ -16,7 +16,7 @@
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/StudyResult'
+                $ref: '#/components/schemas/StudyResponse'
       401:
         $ref: '#/components/responses/UnauthorizedError'
       403:
@@ -96,6 +96,11 @@
                 type: string
                 enum: ['Completed', 'Ongoing']
                 description: Indicate if the study is completed or ongoing.
+              defaultLanguage:
+                type: string
+                enum: ['en_ca', 'fr_ca']
+                description: The default language for the study translation (English Canada or French Canada).
+
     security:
       - bearerAuth: []
     responses:
@@ -104,7 +109,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudyResult'
+              $ref: '#/components/schemas/StudyResponse'
       400:
         $ref: '#/components/responses/BadRequest'
       401:
@@ -135,7 +140,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudyResult'
+              $ref: '#/components/schemas/StudyResponse'
       400:
         $ref: '#/components/responses/BadRequest'
       401:
@@ -234,7 +239,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudyResult'
+              $ref: '#/components/schemas/StudyResponse'
       400:
         $ref: '#/components/responses/BadRequest'
       401:
@@ -262,6 +267,137 @@
     responses:
       204:
         description: Successfully deleted a study by a Study ID. Note that as per the HTTP Spec, no content is returned.
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/UnauthorizedError'
+      403:
+        $ref: '#/components/responses/ForbiddenError'
+      404:
+        $ref: '#/components/responses/NotFound'
+      500:
+        $ref: '#/components/responses/ServerError'
+
+/study/translation/{studyId}:
+  post:
+    summary: Creates a new translation for an existing study. (🔒 Admin only)
+    tags:
+      - Study
+    parameters:
+      - name: studyId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique identifier of the study in PCGL.
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - languageId
+              - studyDescription
+              - fundingSources
+            properties:
+              languageId:
+                type: string
+                enum: ['en_ca', 'fr_ca']
+                description: Language for this translation (English Canada or French Canada).
+              studyDescription:
+                type: string
+                description: A detailed description of the study's purpose, hypothesis, and design in the specified language.
+              programName:
+                type: string
+                nullable: true
+                description: Indicate the overarching program the study belongs to (if applicable) in the specified language.
+              keywords:
+                type: array
+                nullable: true
+                items:
+                  type: string
+                description: List of specific terms that describe the focus and content of the study in the specified language.
+              participantCriteria:
+                type: string
+                nullable: true
+                description: Inclusion/exclusion criteria for participants in the specified language.
+              fundingSources:
+                type: array
+                items:
+                  type: string
+                description: List of organizations or agencies funding the study in the specified language. Ex. Funder name, Grant number
+    security:
+      - bearerAuth: []
+    responses:
+      201:
+        description: Successfully created a new study translation.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudyTranslationResult'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/UnauthorizedError'
+      403:
+        $ref: '#/components/responses/ForbiddenError'
+      404:
+        $ref: '#/components/responses/NotFound'
+      500:
+        $ref: '#/components/responses/ServerError'
+
+  patch:
+    summary: Updates an existing study translation. (🔒 Admin only)
+    tags:
+      - Study
+    parameters:
+      - name: studyId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique identifier of the study in PCGL.
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              languageId:
+                type: string
+                enum: ['en_ca', 'fr_ca']
+                description: Language for this translation (English Canada or French Canada).
+              studyDescription:
+                type: string
+                description: A detailed description of the study's purpose, hypothesis, and design in the specified language.
+              programName:
+                type: string
+                nullable: true
+                description: Indicate the overarching program the study belongs to (if applicable) in the specified language.
+              keywords:
+                type: array
+                nullable: true
+                items:
+                  type: string
+                description: List of specific terms that describe the focus and content of the study in the specified language.
+              participantCriteria:
+                type: string
+                nullable: true
+                description: Inclusion/exclusion criteria for participants in the specified language.
+              fundingSources:
+                type: array
+                items:
+                  type: string
+                description: List of organizations or agencies funding the study in the specified language. Ex. Funder name, Grant number
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Successfully updated the study translation.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudyTranslationResult'
       400:
         $ref: '#/components/responses/BadRequest'
       401:
