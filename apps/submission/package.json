@@ -9,7 +9,7 @@
 	"main": "dist/index.js",
 	"scripts": {
 		"studio": "NODE_OPTIONS='--import tsx' drizzle-kit studio",
-		"db:generate": "NODE_OPTIONS='--import tsx' drizzle-kit generate",
+		"db:generate": "NODE_OPTIONS='--import tsx' drizzle-kit generate --name=apply_composite_key_language_id_study_id",
 		"db:migrate": "NODE_OPTIONS='--import tsx' drizzle-kit migrate",
 		"\n==================  Build  ==================": "",
 		"build:compile": "rimraf dist && tsc",
