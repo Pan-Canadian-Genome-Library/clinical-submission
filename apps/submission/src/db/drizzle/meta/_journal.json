@@ -78,6 +78,34 @@
       "when": 1776692696148,
       "tag": "0010_CUSTOM_study_and_study_translations",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1778014384893,
+      "tag": "0011_CUSTOM_revert_study_translations",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1778022910938,
+      "tag": "0012_re_add_study_translations",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1778023059203,
+      "tag": "0013_CUSTOM_copy_records_into_study_translations",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1778024289895,
+      "tag": "0014_apply_composite_key_language_id_study_id",
+      "breakpoints": true
     }
   ]
 }
