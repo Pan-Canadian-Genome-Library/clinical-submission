@@ -6,7 +6,7 @@ ARG WORKDIR=/clinical-submission
 ######################
 # Configure base image
 ######################
-FROM node:20.12.2-alpine AS base
+FROM node:22-alpine AS base
 
 ARG APP_USER
 ARG WORKDIR
@@ -14,15 +14,16 @@ ARG WORKDIR
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 
-# install pnpm as root user, before updating node ownership
-RUN npm i -g pnpm
-
 # create our own user to run node, don't run node in production as root
 ENV APP_UID=9999
 ENV APP_GID=9999
 RUN addgroup -S -g $APP_GID $APP_USER \
 	&& adduser -S -u $APP_UID -g $APP_GID $APP_USER \
 	&& mkdir -p ${WORKDIR}
+
+
+RUN corepack enable
+RUN corepack use pnpm@11.1.1
 
 WORKDIR ${WORKDIR}
 
@@ -33,21 +34,21 @@ USER ${APP_USER}:${APP_USER}
 ######################
 # Configure build image
 ######################
-
 FROM base AS build
 
 ARG APP_USER
 ARG WORKDIR
 
 COPY --chown=${APP_USER}:${APP_USER} . ./
+USER ${APP_USER}:${APP_USER}
 
-RUN pnpm install --ignore-scripts
+RUN pnpm install --ignore-scripts --frozen-lockfile
 RUN pnpm build
 
 ######################
 # Configure prod-deps image
 ######################
- 
+
 FROM build AS prod-deps
 
 ARG APP_USER
@@ -59,7 +60,7 @@ USER ${APP_USER}:${APP_USER}
 
 ENV CI=true
 # pnpm will not install any package listed in devDependencies
-RUN pnpm install --prod
+RUN pnpm install --prod --no-scripts --frozen-lockfile
 
 ######################
 # Configure server image
@@ -70,14 +71,20 @@ ARG APP_USER
 ARG WORKDIR
 ARG SUBMISSION_DIR=${WORKDIR}/apps/submission
 
-USER ${APP_USER}
+USER ${APP_USER}:${APP_USER}
 
-COPY --from=build ${WORKDIR}/node_modules ./node_modules
+COPY --from=build --chown=${APP_USER}:${APP_USER} ${WORKDIR}/node_modules ./node_modules
 
 WORKDIR ${SUBMISSION_DIR}
 
-COPY --from=prod-deps ${SUBMISSION_DIR}/node_modules ./node_modules
-COPY --from=build ${SUBMISSION_DIR}/dist .
+# Copy files with ownership
+COPY --from=prod-deps --chown=${APP_USER}:${APP_USER} ${SUBMISSION_DIR}/node_modules ./node_modules
+COPY --from=build --chown=${APP_USER}:${APP_USER} ${SUBMISSION_DIR}/dist .
+
+# Copy pnpm-workspace.yaml
+COPY --from=build --chown=${APP_USER}:${APP_USER} ${WORKDIR}/pnpm-workspace.yaml ./pnpm-workspace.yaml
+
+
 
 EXPOSE 3030
 
@@ -114,9 +121,8 @@ RUN mkdir -p /etc/nginx/ssl/ && \
 
 RUN touch /var/run/nginx.pid && \
 	chown -R ${APP_USER}:${APP_USER} /var/run/nginx.pid /run/nginx.pid
-	
 RUN	chown -R ${APP_USER}:${APP_USER} /docker-entrypoint.d && \
-    chown -R ${APP_USER}:${APP_USER} /usr/share/nginx/html 
+    chown -R ${APP_USER}:${APP_USER} /usr/share/nginx/html
 
 # Switch to new user
 USER ${APP_USER}
@@ -130,6 +136,6 @@ COPY --from=build ${DATA_DICTIONARY_UI_DIR}/dist /usr/share/nginx/html
 COPY --from=build ${DATA_DICTIONARY_UI_DIR}/docker/nginx.conf.template /etc/nginx/templates/nginx.conf.template
 RUN rm -f /etc/nginx/conf.d/default.conf
 
-ENTRYPOINT ["/docker-entrypoint.sh"] 
+ENTRYPOINT ["/docker-entrypoint.sh"]
 EXPOSE 3001
 CMD ["nginx", "-g", "daemon off;"]
