@@ -22,7 +22,10 @@ RUN addgroup -S -g $APP_GID $APP_USER \
 	&& mkdir -p ${WORKDIR}
 
 # Set corepack to use a global cache directory
+# IMPORTANT-NOTE: This is a workaround and it is intended for Jenkins builds specifically. Locally, we are able to build and run a container without this, so we are getting different build results locally vs. in Jenkins.
+# Docker builds need to be predictable and getting different results locally vs. in Jenkins is concerning. Will need to revist this issue in the future.
 ENV COREPACK_HOME=/opt/corepack
+
 RUN corepack enable
 RUN corepack prepare pnpm@11.1.1 --activate
 
