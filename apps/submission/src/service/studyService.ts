@@ -267,7 +267,6 @@ const studyService = (db: PostgresDb) => ({
 			const updatedRecord = await db
 				.update(study)
 				.set({
-					dac_id: studyData.dacId,
 					study_name: studyData.studyName,
 					status: studyData.status,
 					context: studyData.context,
