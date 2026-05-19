@@ -70,11 +70,6 @@ export const study = pcglSchema.table(
 			name: 'dac_id_fk',
 		}),
 		foreignKey({
-			columns: [table.study_id],
-			foreignColumns: [studyTranslations.study_id],
-			name: 'study_id_fk',
-		}),
-		foreignKey({
 			columns: [table.default_translation],
 			foreignColumns: [studyTranslations.study_translation_id],
 			name: 'default_translation_fk',
@@ -86,10 +81,6 @@ export const studyRelations = relations(study, ({ one }) => ({
 	dac_id: one(dac, {
 		fields: [study.dac_id],
 		references: [dac.dac_id],
-	}),
-	study_id: one(studyTranslations, {
-		fields: [study.study_id],
-		references: [studyTranslations.study_id],
 	}),
 	default_translation: one(studyTranslations, {
 		fields: [study.default_translation],
