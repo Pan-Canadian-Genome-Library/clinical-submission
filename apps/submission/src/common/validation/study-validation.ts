@@ -92,10 +92,20 @@ export const updateStudy: RequestValidation<
 	pathParams: z.object({
 		studyId: stringNotEmpty,
 	}),
-	body: createStudyProperties.partial().strict({
-		message:
-			'Unrecognized keys in object. Updating the following properties: studyId, updatedAt, or createdAt is disallowed.',
-	}),
+	body: createStudyProperties
+		.omit({
+			defaultLanguage: true,
+			studyDescription: true,
+			fundingSources: true,
+			keywords: true,
+			participantCriteria: true,
+			programName: true,
+		})
+		.partial()
+		.strict({
+			message:
+				'Unrecognized keys in object. Updating the following properties: studyId, updatedAt, createdAt, defaultLanguage, studyDescription, fundingSources, keywords, participantCriteria, or programName is disallowed.',
+		}),
 };
 
 export const listAllStudies: RequestValidation<object, PaginationParams, ParamsDictionary> = {
