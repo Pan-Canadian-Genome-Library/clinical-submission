@@ -84,11 +84,14 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 					);
 				}
 
-				const dacFound = await getDacById(studyData.dacId);
-				if (!dacFound) {
-					throw new lyricProvider.utils.errors.BadRequest(
-						`${studyData.dacId} does not appear to be a valid DAC ID, please ensure this DAC record exists prior to creating a study.`,
-					);
+				// If the dacId does exist, make sure it is valid dac record
+				if (studyData.dacId) {
+					const dacFound = await getDacById(studyData.dacId);
+					if (!dacFound) {
+						throw new lyricProvider.utils.errors.BadRequest(
+							`${studyData.dacId} does not appear to be a valid DAC ID, please ensure this DAC exists prior to creating a study.`,
+						);
+					}
 				}
 
 				const results = await createStudy(studyData, transaction);

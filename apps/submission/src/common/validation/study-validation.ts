@@ -45,7 +45,7 @@ const ALLOWED_DOMAINS = [
 
 const createStudyProperties = z
 	.object({
-		dacId: stringNotEmpty,
+		dacId: z.string().optional().nullable(),
 		defaultLanguage: z.nativeEnum(AllowedLanguages),
 		studyName: stringNotEmpty,
 		studyDescription: stringNotEmpty,
