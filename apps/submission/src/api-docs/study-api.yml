@@ -253,6 +253,49 @@
       500:
         $ref: '#/components/responses/ServerError'
 
+/study/dac/{studyId}:
+  patch:
+    summary: |
+      Update the DAC ID for a study by a study ID. (🔒 Admin only)
+    parameters:
+      - name: studyId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique identifier of the study in PCGL.
+    tags:
+      - Study
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              dacId:
+                type: string
+                description: DAC ID to update for the study.
+    responses:
+      200:
+        description: Returns the updated study record.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudyResponse'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/UnauthorizedError'
+      403:
+        $ref: '#/components/responses/ForbiddenError'
+      404:
+        $ref: '#/components/responses/NotFound'
+      500:
+        $ref: '#/components/responses/ServerError'
+
 /study/translation/{studyId}:
   post:
     summary: Creates a new translation for an existing study. (🔒 Admin only)

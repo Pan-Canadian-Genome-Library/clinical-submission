@@ -129,3 +129,12 @@ export const createStudyTranslation: RequestValidation<StudyTranslationFields, P
 		})
 		.strict(),
 };
+
+export const dacToStudy: RequestValidation<{ dacId: string }, ParsedQs, StudyIDParams> = {
+	pathParams: z.object({
+		studyId: stringNotEmpty,
+	}),
+	body: z.object({
+		dacId: stringNotEmpty,
+	}),
+};

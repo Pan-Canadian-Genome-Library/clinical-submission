@@ -419,6 +419,29 @@ const studyService = (db: PostgresDb) => ({
 			}
 		}
 	},
+	updateStudyDacId: async (studyData: { studyId: string; dacId: string }): Promise<StudyResponse | undefined> => {
+		try {
+			const updatedRecord = await db
+				.update(study)
+				.set({
+					dac_id: studyData.dacId,
+					updated_at: sql`NOW()`,
+				})
+				.where(eq(study.study_id, studyData.studyId))
+				.returning();
+
+			if (updatedRecord[0]) {
+				return await convertFromRecordToStudyResponse(updatedRecord[0], db);
+			}
+			return;
+		} catch (error) {
+			logger.error(error, 'Error at updateStudy in StudyService');
+
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'Something went wrong while updating the requested study. Please try again later.',
+			);
+		}
+	},
 });
 
 export { studyService };

@@ -20,6 +20,7 @@
 import {
 	createStudy,
 	createStudyTranslation,
+	dacToStudy,
 	getOrDeleteStudyByID,
 	listAllStudies,
 	updateStudy,
@@ -195,6 +196,40 @@ export const updateStudyTranslationById = validateRequest(createStudyTranslation
 		const results = await studyRepo.updateStudyTranslation({ ...translationData, studyId });
 
 		res.status(200).send(results);
+		return;
+	} catch (exception) {
+		next(exception);
+	}
+});
+
+export const addDacIdToStudy = validateRequest(dacToStudy, async (req, res, next) => {
+	try {
+		const { studyId } = req.params;
+		const { dacId } = req.body;
+
+		const db = getDbInstance();
+		const studyRepo = studyService(db);
+		const dacRepo = dacService(db);
+
+		const studyFound = await studyRepo.getStudyById(studyId);
+
+		if (!studyFound) {
+			throw new lyricProvider.utils.errors.NotFound(`No Study with ID - ${studyId} found.`);
+		}
+
+		if (studyFound.dacId !== null) {
+			throw new lyricProvider.utils.errors.StatusConflict(`Study with ID - ${studyId} already has a DAC ID.`);
+		}
+
+		const dacFound = await dacRepo.getDacById(dacId);
+
+		if (!dacFound) {
+			throw new lyricProvider.utils.errors.NotFound(`No DAC with ID - ${dacId} found.`);
+		}
+
+		const updatedStudy = await studyRepo.updateStudyDacId({ studyId, dacId });
+
+		res.status(200).send(updatedStudy);
 		return;
 	} catch (exception) {
 		next(exception);
