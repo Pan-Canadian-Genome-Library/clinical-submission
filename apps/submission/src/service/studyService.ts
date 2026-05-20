@@ -435,10 +435,10 @@ const studyService = (db: PostgresDb) => ({
 			}
 			return;
 		} catch (error) {
-			logger.error(error, 'Error at updateStudy in StudyService');
+			logger.error(error, 'Error at updateStudyDacId in StudyService');
 
 			throw new lyricProvider.utils.errors.InternalServerError(
-				'Something went wrong while updating the requested study. Please try again later.',
+				"Something went wrong while updating the requested study's DAC ID. Please try again later.",
 			);
 		}
 	},
