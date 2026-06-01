@@ -267,7 +267,6 @@ const studyService = (db: PostgresDb) => ({
 			const updatedRecord = await db
 				.update(study)
 				.set({
-					dac_id: studyData.dacId,
 					study_name: studyData.studyName,
 					status: studyData.status,
 					context: studyData.context,
@@ -418,6 +417,29 @@ const studyService = (db: PostgresDb) => ({
 						'Something went wrong while creating a new study. Please try again later.',
 					);
 			}
+		}
+	},
+	updateStudyDacId: async (studyData: { studyId: string; dacId: string }): Promise<StudyResponse | undefined> => {
+		try {
+			const updatedRecord = await db
+				.update(study)
+				.set({
+					dac_id: studyData.dacId,
+					updated_at: sql`NOW()`,
+				})
+				.where(eq(study.study_id, studyData.studyId))
+				.returning();
+
+			if (updatedRecord[0]) {
+				return await convertFromRecordToStudyResponse(updatedRecord[0], db);
+			}
+			return;
+		} catch (error) {
+			logger.error(error, 'Error at updateStudyDacId in StudyService');
+
+			throw new lyricProvider.utils.errors.InternalServerError(
+				"Something went wrong while updating the requested study's DAC ID. Please try again later.",
+			);
 		}
 	},
 });

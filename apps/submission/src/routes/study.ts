@@ -20,6 +20,7 @@
 import express, { json, Router, urlencoded } from 'express';
 
 import {
+	addDacIdToStudy,
 	createNewStudy,
 	createStudyTranslationById,
 	deleteStudyById,
@@ -41,6 +42,8 @@ export const studyRouter: Router = (() => {
 	router.post('/', authMiddleware({ requireAdmin: true }), createNewStudy);
 	router.delete('/:studyId', authMiddleware({ requireAdmin: true }), deleteStudyById);
 	router.patch('/:studyId', authMiddleware({ requireAdmin: true }), updateStudyById);
+	router.patch('/dac/:studyId', authMiddleware({ requireAdmin: true }), addDacIdToStudy);
+
 	router.post('/translation/:studyId', authMiddleware({ requireAdmin: true }), createStudyTranslationById);
 	router.patch('/translation/:studyId', authMiddleware({ requireAdmin: true }), updateStudyTranslationById);
 
