@@ -106,7 +106,7 @@ export const parseFileToRecords = async (
 
 		stream.on('close', () => {
 			stream.destroy();
-			fs.unlink(file.path, () => { });
+			fs.unlink(file.path, () => {});
 		});
 	});
 };

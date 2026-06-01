@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 The Ontario Institute for Cancer Research. All rights reserved
+ * Copyright (c) 2026 The Ontario Institute for Cancer Research. All rights reserved
  *
  * This program and the accompanying materials are made available under the terms of
  * the GNU Affero General Public License v3.0. You should have received a copy of the
@@ -17,8 +17,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export * from './dacSchema.js';
-export * from './generate.js';
-export * from './idGenerationConfig.js';
-export * from './studiesSchema.js';
-export * from './studyTranslationsSchema.js';
+import { studyTranslations } from '@/db/schemas/studyTranslationsSchema.js';
+
+import { AllowedLanguagesValues } from './study.js';
+
+export type StudyTranslationDTO = {
+	studyTranslationId?: number;
+	languageId: AllowedLanguagesValues;
+	studyDescription: string;
+	programName?: string | null;
+	keywords?: string[] | null;
+	participantCriteria?: string | null;
+	fundingSources: string[];
+	createdAt: string | Date;
+	updatedAt?: string | Date | null;
+};
+
+export type StudyTranslationRecord = typeof studyTranslations.$inferSelect;

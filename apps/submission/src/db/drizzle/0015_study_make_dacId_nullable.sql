@@ -1,0 +1,1 @@
+ALTER TABLE "pcgl"."study" ALTER COLUMN "dac_id" DROP NOT NULL;

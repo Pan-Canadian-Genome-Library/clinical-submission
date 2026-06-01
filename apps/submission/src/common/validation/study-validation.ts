@@ -23,7 +23,8 @@ import { z } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
-import { StudyContext, StudyDTO, StudyStatus } from '../types/study.js';
+import { AllowedLanguages, StudyContext, StudyDTO, StudyStatus, UpsertStudyParams } from '../types/study.js';
+import { StudyTranslationDTO } from '../types/studyTranslations.js';
 import { orderByString, PaginationParams, positiveInteger, stringNotEmpty } from './common.js';
 
 const ALLOWED_DOMAINS = [
@@ -44,7 +45,8 @@ const ALLOWED_DOMAINS = [
 
 const createStudyProperties = z
 	.object({
-		dacId: stringNotEmpty,
+		dacId: z.string().optional().nullable(),
+		defaultLanguage: z.nativeEnum(AllowedLanguages),
 		studyName: stringNotEmpty,
 		studyDescription: stringNotEmpty,
 		programName: z.string().optional(),
@@ -77,23 +79,46 @@ export const getOrDeleteStudyByID: RequestValidation<object, ParsedQs, StudyIDPa
 	}),
 };
 
-export type CreateStudyFields = Omit<StudyDTO, 'studyId' | 'createdAt' | 'updatedAt'>;
-export const createStudy: RequestValidation<CreateStudyFields, ParsedQs, ParamsDictionary> = {
+export type UpsertStudyFields = Omit<UpsertStudyParams, 'studyId' | 'languageId' | 'createdAt' | 'updatedAt'>;
+export const createStudy: RequestValidation<UpsertStudyFields, ParsedQs, ParamsDictionary> = {
 	body: createStudyProperties,
 };
 
 export const updateStudy: RequestValidation<
-	Partial<Omit<StudyDTO, 'studyId' | 'updatedAt' | 'createdAt'>>,
+	Partial<
+		Omit<
+			StudyDTO,
+			| 'studyId'
+			| 'updatedAt'
+			| 'createdAt'
+			| 'defaultLanguage'
+			| 'studyDescription'
+			| 'fundingSources'
+			| 'keywords'
+			| 'participantCriteria'
+			| 'programName'
+		>
+	>,
 	ParsedQs,
 	StudyIDParams
 > = {
 	pathParams: z.object({
 		studyId: stringNotEmpty,
 	}),
-	body: createStudyProperties.partial().strict({
-		message:
-			'Unrecognized keys in object. Updating the following properties: studyId, updatedAt, or createdAt is disallowed.',
-	}),
+	body: createStudyProperties
+		.omit({
+			defaultLanguage: true,
+			studyDescription: true,
+			fundingSources: true,
+			keywords: true,
+			participantCriteria: true,
+			programName: true,
+		})
+		.partial()
+		.strict({
+			message:
+				'Unrecognized keys in object. Properties defaultLanguage, studyDescription, fundingSources, keywords, participantCriteria, or programName should be updated in the update translations endpoint.',
+		}),
 };
 
 export const listAllStudies: RequestValidation<object, PaginationParams, ParamsDictionary> = {
@@ -101,5 +126,28 @@ export const listAllStudies: RequestValidation<object, PaginationParams, ParamsD
 		orderBy: orderByString.optional(),
 		page: positiveInteger.optional(),
 		pageSize: positiveInteger.optional(),
+	}),
+};
+
+export type StudyTranslationFields = Omit<StudyTranslationDTO, 'createdAt' | 'updatedAt'>;
+export const createStudyTranslation: RequestValidation<StudyTranslationFields, ParsedQs, StudyIDParams> = {
+	body: z
+		.object({
+			languageId: z.nativeEnum(AllowedLanguages),
+			studyDescription: z.string(),
+			programName: z.string().optional(),
+			keywords: z.array(z.string()).optional(),
+			participantCriteria: z.string().optional(),
+			fundingSources: z.array(z.string()),
+		})
+		.strict(),
+};
+
+export const dacToStudy: RequestValidation<{ dacId: string }, ParsedQs, StudyIDParams> = {
+	pathParams: z.object({
+		studyId: stringNotEmpty,
+	}),
+	body: z.object({
+		dacId: stringNotEmpty,
 	}),
 };

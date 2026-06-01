@@ -1,0 +1,2 @@
+ALTER TABLE "pcgl"."study" ALTER COLUMN "default_translation" SET NOT NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX "study_translations_study_id_language_id_index" ON "pcgl"."study_translations" USING btree ("study_id","language_id");
