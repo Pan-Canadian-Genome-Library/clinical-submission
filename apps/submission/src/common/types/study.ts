@@ -44,7 +44,7 @@ export type AllowedLanguagesValues = (typeof AllowedLanguages)[keyof typeof Allo
 
 export type StudyDTO = {
 	studyId: string;
-	dacId: string;
+	dacId?: string | null;
 	studyName: string;
 	status: StudyStatusValues;
 	context: StudyContextValues;
