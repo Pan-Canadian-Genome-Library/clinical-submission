@@ -89,9 +89,7 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 				if (studyData.dacId) {
 					const dacFound = await getDacById(studyData.dacId);
 					if (!dacFound) {
-						throw new lyricProvider.utils.errors.BadRequest(
-							`${studyData.dacId} does not appear to be a valid DAC ID, please ensure this DAC exists prior to creating a study.`,
-						);
+						throw new lyricProvider.utils.errors.BadRequest(`${studyData.dacId} is not a valid DAC ID.`);
 					}
 				}
 

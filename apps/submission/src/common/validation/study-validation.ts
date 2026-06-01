@@ -85,7 +85,20 @@ export const createStudy: RequestValidation<UpsertStudyFields, ParsedQs, ParamsD
 };
 
 export const updateStudy: RequestValidation<
-	Partial<Omit<StudyDTO, 'studyId' | 'updatedAt' | 'createdAt'>>,
+	Partial<
+		Omit<
+			StudyDTO,
+			| 'studyId'
+			| 'updatedAt'
+			| 'createdAt'
+			| 'defaultLanguage'
+			| 'studyDescription'
+			| 'fundingSources'
+			| 'keywords'
+			| 'participantCriteria'
+			| 'programName'
+		>
+	>,
 	ParsedQs,
 	StudyIDParams
 > = {
@@ -104,7 +117,7 @@ export const updateStudy: RequestValidation<
 		.partial()
 		.strict({
 			message:
-				'Unrecognized keys in object. Updating the following properties: studyId, updatedAt, createdAt, defaultLanguage, studyDescription, fundingSources, keywords, participantCriteria, or programName is disallowed.',
+				'Unrecognized keys in object. Properties defaultLanguage, studyDescription, fundingSources, keywords, participantCriteria, or programName should be updated in the update translations endpoint.',
 		}),
 };
 
