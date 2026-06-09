@@ -1,5 +1,5 @@
 {
-	"name": "@clinical-submission/data-dictionary-ui",
+	"name": "@clinical-submission/submission-ui",
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
