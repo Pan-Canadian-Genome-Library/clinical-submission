@@ -9,8 +9,9 @@
 	"type": "module",
 	"scripts": {
 		"\n==================  LOCAL  ==================": "",
-		"build": "pnpm run build:api && pnpm run build:ui",
-		"build:ui": "pnpm --filter ./apps/data-dictionary-ui run build",
+		"build": "pnpm run build:api && pnpm run build:dictionary-ui && pnpm run build:submission-ui",
+		"build:dictionary-ui": "pnpm --filter ./apps/data-dictionary-ui run build",
+		"build:submission-ui": "pnpm --filter ./apps/submission-ui run build",
 		"build:api": "pnpm --filter ./apps/submission run build:all",
 		"\n==================  NX  ==================": "",
 		"\n IMPORT-NOTE: NX currently doesn't like to run when building docker images. This does work locally though. But for our ci/cd pipelines, we utilize LOCAL scripts.": "",
