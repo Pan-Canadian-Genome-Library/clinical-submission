@@ -87,6 +87,9 @@ importers:
       '@overture-stack/lyric':
         specifier: ^0.17.0
         version: 0.17.0(@types/pg@8.15.5)(@types/react@19.2.2)(react@19.2.0)
+      '@pcgl-submission/validation':
+        specifier: workspace:^
+        version: link:../../packages/validation
       axios:
         specifier: ^1.10.0
         version: 1.12.2
@@ -238,6 +241,12 @@ importers:
 
   apps/submission-ui:
     dependencies:
+      '@pcgl-submission/validation':
+        specifier: workspace:^
+        version: link:../../packages/validation
+      '@tanstack/react-query':
+        specifier: ^5.101.0
+        version: 5.101.0(react@19.2.0)
       react:
         specifier: ^19.1.1
         version: 19.2.0
@@ -281,6 +290,16 @@ importers:
       vite:
         specifier: ^7.1.2
         version: 7.1.11(@types/node@24.9.1)(tsx@4.20.6)(yaml@2.8.1)
+
+  packages/validation:
+    dependencies:
+      zod:
+        specifier: ^3.24.2
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: ^5.5.3
+        version: 5.9.3
 
 packages:
 
@@ -1280,6 +1299,14 @@ packages:
 
   '@so-ric/colorspace@1.1.6':
     resolution: {integrity: sha512-/KiKkpHNOBgkFJwu9sh48LkHSMYGyuTcSFK/qMBdnOAlrRJzRSXAOFB5qwzaVQuDl8wAvHVMkaASQDReTahxuw==}
+
+  '@tanstack/query-core@5.101.0':
+    resolution: {integrity: sha512-cQetA74EB+seWySv1TTKr828TnP0u39m6LykwDXIo84SNortpDkp30TMEjkqtYCNP9c40uT/iwl6MLiufEt0Ow==}
+
+  '@tanstack/react-query@5.101.0':
+    resolution: {integrity: sha512-rLlJXSpkqfizLWgkR5+eLeIk0MvTx/meEIR7LRjxic+qxiQP8zVjq7BqQkiCMNLQBlLfuOLqqr6KO5GtrDlmSg==}
+    peerDependencies:
+      react: ^18 || ^19
 
   '@tanstack/react-table@8.21.3':
     resolution: {integrity: sha512-5nNMTSETP4ykGegmVkhjcS8tTLW6Vl4axfEGQN3v0zdHYbK4UfoqfPChclTrJ4EoK9QynqAu9oUf8VEmrpZ5Ww==}
@@ -4877,6 +4904,13 @@ snapshots:
     dependencies:
       color: 5.0.3
       text-hex: 1.0.0
+
+  '@tanstack/query-core@5.101.0': {}
+
+  '@tanstack/react-query@5.101.0(react@19.2.0)':
+    dependencies:
+      '@tanstack/query-core': 5.101.0
+      react: 19.2.0
 
   '@tanstack/react-table@8.21.3(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
     dependencies:
