@@ -28,6 +28,7 @@ export const authSessionRouter: Router = (() => {
 
 	router.get('/login', authSessionController.loginSession);
 	router.get('/user', authSessionController.getUser);
+	router.get('/token', authSessionController.authToken);
 
 	return router;
 })();
