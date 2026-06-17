@@ -17,19 +17,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import type { SessionAccount, SessionUser } from '@pcgl-submission/validation';
 import { type Request } from 'express';
-
-import { SessionAccount } from './sessionTypes.js';
 
 export { default as sessionMiddleware } from './sessionMiddleware.js';
 
 declare module 'express-session' {
 	interface SessionData {
+		user: SessionUser;
 		account: SessionAccount;
 	}
 }
 
 export function resetSession(session: Request['session']) {
+	session.user = undefined;
 	session.account = undefined;
 	session.save();
 }
