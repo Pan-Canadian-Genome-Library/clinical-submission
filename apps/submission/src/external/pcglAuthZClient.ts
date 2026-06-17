@@ -169,7 +169,7 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 	const userTokenInfo: PCGLUserSessionResult = {
 		user: {
 			username: `${responseValidation.data.userinfo.pcgl_id}`,
-			isAdmin: isAdmin({ groups: responseValidation.data.groups }),
+			isAdmin: responseValidation.data.userinfo.data_admin,
 			allowedWriteOrganizations: responseValidation.data.study_authorizations.editable_studies,
 			allowedReadOrganizations: responseValidation.data.study_authorizations.readable_studies,
 			groups: extractUserGroups({ groups: responseValidation.data.groups }),
@@ -221,16 +221,6 @@ export const extractAccessTokenFromHeader = (req: Request): string | undefined =
 	}
 
 	return authHeader.replace('Bearer ', '').trim();
-};
-
-/**
- * @param groups List of groups users belongs to
- * @returns boolean if user has admin group
- */
-const isAdmin = ({ groups }: Groups): boolean => {
-	const { groups: configGroups } = authConfig;
-
-	return groups.some((val) => val.name === configGroups.admin);
 };
 
 /**
