@@ -46,6 +46,7 @@ dotenv.config();
 
 const envSchema = z.object({
 	API_HOST: z.string().url(),
+	UI_HOST: z.string().url(),
 	ALLOWED_ORIGINS: z.string().optional(),
 	AUDIT_ENABLED: z.preprocess((val) => processCoercedBoolean(val), z.boolean()).default(true),
 	AUTH_ENABLED: z.preprocess((val) => processCoercedBoolean(val), z.boolean()).default(false),
