@@ -28,17 +28,17 @@ import { fileURLToPath } from 'url';
 import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { requestLogger } from '@/middleware/requestLogger.js';
+import { authRouter } from '@/routes/auth.js';
+import { authSessionRouter } from '@/routes/authSession.js';
+import { categoryRouter } from '@/routes/categoryRouter.js';
+import { dacRouter } from '@/routes/dac.js';
+import { dataRouter } from '@/routes/data.js';
+import { dictionaryRouter } from '@/routes/dictionary.js';
 import { healthCheckRouter } from '@/routes/healthCheck.js';
 import { openAPIRouter } from '@/routes/openApi.js';
+import { studyRouter } from '@/routes/study.js';
 import { submissionRouter } from '@/routes/submission.js';
-
-import { authRouter } from './routes/auth.js';
-import { categoryRouter } from './routes/categoryRouter.js';
-import { dacRouter } from './routes/dac.js';
-import { dataRouter } from './routes/data.js';
-import { dictionaryRouter } from './routes/dictionary.js';
-import { studyRouter } from './routes/study.js';
-import { validationRouter } from './routes/validationRouter.js';
+import { validationRouter } from '@/routes/validationRouter.js';
 
 const app = express();
 
@@ -92,6 +92,7 @@ app.use('/dac', dacRouter);
 app.use('/health', healthCheckRouter);
 app.use('/study', studyRouter);
 app.use('/auth', authRouter);
+app.use('/auth-session', authSessionRouter);
 
 // Lyric Routes
 app.use('/audit', lyricProvider.routers.audit);
