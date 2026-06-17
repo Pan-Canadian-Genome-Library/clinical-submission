@@ -67,14 +67,6 @@ export function validateRequest<
 				schema.pathParams.parse(req.params);
 			}
 
-			res.locals.requestContext = {
-				method: req.method,
-				path: req.originalUrl || req.path,
-				params: req.params,
-				query: req.query,
-				...(req.method !== 'GET' && req.body ? { body: req.body } : {}),
-			};
-
 			return handler(req, res, next);
 		} catch (error) {
 			if (error instanceof ZodError) {
