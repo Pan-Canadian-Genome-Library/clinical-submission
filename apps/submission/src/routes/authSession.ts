@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 The Ontario Institute for Cancer Research. All rights reserved
+ * Copyright (c) 2025 The Ontario Institute for Cancer Research. All rights reserved
  *
  * This program and the accompanying materials are made available under the terms of
  * the GNU Affero General Public License v3.0. You should have received a copy of the
@@ -17,22 +17,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import express, { json, Router, urlencoded } from 'express';
 
-import { withErrorResponseHandler } from '@/api/error';
-import { fetch } from '@/api/FetchClient';
-import type { SessionUser } from '@pcgl-submission/validation';
-import { ServerError } from '@/types/server';
+import authSessionController from '@/controllers/authSessionController.js';
 
-const useGetUser = () => {
-	return useQuery<{ user: SessionUser }, ServerError>({
-		queryKey: ['user'],
-		queryFn: async () => {
-			const response = await fetch(`/auth-session/user`).then(withErrorResponseHandler);
+export const authSessionRouter: Router = (() => {
+	const router = express.Router();
+	router.use(json());
+	router.use(urlencoded({ extended: false }));
 
-			return await response.json();
-		},
-	});
-};
+	router.get('/login', authSessionController.loginSession);
+	router.get('/user', authSessionController.getUser);
 
-export default useGetUser;
+	return router;
+})();
