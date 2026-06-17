@@ -1,0 +1,20 @@
+{
+	"name": "@pcgl-submission/validation",
+	"private": true,
+	"version": "0.0.0",
+	"description": "PCGL Submission Validation",
+	"license": "ISC",
+	"exports": "./dist/index.js",
+	"types": "dist/index.d.ts",
+	"type": "module",
+	"scripts": {
+		"prebuild": "rimraf ./dist",
+		"build": "tsc"
+	},
+	"dependencies": {
+		"zod": "^3.24.2"
+	},
+	"devDependencies": {
+		"typescript": "^5.5.3"
+	}
+}
