@@ -17,20 +17,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import Home from './pages/Home.tsx';
-import { Routes } from 'react-router';
-import { Route } from 'react-router';
-import Providers from './providers/Providers.tsx';
+import { useQuery } from '@tanstack/react-query';
 
-createRoot(document.getElementById('root')!).render(
-	<StrictMode>
-		<Providers>
-			<Routes>
-				<Route path="/" element={<Home />} />
-				<Route path="/login" element={<></>} />
-			</Routes>
-		</Providers>
-	</StrictMode>,
-);
+import { withErrorResponseHandler } from '@/api/error';
+import { fetch } from '@/api/FetchClient';
+import type { SessionUser } from '@pcgl-submission/validation';
+import { ServerError } from '@/types/server';
+
+const useGetUser = () => {
+	return useQuery<{ user: SessionUser }, ServerError>({
+		queryKey: ['user'],
+		queryFn: async () => {
+			const response = await fetch(`/auth/user`).then(withErrorResponseHandler);
+
+			return await response.json();
+		},
+	});
+};
+
+export default useGetUser;

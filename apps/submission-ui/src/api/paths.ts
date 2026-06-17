@@ -17,20 +17,5 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import Home from './pages/Home.tsx';
-import { Routes } from 'react-router';
-import { Route } from 'react-router';
-import Providers from './providers/Providers.tsx';
-
-createRoot(document.getElementById('root')!).render(
-	<StrictMode>
-		<Providers>
-			<Routes>
-				<Route path="/" element={<Home />} />
-				<Route path="/login" element={<></>} />
-			</Routes>
-		</Providers>
-	</StrictMode>,
-);
+export const API_PATH_LOGIN = `${__API_PROXY_PATH__}/auth/login`;
+export const API_PATH_LOGOUT = `${__API_PROXY_PATH__}/auth/logout`;

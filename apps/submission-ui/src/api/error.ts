@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 The Ontario Institute for Cancer Research. All rights reserved
+ * Copyright (c) 2025 The Ontario Institute for Cancer Research. All rights reserved
  *
  * This program and the accompanying materials are made available under the terms of
  * the GNU Affero General Public License v3.0. You should have received a copy of the
@@ -16,21 +16,37 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+export const withErrorResponseHandler = (response: Response) => {
+	if (response.ok) {
+		return response;
+	} else {
+		const error = {
+			message: 'Error',
+			error: 'An error occurred',
+		};
 
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import Home from './pages/Home.tsx';
-import { Routes } from 'react-router';
-import { Route } from 'react-router';
-import Providers from './providers/Providers.tsx';
+		switch (response.status) {
+			case 400:
+				error.message = 'Bad Request';
+				error.error = 'The request was invalid';
+				break;
+			case 403:
+				error.message = 'Forbidden';
+				error.error = 'You do not have permission to access this resource';
+				break;
+			case 404:
+				error.message = 'Not Found';
+				error.error = 'The requested resource was not found';
+				break;
+			case 500:
+				error.message = 'Server Error';
+				error.error = 'An internal server error occurred';
+				break;
+			default:
+				error.message = 'Request Failed';
+				error.error = 'Failed to fetch data from the server';
+		}
 
-createRoot(document.getElementById('root')!).render(
-	<StrictMode>
-		<Providers>
-			<Routes>
-				<Route path="/" element={<Home />} />
-				<Route path="/login" element={<></>} />
-			</Routes>
-		</Providers>
-	</StrictMode>,
-);
+		throw error;
+	}
+};
