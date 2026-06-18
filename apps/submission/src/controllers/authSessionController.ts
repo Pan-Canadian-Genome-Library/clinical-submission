@@ -17,14 +17,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { SessionUser } from '@pcgl-submission/validation';
 import urlJoin from 'url-join';
 
+import { logger } from '@/common/logger.js';
 import { authConfig } from '@/config/authConfig.js';
 import { env } from '@/config/envConfig.js';
-import { getOidcAuthorizeUrl } from '@/external/oidcAuthenticationClient.js';
+import { lyricProvider } from '@/core/provider.js';
+import { exchangeCodeForTokens, getOidcAuthorizeUrl, getUserInfo } from '@/external/oidcAuthenticationClient.js';
+import { getUserInformation } from '@/external/pcglAuthZClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 
-const getOauthRedirectUri = (host: string) => urlJoin(host, `/api/auth/token`);
+const getOauthRedirectUri = (host: string) => urlJoin(host, `/api/auth-session/token`);
 
 /**
  * Initiate login process.
@@ -145,44 +149,66 @@ const authToken = validateRequest({}, async (request, response) => {
 	}
 
 	try {
-		const tokenResponse = await oidcAuthClient.exchangeCodeForTokens(authConfig, {
+		const tokenResponse = await exchangeCodeForTokens(authConfig, {
 			code,
 			redirectUrl: getOauthRedirectUri(env.UI_HOST),
 		});
 
-		if (!tokenResponse.success) {
-			throw new ExternalAuthError(tokenResponse.error, tokenResponse.message);
+		if ('error' in tokenResponse) {
+			throw new lyricProvider.utils.errors.ServiceUnavailable(tokenResponse.error);
 		}
 
-		const pcglAuthzResponse = await pcglAuthZClient.getUserInformation(tokenResponse.data.access_token);
+		const pcglAuthzResponse = await getUserInformation(tokenResponse.access_token);
 
-		if (!pcglAuthzResponse.success) {
-			throw new ExternalAuthError(pcglAuthzResponse.error, pcglAuthzResponse.message);
+		if (`error` in pcglAuthzResponse) {
+			throw new lyricProvider.utils.errors.ServiceUnavailable('Error retrieving User Information');
 		}
 
-		const oidcDataResponse = await oidcAuthClient.getUserInfo(authConfig, tokenResponse.data.access_token);
-		if (!oidcDataResponse.success) {
-			throw new ExternalAuthError(oidcDataResponse.error, oidcDataResponse.message);
+		const oidcDataResponse = await getUserInfo(authConfig, tokenResponse.access_token);
+		if (!oidcDataResponse) {
+			throw new lyricProvider.utils.errors.ServiceUnavailable('Error retrieving User Information');
 		}
 
-		const userAccountAliasing = convertToSessionAccount(tokenResponse.data);
-		if (!userAccountAliasing.success) {
-			throw new Error(userAccountAliasing.message);
-		}
-		const sessionUserAliasing = await convertToSessionUser(oidcDataResponse.data, pcglAuthzResponse.data);
-		if (!sessionUserAliasing.success) {
-			throw new Error(sessionUserAliasing.message);
-		}
+		const userAccountAliasing = {
+			idToken: tokenResponse.id_token,
+			accessToken: tokenResponse.access_token,
+			refreshToken: tokenResponse.refresh_token,
+			refreshTokenIat: tokenResponse.refresh_token_iat,
+		};
 
-		request.session.account = userAccountAliasing.data;
-		request.session.user = sessionUserAliasing.data;
+		const sessionUserAliasing: SessionUser = {
+			userId: pcglAuthzResponse.userinfo.pcgl_id,
+			sub: oidcDataResponse.sub,
+			emails: pcglAuthzResponse.userinfo.emails,
+			givenName: oidcDataResponse.given_name,
+			familyName: oidcDataResponse.family_name,
+			siteAdmin: pcglAuthzResponse.userinfo.site_admin,
+			dataAdmin: pcglAuthzResponse.userinfo.data_admin,
+			studyAuthorizations: {
+				editableStudies: pcglAuthzResponse.study_authorizations.editable_studies,
+				readableStudies: pcglAuthzResponse.study_authorizations.readable_studies,
+			},
+			dacAuthorizations: pcglAuthzResponse.dac_authorizations.map((dacAuth) => {
+				if (!dacAuth) {
+					return undefined;
+				}
+				return {
+					studyId: dacAuth.study_id,
+					startDate: dacAuth.start_date,
+					endDate: dacAuth.end_date,
+				};
+			}),
+			groups: pcglAuthzResponse.groups,
+		};
 
+		request.session.account = userAccountAliasing;
+		request.session.user = sessionUserAliasing;
 		request.session.save();
 	} catch (error) {
-		logger.error(`Error thrown while going through authentication and authorization flow: `, error);
+		logger.error(`Error thrown while going through authentication and authorization flow: ` + error);
 
-		const redirectURL = urlJoin(env.UI_HOST, authConfig.loginErrorPath);
-		const errorCode = error instanceof ExternalAuthError ? error.code : 'SYSTEM_ERROR';
+		const redirectURL = urlJoin(env.UI_HOST, authConfig.authSessionConfigs.loginErrorPath);
+		const errorCode = error instanceof lyricProvider.utils.errors.ServiceUnavailable ? error.name : 'SYSTEM_ERROR';
 
 		const errorParams = new URLSearchParams({
 			code: errorCode,
@@ -193,7 +219,7 @@ const authToken = validateRequest({}, async (request, response) => {
 	}
 
 	// Auth success! User info saved to session!
-	response.redirect(urlJoin(env.UI_HOST, authConfig.loginRedirectPath));
+	response.redirect(urlJoin(env.UI_HOST, authConfig.authSessionConfigs.loginRedirectPath));
 	return;
 });
 
