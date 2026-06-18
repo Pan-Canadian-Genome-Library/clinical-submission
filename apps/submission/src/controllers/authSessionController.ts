@@ -18,6 +18,7 @@
  */
 
 import { SessionUser } from '@pcgl-submission/validation';
+import axios, { AxiosError } from 'axios';
 import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
@@ -27,6 +28,7 @@ import { lyricProvider } from '@/core/provider.js';
 import { exchangeCodeForTokens, getOidcAuthorizeUrl, getUserInfo } from '@/external/oidcAuthenticationClient.js';
 import { getUserInformation } from '@/external/pcglAuthZClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
+import { resetSession } from '@/session/index.js';
 
 const getOauthRedirectUri = (host: string) => urlJoin(host, `/api/auth-session/token`);
 
@@ -54,88 +56,55 @@ const loginSession = validateRequest({}, async (request, response, _) => {
 
 /**
  * User logout.
- *
- * This will revoke all access and refresh tokens for this session's user, and will then
- * remove account and user information from the current session.
- *
- * On success it will redirect the user agent to the root path for the UI.
  */
-// authRouter.get('/logout', async (request, response) => {
-// 	if (!authConfig.enabled) {
-// 		response.status(400).json({ error: 'AUTH_DISABLED', message: 'Authentication is disabled.' });
-// 		return;
-// 	}
-// 	const logoutSuccessRedirectUrl = urlJoin(env.UI_HOST, authConfig.logoutRedirectPath);
+const logoutSession = validateRequest({}, async (request, response) => {
+	if (!authConfig.enabled) {
+		response.status(400).json({ error: 'AUTH_DISABLED', message: 'Authentication is disabled.' });
+		return;
+	}
+	const logoutSuccessRedirectUrl = urlJoin(env.UI_HOST, authConfig.authSessionConfigs.logoutRedirectPath);
 
-// 	const { account } = request.session;
-// 	if (!account) {
-// 		logger.warn(`User with no valid session attempted to logout.`);
+	const { account } = request.session;
+	if (!account) {
+		logger.warn(`User with no valid session attempted to logout.`);
 
-// 		// TODO: Where to redirect on logout failure.
-// 		response.redirect(logoutSuccessRedirectUrl);
-// 		return;
-// 	}
+		// TODO: Where to redirect on logout failure.
+		response.redirect(logoutSuccessRedirectUrl);
+		return;
+	}
 
-// 	try {
-// 		// TODO: move this request to the oidc provider
-// 		const params = new URLSearchParams({ token: account.accessToken });
-// 		await axios({
-// 			url: urlJoin(authConfig.AUTH_PROVIDER_HOST, `/oauth2/revoke`),
-// 			method: 'POST',
-// 			headers: {
-// 				Authorization: `Bearer ${account.accessToken}`,
-// 				'content-type': 'application/x-www-form-urlencoded',
-// 			},
-// 			params,
-// 		});
+	try {
+		// TODO: move this request to the oidc provider
+		const params = new URLSearchParams({ token: account.accessToken });
+		await axios({
+			url: urlJoin(authConfig.AUTH_PROVIDER_HOST, `/oauth2/revoke`),
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${account.accessToken}`,
+				'content-type': 'application/x-www-form-urlencoded',
+			},
+			params,
+		});
 
-// 		// On logout success we can clear the session data.
-// 		resetSession(request.session);
-// 	} catch (error) {
-// 		logger.error(`Failure sending token revoke request to OIDC Provider.`, error);
-// 		if (error instanceof AxiosError) {
-// 			logger.error(error.response?.data);
-// 		}
+		// On logout success we can clear the session data.
+		resetSession(request.session);
+	} catch (error) {
+		logger.error(`Failure sending token revoke request to OIDC Provider.` + error);
+		if (error instanceof AxiosError) {
+			logger.error(error.response?.data);
+		}
 
-// 		response
-// 			.status(500)
-// 			.json({ error: 'SYSTEM_ERROR', message: 'Failed to revoke user session: Network failure with auth provider.' });
-// 		return;
-// 	}
+		response
+			.status(500)
+			.json({ error: 'SYSTEM_ERROR', message: 'Failed to revoke user session: Network failure with auth provider.' });
+		return;
+	}
 
-// 	response.redirect(logoutSuccessRedirectUrl);
-// 	return;
-// });
+	response.redirect(logoutSuccessRedirectUrl);
+	return;
+});
 
-// // ##############
-// //   GET /token
-// // ##############
-
-// /**
-//  * This is the callback that the OIDC Provider will redirect the user agent to after
-//  * they have successfully authenticated. The URL to this endpoint must be set in the
-//  * OIDC Client as a Redirect URL.
-//  *
-//  * This route will validate the Authorization Code provided as a search parameter by
-//  * calling the OIDC Token endpoint. This will return the authenticated user's tokens
-//  * (ID, Access, refresh) and information on when these tokens will expire.
-//  *
-//  * Then, the access token will be used to call the OIDC User Info endpoint to retrieve
-//  * the available information for this user.
-//  *
-//  * All of this information will be stored in the user session.
-//  *
-//  * Finally, if everything is successful, the response will redirect the user agent to
-//  * the correct UI page for their role:
-//  *   - Applicant: /dashboard
-//  *   - Institutional Rep: ?
-//  *   - DAC Member: /manage/applications
-//  *
-//  * If Authentication or Authorization fails, we redirect to: /login/error with an
-//  * errorCode associated from failure. This error code is then used to generate error
-//  * messages on the frontend with clarification on why the auth process failed & what
-//  * the user can do about it.
-//  */
+//   GET /token
 const authToken = validateRequest({}, async (request, response) => {
 	if (!authConfig.enabled) {
 		response.status(400).json({ error: 'AUTH_DISABLED', message: 'Authentication is disabled.' });
@@ -252,4 +221,4 @@ const getUser = validateRequest({}, async (request, response) => {
 	return;
 });
 
-export default { loginSession, getUser, authToken };
+export default { loginSession, getUser, authToken, logoutSession };

@@ -27,6 +27,7 @@ export const authSessionRouter: Router = (() => {
 	router.use(urlencoded({ extended: false }));
 
 	router.get('/login', authSessionController.loginSession);
+	router.get('/logout', authSessionController.logoutSession);
 	router.get('/user', authSessionController.getUser);
 	router.get('/token', authSessionController.authToken);
 

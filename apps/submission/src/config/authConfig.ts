@@ -57,6 +57,7 @@ export const authConfig = {
 	authSessionConfigs: {
 		loginErrorPath: '/login/error',
 		loginRedirectPath: '/login/redirect',
+		logoutRedirectPath: '/',
 	},
 	service: {
 		id: parseResult.data.AUTHZ_SERVICE_ID,
