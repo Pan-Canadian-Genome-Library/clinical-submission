@@ -17,5 +17,5 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export const API_PATH_LOGIN = `${__API_PROXY_PATH__}/auth/login`;
-export const API_PATH_LOGOUT = `${__API_PROXY_PATH__}/auth/logout`;
+export const API_PATH_LOGIN = `${__API_PROXY_PATH__}/auth-session/login`;
+export const API_PATH_LOGOUT = `${__API_PROXY_PATH__}/auth-session/logout`;
