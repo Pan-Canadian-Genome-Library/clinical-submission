@@ -40,6 +40,8 @@ import { studyRouter } from '@/routes/study.js';
 import { submissionRouter } from '@/routes/submission.js';
 import { validationRouter } from '@/routes/validationRouter.js';
 
+import sessionMiddleware from './session/sessionMiddleware.js';
+
 const app = express();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -70,6 +72,7 @@ app.use(
 		},
 	}),
 );
+app.use(sessionMiddleware);
 
 /**
  * Nunjucks is the templating middleware we use for our temporary
