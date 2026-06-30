@@ -17,16 +17,5 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '../styles/App.css';
-
-function Home() {
-	return (
-		<div className="container">
-			<main className="wrapper">
-				<h1>Submission UI</h1>
-			</main>
-		</div>
-	);
-}
-
-export default Home;
+export const API_PATH_LOGIN = `${__API_PROXY_PATH__}/auth-session/login`;
+export const API_PATH_LOGOUT = `${__API_PROXY_PATH__}/auth-session/logout`;

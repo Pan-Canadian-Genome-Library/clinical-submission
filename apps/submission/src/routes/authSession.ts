@@ -17,16 +17,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '../styles/App.css';
+import express, { json, Router, urlencoded } from 'express';
 
-function Home() {
-	return (
-		<div className="container">
-			<main className="wrapper">
-				<h1>Submission UI</h1>
-			</main>
-		</div>
-	);
-}
+import authSessionController from '@/controllers/authSessionController.js';
 
-export default Home;
+export const authSessionRouter: Router = (() => {
+	const router = express.Router();
+	router.use(json());
+	router.use(urlencoded({ extended: false }));
+
+	router.get('/login', authSessionController.loginSession);
+	router.get('/logout', authSessionController.logoutSession);
+	router.get('/user', authSessionController.getUser);
+	router.get('/token', authSessionController.authToken);
+
+	return router;
+})();

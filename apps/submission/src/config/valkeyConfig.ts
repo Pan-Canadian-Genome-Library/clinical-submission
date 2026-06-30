@@ -17,16 +17,31 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '../styles/App.css';
+import { z } from 'zod';
 
-function Home() {
-	return (
-		<div className="container">
-			<main className="wrapper">
-				<h1>Submission UI</h1>
-			</main>
-		</div>
-	);
+import EnvironmentConfigError from './EnvironmentConfigError.js';
+
+const serverConfigSchema = z.object({
+	VALKEY_HOST: z.string(),
+	VALKEY_PORT: z.coerce.number().int(),
+	VALKEY_USER: z.string(),
+	VALKEY_PASSWORD: z.string(),
+	SESSION_KEYS: z.string(),
+	SESSION_MAX_AGE: z.coerce
+		.number()
+		.int()
+		.optional()
+		.default(1000 * 60 * 30),
+});
+export type ServerConfig = z.infer<typeof serverConfigSchema>;
+
+const parseResult = serverConfigSchema.safeParse(process.env);
+
+if (!parseResult.success) {
+	throw new EnvironmentConfigError(`valkey`, parseResult.error);
 }
 
-export default Home;
+export const valkeyConfig = {
+	...parseResult.data,
+	sessionKeys: parseResult.data.SESSION_KEYS.split(','),
+};

@@ -17,16 +17,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '../styles/App.css';
+import { RedisStore } from 'connect-redis';
+import session from 'express-session';
 
-function Home() {
-	return (
-		<div className="container">
-			<main className="wrapper">
-				<h1>Submission UI</h1>
-			</main>
-		</div>
-	);
-}
+import { valkeyConfig } from '@/config/valkeyConfig.js';
 
-export default Home;
+import valkeyClient from './valkeyClient.js';
+
+const sessionStore = new RedisStore({
+	client: valkeyClient,
+	prefix: 'submission-api:',
+});
+
+export const sessionMiddleware = session({
+	store: sessionStore,
+	secret: valkeyConfig.sessionKeys,
+	resave: false,
+	saveUninitialized: false,
+	cookie: { maxAge: valkeyConfig.SESSION_MAX_AGE },
+});
+
+export default sessionMiddleware;

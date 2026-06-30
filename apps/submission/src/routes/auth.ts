@@ -21,6 +21,9 @@ import express, { json, Router, urlencoded } from 'express';
 
 import authController from '@/controllers/authController.js';
 
+/**
+ * TODO: Previous login solution prior to submission-ui
+ */
 export const authRouter: Router = (() => {
 	const router = express.Router();
 	router.use(json());

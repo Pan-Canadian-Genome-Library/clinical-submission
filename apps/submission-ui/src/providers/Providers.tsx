@@ -17,16 +17,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '../styles/App.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter } from 'react-router';
 
-function Home() {
+import { UserProvider } from './UserProvider';
+
+export const queryClient = new QueryClient();
+
+const Providers = ({ children }: { children: React.ReactNode }) => {
 	return (
-		<div className="container">
-			<main className="wrapper">
-				<h1>Submission UI</h1>
-			</main>
-		</div>
+		<QueryClientProvider client={queryClient}>
+			<BrowserRouter>
+				<UserProvider>{children}</UserProvider>
+			</BrowserRouter>
+		</QueryClientProvider>
 	);
-}
+};
 
-export default Home;
+export default Providers;

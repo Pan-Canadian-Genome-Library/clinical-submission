@@ -16,17 +16,37 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+export const withErrorResponseHandler = (response: Response) => {
+	if (response.ok) {
+		return response;
+	} else {
+		const error = {
+			message: 'Error',
+			error: 'An error occurred',
+		};
 
-import '../styles/App.css';
+		switch (response.status) {
+			case 400:
+				error.message = 'Bad Request';
+				error.error = 'The request was invalid';
+				break;
+			case 403:
+				error.message = 'Forbidden';
+				error.error = 'You do not have permission to access this resource';
+				break;
+			case 404:
+				error.message = 'Not Found';
+				error.error = 'The requested resource was not found';
+				break;
+			case 500:
+				error.message = 'Server Error';
+				error.error = 'An internal server error occurred';
+				break;
+			default:
+				error.message = 'Request Failed';
+				error.error = 'Failed to fetch data from the server';
+		}
 
-function Home() {
-	return (
-		<div className="container">
-			<main className="wrapper">
-				<h1>Submission UI</h1>
-			</main>
-		</div>
-	);
-}
-
-export default Home;
+		throw error;
+	}
+};

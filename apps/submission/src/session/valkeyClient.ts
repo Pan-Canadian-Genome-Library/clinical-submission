@@ -17,16 +17,15 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '../styles/App.css';
+import { Redis } from 'ioredis';
 
-function Home() {
-	return (
-		<div className="container">
-			<main className="wrapper">
-				<h1>Submission UI</h1>
-			</main>
-		</div>
-	);
-}
+import { valkeyConfig } from '@/config/valkeyConfig.js';
 
-export default Home;
+const valkeyClient = new Redis({
+	port: valkeyConfig.VALKEY_PORT,
+	host: valkeyConfig.VALKEY_HOST,
+	username: valkeyConfig.VALKEY_USER,
+	password: valkeyConfig.VALKEY_PASSWORD,
+});
+
+export default valkeyClient;

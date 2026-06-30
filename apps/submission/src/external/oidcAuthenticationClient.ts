@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
@@ -145,5 +145,26 @@ export const getUserInfo = async (authConfig: AuthConfig, accessToken: string) =
 		// we'll just log the result and return a system error
 		logger.error(error, `Unexpected error occurred fetching OIDC User Info.`);
 		throw new lyricProvider.utils.errors.InternalServerError(`Unable to retrieve user info from OIDC Provider.`);
+	}
+};
+
+export const revokeToken = async (authConfig: AuthConfig, accessToken: string) => {
+	try {
+		const params = new URLSearchParams({ token: accessToken });
+		await axios({
+			url: urlJoin(authConfig.AUTH_PROVIDER_HOST, `/oauth2/revoke`),
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+				'content-type': 'application/x-www-form-urlencoded',
+			},
+			params,
+		});
+	} catch (error) {
+		logger.error(error, `Unexpected error occurred revoking OIDC token.`);
+		if (error instanceof AxiosError) {
+			logger.error(error.response?.data);
+		}
+		throw new lyricProvider.utils.errors.InternalServerError(`Unable to revoke token from OIDC Provider.`);
 	}
 };

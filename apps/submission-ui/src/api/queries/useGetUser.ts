@@ -17,16 +17,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '../styles/App.css';
+import { useQuery } from '@tanstack/react-query';
 
-function Home() {
-	return (
-		<div className="container">
-			<main className="wrapper">
-				<h1>Submission UI</h1>
-			</main>
-		</div>
-	);
-}
+import { withErrorResponseHandler } from '@/api/error';
+import { fetch } from '@/api/FetchClient';
+import type { SessionUser } from '@pcgl-submission/validation';
+import { ServerError } from '@/types/server';
 
-export default Home;
+const useGetUser = () => {
+	return useQuery<{ user: SessionUser }, ServerError>({
+		queryKey: ['user'],
+		queryFn: async () => {
+			const response = await fetch(`/auth-session/user`).then(withErrorResponseHandler);
+
+			return await response.json();
+		},
+	});
+};
+
+export default useGetUser;

@@ -54,6 +54,11 @@ export const authConfig = {
 	protectedMethods: env.AUTH_PROTECT_METHODS,
 	loginRedirectPath: urlJoin(env.API_HOST, '/auth/token'),
 	logoutRedirectPath: urlJoin(env.API_HOST, '/api-docs/'),
+	authSessionConfigs: {
+		loginErrorPath: '/login/error',
+		loginRedirectPath: '/login/redirect',
+		logoutRedirectPath: '/',
+	},
 	service: {
 		id: parseResult.data.AUTHZ_SERVICE_ID,
 		uuid: parseResult.data.AUTHZ_SERVICE_UUID,

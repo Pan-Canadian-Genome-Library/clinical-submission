@@ -17,16 +17,12 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '../styles/App.css';
+// only alphanumeric values
+export const ONLY_ALPHANUMERIC = /^[A-Za-z0-9\- ]+$/;
 
-function Home() {
-	return (
-		<div className="container">
-			<main className="wrapper">
-				<h1>Submission UI</h1>
-			</main>
-		</div>
-	);
-}
+// Captures spaces, splitting by this regex will yield a "word"
+export const WORDS = /\s+/;
 
-export default Home;
+//Based off Zod's base64 validation regex, but includes validation for images at the start of the group:
+export const BASE64_IMAGE =
+	/^(?:data\:image\/png\;base64,(\s+)?){1}([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;

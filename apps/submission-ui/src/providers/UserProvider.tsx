@@ -17,16 +17,48 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '../styles/App.css';
+/* eslint-disable react-refresh/only-export-components */
 
-function Home() {
-	return (
-		<div className="container">
-			<main className="wrapper">
-				<h1>Submission UI</h1>
-			</main>
-		</div>
-	);
+import { createContext, useContext, type PropsWithChildren } from 'react';
+
+import { SessionUser } from '@pcgl-submission/validation';
+
+import useGetUser from '@/api/queries/useGetUser';
+
+type UserState = {
+	isLoading: boolean;
+	isLoggedIn: boolean;
+	refresh: () => void;
+	user?: SessionUser;
+};
+
+const UserContext = createContext<UserState>({
+	isLoading: true,
+	isLoggedIn: false,
+	refresh: () => {},
+});
+
+export function UserProvider({ children }: PropsWithChildren) {
+	const { data, isLoading, refetch } = useGetUser();
+
+	const refresh = () => {
+		refetch();
+	};
+
+	const initialUserState: UserState = {
+		user: data?.user,
+		isLoading,
+		refresh,
+		isLoggedIn: !isLoading && !!data?.user,
+	};
+
+	return <UserContext.Provider value={initialUserState}>{children}</UserContext.Provider>;
 }
 
-export default Home;
+export function useUserContext() {
+	const context = useContext(UserContext);
+	if (context === undefined) {
+		throw new Error('useUserContext must be used within a UserProvider');
+	}
+	return context;
+}

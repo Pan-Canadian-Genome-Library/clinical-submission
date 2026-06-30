@@ -9,10 +9,11 @@
 	"type": "module",
 	"scripts": {
 		"\n==================  LOCAL  ==================": "",
-		"build": "pnpm run build:submission-api && pnpm run build:dictionary-ui && pnpm run build:submission-ui",
+		"build": "pnpm run build:submission-api && pnpm run build:dictionary-ui && pnpm run build:submission-ui && pnpm run build:validation",
 		"build:dictionary-ui": "pnpm --filter ./apps/data-dictionary-ui run build",
 		"build:submission-ui": "pnpm --filter ./apps/submission-ui run build",
 		"build:submission-api": "pnpm --filter ./apps/submission run build:all",
+		"build:validation": "pnpm --filter ./packages/validation run build:all",
 		"\n==================  NX  ==================": "",
 		"\n IMPORT-NOTE: NX currently doesn't like to run when building docker images. This does work locally though. But for our ci/cd pipelines, we utilize LOCAL scripts.": "",
 		"build:all": "nx run-many --all --target=build:all",

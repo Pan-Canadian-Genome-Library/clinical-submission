@@ -17,16 +17,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '../styles/App.css';
+import { Outlet } from 'react-router';
 
-function Home() {
+import FooterComponent from '@/components/Footer';
+import HeaderComponent from '@/components/Header';
+
+const PageLayout = () => {
 	return (
-		<div className="container">
-			<main className="wrapper">
-				<h1>Submission UI</h1>
-			</main>
-		</div>
+		<>
+			<HeaderComponent />
+			<div className="layout">
+				<Outlet />
+			</div>
+			<FooterComponent />
+		</>
 	);
-}
+};
 
-export default Home;
+export default PageLayout;

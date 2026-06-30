@@ -17,16 +17,28 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '../styles/App.css';
+import { useUserContext } from '@/providers/UserProvider';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router';
 
-function Home() {
-	return (
-		<div className="container">
-			<main className="wrapper">
-				<h1>Submission UI</h1>
-			</main>
-		</div>
-	);
-}
+const LoginRedirect = () => {
+	const { isLoading, isLoggedIn } = useUserContext();
+	const navigate = useNavigate();
 
-export default Home;
+	useEffect(() => {
+		if (isLoading) {
+			return;
+		}
+
+		if (!isLoggedIn) {
+			navigate('/', { replace: true });
+			return;
+		} else if (isLoggedIn) {
+			navigate('/user', { replace: true });
+		}
+	}, [isLoading, navigate]);
+
+	return <>Loading...</>;
+};
+
+export default LoginRedirect;

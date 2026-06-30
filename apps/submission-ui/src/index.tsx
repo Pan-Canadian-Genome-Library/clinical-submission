@@ -19,18 +19,24 @@
 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { Route, Routes } from 'react-router';
 import Home from './pages/Home.tsx';
-import { BrowserRouter } from 'react-router';
-import { Routes } from 'react-router';
-import { Route } from 'react-router';
+import LoginRedirect from './pages/login/redirect.tsx';
+import PageWrapper from './pages/PageWrapper.tsx';
+import UserPage from './pages/user/user.tsx';
+import Providers from './providers/Providers.tsx';
 
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
-		<BrowserRouter>
+		<Providers>
 			<Routes>
-				<Route path="/" element={<Home />} />
-				<Route path="/login" element={<></>} />
+				<Route element={<PageWrapper />}>
+					<Route path="/" element={<Home />} />
+					<Route path="/login" element={<></>} />
+					<Route path="/user" element={<UserPage />} />
+					<Route path="/login/redirect" element={<LoginRedirect />} />
+				</Route>
 			</Routes>
-		</BrowserRouter>
+		</Providers>
 	</StrictMode>,
 );
