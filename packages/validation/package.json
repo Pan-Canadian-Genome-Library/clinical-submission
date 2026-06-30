@@ -9,7 +9,7 @@
 	"type": "module",
 	"scripts": {
 		"prebuild": "rimraf ./dist",
-		"build": "tsc"
+		"build:all": "tsc"
 	},
 	"dependencies": {
 		"zod": "^3.24.2"
