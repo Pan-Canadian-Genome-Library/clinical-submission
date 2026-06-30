@@ -27,6 +27,11 @@ import {
 } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
+import {
+	createStudy as createAuthzStudy,
+	extractAccessTokenFromHeader,
+	getStudyById as getAuthzStudyById,
+} from '@/external/pcglAuthZClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import dacService from '@/service/dacService.js';
 import { studyService } from '@/service/studyService.js';
@@ -72,37 +77,44 @@ export const getStudyById = validateRequest(getOrDeleteStudyByID, async (req, re
 export const createNewStudy = validateRequest(createStudy, async (req, res, next) => {
 	try {
 		const studyData = req.body;
+		const accessToken = extractAccessTokenFromHeader(req);
 		const db = getDbInstance();
 		const { getStudyByName, createStudy } = studyService(db);
 		const { getDacById } = dacService(db);
 
+		if (!accessToken) {
+			throw new lyricProvider.utils.errors.Forbidden('Unauthorized: No access token provided');
+		}
+
 		const studyTransaction = await db.transaction(async (transaction) => {
-			try {
-				const studyFound = await getStudyByName(studyData.studyName);
-				if (studyFound) {
-					throw new lyricProvider.utils.errors.BadRequest(
-						`${studyData.studyName} already exists in studies. Study name must be unique.`,
-					);
-				}
-
-				// If the dacId does exist, make sure it is valid dac record
-				if (studyData.dacId) {
-					const dacFound = await getDacById(studyData.dacId);
-					if (!dacFound) {
-						throw new lyricProvider.utils.errors.BadRequest(`${studyData.dacId} is not a valid DAC ID.`);
-					}
-				}
-
-				const results = await createStudy(studyData, transaction);
-
-				if (!results) {
-					throw new lyricProvider.utils.errors.BadRequest(`Unable to create study with provided data.`);
-				}
-
-				return results;
-			} catch (exception) {
-				next(exception);
+			const studyFound = await getStudyByName(studyData.studyName);
+			if (studyFound) {
+				throw new lyricProvider.utils.errors.BadRequest(
+					`${studyData.studyName} already exists in studies. Study name must be unique.`,
+				);
 			}
+
+			// If the dacId does exist, make sure it is valid dac record
+			if (studyData.dacId) {
+				const dacFound = await getDacById(studyData.dacId);
+				if (!dacFound) {
+					throw new lyricProvider.utils.errors.BadRequest(`${studyData.dacId} is not a valid DAC ID.`);
+				}
+			}
+
+			const results = await createStudy(studyData, transaction);
+
+			if (!results) {
+				throw new lyricProvider.utils.errors.BadRequest(`Unable to create study with provided data.`);
+			}
+
+			const authzStudy = await getAuthzStudyById(results.studyId, accessToken);
+
+			if (!authzStudy) {
+				await createAuthzStudy(results.studyId, accessToken);
+			}
+
+			return results;
 		});
 
 		res.status(201).send(studyTransaction);

@@ -230,3 +230,61 @@ export const extractAccessTokenFromHeader = (req: Request): string | undefined =
 const extractUserGroups = ({ groups }: Groups): string[] => {
 	return groups.map((currentGroup) => currentGroup.name);
 };
+
+export const getStudyById = async (studyId: string, token: string) => {
+	const { AUTHZ_ENDPOINT } = authConfig;
+
+	const headers = new Headers({
+		Authorization: `Bearer ${token}`,
+		'Content-Type': 'application/json',
+	});
+
+	const url = urlJoin(AUTHZ_ENDPOINT, `/study/${studyId}`);
+	const response = await fetch(url, {
+		method: 'GET',
+		headers,
+	});
+
+	if (response.status === 404) {
+		return;
+	}
+
+	if (!response.ok) {
+		throw new lyricProvider.utils.errors.InternalServerError(
+			`Failed to fetch study in Authz with status ${response.status}`,
+		);
+	}
+
+	return await response.json();
+};
+
+export const createStudy = async (studyId: string, token: string) => {
+	const todaysDate = new Date().toISOString();
+
+	const studyData = {
+		study_id: studyId,
+		data_submitters: [],
+		team_members: [],
+		creation_date: todaysDate,
+	};
+
+	const { AUTHZ_ENDPOINT } = authConfig;
+
+	const headers = new Headers({
+		Authorization: `Bearer ${token}`,
+		'Content-Type': 'application/json',
+	});
+
+	const url = urlJoin(AUTHZ_ENDPOINT, '/study');
+	const response = await fetch(url, {
+		method: 'POST',
+		headers,
+		body: JSON.stringify(studyData),
+	});
+
+	if (!response.ok) {
+		throw new lyricProvider.utils.errors.InternalServerError(
+			`Failed to create study in Authz with status ${response.status}`,
+		);
+	}
+};
