@@ -19,5 +19,4 @@
 
 export * from './common/strings.js';
 export * from './types.js';
-export * from './utils/functions.js';
 export * from './utils/regex.js';
