@@ -1,8 +1,22 @@
-import { Request, Response } from 'express';
+import { RequestWithUser } from '@overture-stack/lyric';
+import { Response } from 'express';
 import { pinoHttp } from 'pino-http';
 
 const ignoreUrls = ['/api-docs', '/health', '/auth/token'];
 
+const getCustomProps = (req: RequestWithUser, res: Response) => {
+	const requestContext = res.locals.requestContext;
+
+	return {
+		user: req.user?.username,
+		params: requestContext?.params || {},
+		query: requestContext?.query || {},
+		body: requestContext?.body || {},
+		status: res.statusCode,
+		method: req.method,
+		url: req.originalUrl,
+	};
+};
 export const requestLogger = pinoHttp({
 	autoLogging: {
 		ignore(req) {
@@ -11,14 +25,11 @@ export const requestLogger = pinoHttp({
 		},
 	},
 	serializers: {
-		req: (req: Request) => ({
-			id: req.id,
-			method: req.method,
-			url: req.url,
-			query: req.query,
-		}),
-		res: (res: Response) => ({
-			statusCode: res.statusCode,
-		}),
+		req: (_: RequestWithUser) => {},
+		res: (_) => {},
 	},
+
+	customProps: getCustomProps,
+	quietReqLogger: true,
+	quietResLogger: true,
 });
