@@ -4,6 +4,19 @@ import { pinoHttp } from 'pino-http';
 
 const ignoreUrls = ['/api-docs', '/health', '/auth/token'];
 
+const getCustomProps = (req: RequestWithUser, res: Response) => {
+	const requestContext = res.locals.requestContext;
+
+	return {
+		user: req.user?.username,
+		params: requestContext?.params || {},
+		query: requestContext?.query || {},
+		body: requestContext?.body || {},
+		status: res.statusCode,
+		method: req.method,
+		url: req.originalUrl,
+	};
+};
 export const requestLogger = pinoHttp({
 	autoLogging: {
 		ignore(req) {
@@ -15,20 +28,8 @@ export const requestLogger = pinoHttp({
 		req: (_: RequestWithUser) => {},
 		res: (_) => {},
 	},
-	customReceivedObject: (_: RequestWithUser, __: Response) => {}, // Needed to type the customProps, customProps inherits the types from customReceivedObject
-	customProps: (req, res) => {
-		const requestContext = res.locals.requestContext;
 
-		return {
-			user: req.user?.username,
-			params: requestContext?.params || {},
-			query: requestContext?.query || {},
-			body: requestContext?.body || {},
-			status: res.statusCode,
-			method: req.method,
-			url: req.originalUrl,
-		};
-	},
+	customProps: getCustomProps,
 	quietReqLogger: true,
 	quietResLogger: true,
 });
