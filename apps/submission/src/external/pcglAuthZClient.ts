@@ -186,7 +186,7 @@ export const getUserInformation = async (accessToken: string): Promise<PCGLAuthZ
 
 		if (response.status === 204) {
 			// A "204 No content" response is returned when the user is not registered.
-			throw new lyricProvider.utils.errors.NotFound('Unable to retrieve user information from the PCGL AuthZ service.');
+			throw new Error('Unable to retrieve user information from the PCGL AuthZ service.');
 		}
 
 		const res = await response.json();
@@ -195,15 +195,13 @@ export const getUserInformation = async (accessToken: string): Promise<PCGLAuthZ
 
 		if (!validatedAuthZData.success) {
 			logger.error(`[AUTHZ]: AuthZ service returned unexpected, or malformed data.` + validatedAuthZData.error);
-			throw new lyricProvider.utils.errors.ServiceUnavailable(
-				'Unable to retrieve user information from the PCGL AuthZ service.',
-			);
+			throw new Error('Unable to retrieve user information from the PCGL AuthZ service.');
 		}
 
 		return validatedAuthZData.data;
 	} catch (error) {
 		logger.error(`[AUTHZ]: Unexpected error while getting user info from the AuthZ service.` + error);
-		throw new lyricProvider.utils.errors.ServiceUnavailable(`Error contacting the PCGL Authorization Service.`);
+		throw new Error(`Error contacting the PCGL Authorization Service.`);
 	}
 };
 

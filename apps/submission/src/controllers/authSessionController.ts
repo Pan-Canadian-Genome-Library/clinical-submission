@@ -18,14 +18,18 @@
  */
 
 import { SessionUser } from '@pcgl-submission/validation';
-import axios, { AxiosError } from 'axios';
 import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
 import { authConfig } from '@/config/authConfig.js';
 import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
-import { exchangeCodeForTokens, getOidcAuthorizeUrl, getUserInfo } from '@/external/oidcAuthenticationClient.js';
+import {
+	exchangeCodeForTokens,
+	getOidcAuthorizeUrl,
+	getUserInfo,
+	revokeToken,
+} from '@/external/oidcAuthenticationClient.js';
 import { getUserInformation } from '@/external/pcglAuthZClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import { resetSession } from '@/session/index.js';
@@ -37,106 +41,81 @@ const getOauthRedirectUri = (host: string) => urlJoin(host, `/api/auth-session/t
  *
  * This will redirect the user-agent to the OIDC Provider authorization URL.
  */
-const loginSession = validateRequest({}, async (request, response, _) => {
+const loginSession = validateRequest({}, async (request, response, next) => {
 	if (!authConfig.enabled) {
 		response.status(400).json({ error: 'AUTH_DISABLED', message: 'Authentication is disabled.' });
 		return;
 	}
+	try {
+		request.session.save();
 
-	// Ensure the user has an active session.
-	request.session.save();
+		const onSuccessRedirect = getOauthRedirectUri(env.UI_HOST);
 
-	const onSuccessRedirect = getOauthRedirectUri(env.UI_HOST);
+		const redirectUrl = getOidcAuthorizeUrl(authConfig, onSuccessRedirect);
 
-	const redirectUrl = getOidcAuthorizeUrl(authConfig, onSuccessRedirect);
+		response.redirect(redirectUrl);
+	} catch (error) {
+		logger.error(`Failed to initiate login session: ${error}`);
 
-	response.redirect(redirectUrl);
-	return;
+		next(error);
+	}
 });
 
 /**
  * User logout.
  */
-const logoutSession = validateRequest({}, async (request, response) => {
+const logoutSession = validateRequest({}, async (request, response, next) => {
 	if (!authConfig.enabled) {
 		response.status(400).json({ error: 'AUTH_DISABLED', message: 'Authentication is disabled.' });
 		return;
 	}
+
 	const logoutSuccessRedirectUrl = urlJoin(env.UI_HOST, authConfig.authSessionConfigs.logoutRedirectPath);
 
 	const { account } = request.session;
 	if (!account) {
 		logger.warn(`User with no valid session attempted to logout.`);
 
-		// TODO: Where to redirect on logout failure.
 		response.redirect(logoutSuccessRedirectUrl);
 		return;
 	}
-
 	try {
-		// TODO: move this request to the oidc provider
-		const params = new URLSearchParams({ token: account.accessToken });
-		await axios({
-			url: urlJoin(authConfig.AUTH_PROVIDER_HOST, `/oauth2/revoke`),
-			method: 'POST',
-			headers: {
-				Authorization: `Bearer ${account.accessToken}`,
-				'content-type': 'application/x-www-form-urlencoded',
-			},
-			params,
-		});
-
+		await revokeToken(authConfig, account.accessToken);
 		// On logout success we can clear the session data.
 		resetSession(request.session);
-	} catch (error) {
-		logger.error(`Failure sending token revoke request to OIDC Provider.` + error);
-		if (error instanceof AxiosError) {
-			logger.error(error.response?.data);
-		}
-
-		response
-			.status(500)
-			.json({ error: 'SYSTEM_ERROR', message: 'Failed to revoke user session: Network failure with auth provider.' });
+		response.redirect(logoutSuccessRedirectUrl);
 		return;
+	} catch (error) {
+		next(error);
 	}
-
-	response.redirect(logoutSuccessRedirectUrl);
-	return;
 });
 
-//   GET /token
+/**
+ * GET /token
+ */
 const authToken = validateRequest({}, async (request, response) => {
 	if (!authConfig.enabled) {
 		response.status(400).json({ error: 'AUTH_DISABLED', message: 'Authentication is disabled.' });
 		return;
 	}
 
-	const { code } = request.query;
-
-	if (typeof code !== 'string') {
-		throw new Error('Invalid Request. Must contain query parameter `code` with a single string value.');
-	}
-
 	try {
+		const { code } = request.query;
+
+		if (typeof code !== 'string') {
+			throw new Error('Invalid Request. Must contain query parameter `code` with a single string value.');
+		}
 		const tokenResponse = await exchangeCodeForTokens(authConfig, {
 			code,
 			redirectUrl: getOauthRedirectUri(env.UI_HOST),
 		});
 
 		if ('error' in tokenResponse) {
-			throw new lyricProvider.utils.errors.ServiceUnavailable(tokenResponse.error);
+			throw new Error(tokenResponse.error);
 		}
 
 		const pcglAuthzResponse = await getUserInformation(tokenResponse.access_token);
-
-		if (`error` in pcglAuthzResponse) {
-			throw new lyricProvider.utils.errors.ServiceUnavailable('Error retrieving User Information');
-		}
-
 		const oidcDataResponse = await getUserInfo(authConfig, tokenResponse.access_token);
-		if (!oidcDataResponse) {
-			throw new lyricProvider.utils.errors.ServiceUnavailable('Error retrieving User Information');
-		}
 
 		const userAccountAliasing = {
 			idToken: tokenResponse.id_token,
@@ -173,6 +152,8 @@ const authToken = validateRequest({}, async (request, response) => {
 		request.session.account = userAccountAliasing;
 		request.session.user = sessionUserAliasing;
 		request.session.save();
+		response.redirect(urlJoin(env.UI_HOST, authConfig.authSessionConfigs.loginRedirectPath));
+		return;
 	} catch (error) {
 		logger.error(`Error thrown while going through authentication and authorization flow: ` + error);
 
@@ -186,10 +167,6 @@ const authToken = validateRequest({}, async (request, response) => {
 		response.redirect(`${redirectURL}/?${errorParams.toString()}`);
 		return;
 	}
-
-	// Auth success! User info saved to session!
-	response.redirect(urlJoin(env.UI_HOST, authConfig.authSessionConfigs.loginRedirectPath));
-	return;
 });
 
 // /**
