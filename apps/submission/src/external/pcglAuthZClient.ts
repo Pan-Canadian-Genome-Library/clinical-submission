@@ -17,13 +17,13 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { authZUserInfo, type PCGLAuthZUserInfoResponse } from '@pcgl-submission/validation';
 import { Request } from 'express';
 import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
 import { ActionIDs, type ActionIDsValues, type PCGLUserSession, PCGLUserSessionResult } from '@/common/types/auth.js';
 import { Groups, ServiceTokenResponse, userDataResponseSchema } from '@/common/validation/auth-validation.js';
+import { authZUserInfo, PCGLAuthZUserInfoResponse } from '@/common/validation/authz-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 
@@ -180,7 +180,7 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 };
 
 /**
- * Retrieves the user information from the PCGL AuthZ service using the given access token.
+ * Retrieves the user information from the PCGL AuthZ service using the given access token. Returns entire response.
  * @param accessToken Access token to use for retrieving user information
  * @returns User information
  */
