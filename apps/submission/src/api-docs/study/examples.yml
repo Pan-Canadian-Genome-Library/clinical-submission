@@ -1,0 +1,117 @@
+# Request body examples for API endpoints
+
+components:
+  examples:
+    # Study API Examples
+    StudyMinimal:
+      summary: Required fields only
+      description: Example showing only the required fields needed to create a study
+      value:
+        studyName: 'Cancer Genomics Study Example'
+        studyDescription: 'A comprehensive genomics study example.'
+        defaultLanguage: 'en_ca'
+        status: 'Ongoing'
+        context: 'Research'
+        domain:
+          - 'CANCER'
+        principalInvestigators:
+          - 'Dr. Jane Smith, University Research Institute'
+        leadOrganizations:
+          - 'University Research Institute'
+        fundingSources:
+          - 'Cancer Institute, Grant #12345'
+
+    StudyMinimalFrench:
+      summary: Required fields only in French
+      description: Example showing only the required fields needed to create a study
+      value:
+        studyName: 'Exemple d`étude de génomique du cancer'
+        studyDescription: 'Un exemple d`étude génomique complète.'
+        defaultLanguage: 'fr_ca'
+        status: 'Ongoing'
+        context: 'Research'
+        domain:
+          - 'CANCER'
+        principalInvestigators:
+          - 'Dre Jane Smith, Institut de recherche universitaire'
+        leadOrganizations:
+          - 'Institut de recherche universitaire'
+        fundingSources:
+          - 'Institut du cancer, Subvention #12345'
+
+    StudyFullExample:
+      summary: Complete example with all optional fields
+      description: Example showing all fields including optional parameters
+      value:
+        studyName: 'Rare Disease Genomics Study Example'
+        studyDescription: 'A comprehensive genomics study example.'
+        defaultLanguage: 'en_ca'
+        status: 'Completed'
+        context: 'Clinical'
+        domain:
+          - 'RARE DISEASES'
+        principalInvestigators:
+          - 'Dr. John Doe, Childrens Hospital'
+          - 'Dr. Sarah Johnson, Genetics Research Center'
+        leadOrganizations:
+          - 'Genetics Research Center'
+        fundingSources:
+          - 'National Institutes of Health, Grant #54321'
+          - 'Rare Disease Foundation, Grant #98765'
+        dacId: 'DA0001'
+        programName: 'National Rare Disease Program'
+        keywords:
+          - 'rare diseases'
+          - 'diagnostic markers'
+        participantCriteria: 'Ages 0-100 with diagnosed rare genetic conditions.'
+        collaborators:
+          - 'University Medical Center'
+          - 'International Rare Disease Consortium'
+        publicationLinks:
+          - 'https://example-link-1.com'
+          - 'https://example-link-2.com'
+
+    # Study Translation API Examples
+    StudyTranslationMinimalEnglish:
+      summary: Required fields only (English translation)
+      description: Example showing only the required fields needed to create an English translation for a study
+      value:
+        languageId: 'en_ca'
+        studyDescription: 'A comprehensive genomics study example description.'
+        fundingSources:
+          - 'Cancer Research Institute, Grant #12345'
+
+    StudyTranslationMinimalFrench:
+      summary: Required fields only (French translation)
+      description: Example showing only the required fields needed to create a French translation for a study
+      value:
+        languageId: 'fr_ca'
+        studyDescription: 'Un exemple de description d`étude génomique complète.'
+        fundingSources:
+          - 'Institut de recherche sur le cancer, Subvention #12345'
+
+    StudyTranslationFullEnglish:
+      summary: Complete English translation with all optional fields
+      description: Example showing all fields including optional parameters for an English translation
+      value:
+        languageId: 'en_ca'
+        studyDescription: 'An example study description for an English translation.'
+        fundingSources:
+          - 'National Institutes of Health, Grant #54321'
+        programName: 'National Rare Disease Program'
+        keywords:
+          - 'rare diseases'
+        participantCriteria: 'Ages 0-100 with diagnosed rare genetic conditions.'
+
+    StudyTranslationFullFrench:
+      summary: Complete French translation with all optional fields
+      description: Example showing all fields including optional parameters for a French translation
+      value:
+        languageId: 'fr_ca'
+        studyDescription: 'Un exemple de description d`étude pour une traduction en français.'
+        fundingSources:
+          - 'Instituts nationaux de la santé, Subvention #54321'
+        programName: 'Programme national des maladies rares'
+        keywords:
+          - 'maladies rares'
+        participantCriteria: 'Âges de 0 à 100 ans avec des conditions génétiques rares diagnostiquées.'

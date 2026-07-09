@@ -91,7 +91,7 @@
                 description: The official name of the study
               studyDescription:
                 type: string
-                description: A detailed description of the study’s purpose, hypothesis, and design.
+                description: A detailed description of the study's purpose, hypothesis, and design.
               status:
                 type: string
                 enum: ['Completed', 'Ongoing']
@@ -100,6 +100,13 @@
                 type: string
                 enum: ['en_ca', 'fr_ca']
                 description: The default language for the study translation (English Canada or French Canada).
+          examples:
+            minimal:
+              $ref: '#/components/examples/StudyMinimal'
+            minimalFrench:
+              $ref: '#/components/examples/StudyMinimalFrench'
+            fullExample:
+              $ref: '#/components/examples/StudyFullExample'
 
     security:
       - bearerAuth: []
@@ -344,6 +351,14 @@
                 items:
                   type: string
                 description: List of organizations or agencies funding the study in the specified language. Ex. Funder name, Grant number
+          examples:
+            minimalEnglish:
+              $ref: '#/components/examples/StudyTranslationMinimalEnglish'
+            minimalFrench:
+              $ref: '#/components/examples/StudyTranslationMinimalFrench'
+            fullEnglish:
+              $ref: '#/components/examples/StudyTranslationFullEnglish'
+
     security:
       - bearerAuth: []
     responses:
