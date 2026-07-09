@@ -18,7 +18,6 @@
  */
 
 import { z } from 'zod';
-import { WORDS } from '../utils/regex.js';
 
 export const TrimmedString = z.string().trim();
 export type TrimmedString = z.infer<typeof TrimmedString>;
@@ -43,28 +42,11 @@ export type EmptyOrOptionalString = z.infer<typeof EmptyOrOptionalString>;
 export const OptionalURLString = TrimmedString.url().optional().or(EmptyWhiteSpace);
 export type OptionalURLString = z.infer<typeof OptionalURLString>;
 
-export const MinimumWordCountString = TrimmedString.refine((value) => value.split(WORDS).length >= 100, {
-	params: { violation: 'tooFewWords', length: 100 },
-});
-export type MinimumWordCountString = z.infer<typeof MinimumWordCountString>;
+/**
+ *  REGEX VALUES
+ */
+// only alphanumeric values
+export const ONLY_ALPHANUMERIC = /^[A-Za-z0-9\- ]+$/;
 
-export const Maximum200WordsString = TrimmedString.refine((value) => value.split(WORDS).length <= 200, {
-	params: { violation: 'tooManyWords', length: 200 },
-});
-export type Maximum200WordsString = z.infer<typeof Maximum200WordsString>;
-
-export const Maximum250WordsString = TrimmedString.refine((value) => value.split(WORDS).length <= 250, {
-	params: { violation: 'tooManyWords', length: 250 },
-});
-export type Maximum250WordsString = z.infer<typeof Maximum250WordsString>;
-
-export const Maximum300WordsString = TrimmedString.refine((value) => value.split(WORDS).length <= 300, {
-	params: { violation: 'tooManyWords', length: 300 },
-});
-export type Maximum300WordsString = z.infer<typeof Maximum300WordsString>;
-
-export const Concise200WordCountString = MinimumWordCountString.and(Maximum200WordsString);
-export type Concise200WordCountString = z.infer<typeof Concise200WordCountString>;
-
-export const Concise250WordCountString = MinimumWordCountString.and(Maximum250WordsString);
-export type Concise250WordCountString = z.infer<typeof Concise250WordCountString>;
+// Captures spaces, splitting by this regex will yield a "word"
+export const WORDS = /\s+/;
