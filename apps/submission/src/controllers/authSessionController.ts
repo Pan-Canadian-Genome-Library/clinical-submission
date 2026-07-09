@@ -169,11 +169,11 @@ const authToken = validateRequest({}, async (request, response) => {
 	}
 });
 
-// /**
-//  * Retrieve user information stored in session. This can be used by the UI to determine
-//  * if a user is logged in and what type of user they are (which role they have). This will
-//  * let the UI determine which routes to allow to the user.
-//  */
+/**
+ * Retrieve user information stored in session. This can be used by the UI to determine
+ * if a user is logged in and what type of user they are (which role they have). This will
+ * let the UI determine which routes to allow to the user.
+ */
 const getUser = validateRequest({}, async (request, response) => {
 	if (!authConfig.enabled) {
 		response.status(400).json({ error: 'AUTH_DISABLED', message: 'Authentication is disabled.' });
