@@ -16,6 +16,10 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+/**
+ * Utility function to handle error responses from the server.
+ */
 export const withErrorResponseHandler = (response: Response) => {
 	if (response.ok) {
 		return response;

@@ -21,9 +21,12 @@ import { useQuery } from '@tanstack/react-query';
 
 import { withErrorResponseHandler } from '@/api/error';
 import { fetch } from '@/api/FetchClient';
-import type { SessionUser } from '@pcgl-submission/validation';
 import { ServerError } from '@/types/server';
+import type { SessionUser } from '@pcgl-submission/validation';
 
+/**
+ * Query hook to fetch the current user from the auth-session endpoint.
+ */
 const useGetUser = () => {
 	return useQuery<{ user: SessionUser }, ServerError>({
 		queryKey: ['user'],
