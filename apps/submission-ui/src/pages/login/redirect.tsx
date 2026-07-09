@@ -36,7 +36,7 @@ const LoginRedirect = () => {
 		} else if (isLoggedIn) {
 			navigate('/user', { replace: true });
 		}
-	}, [isLoading, navigate]);
+	}, [isLoading, navigate, isLoggedIn]);
 
 	return <>Loading...</>;
 };
