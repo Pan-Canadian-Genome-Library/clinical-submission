@@ -33,8 +33,8 @@ createRoot(document.getElementById('root')!).render(
 				<Route element={<PageWrapper />}>
 					<Route path="/" element={<Home />} />
 					<Route path="/login" element={<></>} />
-					<Route path="/user" element={<UserPage />} />
 					<Route path="/login/redirect" element={<LoginRedirect />} />
+					<Route path="/user" element={<UserPage />} />
 				</Route>
 			</Routes>
 		</Providers>
