@@ -40,7 +40,9 @@ type RequestWithUser<
 };
 
 /**
- * Validate the body using Zod parse
+ * Validate the body, query or pathParams of incoming requests using Zod parse.
+ * If validation is not required, pass `{}` as the schemna value then the handler is called directly.
+ *
  * @param schema Zod objects used to validate request
  * @returns Throws a Bad Request when validation fails
  */
