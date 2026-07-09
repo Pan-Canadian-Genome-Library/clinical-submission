@@ -75,8 +75,7 @@ const refreshAuthZServiceToken = async () => {
 };
 
 /**
- *  Function to perform fetch requests to AUTHZ service
- *
+ * Function to perform fetch requests to AUTHZ service
  * @param resource endpoint to query from authz
  * @param token authorization token
  * @param options optional additional request configurations for the fetch call
@@ -180,6 +179,11 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 	return userTokenInfo;
 };
 
+/**
+ * Retrieves the user information from the PCGL AuthZ service using the given access token.
+ * @param accessToken Access token to use for retrieving user information
+ * @returns User information
+ */
 export const getUserInformation = async (accessToken: string): Promise<PCGLAuthZUserInfoResponse> => {
 	try {
 		const response = await fetchAuthZResource('/user/me', accessToken);
@@ -206,7 +210,7 @@ export const getUserInformation = async (accessToken: string): Promise<PCGLAuthZ
 };
 
 /**
- *
+ * Checks if the user has allowed access to the given study based on their PCGL user session.
  * @param study Study user is trying to get access to
  * @param userStudies An array of user studies
  * @returns True or false depending if the user has access to the study
