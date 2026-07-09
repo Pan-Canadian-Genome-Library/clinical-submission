@@ -8,8 +8,8 @@
 	"types": "dist/index.d.ts",
 	"type": "module",
 	"scripts": {
-		"prebuild": "rimraf ./dist",
-		"build:all": "tsc"
+		"build": "tsc",
+		"prebuild": "rimraf ./dist"
 	},
 	"dependencies": {
 		"zod": "^3.24.2"
