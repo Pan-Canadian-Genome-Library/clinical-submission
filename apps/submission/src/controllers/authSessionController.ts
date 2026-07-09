@@ -70,7 +70,7 @@ const logoutSession = validateRequest({}, async (request, response, next) => {
 		return;
 	}
 
-	const logoutSuccessRedirectUrl = urlJoin(env.UI_HOST, authConfig.authSessionConfigs.logoutRedirectPath);
+	const logoutSuccessRedirectUrl = urlJoin(env.UI_HOST, '/');
 
 	const { account } = request.session;
 	if (!account) {
@@ -152,12 +152,12 @@ const authToken = validateRequest({}, async (request, response) => {
 		request.session.account = userAccountAliasing;
 		request.session.user = sessionUserAliasing;
 		request.session.save();
-		response.redirect(urlJoin(env.UI_HOST, authConfig.authSessionConfigs.loginRedirectPath));
+		response.redirect(urlJoin(env.UI_HOST, '/login/redirect'));
 		return;
 	} catch (error) {
 		logger.error(`Error thrown while going through authentication and authorization flow: ` + error);
 
-		const redirectURL = urlJoin(env.UI_HOST, authConfig.authSessionConfigs.loginErrorPath);
+		const redirectURL = urlJoin(env.UI_HOST, '/login/error');
 		const errorCode = error instanceof lyricProvider.utils.errors.ServiceUnavailable ? error.name : 'SYSTEM_ERROR';
 
 		const errorParams = new URLSearchParams({
