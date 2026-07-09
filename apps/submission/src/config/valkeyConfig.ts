@@ -30,6 +30,7 @@ const serverConfigSchema = z.object({
 	SESSION_MAX_AGE: z.coerce
 		.number()
 		.int()
+		.positive()
 		.optional()
 		.default(1000 * 60 * 30),
 });
