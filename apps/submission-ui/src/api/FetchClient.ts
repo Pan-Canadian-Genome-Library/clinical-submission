@@ -36,6 +36,6 @@ async function fetchClient(resource: string | URL, options?: RequestInit): Promi
 		resource.hostname = applicationAPIPrefix;
 	}
 
-	return await fetch(resource, { headers: headers, ...options });
+	return fetch(resource, { headers: headers, ...options });
 }
 export { fetchClient as fetch };
