@@ -21,7 +21,7 @@
 
 import { createContext, useContext, type PropsWithChildren } from 'react';
 
-import { SessionUser } from '@pcgl-submission/validation';
+import { PartialSessionState } from '@pcgl-submission/validation';
 
 import useGetUser from '@/api/queries/useGetUser';
 
@@ -29,7 +29,7 @@ type UserState = {
 	isLoading: boolean;
 	isLoggedIn: boolean;
 	refresh: () => void;
-	user?: SessionUser;
+	user?: PartialSessionState;
 };
 
 const UserContext = createContext<UserState>({
@@ -46,7 +46,7 @@ export function UserProvider({ children }: PropsWithChildren) {
 	};
 
 	const initialUserState: UserState = {
-		user: data?.user,
+		user: data,
 		isLoading,
 		refresh,
 		isLoggedIn: !isLoading && !!data?.user,

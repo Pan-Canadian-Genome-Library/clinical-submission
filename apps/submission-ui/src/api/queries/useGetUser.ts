@@ -19,20 +19,18 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { withErrorResponseHandler } from '@/api/error';
 import { fetch } from '@/api/FetchClient';
 import { ServerError } from '@/types/server';
-import type { SessionUser } from '@pcgl-submission/validation';
+import type { PartialSessionState } from '@pcgl-submission/validation';
 
 /**
  * Query hook to fetch the current user from the auth-session endpoint.
  */
 const useGetUser = () => {
-	return useQuery<{ user: SessionUser }, ServerError>({
+	return useQuery<PartialSessionState, ServerError>({
 		queryKey: ['user'],
 		queryFn: async () => {
-			const response = await fetch(`/auth-session/user`).then(withErrorResponseHandler);
-
+			const response = await fetch(`/auth-session/user`);
 			return await response.json();
 		},
 	});

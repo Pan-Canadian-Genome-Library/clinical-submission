@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { SessionUser } from '@pcgl-submission/validation';
+import type { PartialSessionState, SessionUser } from '@pcgl-submission/validation';
 import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
@@ -182,7 +182,7 @@ const getUser = validateRequest({}, async (request, response) => {
 
 	const userSession = request.session?.user;
 
-	const output = {
+	const output: PartialSessionState = {
 		user: userSession
 			? {
 					userId: userSession.userId,
