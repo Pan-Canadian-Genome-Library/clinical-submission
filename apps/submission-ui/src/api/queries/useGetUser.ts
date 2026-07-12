@@ -29,6 +29,7 @@ import type { PartialSessionState } from '@pcgl-submission/validation';
 const useGetUser = () => {
 	return useQuery<PartialSessionState, ServerError>({
 		queryKey: ['user'],
+		throwOnError: true,
 		queryFn: async () => {
 			const response = await fetch(`/auth-session/user`);
 			return await response.json();
