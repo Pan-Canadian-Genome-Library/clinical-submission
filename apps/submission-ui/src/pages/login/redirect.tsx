@@ -21,6 +21,16 @@ import { useUserContext } from '@/providers/UserProvider';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 
+/**
+ * Redirect page that handles post-login navigation.
+ *
+ * This component checks the user's authentication status and redirects accordingly:
+ * - Redirects unauthenticated users to the home page ('/')
+ * - Redirects authenticated users to the user dashboard ('/user')
+ * - A loading message while authentication status is being handled
+ *
+ * @returns A loading message while redirect is being calculated
+ */
 const LoginRedirect = () => {
 	const { isLoading, isLoggedIn } = useUserContext();
 	const navigate = useNavigate();
