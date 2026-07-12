@@ -24,6 +24,13 @@ import { UserProvider } from './UserProvider';
 
 export const queryClient = new QueryClient();
 
+/**
+ * Root provider component that wraps the application with all necessary context providers.
+ *
+ * - QueryClientProvider - Enables React Query for data fetching and caching
+ * - BrowserRouter - Provides routing capabilities
+ * - UserProvider - Manages user authentication and session state
+ */
 const Providers = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<QueryClientProvider client={queryClient}>
