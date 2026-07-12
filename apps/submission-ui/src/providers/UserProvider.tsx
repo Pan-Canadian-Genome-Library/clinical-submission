@@ -49,7 +49,7 @@ export function UserProvider({ children }: PropsWithChildren) {
 		user: data,
 		isLoading,
 		refresh,
-		isLoggedIn: !isLoading && !!data?.user,
+		isLoggedIn: !isLoading && !!data,
 	};
 
 	return <UserContext.Provider value={initialUserState}>{children}</UserContext.Provider>;

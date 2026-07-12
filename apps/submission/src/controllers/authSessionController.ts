@@ -182,7 +182,7 @@ const getUser = validateRequest({}, async (request, response) => {
 
 	const userSession = request.session?.user;
 
-	const output: PartialSessionState = {
+	const output: { user?: PartialSessionState } = {
 		user: userSession
 			? {
 					userId: userSession.userId,
@@ -190,6 +190,9 @@ const getUser = validateRequest({}, async (request, response) => {
 					familyName: userSession.familyName,
 					emails: userSession.emails,
 					dacAuthorizations: userSession.dacAuthorizations,
+					siteAdmin: userSession.siteAdmin,
+					dataAdmin: userSession.dataAdmin,
+					groups: userSession.groups,
 				}
 			: undefined,
 	};
