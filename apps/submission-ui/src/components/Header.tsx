@@ -16,14 +16,35 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+import { clearLangSessionInformation, setLangSessionInformation, SupportedLangs } from '@/global/localstorage/language';
+import i18n from '@/i18n/translations';
+import { useState } from 'react';
 import PCGL from '../assets/pcgl-logo-colour.svg';
 
 const Header = () => {
+	const [lang, setLanguage] = useState(i18n.language);
+
+	const languageSwitch = () => {
+		clearLangSessionInformation();
+		if (lang === SupportedLangs.FRENCH) {
+			setLanguage(SupportedLangs.ENGLISH);
+			setLangSessionInformation({ lang: SupportedLangs.ENGLISH });
+			i18n.changeLanguage(SupportedLangs.ENGLISH);
+		} else {
+			setLanguage(SupportedLangs.FRENCH);
+			setLangSessionInformation({ lang: SupportedLangs.FRENCH });
+			i18n.changeLanguage(SupportedLangs.FRENCH);
+		}
+	};
+
 	return (
 		<header className="header">
 			<div className="header-body">
 				<img className="header-image" src={PCGL} alt="PCGL Clinical Submission Home" />
-				<h2>Submission UI</h2>
+				<>
+					<button onClick={languageSwitch}>{i18n.language === SupportedLangs.FRENCH ? 'English' : 'French'}</button>
+					<h2>Submission UI</h2>
+				</>
 			</div>
 		</header>
 	);

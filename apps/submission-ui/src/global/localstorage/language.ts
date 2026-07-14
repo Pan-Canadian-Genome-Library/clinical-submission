@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-const LANG_SESSION_INFO_KEY = 'pcgl-daco-lang-session';
+const LANG_SESSION_INFO_KEY = 'pcgl-submission-lang-session';
 
 import z from 'zod';
 
