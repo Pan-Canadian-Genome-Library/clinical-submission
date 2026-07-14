@@ -16,12 +16,30 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 import { clearLangSessionInformation, setLangSessionInformation, SupportedLangs } from '@/global/localstorage/language';
 import i18n from '@/i18n/translations';
+import { Theme, useTheme } from '@/styles/theme';
 import { useState } from 'react';
 import PCGL from '../assets/pcgl-logo-colour.svg';
 
+const headerTop = (theme: Theme): React.CSSProperties => ({
+	borderTop: `10px solid ${theme.colors.secondary.main}`,
+	padding: `${theme.spacing.md} ${theme.spacing.xxl}`,
+});
+
+const headerBody = (): React.CSSProperties => ({
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'space-between',
+});
+
+const headerImage = (): React.CSSProperties => ({
+	width: '250px',
+});
+
 const Header = () => {
+	const { theme } = useTheme();
 	const [lang, setLanguage] = useState(i18n.language);
 
 	const languageSwitch = () => {
@@ -38,9 +56,9 @@ const Header = () => {
 	};
 
 	return (
-		<header className="header">
-			<div className="header-body">
-				<img className="header-image" src={PCGL} alt="PCGL Clinical Submission Home" />
+		<header style={headerTop(theme)}>
+			<div style={headerBody()}>
+				<img style={headerImage()} src={PCGL} alt="PCGL Clinical Submission Home" />
 				<>
 					<button onClick={languageSwitch}>{i18n.language === SupportedLangs.FRENCH ? 'English' : 'French'}</button>
 					<h2>Submission UI</h2>

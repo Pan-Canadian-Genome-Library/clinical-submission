@@ -21,12 +21,30 @@ import '@/styles/App.css';
 
 import Footer from '@/components/Footer';
 import HeaderPCGL from '@/components/Header';
+import { Theme, useTheme } from '@/styles/theme';
+
+const Wrapper = (theme: Theme): React.CSSProperties => {
+	return {
+		position: 'relative',
+		maxWidth: '1480px',
+		margin: '0 auto',
+		paddingInline: `${theme.spacing.md}`,
+		width: '100%',
+	};
+};
+
+const Container = (): React.CSSProperties => ({
+	position: 'relative',
+	height: '100%',
+	width: '100%',
+});
 
 function Home() {
+	const { theme } = useTheme();
 	return (
-		<div className="container">
+		<div style={Container()}>
 			<HeaderPCGL />
-			<main className="wrapper">
+			<main style={Wrapper(theme)}>
 				<h1>Submission UI</h1>
 			</main>
 			<Footer />

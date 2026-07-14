@@ -17,23 +17,52 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '@/i18n/translations';
+export const theme = {
+	colors: {
+		primary: {
+			main: '#c41d7f',
+		},
+		secondary: {
+			main: '#520339',
+		},
+		error: {
+			main: '#d32f2f',
+		},
+		warning: {
+			main: '#ed6c02',
+		},
+		success: {
+			main: '#2e7d32',
+		},
+		background: {
+			default: '#ffffff',
+		},
+		text: {
+			primary: '#212121',
+		},
+	},
+	typography: {
+		fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+		fontSize: {
+			xs: '0.75rem',
+			sm: '0.875rem',
+			base: '1rem',
+			lg: '1.125rem',
+		},
+		fontWeight: {
+			regular: 400,
+		},
+		lineHeight: {
+			normal: 1.5,
+			relaxed: 1.75,
+		},
+	},
+	spacing: {
+		sm: '0.5rem',
+		md: '1rem',
+		lg: '1.5rem',
+		xxl: '4rem',
+	},
+};
 
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Route, Routes } from 'react-router';
-import Home from './pages/Home.tsx';
-import { ThemeProvider } from './styles/theme/ThemeProvider';
-
-createRoot(document.getElementById('root')!).render(
-	<StrictMode>
-		<ThemeProvider>
-			<BrowserRouter>
-				<Routes>
-					<Route path="/" element={<Home />} />
-					<Route path="/login" element={<></>} />
-				</Routes>
-			</BrowserRouter>
-		</ThemeProvider>
-	</StrictMode>,
-);
+export type Theme = typeof theme;

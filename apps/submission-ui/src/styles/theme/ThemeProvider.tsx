@@ -17,23 +17,30 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '@/i18n/translations';
+import React, { createContext, ReactNode, useContext } from 'react';
+import { theme, Theme } from './theme';
 
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Route, Routes } from 'react-router';
-import Home from './pages/Home.tsx';
-import { ThemeProvider } from './styles/theme/ThemeProvider';
+interface ThemeContextType {
+	theme: Theme;
+}
 
-createRoot(document.getElementById('root')!).render(
-	<StrictMode>
-		<ThemeProvider>
-			<BrowserRouter>
-				<Routes>
-					<Route path="/" element={<Home />} />
-					<Route path="/login" element={<></>} />
-				</Routes>
-			</BrowserRouter>
-		</ThemeProvider>
-	</StrictMode>,
-);
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+interface ThemeProviderProps {
+	children: ReactNode;
+	customTheme?: Partial<Theme>;
+}
+
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, customTheme }) => {
+	const mergedTheme = customTheme ? { ...theme, ...customTheme } : theme;
+
+	return <ThemeContext.Provider value={{ theme: mergedTheme }}>{children}</ThemeContext.Provider>;
+};
+
+export const useTheme = (): ThemeContextType => {
+	const context = useContext(ThemeContext);
+	if (!context) {
+		throw new Error('useTheme must be used within a ThemeProvider');
+	}
+	return context;
+};
