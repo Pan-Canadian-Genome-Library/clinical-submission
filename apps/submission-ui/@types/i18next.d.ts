@@ -17,21 +17,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '@/styles/App.css';
+import { defaultNS, resources } from '@/i18n/translations';
 
-import Footer from '@/components/Footer';
-import HeaderPCGL from '@/components/Header';
-
-function Home() {
-	return (
-		<div className="container">
-			<HeaderPCGL />
-			<main className="wrapper">
-				<h1>Submission UI</h1>
-			</main>
-			<Footer />
-		</div>
-	);
+declare module 'i18next' {
+	interface CustomTypeOptions {
+		defaultNS: typeof defaultNS;
+		resources: (typeof resources)['en'];
+	}
 }
-
-export default Home;

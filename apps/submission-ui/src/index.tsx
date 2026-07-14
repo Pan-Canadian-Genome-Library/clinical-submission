@@ -17,12 +17,12 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import '@/i18n/translations';
+
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter, Route, Routes } from 'react-router';
 import Home from './pages/Home.tsx';
-import { BrowserRouter } from 'react-router';
-import { Routes } from 'react-router';
-import { Route } from 'react-router';
 
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>

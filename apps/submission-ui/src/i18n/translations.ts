@@ -17,21 +17,45 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '@/styles/App.css';
+import { getLangSessionInformation, SupportedLangs } from '@/global/localstorage/language';
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
 
-import Footer from '@/components/Footer';
-import HeaderPCGL from '@/components/Header';
+import enForm from '@/i18n/locales/en/enForm.json';
+import enGeneral from '@/i18n/locales/en/enGeneral.json';
+import frForm from '@/i18n/locales/fr/frForm.json';
+import frGeneral from '@/i18n/locales/fr/frGeneral.json';
 
-function Home() {
-	return (
-		<div className="container">
-			<HeaderPCGL />
-			<main className="wrapper">
-				<h1>Submission UI</h1>
-			</main>
-			<Footer />
-		</div>
-	);
-}
+const { lang } = getLangSessionInformation();
 
-export default Home;
+export const defaultNS = 'common';
+export const resources = {
+	en: {
+		[defaultNS]: {
+			...enForm,
+			...enGeneral,
+		},
+	},
+	fr: {
+		[defaultNS]: {
+			...frForm,
+			...frGeneral,
+		},
+	},
+};
+
+i18n.use(initReactI18next).init({
+	resources,
+	lng: lang,
+	defaultNS,
+	fallbackNS: defaultNS,
+	fallbackLng: SupportedLangs.ENGLISH,
+	returnEmptyString: false,
+	supportedLngs: ['en', 'fr'],
+	interpolation: {
+		escapeValue: false,
+	},
+	ns: ['en', 'fr'],
+});
+
+export default i18n;
