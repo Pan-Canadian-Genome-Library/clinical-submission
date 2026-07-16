@@ -20,26 +20,44 @@
 export const theme = {
 	colors: {
 		primary: {
-			main: '#c41d7f',
+			darkest: '#054A74',
+			darker: '#155680',
+			dark: '#1F6592',
+			main: '#2B7AAD',
+			light: '#4794C6',
+			lighter: '#60AADB',
 		},
 		secondary: {
-			main: '#520339',
+			teal: '#25BEA2',
+			blue: '#3D7EA5',
+			pink: '#DFC7C5',
+			black: '#000000',
+			main: '#25BEA2',
 		},
 		error: {
-			main: '#d32f2f',
+			main: '#EC1C24',
+			light: '#F4A1A4',
 		},
 		warning: {
-			main: '#ed6c02',
+			main: '#FADB14',
+			light: '#FFFB88',
 		},
 		success: {
-			main: '#2e7d32',
+			main: '#52C41A',
+			light: '#D9F7BE',
 		},
 		background: {
 			default: '#ffffff',
+			grey: '#f5f5f5',
 		},
 		text: {
 			primary: '#212121',
+			secondary: '#666666',
 		},
+	},
+	shadows: {
+		level1: '0 2px 8px rgba(0, 0, 0, 0.08)',
+		level2: '0 4px 16px rgba(0, 0, 0, 0.12)',
 	},
 	typography: {
 		fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',

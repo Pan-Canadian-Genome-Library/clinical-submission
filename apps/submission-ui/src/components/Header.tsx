@@ -24,7 +24,6 @@ import { useState } from 'react';
 import PCGL from '../assets/pcgl-logo-colour.svg';
 
 const headerTop = (theme: Theme): React.CSSProperties => ({
-	borderTop: `10px solid ${theme.colors.secondary.main}`,
 	padding: `${theme.spacing.md} ${theme.spacing.xxl}`,
 });
 
