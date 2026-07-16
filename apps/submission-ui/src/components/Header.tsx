@@ -64,9 +64,9 @@ const Header = () => {
 		<header style={headerTop(theme)}>
 			<div style={headerBody()}>
 				<div style={{ display: 'flex', gap: theme.spacing.sm, flex: 1, alignItems: 'center' }}>
-					<img style={headerImage()} src={PCGL} alt="PCGL Clinical Submission Home" />
-					<Text>Data Submission</Text>
-					<Text>Data Dictionary</Text>
+					<img style={headerImage()} src={PCGL} alt={t('common:pcglLogoAltText')} />
+					<Text>{t('common:dataSubmission')}</Text>
+					<Text>{t('common:dataDictionary')}</Text>
 				</div>
 				<div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1 }}>
 					<Button defaultText={t('common:languageSwitch')} handler={languageSwitch} />

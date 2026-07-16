@@ -1,4 +1,7 @@
 {
 	"PCGL": "Pan-Canadian Genome Library {{ date }}",
-	"languageSwitch": "Français"
+	"pcglLogoAltText": "PCGL Clinical Submission Home",
+	"languageSwitch": "Français",
+	"dataSubmission": "Data Submission",
+	"dataDictionary": "Data Dictionary"
 }
