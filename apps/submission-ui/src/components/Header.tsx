@@ -22,6 +22,7 @@ import i18n from '@/i18n/translations';
 import { Theme, useTheme } from '@/styles/theme';
 import { useState } from 'react';
 import PCGL from '../assets/pcgl-logo-colour.svg';
+import Button from './button/Button';
 
 const headerTop = (theme: Theme): React.CSSProperties => ({
 	padding: `${theme.spacing.md} ${theme.spacing.xxl}`,
@@ -59,7 +60,10 @@ const Header = () => {
 			<div style={headerBody()}>
 				<img style={headerImage()} src={PCGL} alt="PCGL Clinical Submission Home" />
 				<>
-					<button onClick={languageSwitch}>{i18n.language === SupportedLangs.FRENCH ? 'English' : 'French'}</button>
+					<Button
+						defaultText={i18n.language === SupportedLangs.FRENCH ? 'English' : 'French'}
+						handler={languageSwitch}
+					/>
 					<h2>Submission UI</h2>
 				</>
 			</div>
