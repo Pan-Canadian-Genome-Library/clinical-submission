@@ -18,47 +18,27 @@
  */
 
 import { useTheme } from '@/styles/theme';
-import { useState } from 'react';
-import Text from '../typography/Text';
 
-type ButtonProps = {
-	children?: React.ReactNode;
-	defaultText: string;
-	handler: () => void;
+type TextProps = {
+	children: React.ReactNode;
+	styles?: React.CSSProperties;
 };
 
 /**
- * A button component that supports both text and children content.
- * If a children prop is provided, it will be used instead of the default text.
+ * A generic text component
+ * Styles can be overridden via the `styles` prop.
  * @param props
  * @returns
  */
-const Button = (props: ButtonProps) => {
+const Text = (props: TextProps) => {
 	const { theme } = useTheme();
-	const [isHovered, setIsHovered] = useState(false);
 
 	const buttonStyle: React.CSSProperties = {
-		backgroundColor: isHovered ? theme.colors.primary.main : theme.colors.primary.dark,
-		color: theme.colors.background.default,
-		borderRadius: '8px',
-		padding: `${theme.spacing.sm} ${theme.spacing.sm}`,
-		border: 'none',
-		cursor: 'pointer',
-		transition: 'background-color 0.3s ease',
+		color: theme.colors.secondary.black,
+		paddingInline: `${theme.spacing.sm}`,
 	};
 
-	return (
-		<button
-			style={buttonStyle}
-			onClick={() => props.handler()}
-			onMouseEnter={() => setIsHovered(true)}
-			onMouseLeave={() => setIsHovered(false)}
-		>
-			<Text styles={{ color: theme.colors.text.white, fontWeight: theme.typography.fontWeight.bold }}>
-				{props.children ?? props.defaultText}
-			</Text>
-		</button>
-	);
+	return <p style={{ ...buttonStyle, ...props.styles }}>{props.children}</p>;
 };
 
-export default Button;
+export default Text;

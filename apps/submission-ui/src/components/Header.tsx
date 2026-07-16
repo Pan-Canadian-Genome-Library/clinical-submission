@@ -22,21 +22,22 @@ import i18n from '@/i18n/translations';
 import { Theme, useTheme } from '@/styles/theme';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import PCGL from '../assets/pcgl-logo-colour.svg';
+import PCGL from '../assets/pcgl-logo.png';
 import Button from './button/Button';
+import Text from './typography/Text';
 
 const headerTop = (theme: Theme): React.CSSProperties => ({
-	padding: `${theme.spacing.md} ${theme.spacing.xxl}`,
+	backgroundColor: theme.colors.background.default,
+	padding: `${theme.spacing.md} ${theme.spacing.lg}`,
 });
 
 const headerBody = (): React.CSSProperties => ({
 	display: 'flex',
 	alignItems: 'center',
-	justifyContent: 'space-between',
 });
 
 const headerImage = (): React.CSSProperties => ({
-	width: '250px',
+	width: '150px',
 });
 
 const Header = () => {
@@ -62,11 +63,14 @@ const Header = () => {
 	return (
 		<header style={headerTop(theme)}>
 			<div style={headerBody()}>
-				<img style={headerImage()} src={PCGL} alt="PCGL Clinical Submission Home" />
-				<>
+				<div style={{ display: 'flex', gap: theme.spacing.sm, flex: 1, alignItems: 'center' }}>
+					<img style={headerImage()} src={PCGL} alt="PCGL Clinical Submission Home" />
+					<Text>Data Submission</Text>
+					<Text>Data Dictionary</Text>
+				</div>
+				<div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1 }}>
 					<Button defaultText={t('common:languageSwitch')} handler={languageSwitch} />
-					<h2>Submission UI</h2>
-				</>
+				</div>
 			</div>
 		</header>
 	);

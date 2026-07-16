@@ -53,6 +53,7 @@ export const theme = {
 		text: {
 			primary: '#212121',
 			secondary: '#666666',
+			white: '#ffffff',
 		},
 	},
 	shadows: {
@@ -69,6 +70,7 @@ export const theme = {
 		},
 		fontWeight: {
 			regular: 400,
+			bold: 700,
 		},
 		lineHeight: {
 			normal: 1.5,
