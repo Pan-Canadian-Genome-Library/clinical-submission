@@ -21,6 +21,7 @@ import { clearLangSessionInformation, setLangSessionInformation, SupportedLangs 
 import i18n from '@/i18n/translations';
 import { Theme, useTheme } from '@/styles/theme';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import PCGL from '../assets/pcgl-logo-colour.svg';
 import Button from './button/Button';
 
@@ -41,6 +42,9 @@ const headerImage = (): React.CSSProperties => ({
 const Header = () => {
 	const { theme } = useTheme();
 	const [lang, setLanguage] = useState(i18n.language);
+	const {
+		i18n: { t },
+	} = useTranslation();
 
 	const languageSwitch = () => {
 		clearLangSessionInformation();
@@ -60,10 +64,7 @@ const Header = () => {
 			<div style={headerBody()}>
 				<img style={headerImage()} src={PCGL} alt="PCGL Clinical Submission Home" />
 				<>
-					<Button
-						defaultText={i18n.language === SupportedLangs.FRENCH ? 'English' : 'French'}
-						handler={languageSwitch}
-					/>
+					<Button defaultText={t('common:languageSwitch')} handler={languageSwitch} />
 					<h2>Submission UI</h2>
 				</>
 			</div>
