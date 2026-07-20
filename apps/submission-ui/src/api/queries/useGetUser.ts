@@ -21,7 +21,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { fetch } from '@/api/FetchClient';
 import { ServerError } from '@/types/server';
-import type { PartialSessionState } from '@pcgl-submission/validation';
+import { type PartialSessionState, partialSessionState } from '@pcgl-submission/validation';
 
 /**
  * Query hook to fetch the current user from the auth-session endpoint.
@@ -29,10 +29,25 @@ import type { PartialSessionState } from '@pcgl-submission/validation';
 const useGetUser = () => {
 	return useQuery<PartialSessionState, ServerError>({
 		queryKey: ['user'],
-		throwOnError: true,
+		retry: 1,
 		queryFn: async () => {
 			const response = await fetch(`/auth-session/user`);
-			return await response.json();
+
+			const result: { user: PartialSessionState } = await response.json();
+
+			// User is not authenticated
+			if (result?.user === undefined) {
+				return {};
+			}
+
+			// Validate user object
+			const userParseResult = partialSessionState.safeParse(result?.user);
+			if (!userParseResult.success) {
+				//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation
+				return {};
+			}
+
+			return userParseResult.data;
 		},
 	});
 };

@@ -70,7 +70,15 @@ const authGeneratedSessionValues = z.object({
 
 export type SessionUser = z.infer<typeof authGeneratedSessionValues>;
 
-export type PartialSessionState = Pick<
-	SessionUser,
-	'userId' | 'givenName' | 'familyName' | 'emails' | 'dacAuthorizations' | 'siteAdmin' | 'dataAdmin' | 'groups'
->;
+export const partialSessionState = authGeneratedSessionValues.pick({
+	userId: true,
+	givenName: true,
+	familyName: true,
+	emails: true,
+	dacAuthorizations: true,
+	siteAdmin: true,
+	dataAdmin: true,
+	groups: true,
+});
+
+export type PartialSessionState = Partial<z.infer<typeof authGeneratedSessionValues>>;
