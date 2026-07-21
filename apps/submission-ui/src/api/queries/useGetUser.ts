@@ -43,7 +43,8 @@ const useGetUser = () => {
 			// Validate user object
 			const userParseResult = partialSessionState.safeParse(result?.user);
 			if (!userParseResult.success) {
-				//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation
+				//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation. Remove console.log
+				console.debug('[ERROR]: Zod userParseResult failed', userParseResult.error);
 				return {};
 			}
 

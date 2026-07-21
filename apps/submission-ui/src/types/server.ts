@@ -18,6 +18,7 @@
  */
 
 export interface ServerError {
-	message: string;
-	error?: string;
+	error: string;
+	status: number;
+	message?: string;
 }

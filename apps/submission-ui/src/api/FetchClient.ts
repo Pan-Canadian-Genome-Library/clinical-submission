@@ -17,11 +17,30 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { ServerError } from '@/types/server';
+
+/**
+ * Custom error class for fetch errors, modeled after ServerError interface
+ */
+export class FetchError extends Error implements ServerError {
+	message: string;
+	error: string;
+	status: number;
+
+	constructor(error: string, status: number, message?: string) {
+		super(message || error);
+		this.message = message || '';
+		this.error = error;
+		this.status = status;
+	}
+}
+
 /**
  * A wrapper for `fetch`, used to append the application API URL to all fetch calls.
  * @param resource This defines the resource that you wish to fetch. This can be a string or a `URL` object — that provides the URL of the resource you want to fetch. Important - prepend your request URLs with `/`
  * @param options A `RequestInit` object containing any custom settings that you want to apply to the request.
  * @returns A promise containing a `Response` object.
+ * @throws {FetchError} When response has error status code or network error occurs
  * @link https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch
  */
 async function fetchClient(resource: string | URL, options?: RequestInit): Promise<Response> {
@@ -36,6 +55,42 @@ async function fetchClient(resource: string | URL, options?: RequestInit): Promi
 		resource.hostname = applicationAPIPrefix;
 	}
 
-	return fetch(resource, { headers: headers, ...options });
+	try {
+		const response = await fetch(resource, { headers: headers, ...options });
+
+		// Check if server response is ok
+		if (!response.ok) {
+			try {
+				const errorBody = await response.json();
+				let error = response.statusText;
+				let message = undefined;
+				// If server returns a ServerError-shaped response, use its details if exists
+				if (errorBody && typeof errorBody === 'object') {
+					error = errorBody.error;
+					message = errorBody.message;
+				}
+
+				throw new FetchError(error, response.status, message);
+			} catch {
+				throw new FetchError(response.statusText, response.status);
+			}
+		}
+
+		return response;
+	} catch (error) {
+		// Error response returned from the server
+		if (error instanceof FetchError) {
+			throw error;
+		}
+
+		// Network errors
+		if (error instanceof Error) {
+			throw new FetchError(`Network error`, 500, error.message);
+		}
+
+		// Default to system error
+		throw new FetchError('System Error', 500, 'An unknown error occurred during fetch');
+	}
 }
+
 export { fetchClient as fetch };
