@@ -60,20 +60,8 @@ async function fetchClient(resource: string | URL, options?: RequestInit): Promi
 
 		// Check if server response is ok
 		if (!response.ok) {
-			try {
-				const errorBody = await response.json();
-				let error = response.statusText;
-				let message = undefined;
-				// If server returns a ServerError-shaped response, use its details if exists
-				if (errorBody && typeof errorBody === 'object') {
-					error = errorBody.error;
-					message = errorBody.message;
-				}
-
-				throw new FetchError(error, response.status, message);
-			} catch {
-				throw new FetchError(response.statusText, response.status);
-			}
+			const errorBody = await response.json();
+			throw new FetchError(errorBody.error || response.statusText, response.status, errorBody.message || '');
 		}
 
 		return response;
@@ -83,7 +71,7 @@ async function fetchClient(resource: string | URL, options?: RequestInit): Promi
 			throw error;
 		}
 
-		// Network errors
+		// Network errors and response.json() error handloing
 		if (error instanceof Error) {
 			throw new FetchError(`Network error`, 500, error.message);
 		}
