@@ -60,7 +60,12 @@ async function fetchClient(resource: string | URL, options?: RequestInit): Promi
 
 		// Check if server response is ok
 		if (!response.ok) {
-			const errorBody = await response.json();
+			let errorBody = undefined;
+			try {
+				errorBody = await response.json();
+			} catch (error) {
+				throw new FetchError(response.statusText, response.status, error);
+			}
 			throw new FetchError(errorBody.error || response.statusText, response.status, errorBody.message || '');
 		}
 

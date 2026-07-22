@@ -19,7 +19,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { fetch } from '@/api/FetchClient';
+import { fetch, FetchError } from '@/api/FetchClient';
 import { ServerError } from '@/types/server';
 import { type PartialSessionState, partialSessionState } from '@pcgl-submission/validation';
 
@@ -32,8 +32,14 @@ const useGetUser = () => {
 		retry: 1,
 		queryFn: async () => {
 			const response = await fetch(`/auth-session/user`);
+			let result: { user: PartialSessionState } = undefined;
 
-			const result: { user: PartialSessionState } = await response.json();
+			try {
+				result = await response.json();
+			} catch (error) {
+				console.debug('[ERROR]: Failed parse response object', error);
+				throw new FetchError(error, response.status, error);
+			}
 
 			// User is not authenticated
 			if (result?.user === undefined) {
@@ -47,7 +53,6 @@ const useGetUser = () => {
 				console.debug('[ERROR]: Response from user endpoint failed validation', userParseResult.error);
 				return {};
 			}
-
 			return userParseResult.data;
 		},
 	});
