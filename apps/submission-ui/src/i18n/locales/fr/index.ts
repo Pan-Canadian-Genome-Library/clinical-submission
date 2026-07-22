@@ -19,9 +19,11 @@
 
 import frForm from '@/i18n/locales/fr/frForm.json';
 import frGeneral from '@/i18n/locales/fr/frGeneral.json';
+import frHome from '@/i18n/locales/fr/frHome.json';
 import { I18N_LOCALE_DICTIONARY } from '../en';
 
 export const FRENCH_DICTIONARY = {
 	...frForm,
 	...frGeneral,
+	...frHome,
 } as const satisfies I18N_LOCALE_DICTIONARY;
