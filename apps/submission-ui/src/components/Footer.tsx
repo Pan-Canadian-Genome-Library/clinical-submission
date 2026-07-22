@@ -19,6 +19,7 @@
 
 import CIHRLogo from '@/assets/cihr-logo.png';
 import PCGLLogoWhite from '@/assets/pcgl-logo-white.png';
+import { useMinWidth } from '@/global/hooks/useMinWidth';
 import { Theme, useTheme } from '@/styles/theme';
 import { useTranslation } from 'react-i18next';
 
@@ -29,8 +30,9 @@ const FooterStyles = (theme: Theme): React.CSSProperties => ({
 	padding: '2rem 2rem',
 });
 
-const FooterContent = (): React.CSSProperties => ({
+const FooterContent = (minWidth: number): React.CSSProperties => ({
 	display: 'flex',
+	flexDirection: minWidth < 768 ? 'column' : 'row',
 	justifyContent: 'space-between',
 	gap: '3rem',
 });
@@ -53,10 +55,11 @@ const LogoStyle: React.CSSProperties = {
 	objectFit: 'contain',
 };
 
-const LinksSection = (): React.CSSProperties => ({
+const LinksSection = (minWidth: number): React.CSSProperties => ({
 	display: 'flex',
-	alignItems: 'center',
-	gap: '3rem',
+	flexDirection: minWidth < 768 ? 'column' : 'row',
+	alignItems: minWidth < 768 ? 'flex-start' : 'center',
+	gap: minWidth < 768 ? '2rem' : '3rem',
 });
 
 const LinkColumn = (): React.CSSProperties => ({
@@ -85,10 +88,11 @@ const Footer = () => {
 	} = useTranslation('common');
 	const currentDate = new Date().getFullYear();
 	const { theme } = useTheme();
+	const minWidth = useMinWidth();
 
 	return (
 		<footer style={FooterStyles(theme)}>
-			<div style={FooterContent()}>
+			<div style={FooterContent(minWidth)}>
 				{/* Left Section - Logos and Text */}
 				<div style={LogoSection()}>
 					<div style={LogoContainer()}>
@@ -100,7 +104,7 @@ const Footer = () => {
 				</div>
 
 				{/* Right Section - Links */}
-				<div style={LinksSection()}>
+				<div style={LinksSection(minWidth)}>
 					{/* Column 1 */}
 					<div style={LinkColumn()}>
 						<a href="#contact" style={LinkStyle(theme)}>

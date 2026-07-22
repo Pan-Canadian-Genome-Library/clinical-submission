@@ -27,6 +27,7 @@ import UserIcon from '@/assets/user-outlined.png';
 import Button from '@/components/button/Button';
 import Footer from '@/components/Footer';
 import HeaderPCGL from '@/components/Header';
+import { useMinWidth } from '@/global/hooks/useMinWidth';
 import { Theme, useTheme } from '@/styles/theme';
 import { useTranslation } from 'react-i18next';
 
@@ -71,11 +72,12 @@ const contentWrapperStyle: React.CSSProperties = {
 	margin: '0 auto',
 };
 
-const twoColumnStyle: React.CSSProperties = {
-	display: 'grid',
-	gridTemplateColumns: '1fr 1fr',
+const twoColumnStyle = (minWidth: number): React.CSSProperties => ({
+	display: 'flex',
+	flexDirection: minWidth < 768 ? 'column' : 'row',
 	gap: '3rem',
-};
+	marginBottom: '3rem',
+});
 
 const iconCircleStyle = (theme: Theme, bgColor: string): React.CSSProperties => ({
 	width: '50px',
@@ -117,6 +119,8 @@ function Home() {
 		i18n: { t },
 	} = useTranslation();
 
+	const minWidth = useMinWidth();
+
 	return (
 		<div style={Container()}>
 			<HeaderPCGL />
@@ -154,9 +158,9 @@ function Home() {
 				{/* Content Section */}
 				<section style={contentSectionStyle}>
 					<div style={contentWrapperStyle}>
-						<div style={twoColumnStyle}>
+						<div style={twoColumnStyle(minWidth)}>
 							{/* Overview Section */}
-							<div>
+							<div style={{ flex: 1 }}>
 								<h2
 									style={{
 										color: theme.colors.text.primary,
@@ -189,7 +193,7 @@ function Home() {
 							</div>
 
 							{/* How to Register Section */}
-							<div>
+							<div style={{ flex: 1 }}>
 								<h2
 									style={{
 										color: theme.colors.text.primary,
