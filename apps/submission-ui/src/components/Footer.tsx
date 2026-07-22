@@ -17,19 +17,66 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import CIHRLogo from '@/assets/cihr-logo.png';
+import PCGLLogoWhite from '@/assets/pcgl-logo-white.png';
 import { Theme, useTheme } from '@/styles/theme';
 import { useTranslation } from 'react-i18next';
 
 const FooterStyles = (theme: Theme): React.CSSProperties => ({
 	backgroundColor: theme.colors.primary.light,
-	display: 'flex',
-	color: theme.colors.secondary.black,
+	color: theme.colors.text.white,
+	width: '100%',
+	padding: '2rem 2rem',
 });
 
-const FooterBody = (): React.CSSProperties => ({
+const FooterContent = (): React.CSSProperties => ({
+	display: 'flex',
+	justifyContent: 'space-between',
+	gap: '3rem',
+});
+
+const LogoSection = (): React.CSSProperties => ({
+	flex: '1',
+	display: 'flex',
+	flexDirection: 'column',
+	gap: '1rem',
+});
+
+const LogoContainer = (): React.CSSProperties => ({
+	display: 'flex',
+	gap: '1.5rem',
+	alignItems: 'center',
+});
+
+const LogoStyle: React.CSSProperties = {
+	height: '40px',
+	objectFit: 'contain',
+};
+
+const LinksSection = (): React.CSSProperties => ({
 	display: 'flex',
 	alignItems: 'center',
-	justifyContent: 'space-between',
+	gap: '3rem',
+});
+
+const LinkColumn = (): React.CSSProperties => ({
+	display: 'flex',
+	flexDirection: 'column',
+	gap: '1.50rem',
+});
+
+const LinkStyle = (theme: Theme): React.CSSProperties => ({
+	color: theme.colors.text.white,
+	textDecoration: 'underline',
+	fontSize: theme.typography.fontSize.sm,
+	cursor: 'pointer',
+});
+
+const TextStyle = (theme: Theme): React.CSSProperties => ({
+	color: theme.colors.text.white,
+	fontSize: theme.typography.fontSize.sm,
+	lineHeight: theme.typography.lineHeight.normal,
+	margin: 0,
 });
 
 const Footer = () => {
@@ -38,10 +85,61 @@ const Footer = () => {
 	} = useTranslation('common');
 	const currentDate = new Date().getFullYear();
 	const { theme } = useTheme();
+
 	return (
 		<footer style={FooterStyles(theme)}>
-			<div style={FooterBody()}>
-				<h3>&copy; {t('common:PCGL', { date: currentDate })}</h3>
+			<div style={FooterContent()}>
+				{/* Left Section - Logos and Text */}
+				<div style={LogoSection()}>
+					<div style={LogoContainer()}>
+						<img src={PCGLLogoWhite} alt="PCGL Logo" style={LogoStyle} />
+						<img src={CIHRLogo} alt="CIHR Logo" style={LogoStyle} />
+					</div>
+					<p style={TextStyle(theme)}>{t('common:footer.supportedBy')}</p>
+					<p style={TextStyle(theme)}>{t('common:footer.copyright', { date: currentDate })}</p>
+				</div>
+
+				{/* Right Section - Links */}
+				<div style={LinksSection()}>
+					{/* Column 1 */}
+					<div style={LinkColumn()}>
+						<a href="#contact" style={LinkStyle(theme)}>
+							{t('common:footer.contactUs')}
+						</a>
+						<a href="#controlled-users" style={LinkStyle(theme)}>
+							{t('common:footer.controlledDataUsers')}
+						</a>
+						<a href="#privacy" style={LinkStyle(theme)}>
+							{t('common:footer.privacyPolicy')}
+						</a>
+					</div>
+
+					{/* Column 2 */}
+					<div style={LinkColumn()}>
+						<a href="#policies" style={LinkStyle(theme)}>
+							{t('common:footer.policiesGuidelines')}
+						</a>
+						<a href="#website" style={LinkStyle(theme)}>
+							{t('common:footer.pcglWebsite')}
+						</a>
+						<a href="#terms" style={LinkStyle(theme)}>
+							{t('common:footer.termsConditions')}
+						</a>
+					</div>
+
+					{/* Column 3 */}
+					<div style={LinkColumn()}>
+						<a href="#help" style={LinkStyle(theme)}>
+							{t('common:footer.helpGuides')}
+						</a>
+						<a href="#platform" style={LinkStyle(theme)}>
+							{t('common:footer.dataPlatform')}
+						</a>
+						<a href="#publication" style={LinkStyle(theme)}>
+							{t('common:footer.publicationPolicy')}
+						</a>
+					</div>
+				</div>
 			</div>
 		</footer>
 	);
