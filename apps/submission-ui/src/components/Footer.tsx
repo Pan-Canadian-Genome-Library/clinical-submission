@@ -19,6 +19,7 @@
 
 import CIHRLogo from '@/assets/cihr-logo.png';
 import PCGLLogoWhite from '@/assets/pcgl-logo-white.png';
+import Text from '@/components/typography/Text';
 import { useMinWidth } from '@/global/hooks/useMinWidth';
 import { Theme, useTheme } from '@/styles/theme';
 import { useTranslation } from 'react-i18next';
@@ -75,11 +76,12 @@ const LinkStyle = (theme: Theme): React.CSSProperties => ({
 	cursor: 'pointer',
 });
 
-const TextStyle = (theme: Theme): React.CSSProperties => ({
+const FooterTextStyle = (theme: Theme): React.CSSProperties => ({
 	color: theme.colors.text.white,
 	fontSize: theme.typography.fontSize.sm,
 	lineHeight: theme.typography.lineHeight.normal,
 	margin: 0,
+	paddingInline: 0,
 });
 
 const Footer = () => {
@@ -99,8 +101,8 @@ const Footer = () => {
 						<img src={PCGLLogoWhite} alt="PCGL Logo" style={LogoStyle} />
 						<img src={CIHRLogo} alt="CIHR Logo" style={LogoStyle} />
 					</div>
-					<p style={TextStyle(theme)}>{t('common:footer.supportedBy')}</p>
-					<p style={TextStyle(theme)}>{t('common:footer.copyright', { date: currentDate })}</p>
+					<Text styles={FooterTextStyle(theme)}>{t('common:footer.supportedBy')}</Text>
+					<Text styles={FooterTextStyle(theme)}>{t('common:footer.copyright', { date: currentDate })}</Text>
 				</div>
 
 				{/* Right Section - Links */}

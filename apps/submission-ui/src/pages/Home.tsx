@@ -27,6 +27,7 @@ import UserIcon from '@/assets/user-outlined.png';
 import Button from '@/components/button/Button';
 import Footer from '@/components/Footer';
 import HeaderPCGL from '@/components/Header';
+import Text from '@/components/typography/Text';
 import { useMinWidth } from '@/global/hooks/useMinWidth';
 import { Theme, useTheme } from '@/styles/theme';
 import { useTranslation } from 'react-i18next';
@@ -134,21 +135,20 @@ function Home() {
 								fontSize: '2.5rem',
 								marginBottom: '1rem',
 								fontWeight: theme.typography.fontWeight.bold,
+								maxWidth: '650px',
 							}}
 						>
 							{t('common:hero.title')}
 						</h1>
-						<p
-							style={{
+						<Text
+							styles={{
 								color: theme.colors.text.white,
-								fontSize: theme.typography.fontSize.base,
-								lineHeight: theme.typography.lineHeight.normal,
 								marginBottom: '2rem',
-								maxWidth: '800px',
+								maxWidth: '600px',
 							}}
 						>
 							{t('common:hero.description')}
-						</p>
+						</Text>
 						<div style={buttonGroupStyle}>
 							<Button type="secondary" defaultText={t('common:hero.submitFiles')} handler={() => {}} />
 						</div>
@@ -171,25 +171,14 @@ function Home() {
 								>
 									{t('common:overview.title')}
 								</h2>
-								<p
-									style={{
-										color: theme.colors.text.primary,
-										fontSize: theme.typography.fontSize.base,
-										lineHeight: theme.typography.lineHeight.normal,
+								<Text
+									styles={{
 										marginBottom: '1rem',
 									}}
 								>
 									{t('common:overview.paragraph1')}
-								</p>
-								<p
-									style={{
-										color: theme.colors.text.primary,
-										fontSize: theme.typography.fontSize.base,
-										lineHeight: theme.typography.lineHeight.normal,
-									}}
-								>
-									{t('common:overview.paragraph2')}
-								</p>
+								</Text>
+								<Text>{t('common:overview.paragraph2')}</Text>
 							</div>
 
 							{/* How to Register Section */}
@@ -210,13 +199,7 @@ function Home() {
 									<div style={iconCircleStyle(theme, '#E8A4A2')}>
 										<img src={AuditIcon} alt="" style={iconImageStyle} />
 									</div>
-									<p
-										style={{
-											color: theme.colors.text.primary,
-											fontSize: theme.typography.fontSize.base,
-											lineHeight: theme.typography.lineHeight.normal,
-										}}
-									>
+									<Text>
 										<a
 											href="#helpdesk"
 											style={{
@@ -227,7 +210,7 @@ function Home() {
 											{t('common:howToRegister.step1.linkText')}
 										</a>{' '}
 										{t('common:howToRegister.step1.text')}
-									</p>
+									</Text>
 								</div>
 
 								{/* Step 2 */}
@@ -235,15 +218,7 @@ function Home() {
 									<div style={iconCircleStyle(theme, '#A8D5BA')}>
 										<img src={SignatureIcon} alt="" style={iconImageStyle} />
 									</div>
-									<p
-										style={{
-											color: theme.colors.text.primary,
-											fontSize: theme.typography.fontSize.base,
-											lineHeight: theme.typography.lineHeight.normal,
-										}}
-									>
-										{t('common:howToRegister.step2')}
-									</p>
+									<Text>{t('common:howToRegister.step2')}</Text>
 								</div>
 
 								{/* Step 3 */}
@@ -251,15 +226,7 @@ function Home() {
 									<div style={iconCircleStyle(theme, '#F4D35E')}>
 										<img src={UserIcon} alt="" style={iconImageStyle} />
 									</div>
-									<p
-										style={{
-											color: theme.colors.text.primary,
-											fontSize: theme.typography.fontSize.base,
-											lineHeight: theme.typography.lineHeight.normal,
-										}}
-									>
-										{t('common:howToRegister.step3')}
-									</p>
+									<Text>{t('common:howToRegister.step3')}</Text>
 								</div>
 
 								{/* Step 4 */}
@@ -267,15 +234,7 @@ function Home() {
 									<div style={iconCircleStyle(theme, '#A4C2E4')}>
 										<img src={FileIcon} alt="" style={iconImageStyle} />
 									</div>
-									<p
-										style={{
-											color: theme.colors.text.primary,
-											fontSize: theme.typography.fontSize.base,
-											lineHeight: theme.typography.lineHeight.normal,
-										}}
-									>
-										{t('common:howToRegister.step4')}
-									</p>
+									<Text>{t('common:howToRegister.step4')}</Text>
 								</div>
 							</div>
 						</div>
@@ -295,16 +254,7 @@ function Home() {
 						>
 							{t('common:genomicData.title')}
 						</h2>
-						<p
-							style={{
-								color: theme.colors.text.primary,
-								fontSize: theme.typography.fontSize.base,
-								lineHeight: theme.typography.lineHeight.relaxed,
-								marginBottom: '1rem',
-							}}
-						>
-							{t('common:genomicData.paragraph')}
-						</p>
+						<Text>{t('common:genomicData.paragraph')}</Text>
 						<a
 							href="#workflow"
 							style={{

@@ -33,12 +33,13 @@ type TextProps = {
 const Text = (props: TextProps) => {
 	const { theme } = useTheme();
 
-	const buttonStyle: React.CSSProperties = {
-		color: theme.colors.secondary.black,
-		paddingInline: `${theme.spacing.sm}`,
+	const textStyle: React.CSSProperties = {
+		color: theme.colors.text.primary,
+		fontSize: theme.typography.fontSize.base,
+		lineHeight: theme.typography.lineHeight.relaxed,
 	};
 
-	return <p style={{ ...buttonStyle, ...props.styles }}>{props.children}</p>;
+	return <p style={{ ...textStyle, ...props.styles }}>{props.children}</p>;
 };
 
 export default Text;
