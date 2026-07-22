@@ -75,7 +75,6 @@ const twoColumnStyle: React.CSSProperties = {
 	display: 'grid',
 	gridTemplateColumns: '1fr 1fr',
 	gap: '3rem',
-	marginBottom: '3rem',
 };
 
 const iconCircleStyle = (theme: Theme, bgColor: string): React.CSSProperties => ({
@@ -276,40 +275,42 @@ function Home() {
 								</div>
 							</div>
 						</div>
+					</div>
+				</section>
 
-						{/* Submitting Genomic Data Section */}
-						<div style={{ marginTop: '2rem' }}>
-							<h2
-								style={{
-									color: theme.colors.text.primary,
-									fontSize: theme.typography.fontSize.xl,
-									marginBottom: '1rem',
-									fontWeight: theme.typography.fontWeight.bold,
-								}}
-							>
-								{t('common:genomicData.title')}
-							</h2>
-							<p
-								style={{
-									color: theme.colors.text.primary,
-									fontSize: theme.typography.fontSize.base,
-									lineHeight: theme.typography.lineHeight.normal,
-									marginBottom: '1rem',
-								}}
-							>
-								{t('common:genomicData.paragraph')}
-							</p>
-							<a
-								href="#workflow"
-								style={{
-									color: theme.colors.primary.main,
-									textDecoration: 'underline',
-									fontSize: theme.typography.fontSize.base,
-								}}
-							>
-								{t('common:genomicData.linkText')}
-							</a>
-						</div>
+				{/* Submitting Genomic Data Section */}
+				<section style={{ padding: '3rem 2rem' }}>
+					<div style={contentWrapperStyle}>
+						<h2
+							style={{
+								color: theme.colors.text.primary,
+								fontSize: theme.typography.fontSize.xl,
+								marginBottom: '1rem',
+								fontWeight: theme.typography.fontWeight.bold,
+							}}
+						>
+							{t('common:genomicData.title')}
+						</h2>
+						<p
+							style={{
+								color: theme.colors.text.primary,
+								fontSize: theme.typography.fontSize.base,
+								lineHeight: theme.typography.lineHeight.relaxed,
+								marginBottom: '1rem',
+							}}
+						>
+							{t('common:genomicData.paragraph')}
+						</p>
+						<a
+							href="#workflow"
+							style={{
+								color: theme.colors.primary.main,
+								textDecoration: 'underline',
+								fontSize: theme.typography.fontSize.base,
+							}}
+						>
+							{t('common:genomicData.linkText')} →
+						</a>
 					</div>
 				</section>
 			</main>
