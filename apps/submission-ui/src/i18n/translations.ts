@@ -23,8 +23,10 @@ import { initReactI18next } from 'react-i18next';
 
 import enForm from '@/i18n/locales/en/enForm.json';
 import enGeneral from '@/i18n/locales/en/enGeneral.json';
+import enHome from '@/i18n/locales/en/enHome.json';
 import frForm from '@/i18n/locales/fr/frForm.json';
 import frGeneral from '@/i18n/locales/fr/frGeneral.json';
+import frHome from '@/i18n/locales/fr/frHome.json';
 
 const { lang } = getLangSessionInformation();
 
@@ -34,12 +36,14 @@ export const resources = {
 		[defaultNS]: {
 			...enForm,
 			...enGeneral,
+			...enHome,
 		},
 	},
 	fr: {
 		[defaultNS]: {
 			...frForm,
 			...frGeneral,
+			...frHome,
 		},
 	},
 };

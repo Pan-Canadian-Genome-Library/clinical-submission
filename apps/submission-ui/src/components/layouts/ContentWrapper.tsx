@@ -17,74 +17,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export const theme = {
-	colors: {
-		primary: {
-			darkest: '#054A74',
-			darker: '#155680',
-			dark: '#1F6592',
-			main: '#2B7AAD',
-			light: '#4794C6',
-			lighter: '#60AADB',
-		},
-		secondary: {
-			teal: '#25BEA2',
-			blue: '#3D7EA5',
-			pink: '#DFC7C5',
-			black: '#000000',
-			main: '#25BEA2',
-		},
-		error: {
-			main: '#EC1C24',
-			light: '#F4A1A4',
-		},
-		warning: {
-			main: '#FADB14',
-			light: '#FFFB88',
-		},
-		success: {
-			main: '#52C41A',
-			light: '#D9F7BE',
-		},
-		background: {
-			default: '#ffffff',
-			grey: '#f5f5f5',
-		},
-		text: {
-			primary: '#212121',
-			secondary: '#666666',
-			white: '#ffffff',
-		},
-	},
-	shadows: {
-		level1: '0 2px 8px rgba(0, 0, 0, 0.08)',
-		level2: '0 4px 16px rgba(0, 0, 0, 0.12)',
-	},
-	typography: {
-		fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-		fontSize: {
-			xs: '0.75rem',
-			sm: '0.875rem',
-			base: '1rem',
-			lg: '1.125rem',
-			xl: '1.5rem',
-			xxl: '1.875rem',
-		},
-		fontWeight: {
-			regular: 400,
-			bold: 600,
-		},
-		lineHeight: {
-			normal: 1.5,
-			relaxed: 1.75,
-		},
-	},
-	spacing: {
-		sm: '0.5rem',
-		md: '1rem',
-		lg: '1.5rem',
-		xxl: '4rem',
-	},
+// @description: Purpose of this wrapper is to ensure all elements on the page is sized consistently and properly across pages and elements
+export const contentWrapperStyles: React.CSSProperties = {
+	marginInline: 'auto',
+	width: '90%',
+	maxWidth: '1440px' /* Limit max sizes on large displays to enhance readability  */,
 };
 
-export type Theme = typeof theme;
+type ContentWrapperProps = {
+	style?: React.CSSProperties;
+	children: React.ReactElement;
+};
+
+const ContentWrapper = ({ style, children }: ContentWrapperProps) => {
+	return (
+		<div style={{ ...contentWrapperStyles, ...style, display: 'flex', flex: 1, justifyContent: 'center' }}>
+			{children}
+		</div>
+	);
+};
+
+export default ContentWrapper;
