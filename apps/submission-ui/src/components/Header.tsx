@@ -68,8 +68,10 @@ const Header = () => {
 					<Text>{t('common:dataSubmission')}</Text>
 					<Text>{t('common:dataDictionary')}</Text>
 				</div>
-				<div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1 }}>
-					<Button defaultText={t('common:languageSwitch')} handler={languageSwitch} />
+				<div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1, gap: theme.spacing.sm }}>
+					<Button type="secondary" defaultText={t('common:languageSwitch')} handler={languageSwitch} />
+					<Button type="secondary" defaultText={t('common:helpDesk')} handler={() => {}} />
+					<Button defaultText={t('common:login')} handler={() => {}} />
 				</div>
 			</div>
 		</header>

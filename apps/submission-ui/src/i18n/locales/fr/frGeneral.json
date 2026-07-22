@@ -3,5 +3,7 @@
 	"pcglLogoAltText": "Accueil de la soumission clinique PCGL",
 	"languageSwitch": "English",
 	"dataSubmission": "Soumission de données",
-	"dataDictionary": "Dictionnaire de données"
+	"dataDictionary": "Dictionnaire de données",
+	"login": "Connexion",
+	"helpDesk": "Assistance"
 }

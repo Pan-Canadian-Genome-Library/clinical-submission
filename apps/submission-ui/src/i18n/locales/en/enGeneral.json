@@ -3,5 +3,7 @@
 	"pcglLogoAltText": "PCGL Clinical Submission Home",
 	"languageSwitch": "Français",
 	"dataSubmission": "Data Submission",
-	"dataDictionary": "Data Dictionary"
+	"dataDictionary": "Data Dictionary",
+	"login": "Login",
+	"helpDesk": "Help Desk"
 }

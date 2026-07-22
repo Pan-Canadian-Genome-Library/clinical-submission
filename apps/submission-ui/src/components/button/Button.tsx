@@ -25,6 +25,7 @@ type ButtonProps = {
 	children?: React.ReactNode;
 	defaultText: string;
 	handler: () => void;
+	type?: 'primary' | 'secondary';
 };
 
 /**
@@ -36,13 +37,22 @@ type ButtonProps = {
 const Button = (props: ButtonProps) => {
 	const { theme } = useTheme();
 	const [isHovered, setIsHovered] = useState(false);
+	const buttonType = props.type ?? 'primary';
+
+	const isPrimary = buttonType === 'primary';
 
 	const buttonStyle: React.CSSProperties = {
-		backgroundColor: isHovered ? theme.colors.primary.main : theme.colors.primary.dark,
-		color: theme.colors.background.default,
+		backgroundColor: isPrimary
+			? isHovered
+				? theme.colors.primary.main
+				: theme.colors.primary.dark
+			: isHovered
+				? theme.colors.background.grey
+				: theme.colors.background.default,
+		color: isPrimary ? theme.colors.background.default : theme.colors.secondary.black,
 		borderRadius: '8px',
 		padding: `${theme.spacing.sm} ${theme.spacing.sm}`,
-		border: 'none',
+		border: isPrimary ? 'none' : `1px solid ${theme.colors.background.grey}`,
 		cursor: 'pointer',
 		transition: 'background-color 0.3s ease',
 	};
@@ -54,7 +64,12 @@ const Button = (props: ButtonProps) => {
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 		>
-			<Text styles={{ color: theme.colors.text.white, fontWeight: theme.typography.fontWeight.bold }}>
+			<Text
+				styles={{
+					color: isPrimary ? theme.colors.text.white : theme.colors.secondary.black,
+					fontWeight: theme.typography.fontWeight.bold,
+				}}
+			>
 				{props.children ?? props.defaultText}
 			</Text>
 		</button>
