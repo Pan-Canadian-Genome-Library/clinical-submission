@@ -17,37 +17,12 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { getLangSessionInformation, SupportedLangs } from '@/global/localstorage/language';
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
+import enForm from '@/i18n/locales/en/enForm.json';
+import enGeneral from '@/i18n/locales/en/enGeneral.json';
 
-import { ENGLISH_LOCALE_DICTIONARY } from './locales/en';
-import { FRENCH_DICTIONARY } from './locales/fr';
+export const ENGLISH_LOCALE_DICTIONARY = {
+	...enForm,
+	...enGeneral,
+} as const;
 
-const { lang } = getLangSessionInformation();
-
-export const defaultNS = 'common';
-export const resources = {
-	en: {
-		[defaultNS]: ENGLISH_LOCALE_DICTIONARY,
-	},
-	fr: {
-		[defaultNS]: FRENCH_DICTIONARY,
-	},
-};
-
-i18n.use(initReactI18next).init({
-	resources,
-	lng: lang,
-	defaultNS,
-	fallbackNS: defaultNS,
-	fallbackLng: SupportedLangs.ENGLISH,
-	returnEmptyString: false,
-	supportedLngs: [SupportedLangs.ENGLISH, SupportedLangs.FRENCH],
-	interpolation: {
-		escapeValue: false,
-	},
-	ns: [SupportedLangs.ENGLISH, SupportedLangs.ENGLISH],
-});
-
-export default i18n;
+export type I18N_LOCALE_DICTIONARY = typeof ENGLISH_LOCALE_DICTIONARY;
