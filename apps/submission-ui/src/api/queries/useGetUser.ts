@@ -37,7 +37,7 @@ const useGetUser = () => {
 			try {
 				result = await response.json();
 			} catch (error) {
-				console.debug('[ERROR]: Failed parse response object', error);
+				console.debug('[ERROR]: Failed to parse response object', error);
 				throw new FetchError(error, response.status, error);
 			}
 
