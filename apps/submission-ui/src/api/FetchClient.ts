@@ -64,7 +64,7 @@ async function fetchClient(resource: string | URL, options?: RequestInit): Promi
 			try {
 				errorBody = await response.json();
 			} catch (error) {
-				throw new FetchError(response.statusText, response.status, error);
+				throw new Error(error);
 			}
 			throw new FetchError(errorBody.error || response.statusText, response.status, errorBody.message || '');
 		}
@@ -72,7 +72,7 @@ async function fetchClient(resource: string | URL, options?: RequestInit): Promi
 		return response;
 	} catch (error) {
 		// Error response returned from the server
-		if (error instanceof FetchError) {
+		if (error instanceof FetchError || error instanceof Error) {
 			throw error;
 		}
 

@@ -19,7 +19,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { fetch, FetchError } from '@/api/FetchClient';
+import { fetch } from '@/api/FetchClient';
 import { ServerError } from '@/types/server';
 import { type PartialSessionState, partialSessionState } from '@pcgl-submission/validation';
 
@@ -38,7 +38,7 @@ const useGetUser = () => {
 				result = await response.json();
 			} catch (error) {
 				console.debug('[ERROR]: Failed to parse response object', error);
-				throw new FetchError(error, response.status, error);
+				throw new Error(error);
 			}
 
 			// User is not authenticated
