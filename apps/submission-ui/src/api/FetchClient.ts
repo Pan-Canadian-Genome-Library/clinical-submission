@@ -64,6 +64,7 @@ async function fetchClient(resource: string | URL, options?: RequestInit): Promi
 			try {
 				errorBody = await response.json();
 			} catch (error) {
+				console.debug('[ERROR]: Failed to parse response object');
 				throw new Error(error);
 			}
 			throw new FetchError(errorBody.error || response.statusText, response.status, errorBody.message || '');

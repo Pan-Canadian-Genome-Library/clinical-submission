@@ -38,7 +38,7 @@ const useGetUser = () => {
 				result = await response.json();
 			} catch (error) {
 				console.debug('[ERROR]: Failed to parse response object', error);
-				throw new Error(error);
+				return {};
 			}
 
 			// User is not authenticated
