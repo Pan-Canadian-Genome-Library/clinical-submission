@@ -77,9 +77,9 @@ async function fetchClient(resource: string | URL, options?: RequestInit): Promi
 			throw error;
 		}
 
-		// Network errors and response.json() error handloing
+		// Errors and response.json() error handloing
 		if (error instanceof Error) {
-			throw new FetchError(`Network error`, 500, error.message);
+			throw new Error(`Error: ${error.message}`);
 		}
 
 		// Default to system error
