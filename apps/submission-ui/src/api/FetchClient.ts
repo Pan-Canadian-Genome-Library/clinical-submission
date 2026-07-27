@@ -55,22 +55,7 @@ async function fetchClient(resource: string | URL, options?: RequestInit): Promi
 		resource.hostname = applicationAPIPrefix;
 	}
 
-	try {
-		return await fetch(resource, { headers: headers, ...options });
-	} catch (error) {
-		// Error response returned from the server
-		if (error instanceof FetchError || error instanceof Error) {
-			throw error;
-		}
-
-		// Errors and response.json() error handloing
-		if (error instanceof Error) {
-			throw new Error(`Error: ${error.message}`);
-		}
-
-		// Default to system error
-		throw new FetchError('System Error', 500, 'An unknown error occurred during fetch');
-	}
+	return await fetch(resource, { headers: headers, ...options });
 }
 
 export { fetchClient as fetch };
