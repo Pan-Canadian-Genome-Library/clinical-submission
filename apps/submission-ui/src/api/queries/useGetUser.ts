@@ -32,28 +32,31 @@ const useGetUser = () => {
 		retry: 1,
 		queryFn: async () => {
 			const response = await fetch(`/auth-session/user`);
-			let result: { user: PartialSessionState } = undefined;
+
+			if (!response.ok) {
+				console.debug(`[useGetUser]: Error fetching /auth-session/user', response status ${response.status}`);
+				return {};
+			}
 
 			try {
-				result = await response.json();
+				const result = await response.json();
+				// User is not authenticated
+				if (result?.user === undefined) {
+					return {};
+				}
+
+				// Validate user object
+				const userParseResult = partialSessionState.safeParse(result?.user);
+				if (!userParseResult.success) {
+					//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation.
+					console.debug('[useGetUser]: Response from user endpoint failed validation', userParseResult.error);
+					return {};
+				}
+				return userParseResult.data;
 			} catch (error) {
-				console.debug('[ERROR]: Failed to parse response object', error);
+				console.debug('[useGetUser]: Failed to parse response object', error);
 				return {};
 			}
-
-			// User is not authenticated
-			if (result?.user === undefined) {
-				return {};
-			}
-
-			// Validate user object
-			const userParseResult = partialSessionState.safeParse(result?.user);
-			if (!userParseResult.success) {
-				//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation. Remove console.log
-				console.debug('[ERROR]: Response from user endpoint failed validation', userParseResult.error);
-				return {};
-			}
-			return userParseResult.data;
 		},
 	});
 };
