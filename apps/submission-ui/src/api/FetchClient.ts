@@ -17,30 +17,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { ServerError } from '@/types/server';
-
-/**
- * Custom error class for fetch errors, modeled after ServerError interface
- */
-export class FetchError extends Error implements ServerError {
-	message: string;
-	error: string;
-	status: number;
-
-	constructor(error: string, status: number, message?: string) {
-		super(message || error);
-		this.message = message || '';
-		this.error = error;
-		this.status = status;
-	}
-}
-
 /**
  * A wrapper for `fetch`, used to append the application API URL to all fetch calls.
  * @param resource This defines the resource that you wish to fetch. This can be a string or a `URL` object — that provides the URL of the resource you want to fetch. Important - prepend your request URLs with `/`
  * @param options A `RequestInit` object containing any custom settings that you want to apply to the request.
  * @returns A promise containing a `Response` object.
- * @throws {FetchError} When response has error status code or network error occurs
  * @link https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch
  */
 async function fetchClient(resource: string | URL, options?: RequestInit): Promise<Response> {
