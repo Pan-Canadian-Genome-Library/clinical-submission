@@ -84,12 +84,12 @@ importers:
 
   apps/submission:
     dependencies:
+      '@clinical-submission/validation':
+        specifier: workspace:^
+        version: link:../../packages/validation
       '@overture-stack/lyric':
         specifier: ^0.17.0
         version: 0.17.0(@types/pg@8.15.5)(@types/react@19.2.2)(react@19.2.0)
-      '@pcgl-submission/validation':
-        specifier: workspace:^
-        version: link:../../packages/validation
       axios:
         specifier: ^1.10.0
         version: 1.12.2
@@ -241,7 +241,7 @@ importers:
 
   apps/submission-ui:
     dependencies:
-      '@pcgl-submission/validation':
+      '@clinical-submission/validation':
         specifier: workspace:^
         version: link:../../packages/validation
       '@tanstack/react-query':
