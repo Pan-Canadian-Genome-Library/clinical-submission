@@ -21,7 +21,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { fetch } from '@/api/FetchClient';
 import { ServerError } from '@/types/server';
-import { type PartialSessionState, partialSessionState } from '@pcgl-submission/validation';
+import { type PartialSessionState, partialSessionState } from '@clinical-submission/validation';
 
 /**
  * Query hook to fetch the current user from the auth-session endpoint.

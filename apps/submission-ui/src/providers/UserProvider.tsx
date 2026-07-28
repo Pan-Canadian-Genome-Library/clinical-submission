@@ -21,7 +21,7 @@
 
 import { createContext, useContext, type PropsWithChildren } from 'react';
 
-import { PartialSessionState } from '@pcgl-submission/validation';
+import { PartialSessionState } from '@clinical-submission/validation';
 
 import useGetUser from '@/api/queries/useGetUser';
 

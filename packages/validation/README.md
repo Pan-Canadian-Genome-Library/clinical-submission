@@ -1,4 +1,4 @@
-# @pcgl-submission/validation
+# @clinical-submission/validation
 
 Shared validation utilities and schemas for the PCGL Clinical Submission platform.
 
@@ -8,4 +8,4 @@ This package provides reusable validation schemas and utilities built on [Zod](h
 
 ## Installation
 
-This is an internal monorepo package. It's automatically available to other packages in the workspace when adding `@pcgl-submission/validation` as a dependency.
+This is an internal monorepo package. It's automatically available to other packages in the workspace when adding `@clinical-submission/validation` as a dependency.

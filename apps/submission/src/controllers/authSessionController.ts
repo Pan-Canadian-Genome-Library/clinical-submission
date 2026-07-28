@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import type { PartialSessionState, SessionUser } from '@pcgl-submission/validation';
+import type { PartialSessionState, SessionUser } from '@clinical-submission/validation';
 import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
