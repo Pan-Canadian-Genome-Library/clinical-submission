@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 The Ontario Institute for Cancer Research. All rights reserved
+ * Copyright (c) 2026 The Ontario Institute for Cancer Research. All rights reserved
  *
  * This program and the accompanying materials are made available under the terms of
  * the GNU Affero General Public License v3.0. You should have received a copy of the
@@ -19,22 +19,17 @@
 
 import express, { json, Router, urlencoded } from 'express';
 
-import authController from '@/controllers/authController.js';
+import authSessionController from '@/controllers/authSessionController.js';
 
-/**
- * This router contains the original auth implementation. It returns user token information directly to the requesting client and does not establish a session.
- * PCGL is hosting a placeholder submission login page that uses these routes until the formal submission UI is available.
- * This is intended to be replaced by the `auth-session` router/controller.
- * TODO: Remove the `auth` router and controller and replace with `auth-session`
- */
-export const authRouter: Router = (() => {
+export const authSessionRouter: Router = (() => {
 	const router = express.Router();
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
 
-	router.get('/login', authController.login);
-	router.get('/logout', authController.logout);
-	router.get('/token', authController.token);
+	router.get('/login', authSessionController.loginSession);
+	router.get('/logout', authSessionController.logoutSession);
+	router.get('/user', authSessionController.getUser);
+	router.get('/token', authSessionController.authToken);
 
 	return router;
 })();

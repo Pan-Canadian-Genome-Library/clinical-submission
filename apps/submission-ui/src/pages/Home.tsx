@@ -17,18 +17,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import HeaderPCGL from '@/components/Header';
 import '../styles/App.css';
-import Footer from '@/components/Footer';
 
 function Home() {
 	return (
 		<div className="container">
-			<HeaderPCGL />
 			<main className="wrapper">
 				<h1>Submission UI</h1>
 			</main>
-			<Footer />
 		</div>
 	);
 }
