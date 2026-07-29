@@ -11,7 +11,7 @@
         required: true
         schema:
           type: string
-        description: The ID of the category containing the dictionary
+        description: Numeric ID or alias of the category containing the dictionary
     responses:
       200:
         description: Dictionary schema JSON
@@ -38,7 +38,7 @@
         required: true
         schema:
           type: string
-        description: The ID of the category containing the dictionary
+        description: Numeric ID or alias of the category containing the dictionary
       - name: fileType
         in: query
         required: false

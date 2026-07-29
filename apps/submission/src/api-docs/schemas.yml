@@ -88,12 +88,15 @@ components:
     CategoryDetails:
       type: object
       properties:
-        id:
-          type: number
-          description: ID of the Category
-        name:
+        alias:
           type: string
-          description: Name of the Category
+          description: Optional alias for the category. Not set if none is assigned.
+        createdAt:
+          type: string
+          description: Date and time of creation
+        createdBy:
+          type: string
+          description: User name who created the submission
         dictionary:
           type: object
           description: Dictionary used to validate the submission
@@ -102,22 +105,22 @@ components:
               type: string
             version:
               type: string
-        studyId:
+        id:
+          type: number
+          description: ID of the Category
+        name:
           type: string
-          description: Associated study to this category
-        createdAt:
-          type: string
-          description: Date and time of creation
-        createdBy:
-          type: string
-          description: User name who created the submission
+          description: Name of the Category
         updatedAt:
           type: string
           description: Date and time of latest update
         updatedBy:
           type: string
           description: User name who last updated the submission
-    
+        studyId:
+          type: string
+          description: Associated study to this category
+
     CategorySummary:
       type: object
       properties:
