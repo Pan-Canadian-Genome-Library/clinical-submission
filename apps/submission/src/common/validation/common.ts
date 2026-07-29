@@ -18,16 +18,16 @@
  */
 
 import { ParsedQs } from 'qs';
-import { z } from 'zod';
+import { z as zod } from 'zod';
 
-export const stringNotEmpty = z.string().trim().min(1);
-export const stringNotEmptyOptional = stringNotEmpty.or(z.literal('')).optional();
-export const orderByString = z.literal('asc').or(z.literal('desc'));
+export const stringNotEmpty = zod.string().trim().min(1);
+export const stringNotEmptyOptional = stringNotEmpty.or(zod.literal('')).optional();
+export const orderByString = zod.literal('asc').or(zod.literal('desc'));
 
 /**
- * Zod's `z.coerce` does not work in an "expected" way for booleans and will always return `true`
+ * Zod's `zod.coerce` does not work in an "expected" way for booleans and will always return `true`
  * for a boolean if the string it's parsing is not empty. This function will make the type
- * check work in an "expected" way if used in conjunction with the zod `z.preprocess` function.
+ * check work in an "expected" way if used in conjunction with the zod `zod.preprocess` function.
  *
  * @see https://github.com/colinhacks/zod/discussions/3329
  *
@@ -38,11 +38,11 @@ export const processCoercedBoolean = (potentialBoolean: unknown) => {
 	return String(potentialBoolean).toLowerCase().trim() === 'true' ? true : false;
 };
 
-export const positiveInteger = z.string().superRefine((value, ctx) => {
+export const positiveInteger = zod.string().superRefine((value, ctx) => {
 	const parsed = parseInt(value);
 	if (isNaN(parsed)) {
 		ctx.addIssue({
-			code: z.ZodIssueCode.invalid_type,
+			code: zod.ZodIssueCode.invalid_type,
 			expected: 'number',
 			received: 'nan',
 		});
@@ -50,7 +50,7 @@ export const positiveInteger = z.string().superRefine((value, ctx) => {
 
 	if (parsed < 1) {
 		ctx.addIssue({
-			code: z.ZodIssueCode.too_small,
+			code: zod.ZodIssueCode.too_small,
 			minimum: 1,
 			inclusive: true,
 			type: 'number',
@@ -58,11 +58,11 @@ export const positiveInteger = z.string().superRefine((value, ctx) => {
 	}
 });
 
-export const nonNegativeInteger = z.string().superRefine((value, ctx) => {
+export const nonNegativeInteger = zod.string().superRefine((value, ctx) => {
 	const parsed = parseInt(value);
 	if (isNaN(parsed)) {
 		ctx.addIssue({
-			code: z.ZodIssueCode.invalid_type,
+			code: zod.ZodIssueCode.invalid_type,
 			expected: 'number',
 			received: 'nan',
 		});
@@ -70,7 +70,7 @@ export const nonNegativeInteger = z.string().superRefine((value, ctx) => {
 
 	if (parsed < 0) {
 		ctx.addIssue({
-			code: z.ZodIssueCode.too_small,
+			code: zod.ZodIssueCode.too_small,
 			minimum: 0,
 			inclusive: true,
 			type: 'number',
@@ -83,3 +83,28 @@ export interface PaginationParams extends ParsedQs {
 	page?: string;
 	pageSize?: string;
 }
+
+/**
+ * Checks if a string is safe as a category alias: a non-empty URL-safe slug (letters, numbers,
+ * hyphens, underscores, periods). A value that is *only* digits (e.g. `"5"`) is rejected, since
+ * category ids are whole numbers and an alias must never be able to collide with one, now or once
+ * the id sequence catches up to it. A value containing any other character, including a decimal
+ * point (e.g. `"2.5"`, `"v5"`, `"5-donor"`), can never be mistaken for an id and is allowed,
+ * including a data version label.
+ * @param {string} value
+ * @returns {boolean}
+ */
+export function isValidCategoryAlias(value: string): boolean {
+	if (/^\d+$/.test(value)) {
+		return false;
+	}
+	return /^[A-Za-z0-9_.-]+$/.test(value);
+}
+
+export const categoryAliasSchema = zod
+	.string()
+	.trim()
+	.refine(
+		(value) => value === '' || isValidCategoryAlias(value),
+		'alias must contain only letters, numbers, hyphens, and underscores',
+	);

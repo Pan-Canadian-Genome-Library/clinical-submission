@@ -26,6 +26,7 @@ import { RequestValidation } from '@/middleware/requestValidation.js';
 import { stringNotEmpty, stringNotEmptyOptional } from './common.js';
 
 type RegisterDictionaryBody = {
+	alias?: string;
 	studyId: string;
 	categoryName: string;
 	dictionaryName: string;
@@ -35,6 +36,7 @@ type RegisterDictionaryBody = {
 
 export const registerDictionaryValidation: RequestValidation<RegisterDictionaryBody, ParsedQs, ParamsDictionary> = {
 	body: z.object({
+		alias: stringNotEmptyOptional,
 		studyId: stringNotEmpty,
 		categoryName: stringNotEmpty,
 		dictionaryName: stringNotEmpty,

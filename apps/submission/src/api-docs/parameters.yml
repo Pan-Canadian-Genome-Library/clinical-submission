@@ -7,7 +7,8 @@ components:
         required: true
         schema:
           type: string
-        description: ID of the category to which the data belongs
+        description: >-
+          Numeric ID or alias of the category to which the data belongs.
       DacId:
         name: dacId
         in: path
