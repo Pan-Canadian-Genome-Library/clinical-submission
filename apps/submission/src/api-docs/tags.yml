@@ -11,6 +11,8 @@ tags:
     description: Dictionary registration. Uses Dictionary Manager as source of truth for Dictionaries
   - name: Health
     description: Service status monitoring
+  - name: Migration
+    description: Operations related to Migrations management. Migrations are used to update and validate existing data against a new Dictionary version.
   - name: Submission
     description: Create, View, Edit and Commit a Submission. A Submission represents a collection of data that is staged for validation before finalization
   - name: Study

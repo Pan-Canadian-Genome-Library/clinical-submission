@@ -62,9 +62,17 @@
         $ref: '#/components/responses/ServerError'
 /dictionary/register:
   post:
-    summary: Associates the provided dictionary and version from the Dictionary Manager with a new category linked to the specified study ID. (🔒 Admin only)
+    summary: Associates the provided dictionary and version from the Dictionary Manager with a new category linked to the specified study ID. Creates the category if it does not exist, or updates its active dictionary and triggers a data migration to validate and update existing data against the new dictionary. (🔒 Admin only)
     tags:
       - Dictionary
+    parameters:
+      - name: force
+        description: Retries migration for this category only when the same dictionary is already registered and the most recent migration previously failed. If there is no previous failed migration, this flag is ignored.
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
     requestBody:
       content:
         application/json:
