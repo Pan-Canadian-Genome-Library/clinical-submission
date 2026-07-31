@@ -23,7 +23,7 @@ import { z } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
-import { stringNotEmpty, stringNotEmptyOptional } from './common.js';
+import { stringNotEmpty, stringNotEmptyOptional, categoryAliasSchema } from './common.js';
 
 type RegisterDictionaryBody = {
 	alias?: string;
@@ -36,7 +36,7 @@ type RegisterDictionaryBody = {
 
 export const registerDictionaryValidation: RequestValidation<RegisterDictionaryBody, ParsedQs, ParamsDictionary> = {
 	body: z.object({
-		alias: stringNotEmptyOptional,
+		alias: categoryAliasSchema,
 		studyId: stringNotEmpty,
 		categoryName: stringNotEmpty,
 		dictionaryName: stringNotEmpty,
