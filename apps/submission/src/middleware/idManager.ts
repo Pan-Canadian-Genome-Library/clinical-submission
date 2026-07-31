@@ -124,5 +124,10 @@ export const onFinishCommitCallback = async (resultOnCommit: ResultOnCommit) => 
 		return;
 	}
 
-	await processInsertedRecords(data.inserts, db);
+	try {
+		await processInsertedRecords(data.inserts, db);
+	} catch (error) {
+		logger.error(`[Middleware/IIM]: Error processing inserted records: ${error}`);
+		// We don't want to throw an error here. We just log the error and continue.
+	}
 };
