@@ -120,7 +120,4 @@ export function isValidCategoryAlias(value: string): boolean {
 export const categoryAliasSchema = zod
 	.string()
 	.trim()
-	.refine(
-		(value) => value === '' || isValidCategoryAlias(value),
-		'alias must contain only letters, numbers, hyphens, and underscores',
-	);
+	.refine((value) => isValidCategoryAlias(value), 'alias must contain only letters, numbers, hyphens, and underscores');
