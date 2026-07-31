@@ -85,6 +85,22 @@ export interface PaginationParams extends ParsedQs {
 }
 
 /**
+ * Function that returns true if input is a valid number greater than zero.
+ * Otherwise it returns false
+ */
+export const isValidIdNumber = (value: unknown): boolean => {
+	return typeof value === 'number' && !isNaN(value) && value > 0 && value < Number.MAX_VALUE;
+};
+/**
+ * Schema for validating category ID or alias.
+ */
+export const categoryIdSchema = zod
+	.string()
+	.trim()
+	.min(1)
+	.refine((value) => isValidIdNumber(parseInt(value)) || isValidCategoryAlias(value), 'invalid category ID');
+
+/**
  * Checks if a string is safe as a category alias: a non-empty URL-safe slug (letters, numbers,
  * hyphens, underscores, periods). A value that is *only* digits (e.g. `"5"`) is rejected, since
  * category ids are whole numbers and an alias must never be able to collide with one, now or once

@@ -24,7 +24,7 @@ import { z as zod } from 'zod';
 import { lyricProvider } from '@/core/provider.js';
 import { type RequestValidation } from '@/middleware/requestValidation.js';
 
-import { categoryAliasSchema, nonNegativeInteger, positiveInteger } from './common.js';
+import { categoryIdSchema, nonNegativeInteger, positiveInteger } from './common.js';
 
 interface SubmitRequestPathParams extends ParamsDictionary {
 	categoryId: string;
@@ -41,7 +41,7 @@ export const submitRequestSchema: RequestValidation<
 		organization: zod.string(),
 	}),
 	pathParams: zod.object({
-		categoryId: categoryAliasSchema,
+		categoryId: categoryIdSchema,
 	}),
 };
 
@@ -60,7 +60,7 @@ export const editDataRequestSchema: RequestValidation<
 		organization: zod.string(),
 	}),
 	pathParams: zod.object({
-		categoryId: categoryAliasSchema,
+		categoryId: categoryIdSchema,
 	}),
 };
 

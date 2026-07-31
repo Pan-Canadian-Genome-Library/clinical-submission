@@ -23,7 +23,7 @@ import { z } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
-import { categoryAliasSchema } from './common.js';
+import { categoryIdSchema } from './common.js';
 
 interface CategoryIDParams extends ParamsDictionary {
 	categoryId: string;
@@ -31,12 +31,12 @@ interface CategoryIDParams extends ParamsDictionary {
 
 export const getCategoryByIDReqValidation: RequestValidation<object, ParsedQs, CategoryIDParams> = {
 	pathParams: z.object({
-		categoryId: categoryAliasSchema,
+		categoryId: categoryIdSchema,
 	}),
 };
 
 export const removeStudyLinkFromCategoryReqValidation: RequestValidation<object, ParsedQs, CategoryIDParams> = {
 	pathParams: z.object({
-		categoryId: categoryAliasSchema,
+		categoryId: categoryIdSchema,
 	}),
 };
