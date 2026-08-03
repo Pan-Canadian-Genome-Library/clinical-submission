@@ -21,19 +21,24 @@ import '@/i18n/translations';
 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Route, Routes } from 'react-router';
+import { Route, Routes } from 'react-router';
 import Home from './pages/Home.tsx';
-import { ThemeProvider } from './styles/theme/ThemeProvider';
+import LoginRedirect from './pages/login/redirect.tsx';
+import PageWrapper from './pages/PageWrapper.tsx';
+import UserPage from './pages/user/user.tsx';
+import Providers from './providers/Providers.tsx';
 
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
-		<ThemeProvider>
-			<BrowserRouter>
-				<Routes>
+		<Providers>
+			<Routes>
+				<Route element={<PageWrapper />}>
 					<Route path="/" element={<Home />} />
 					<Route path="/login" element={<></>} />
-				</Routes>
-			</BrowserRouter>
-		</ThemeProvider>
+					<Route path="/login/redirect" element={<LoginRedirect />} />
+					<Route path="/user" element={<UserPage />} />
+				</Route>
+			</Routes>
+		</Providers>
 	</StrictMode>,
 );

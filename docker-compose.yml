@@ -35,10 +35,21 @@ services:
       MONGO_DB: dictionary-manager
       MONGO_USER: admin
       MONGO_PASS: password
+  submission-valkey:
+    container_name: submission.valkey
+    image: valkey/valkey:8-alpine
+    command: valkey-server --requirepass valkeypass
+    ports:
+      - '6379:6379'
+    volumes:
+      - 'valkey:/bitnami/valkey/data'
 volumes:
   mongodb_data:
     name: dictionary-manager-mongo-data
     driver: local
   submission_data:
     name: submission-postgres-data
+    driver: local
+  valkey:
+    name: submission-valkey
     driver: local

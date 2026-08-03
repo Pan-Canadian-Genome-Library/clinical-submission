@@ -17,8 +17,10 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { API_PATH_LOGIN, API_PATH_LOGOUT } from '@/api/paths';
 import { clearLangSessionInformation, setLangSessionInformation, SupportedLangs } from '@/global/localstorage/language';
 import i18n from '@/i18n/translations';
+import { useUserContext } from '@/providers/UserProvider';
 import { Theme, useTheme } from '@/styles/theme';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -41,6 +43,7 @@ const headerImage = (): React.CSSProperties => ({
 
 const Header = () => {
 	const { theme } = useTheme();
+	const { isLoggedIn } = useUserContext();
 	const [lang, setLanguage] = useState(i18n.language);
 	const {
 		i18n: { t },
@@ -66,6 +69,9 @@ const Header = () => {
 				<>
 					<Button defaultText={t('common:languageSwitch')} handler={languageSwitch} />
 					<h2>Submission UI</h2>
+					<a href={!isLoggedIn ? API_PATH_LOGIN : API_PATH_LOGOUT} className="login-button">
+						{!isLoggedIn ? 'Login' : 'Logout'}
+					</a>
 				</>
 			</div>
 		</header>

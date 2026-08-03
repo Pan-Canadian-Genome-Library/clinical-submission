@@ -17,35 +17,48 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '@/styles/App.css';
+/* eslint-disable react-refresh/only-export-components */
 
-import { Theme, useTheme } from '@/styles/theme';
+import { createContext, useContext, type PropsWithChildren } from 'react';
 
-const Wrapper = (theme: Theme): React.CSSProperties => {
-	return {
-		position: 'relative',
-		maxWidth: '1480px',
-		margin: '0 auto',
-		paddingInline: `${theme.spacing.md}`,
-		width: '100%',
-	};
+import { PartialSessionState } from '@clinical-submission/validation';
+
+import useGetUser from '@/api/queries/useGetUser';
+
+type UserState = {
+	isLoading: boolean;
+	isLoggedIn: boolean;
+	refresh: () => void;
+	user?: PartialSessionState;
 };
 
-const Container = (): React.CSSProperties => ({
-	position: 'relative',
-	height: '100%',
-	width: '100%',
+const UserContext = createContext<UserState>({
+	isLoading: true,
+	isLoggedIn: false,
+	refresh: () => {},
 });
 
-function Home() {
-	const { theme } = useTheme();
-	return (
-		<div style={Container()}>
-			<main style={Wrapper(theme)}>
-				<h1>Submission UI</h1>
-			</main>
-		</div>
-	);
+export function UserProvider({ children }: PropsWithChildren) {
+	const { data, isLoading, refetch } = useGetUser();
+
+	const refresh = () => {
+		refetch();
+	};
+
+	const initialUserState: UserState = {
+		user: data,
+		isLoading,
+		refresh,
+		isLoggedIn: !isLoading && data?.userId !== undefined,
+	};
+
+	return <UserContext.Provider value={initialUserState}>{children}</UserContext.Provider>;
 }
 
-export default Home;
+export function useUserContext() {
+	const context = useContext(UserContext);
+	if (context === undefined) {
+		throw new Error('useUserContext must be used within a UserProvider');
+	}
+	return context;
+}

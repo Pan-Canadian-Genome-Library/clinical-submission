@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 The Ontario Institute for Cancer Research. All rights reserved
+ * Copyright (c) 2026 The Ontario Institute for Cancer Research. All rights reserved
  *
  * This program and the accompanying materials are made available under the terms of
  * the GNU Affero General Public License v3.0. You should have received a copy of the
@@ -17,24 +17,38 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import express, { json, Router, urlencoded } from 'express';
-
-import authController from '@/controllers/authController.js';
+import { useUserContext } from '@/providers/UserProvider';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router';
 
 /**
- * This router contains the original auth implementation. It returns user token information directly to the requesting client and does not establish a session.
- * PCGL is hosting a placeholder submission login page that uses these routes until the formal submission UI is available.
- * This is intended to be replaced by the `auth-session` router/controller.
- * TODO: Remove the `auth` router and controller and replace with `auth-session`
+ * Redirect page that handles post-login navigation.
+ *
+ * This component checks the user's authentication status and redirects accordingly:
+ * - Redirects unauthenticated users to the home page ('/')
+ * - Redirects authenticated users to the user dashboard ('/user')
+ * - A loading message while authentication status is being handled
+ *
+ * @returns A loading message while redirect is being calculated
  */
-export const authRouter: Router = (() => {
-	const router = express.Router();
-	router.use(json());
-	router.use(urlencoded({ extended: false }));
+const LoginRedirect = () => {
+	const { isLoading, isLoggedIn } = useUserContext();
+	const navigate = useNavigate();
 
-	router.get('/login', authController.login);
-	router.get('/logout', authController.logout);
-	router.get('/token', authController.token);
+	useEffect(() => {
+		if (isLoading) {
+			return;
+		}
 
-	return router;
-})();
+		if (!isLoggedIn) {
+			navigate('/', { replace: true });
+			return;
+		} else if (isLoggedIn) {
+			navigate('/user', { replace: true });
+		}
+	}, [isLoading, navigate, isLoggedIn]);
+
+	return <>Loading...</>;
+};
+
+export default LoginRedirect;
