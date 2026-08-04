@@ -25,8 +25,6 @@ import Hero from '@/assets/hero-bar.png';
 import SignatureIcon from '@/assets/signature-outlined.png';
 import UserIcon from '@/assets/user-outlined.png';
 import Button from '@/components/button/Button';
-import Footer from '@/components/Footer';
-import HeaderPCGL from '@/components/Header';
 import Text from '@/components/typography/Text';
 import { useMinWidth } from '@/global/hooks/useMinWidth';
 import { Theme, useTheme } from '@/styles/theme';
@@ -124,7 +122,6 @@ function Home() {
 
 	return (
 		<div style={Container()}>
-			<HeaderPCGL />
 			<main style={MainContent()}>
 				{/* Hero Section */}
 				<section style={heroSectionStyle}>
@@ -268,7 +265,6 @@ function Home() {
 					</div>
 				</section>
 			</main>
-			<Footer />
 		</div>
 	);
 }

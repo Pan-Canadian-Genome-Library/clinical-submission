@@ -17,28 +17,48 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '@/i18n/translations';
+/* eslint-disable react-refresh/only-export-components */
 
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { Route, Routes } from 'react-router';
-import Home from './pages/Home.tsx';
-import LoginRedirect from './pages/login/redirect.tsx';
-import PageWrapper from './pages/PageWrapper.tsx';
-import UserPage from './pages/user/user.tsx';
-import Providers from './providers/Providers.tsx';
+import { createContext, useContext, type PropsWithChildren } from 'react';
 
-createRoot(document.getElementById('root')!).render(
-	<StrictMode>
-		<Providers>
-			<Routes>
-				<Route element={<PageWrapper />}>
-					<Route path="/" element={<Home />} />
-					<Route path="/login" element={<></>} />
-					<Route path="/login/redirect" element={<LoginRedirect />} />
-					<Route path="/user" element={<UserPage />} />
-				</Route>
-			</Routes>
-		</Providers>
-	</StrictMode>,
-);
+import { PartialSessionState } from '@clinical-submission/validation';
+
+import useGetUser from '@/api/queries/useGetUser';
+
+type UserState = {
+	isLoading: boolean;
+	isLoggedIn: boolean;
+	refresh: () => void;
+	user?: PartialSessionState;
+};
+
+const UserContext = createContext<UserState>({
+	isLoading: true,
+	isLoggedIn: false,
+	refresh: () => {},
+});
+
+export function UserProvider({ children }: PropsWithChildren) {
+	const { data, isLoading, refetch } = useGetUser();
+
+	const refresh = () => {
+		refetch();
+	};
+
+	const initialUserState: UserState = {
+		user: data,
+		isLoading,
+		refresh,
+		isLoggedIn: !isLoading && data?.userId !== undefined,
+	};
+
+	return <UserContext.Provider value={initialUserState}>{children}</UserContext.Provider>;
+}
+
+export function useUserContext() {
+	const context = useContext(UserContext);
+	if (context === undefined) {
+		throw new Error('useUserContext must be used within a UserProvider');
+	}
+	return context;
+}

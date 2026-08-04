@@ -17,8 +17,10 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { API_PATH_LOGIN, API_PATH_LOGOUT } from '@/api/paths';
 import { clearLangSessionInformation, setLangSessionInformation, SupportedLangs } from '@/global/localstorage/language';
 import i18n from '@/i18n/translations';
+import { useUserContext } from '@/providers/UserProvider';
 import { Theme, useTheme } from '@/styles/theme';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -42,6 +44,7 @@ const headerImage = (): React.CSSProperties => ({
 
 const Header = () => {
 	const { theme } = useTheme();
+	const { isLoggedIn } = useUserContext();
 	const [lang, setLanguage] = useState(i18n.language);
 	const {
 		i18n: { t },
@@ -71,7 +74,9 @@ const Header = () => {
 				<div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1, gap: theme.spacing.sm }}>
 					<Button type="secondary" defaultText={t('common:languageSwitch')} handler={languageSwitch} />
 					<Button type="secondary" defaultText={t('common:helpDesk')} handler={() => {}} />
-					<Button defaultText={t('common:login')} handler={() => {}} />
+					<Button href={!isLoggedIn ? API_PATH_LOGIN : API_PATH_LOGOUT} defaultText={t('common:login')}>
+						{!isLoggedIn ? 'Login' : 'Logout'}
+					</Button>
 				</div>
 			</div>
 		</header>

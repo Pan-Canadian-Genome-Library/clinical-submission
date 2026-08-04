@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 The Ontario Institute for Cancer Research. All rights reserved
+ * Copyright (c) 2026 The Ontario Institute for Cancer Research. All rights reserved
  *
  * This program and the accompanying materials are made available under the terms of
  * the GNU Affero General Public License v3.0. You should have received a copy of the
@@ -17,24 +17,44 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import express, { json, Router, urlencoded } from 'express';
+import { z } from 'zod';
 
-import authController from '@/controllers/authController.js';
-
-/**
- * This router contains the original auth implementation. It returns user token information directly to the requesting client and does not establish a session.
- * PCGL is hosting a placeholder submission login page that uses these routes until the formal submission UI is available.
- * This is intended to be replaced by the `auth-session` router/controller.
- * TODO: Remove the `auth` router and controller and replace with `auth-session`
- */
-export const authRouter: Router = (() => {
-	const router = express.Router();
-	router.use(json());
-	router.use(urlencoded({ extended: false }));
-
-	router.get('/login', authController.login);
-	router.get('/logout', authController.logout);
-	router.get('/token', authController.token);
-
-	return router;
-})();
+export const authZUserInfo = z.object({
+	userinfo: z.object({
+		emails: z.array(
+			z.object({
+				address: z.string().email(),
+				type: z
+					.literal('official')
+					.or(z.literal('delivery').or(z.literal('forwarding').or(z.literal('personal'))))
+					.optional(),
+			}),
+		),
+		pcgl_id: z.string(),
+		site_admin: z.boolean().default(false),
+		data_admin: z.boolean().default(false),
+	}),
+	study_authorizations: z.object({
+		editable_studies: z.array(z.string()).optional(),
+		readable_studies: z.array(z.string()).optional(),
+	}),
+	dac_authorizations: z.array(
+		z
+			.object({
+				study_id: z.string(),
+				start_date: z.string(),
+				end_date: z.string(),
+			})
+			.optional(),
+	),
+	groups: z
+		.array(
+			z.object({
+				description: z.string(),
+				id: z.number().int(),
+				name: z.string(),
+			}),
+		)
+		.optional(),
+});
+export type PCGLAuthZUserInfoResponse = z.infer<typeof authZUserInfo>;
