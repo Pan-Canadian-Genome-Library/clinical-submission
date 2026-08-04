@@ -38,7 +38,7 @@ createRoot(document.getElementById('root')!).render(
 					<Route path="/login" element={<></>} />
 					<Route path="/login/redirect" element={<LoginRedirect />} />
 
-					<Route path="/study" element={<StudyDetails />} />
+					<Route path="/study/:studyId" element={<StudyDetails />} />
 					<Route path="/user" element={<UserPage />} />
 				</Route>
 			</Routes>

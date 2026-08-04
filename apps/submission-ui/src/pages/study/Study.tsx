@@ -17,42 +17,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import useGetStudy from '@/api/queries/useGetStudy';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import Text from '@/components/typography/Text';
-import { useUserContext } from '@/providers/UserProvider';
 import { useTheme } from '@/styles/theme';
 import { useTranslation } from 'react-i18next';
-
-type StudyField = {
-	label: string;
-	value: React.ReactNode;
-};
-
-const mockStudy = {
-	studyName: 'La biobanque québécois de la COVID-19',
-	description:
-		'COVID-19 remains a major public health concern, with long-term effects including post-acute COVID-19 conditions (Long COVID). The Quebec COVID-19 Biobank (BQC19) is a multicentre, prospective cohort and biobank initiative designed to study how host factors, immune responses, and clinical characteristics influence COVID-19 severity and long-term outcomes (hypothesis). The study collects clinical, biological, and socio-demographic data, along with biospecimens, across multiple sites in Quebec (design), enabling research that informs patient care and public health while promoting open and accessible data sharing.',
-	studyId: 'PCGLST0001',
-	programName: 'PCGLST0001',
-	keywords: 'PCGLST0001',
-	status: 'PCGLST0001',
-	context: 'PCGLST0001',
-	domain: 'PCGLST0001',
-	dacId: 'PCGLST0001',
-	principalInvestigators: 'PCGLST0001',
-	leadOrganizations: 'PCGLST0001',
-	fundingSources: 'PCGLST0001',
-	collaborators: 'PCGLST0001',
-	publicationLinks: 'PCGLST0001',
-	participantCriteria: 'PCGLST0001',
-};
+import { useMatch } from 'react-router';
 
 const StudyDetails = () => {
+	const {
+		params: { studyId },
+	} = useMatch('study/:studyId');
+
 	const { theme } = useTheme();
-	const { isLoading, isLoggedIn, user } = useUserContext();
+	const { data: study, isLoading } = useGetStudy({ studyId });
+	console.log(study);
+
 	const {
 		i18n: { t },
 	} = useTranslation();
+
 	if (isLoading) {
 		return (
 			<div style={{ padding: '2rem' }}>
@@ -60,32 +44,6 @@ const StudyDetails = () => {
 			</div>
 		);
 	}
-
-	if (!isLoggedIn || !user) {
-		return (
-			<div style={{ padding: '2rem' }}>
-				<Text>You are not logged in. Please log in to view study details.</Text>
-			</div>
-		);
-	}
-
-	const fields: StudyField[] = [
-		{ label: 'Study Name', value: mockStudy.studyName },
-		{ label: 'Description', value: mockStudy.description },
-		{ label: 'Study ID', value: mockStudy.studyId },
-		{ label: 'Program Name', value: mockStudy.programName },
-		{ label: 'Keywords', value: mockStudy.keywords },
-		{ label: 'Status', value: mockStudy.status },
-		{ label: 'Context', value: mockStudy.context },
-		{ label: 'Domain', value: mockStudy.domain },
-		{ label: 'DAC ID', value: mockStudy.dacId },
-		{ label: 'Principal Investigators', value: mockStudy.principalInvestigators },
-		{ label: 'Lead Organizations', value: mockStudy.leadOrganizations },
-		{ label: 'Funding Sources', value: mockStudy.fundingSources },
-		{ label: 'Collaborators', value: mockStudy.collaborators },
-		{ label: 'Publication Links', value: mockStudy.publicationLinks },
-		{ label: 'Participant Criteria', value: mockStudy.participantCriteria },
-	];
 
 	const pageStyle: React.CSSProperties = {
 		display: 'flex',
@@ -113,12 +71,6 @@ const StudyDetails = () => {
 		marginBottom: theme.spacing.lg,
 	};
 
-	const fieldRowStyle: React.CSSProperties = {
-		display: 'flex',
-		alignItems: 'flex-start',
-		marginBottom: theme.spacing.md,
-	};
-
 	const labelStyle: React.CSSProperties = {
 		minWidth: '200px',
 		fontWeight: theme.typography.fontWeight.bold,
@@ -140,12 +92,86 @@ const StudyDetails = () => {
 					<hr style={dividerStyle} />
 
 					<div>
-						{fields.map(({ label, value }) => (
-							<div key={label} style={fieldRowStyle}>
-								<span style={labelStyle}>{label}:</span>
-								<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{value}</Text>
+						<div>
+							<span style={labelStyle}>{t('common:study.fields.studyName')}:</span>
+							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.studyName}</Text>
+						</div>
+						<div>
+							<span style={labelStyle}>{t('common:study.fields.description')}:</span>
+							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
+								{study?.translations[0].studyDescription}
+							</Text>
+						</div>
+						<div>
+							<span style={labelStyle}>{t('common:study.fields.studyId')}:</span>
+							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.studyId}</Text>
+						</div>
+						<div>
+							<span style={labelStyle}>{t('common:study.fields.programName')}:</span>
+							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
+								{study?.translations[0].programName}
+							</Text>
+						</div>
+						<div>
+							<span style={labelStyle}>{t('common:study.fields.keywords')}:</span>
+							<div style={{ display: 'flex', flexWrap: 'wrap', gap: '1em' }}>
+								<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
+									{study?.translations[0].keywords.join(', ')}
+								</Text>
 							</div>
-						))}
+						</div>
+						<div>
+							<span style={labelStyle}>{t('common:study.fields.status')}:</span>
+							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.status}</Text>
+						</div>
+						<div>
+							<span style={labelStyle}>{t('common:study.fields.context')}:</span>
+							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.context}</Text>
+						</div>
+						<div>
+							<span style={labelStyle}>{t('common:study.fields.domain')}:</span>
+							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.domain}</Text>
+						</div>
+						<div>
+							<span style={labelStyle}>{t('common:study.fields.dacId')}:</span>
+							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.dacId}</Text>
+						</div>
+						<div>
+							<span style={labelStyle}>{t('common:study.fields.principalInvestigators')}:</span>
+							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
+								{study?.principalInvestigators.join(', ')}
+							</Text>
+						</div>
+						<div>
+							<span style={labelStyle}>{t('common:study.fields.leadOrganizations')}:</span>
+							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
+								{study?.leadOrganizations.join(', ')}
+							</Text>
+						</div>
+						<div>
+							<span style={labelStyle}>{t('common:study.fields.fundingSources')}:</span>
+							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
+								{study?.translations[0].fundingSources.join(', ')}
+							</Text>
+						</div>
+						<div>
+							<span style={labelStyle}>{t('common:study.fields.collaborators')}:</span>
+							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
+								{study?.collaborators.join(', ')}
+							</Text>
+						</div>
+						<div>
+							<span style={labelStyle}>{t('common:study.fields.publicationLinks')}:</span>
+							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
+								{study?.publicationLinks.join(', ')}
+							</Text>
+						</div>
+						<div>
+							<span style={labelStyle}>{t('common:study.fields.participantCriteria')}:</span>
+							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
+								{study?.translations[0].participantCriteria}
+							</Text>
+						</div>
 					</div>
 				</div>
 			</div>

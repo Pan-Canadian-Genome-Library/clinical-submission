@@ -24,12 +24,13 @@ import { ServerError } from '@/types/server';
 import { StudyResponse } from '@clinical-submission/data-model';
 
 /**
- * Query hook to fetch the current user from the auth-session endpoint.
+ * Query hook to fetch the current user from the study endpoint.
  */
 const useGetStudy = ({ studyId }: { studyId: string }) => {
 	return useQuery<StudyResponse, ServerError>({
 		queryKey: ['study', studyId],
 		retry: 1,
+		enabled: !!studyId,
 		queryFn: async () => {
 			const response = await fetch(`/study/${studyId}`);
 
@@ -39,9 +40,7 @@ const useGetStudy = ({ studyId }: { studyId: string }) => {
 			}
 
 			try {
-				const result = await response.json();
-
-				return result;
+				return await response.json();
 			} catch (error) {
 				console.debug('[useGetStudy]: Failed to parse response object', error);
 				throw error;
