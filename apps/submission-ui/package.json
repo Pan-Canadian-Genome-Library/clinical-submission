@@ -11,6 +11,7 @@
 	},
 	"dependencies": {
 		"i18next": "^26.3.6",
+		"@clinical-submission/data-model": "workspace:^",
 		"@clinical-submission/validation": "workspace:^",
 		"@tanstack/react-query": "^5.101.0",
 		"react": "^19.1.1",

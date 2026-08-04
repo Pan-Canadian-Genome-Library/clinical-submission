@@ -17,14 +17,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import {
+	AllowedLanguages,
+	StudyContext,
+	StudyDTO,
+	StudyStatus,
+	StudyTranslationDTO,
+	UpsertStudyParams,
+} from '@clinical-submission/data-model';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
 import { z } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
-import { AllowedLanguages, StudyContext, StudyDTO, StudyStatus, UpsertStudyParams } from '../types/study.js';
-import { StudyTranslationDTO } from '../types/studyTranslations.js';
 import { orderByString, PaginationParams, positiveInteger, stringNotEmpty } from './common.js';
 
 const ALLOWED_DOMAINS = [

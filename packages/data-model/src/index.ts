@@ -17,6 +17,4 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { studyTranslations } from '@/db/schemas/studyTranslationsSchema.js';
-
-export type StudyTranslationRecord = typeof studyTranslations.$inferSelect;
+export * from './types.js';

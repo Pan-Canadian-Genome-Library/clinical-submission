@@ -84,6 +84,9 @@ importers:
 
   apps/submission:
     dependencies:
+      '@clinical-submission/data-model':
+        specifier: workspace:^
+        version: link:../../packages/data-model
       '@clinical-submission/validation':
         specifier: workspace:^
         version: link:../../packages/validation
@@ -241,6 +244,9 @@ importers:
 
   apps/submission-ui:
     dependencies:
+      '@clinical-submission/data-model':
+        specifier: workspace:^
+        version: link:../../packages/data-model
       '@clinical-submission/validation':
         specifier: workspace:^
         version: link:../../packages/validation
@@ -299,6 +305,16 @@ importers:
       vite:
         specifier: ^7.1.2
         version: 7.1.11(@types/node@24.9.1)(tsx@4.20.6)(yaml@2.8.1)
+
+  packages/data-model:
+    dependencies:
+      zod:
+        specifier: ^3.24.2
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: ^5.5.3
+        version: 5.9.3
 
   packages/validation:
     dependencies:

@@ -17,6 +17,37 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { studyTranslations } from '@/db/schemas/studyTranslationsSchema.js';
+import { useQuery } from '@tanstack/react-query';
 
-export type StudyTranslationRecord = typeof studyTranslations.$inferSelect;
+import { fetch } from '@/api/FetchClient';
+import { ServerError } from '@/types/server';
+import { StudyResponse } from '@clinical-submission/data-model';
+
+/**
+ * Query hook to fetch the current user from the auth-session endpoint.
+ */
+const useGetStudy = ({ studyId }: { studyId: string }) => {
+	return useQuery<StudyResponse, ServerError>({
+		queryKey: ['study', studyId],
+		retry: 1,
+		queryFn: async () => {
+			const response = await fetch(`/study/${studyId}`);
+
+			if (!response.ok) {
+				console.debug(`[useGetStudy]: Error fetching /study/${studyId}', response status ${response.status}`);
+				throw new Error(`Failed to fetch study ${studyId}: ${response.statusText}`);
+			}
+
+			try {
+				const result = await response.json();
+
+				return result;
+			} catch (error) {
+				console.debug('[useGetStudy]: Failed to parse response object', error);
+				throw error;
+			}
+		},
+	});
+};
+
+export default useGetStudy;
