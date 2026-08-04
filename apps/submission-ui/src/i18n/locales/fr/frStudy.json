@@ -1,0 +1,24 @@
+{
+	"study": {
+		"loading": "Chargement des informations sur l'étude...",
+		"notLoggedIn": "Vous n'êtes pas connecté. Veuillez vous connecter pour consulter les détails de l'étude.",
+		"pageTitle": "Détails de l'étude",
+		"fields": {
+			"studyName": "Nom de l'étude",
+			"description": "Description",
+			"studyId": "Identifiant de l'étude",
+			"programName": "Nom du programme",
+			"keywords": "Mots-clés",
+			"status": "Statut",
+			"context": "Contexte",
+			"domain": "Domaine",
+			"dacId": "Identifiant du CAD",
+			"principalInvestigators": "Chercheurs principaux",
+			"leadOrganizations": "Organisations responsables",
+			"fundingSources": "Sources de financement",
+			"collaborators": "Collaborateurs",
+			"publicationLinks": "Liens de publication",
+			"participantCriteria": "Critères de participation"
+		}
+	}
+}

@@ -55,6 +55,9 @@ export const theme = {
 			secondary: '#666666',
 			white: '#ffffff',
 		},
+		border: {
+			primary: '#e0e0e0',
+		},
 	},
 	shadows: {
 		level1: '0 2px 8px rgba(0, 0, 0, 0.08)',

@@ -20,11 +20,13 @@
 import enForm from '@/i18n/locales/en/enForm.json';
 import enGeneral from '@/i18n/locales/en/enGeneral.json';
 import enHome from '@/i18n/locales/en/enHome.json';
+import enStudy from '@/i18n/locales/en/enStudy.json';
 
 export const ENGLISH_LOCALE_DICTIONARY = {
 	...enForm,
 	...enGeneral,
 	...enHome,
+	...enStudy,
 } as const;
 
 export type I18N_LOCALE_DICTIONARY = typeof ENGLISH_LOCALE_DICTIONARY;

@@ -1,0 +1,24 @@
+{
+	"study": {
+		"loading": "Loading study information...",
+		"notLoggedIn": "You are not logged in. Please log in to view study details.",
+		"pageTitle": "Study Details",
+		"fields": {
+			"studyName": "Study Name",
+			"description": "Description",
+			"studyId": "Study ID",
+			"programName": "Program Name",
+			"keywords": "Keywords",
+			"status": "Status",
+			"context": "Context",
+			"domain": "Domain",
+			"dacId": "DAC ID",
+			"principalInvestigators": "Principal Investigators",
+			"leadOrganizations": "Lead Organizations",
+			"fundingSources": "Funding Sources",
+			"collaborators": "Collaborators",
+			"publicationLinks": "Publication Links",
+			"participantCriteria": "Participant Criteria"
+		}
+	}
+}
