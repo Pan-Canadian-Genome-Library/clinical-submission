@@ -24,8 +24,10 @@ import Text from '../typography/Text';
 type ButtonProps = {
 	children?: React.ReactNode;
 	defaultText: string;
-	handler: () => void;
+	handler?: () => void;
 	type?: 'primary' | 'secondary';
+	href?: string;
+	className?: string;
 };
 
 /**
@@ -57,6 +59,32 @@ const Button = (props: ButtonProps) => {
 		transition: 'background-color 0.3s ease',
 	};
 
+	const content = (
+		<Text
+			styles={{
+				color: isPrimary ? theme.colors.text.white : theme.colors.secondary.black,
+				fontWeight: theme.typography.fontWeight.bold,
+			}}
+		>
+			{props.children ?? props.defaultText}
+		</Text>
+	);
+
+	if (props.href) {
+		return (
+			<a
+				href={props.href}
+				className={props.className}
+				style={{ ...buttonStyle, textDecoration: 'none' }}
+				onClick={props.handler}
+				onMouseEnter={() => setIsHovered(true)}
+				onMouseLeave={() => setIsHovered(false)}
+			>
+				{content}
+			</a>
+		);
+	}
+
 	return (
 		<button
 			style={buttonStyle}
@@ -64,14 +92,7 @@ const Button = (props: ButtonProps) => {
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 		>
-			<Text
-				styles={{
-					color: isPrimary ? theme.colors.text.white : theme.colors.secondary.black,
-					fontWeight: theme.typography.fontWeight.bold,
-				}}
-			>
-				{props.children ?? props.defaultText}
-			</Text>
+			{content}
 		</button>
 	);
 };
