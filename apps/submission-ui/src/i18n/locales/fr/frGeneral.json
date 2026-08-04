@@ -6,6 +6,7 @@
 	"dataDictionary": "Dictionnaire de données",
 	"login": "Connexion",
 	"helpDesk": "Assistance",
+	"spinner": "Chargement...",
 	"breadcrumbs": {
 		"home": "Accueil",
 		"studyDetails": "Détails de l'étude"

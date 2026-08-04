@@ -6,6 +6,7 @@
 	"dataDictionary": "Data Dictionary",
 	"login": "Login",
 	"helpDesk": "Help Desk",
+	"spinner": "Loading...",
 	"breadcrumbs": {
 		"home": "Home",
 		"studyDetails": "Study Details"

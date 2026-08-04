@@ -19,6 +19,7 @@
 
 import useGetStudy from '@/api/queries/useGetStudy';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import Spinner from '@/components/Spinner';
 import Text from '@/components/typography/Text';
 import { useTheme } from '@/styles/theme';
 import { useTranslation } from 'react-i18next';
@@ -37,17 +38,13 @@ const StudyDetails = () => {
 	} = useTranslation();
 
 	if (isLoading) {
-		return (
-			<div style={{ padding: '2rem' }}>
-				<Text>Loading study information...</Text>
-			</div>
-		);
+		return <Spinner label="Loading study information..." />;
 	}
 
 	if (isError) {
 		return (
 			<div style={{ padding: '2rem' }}>
-				<Text>Error loading study information. </Text>
+				<Text>Error loading study information.</Text>
 			</div>
 		);
 	}
