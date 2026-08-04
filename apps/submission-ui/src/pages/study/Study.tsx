@@ -30,8 +30,7 @@ const StudyDetails = () => {
 	} = useMatch('study/:studyId');
 
 	const { theme } = useTheme();
-	const { data: study, isLoading } = useGetStudy({ studyId });
-	console.log(study);
+	const { data: study, isLoading, isError } = useGetStudy({ studyId });
 
 	const {
 		i18n: { t },
@@ -41,6 +40,14 @@ const StudyDetails = () => {
 		return (
 			<div style={{ padding: '2rem' }}>
 				<Text>Loading study information...</Text>
+			</div>
+		);
+	}
+
+	if (isError) {
+		return (
+			<div style={{ padding: '2rem' }}>
+				<Text>Error loading study information. </Text>
 			</div>
 		);
 	}
@@ -63,6 +70,7 @@ const StudyDetails = () => {
 		color: theme.colors.text.primary,
 		margin: 0,
 		marginBottom: theme.spacing.lg,
+		padding: '2rem 0 2rem 0',
 	};
 
 	const dividerStyle: React.CSSProperties = {
@@ -72,12 +80,18 @@ const StudyDetails = () => {
 	};
 
 	const labelStyle: React.CSSProperties = {
-		minWidth: '200px',
+		minWidth: '220px',
 		fontWeight: theme.typography.fontWeight.bold,
 		color: theme.colors.text.primary,
 		fontSize: theme.typography.fontSize.base,
 		paddingTop: '0.1rem',
 		flexShrink: 0,
+	};
+
+	const rowStyle: React.CSSProperties = {
+		display: 'flex',
+		alignItems: 'flex-start',
+		marginBottom: theme.spacing.md,
 	};
 
 	return (
@@ -91,82 +105,80 @@ const StudyDetails = () => {
 					<h1 style={headingStyle}>{t('common:study.pageTitle')}</h1>
 					<hr style={dividerStyle} />
 
-					<div>
-						<div>
+					<div style={{ paddingTop: '2rem' }}>
+						<div style={rowStyle}>
 							<span style={labelStyle}>{t('common:study.fields.studyName')}:</span>
 							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.studyName}</Text>
 						</div>
-						<div>
+						<div style={rowStyle}>
 							<span style={labelStyle}>{t('common:study.fields.description')}:</span>
 							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
 								{study?.translations[0].studyDescription}
 							</Text>
 						</div>
-						<div>
+						<div style={rowStyle}>
 							<span style={labelStyle}>{t('common:study.fields.studyId')}:</span>
 							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.studyId}</Text>
 						</div>
-						<div>
+						<div style={rowStyle}>
 							<span style={labelStyle}>{t('common:study.fields.programName')}:</span>
 							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
 								{study?.translations[0].programName}
 							</Text>
 						</div>
-						<div>
+						<div style={rowStyle}>
 							<span style={labelStyle}>{t('common:study.fields.keywords')}:</span>
-							<div style={{ display: 'flex', flexWrap: 'wrap', gap: '1em' }}>
-								<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
-									{study?.translations[0].keywords.join(', ')}
-								</Text>
-							</div>
+							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
+								{study?.translations[0].keywords.join(', ')}
+							</Text>
 						</div>
-						<div>
+						<div style={rowStyle}>
 							<span style={labelStyle}>{t('common:study.fields.status')}:</span>
 							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.status}</Text>
 						</div>
-						<div>
+						<div style={rowStyle}>
 							<span style={labelStyle}>{t('common:study.fields.context')}:</span>
 							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.context}</Text>
 						</div>
-						<div>
+						<div style={rowStyle}>
 							<span style={labelStyle}>{t('common:study.fields.domain')}:</span>
 							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.domain}</Text>
 						</div>
-						<div>
+						<div style={rowStyle}>
 							<span style={labelStyle}>{t('common:study.fields.dacId')}:</span>
 							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.dacId}</Text>
 						</div>
-						<div>
+						<div style={rowStyle}>
 							<span style={labelStyle}>{t('common:study.fields.principalInvestigators')}:</span>
 							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
 								{study?.principalInvestigators.join(', ')}
 							</Text>
 						</div>
-						<div>
+						<div style={rowStyle}>
 							<span style={labelStyle}>{t('common:study.fields.leadOrganizations')}:</span>
 							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
 								{study?.leadOrganizations.join(', ')}
 							</Text>
 						</div>
-						<div>
+						<div style={rowStyle}>
 							<span style={labelStyle}>{t('common:study.fields.fundingSources')}:</span>
 							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
 								{study?.translations[0].fundingSources.join(', ')}
 							</Text>
 						</div>
-						<div>
+						<div style={rowStyle}>
 							<span style={labelStyle}>{t('common:study.fields.collaborators')}:</span>
 							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
 								{study?.collaborators.join(', ')}
 							</Text>
 						</div>
-						<div>
+						<div style={rowStyle}>
 							<span style={labelStyle}>{t('common:study.fields.publicationLinks')}:</span>
 							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
 								{study?.publicationLinks.join(', ')}
 							</Text>
 						</div>
-						<div>
+						<div style={rowStyle}>
 							<span style={labelStyle}>{t('common:study.fields.participantCriteria')}:</span>
 							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
 								{study?.translations[0].participantCriteria}
