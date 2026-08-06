@@ -10,8 +10,8 @@
         in: path
         required: true
         schema:
-          type: integer
-        description: The ID of the category containing the dictionary
+          type: string
+        description: Numeric ID or alias of the category containing the dictionary
     responses:
       200:
         description: Dictionary schema JSON
@@ -37,8 +37,8 @@
         in: path
         required: true
         schema:
-          type: integer
-        description: The ID of the category containing the dictionary
+          type: string
+        description: Numeric ID or alias of the category containing the dictionary
       - name: fileType
         in: query
         required: false
@@ -62,21 +62,43 @@
         $ref: '#/components/responses/ServerError'
 /dictionary/register:
   post:
-    summary: Associates the provided dictionary and version from the Dictionary Manager with a new category linked to the specified study ID. (🔒 Admin only)
+    summary: Associates the provided dictionary and version from the Dictionary Manager with a new category linked to the specified study ID. Creates the category if it does not exist, or updates its active dictionary and triggers a data migration to validate and update existing data against the new dictionary. (🔒 Admin only)
     tags:
       - Dictionary
+    parameters:
+      - name: force
+        description: Retries migration for this category only when the same dictionary is already registered and the most recent migration previously failed. If there is no previous failed migration, this flag is ignored.
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
     requestBody:
       content:
         application/json:
           schema:
             type: object
             properties:
-              studyId:
+              alias:
                 type: string
-                description: The unique identifier of the study, which must be already created by the Data Admin.
+                description: >-
+                  An optional, human-readable identifier for the category, usable anywhere a
+                  categoryId is accepted, in place of the numeric id. Doesn't change on its own the
+                  way an auto-generated token might, though it can be cleared or reassigned via
+                  PUT/DELETE /category/{categoryId}/alias, it isn't permanent the way the numeric id
+                  is. Letters, numbers, hyphens, underscores, and periods only; an empty string is
+                  treated as not provided. A purely numeric value (e.g. `5`) is rejected, since it
+                  could collide with a category's numeric id; a value containing a decimal point
+                  (e.g. `2.5`) is allowed, including as a data version label. Can only be set here
+                  at category creation; supplying it while registering onto an existing category
+                  returns 400. Use PUT/DELETE /category/{categoryId}/alias to add or remove one
+                  afterward; changing an already-set alias isn't supported yet.
               categoryName:
                 type: string
                 description: A user-defined classification to group and organize data based on shared characteristics or criteria
+              defaultCentricEntity:
+                type: string
+                description: The default centric entity name
               dictionaryName:
                 type: string
                 description: A matching Dictionary Name defined on Dictionary Manager
@@ -84,9 +106,9 @@
                 type: string
                 example: '1.0'
                 description: A matching Dictionary Version defined on Dictionary Manager
-              defaultCentricEntity:
+              studyId:
                 type: string
-                description: The default centric entity name
+                description: The unique identifier of the study, which must be already created by the Data Admin.
             required:
               - categoryName
               - dictionaryName

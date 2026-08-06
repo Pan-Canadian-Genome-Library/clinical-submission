@@ -29,26 +29,28 @@ import { studyService } from '@/service/studyService.js';
 
 const unlinkStudiesFromCategory = validateRequest(removeStudyLinkFromCategoryReqValidation, async (req, res, next) => {
 	try {
-		const categoryId = Number(req.params.categoryId);
+		const categoryIdOrAlias = req.params.categoryId;
 		const database = getDbInstance();
 
 		const studySvc = await studyService(database);
 
-		const foundCategory = await lyricProvider.services.category.getDetails(categoryId);
+		const foundCategory = await lyricProvider.services.category.getDetails(categoryIdOrAlias);
 		if (!foundCategory) {
-			throw new lyricProvider.utils.errors.NotFound(`No Category with ID - ${categoryId} found.`);
+			throw new lyricProvider.utils.errors.NotFound(`No Category with ID or Alias - ${categoryIdOrAlias} found.`);
 		}
 
-		const submittedDataCount = await lyricProvider.repositories.submittedData.getTotalRecordsByCategoryId(categoryId);
+		const submittedDataCount = await lyricProvider.repositories.submittedData.getTotalRecordsByCategoryId(
+			foundCategory.id,
+		);
 		if (submittedDataCount > 0) {
 			throw new lyricProvider.utils.errors.BadRequest(
-				`Cannot remove study link from category ${categoryId} because it has ${submittedDataCount} records submitted`,
+				`Cannot remove study link from category ${categoryIdOrAlias} because it has ${submittedDataCount} records submitted`,
 			);
 		}
 
-		const linkedStudies = await studySvc.getStudiesByCategoryIds([categoryId]);
+		const linkedStudies = await studySvc.getStudiesByCategoryIds([foundCategory.id]);
 		if (linkedStudies.length > 0) {
-			await studySvc.unlinkStudiesFromCategory(categoryId);
+			await studySvc.unlinkStudiesFromCategory(foundCategory.id);
 		}
 
 		res.status(204).send();
@@ -60,19 +62,19 @@ const unlinkStudiesFromCategory = validateRequest(removeStudyLinkFromCategoryReq
 });
 
 const getCategoryById = validateRequest(getCategoryByIDReqValidation, async (req, res, next) => {
-	const categoryId = Number(req.params.categoryId);
+	const categoryIdOrAlias = req.params.categoryId;
 	const database = getDbInstance();
 	const categoryService = lyricProvider.services.category;
 	const studySvc = await studyService(database);
 
 	try {
-		const foundCategory = await categoryService.getDetails(categoryId);
+		const foundCategory = await categoryService.getDetails(categoryIdOrAlias);
 
 		if (!foundCategory) {
-			throw new lyricProvider.utils.errors.NotFound(`No Category with ID - ${categoryId} found.`);
+			throw new lyricProvider.utils.errors.NotFound(`No Category with ID or Alias - ${categoryIdOrAlias} found.`);
 		}
 
-		const linkedStudies = await studySvc.getStudiesByCategoryIds([categoryId]);
+		const linkedStudies = await studySvc.getStudiesByCategoryIds([foundCategory.id]);
 
 		const study = linkedStudies[0]?.study_id;
 
