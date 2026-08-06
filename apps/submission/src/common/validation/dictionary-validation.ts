@@ -36,7 +36,7 @@ type RegisterDictionaryBody = {
 
 export const registerDictionaryValidation: RequestValidation<RegisterDictionaryBody, ParsedQs, ParamsDictionary> = {
 	body: zod.object({
-		alias: categoryAliasSchema,
+		alias: categoryAliasSchema.optional(),
 		studyId: stringNotEmpty,
 		categoryName: stringNotEmpty,
 		dictionaryName: stringNotEmpty,

@@ -98,7 +98,10 @@ export const categoryIdSchema = zod
 	.string()
 	.trim()
 	.min(1)
-	.refine((value) => isValidIdNumber(parseInt(value)) || isValidCategoryAlias(value), 'invalid category ID');
+	.refine(
+		(value) => (/^\d+$/.test(value) && isValidIdNumber(Number(value))) || isValidCategoryAlias(value),
+		'Invalid category ID. Must be a positive integer or a valid alias.',
+	);
 
 /**
  * Checks if a string is safe as a category alias: a non-empty URL-safe slug (letters, numbers,
