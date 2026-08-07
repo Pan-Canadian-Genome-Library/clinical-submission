@@ -20,7 +20,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router';
 
-import { ThemeProvider } from '@/styles/theme';
 import { UserProvider } from './UserProvider';
 
 export const queryClient = new QueryClient();
@@ -35,11 +34,9 @@ export const queryClient = new QueryClient();
 const Providers = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<QueryClientProvider client={queryClient}>
-			<ThemeProvider>
-				<BrowserRouter>
-					<UserProvider>{children}</UserProvider>
-				</BrowserRouter>
-			</ThemeProvider>
+			<BrowserRouter>
+				<UserProvider>{children}</UserProvider>
+			</BrowserRouter>
 		</QueryClientProvider>
 	);
 };

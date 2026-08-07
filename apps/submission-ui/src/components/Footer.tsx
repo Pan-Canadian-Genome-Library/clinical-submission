@@ -17,34 +17,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { Theme, useTheme } from '@/styles/theme';
 import { useTranslation } from 'react-i18next';
-
-const FooterStyles = (theme: Theme): React.CSSProperties => ({
-	backgroundColor: theme.colors.primary.light,
-	display: 'flex',
-	color: theme.colors.secondary.black,
-});
-
-const FooterBody = (): React.CSSProperties => ({
-	display: 'flex',
-	alignItems: 'center',
-	justifyContent: 'space-between',
-});
 
 const Footer = () => {
 	const {
 		i18n: { t },
 	} = useTranslation('common');
 	const currentDate = new Date().getFullYear();
-	const { theme } = useTheme();
 	return (
-		<footer style={FooterStyles(theme)}>
-			<div style={FooterBody()}>
+		<footer className="flex bg-primary-600 text-black">
+			<div className="flex items-center justify-between">
 				<h3>&copy; {t('common:PCGL', { date: currentDate })}</h3>
 			</div>
 		</footer>
 	);
 };
-
 export default Footer;

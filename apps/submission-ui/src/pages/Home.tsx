@@ -19,29 +19,10 @@
 
 import '@/styles/App.css';
 
-import { Theme, useTheme } from '@/styles/theme';
-
-const Wrapper = (theme: Theme): React.CSSProperties => {
-	return {
-		position: 'relative',
-		maxWidth: '1480px',
-		margin: '0 auto',
-		paddingInline: `${theme.spacing.md}`,
-		width: '100%',
-	};
-};
-
-const Container = (): React.CSSProperties => ({
-	position: 'relative',
-	height: '100%',
-	width: '100%',
-});
-
 function Home() {
-	const { theme } = useTheme();
 	return (
-		<div style={Container()}>
-			<main style={Wrapper(theme)}>
+		<div className="relative h-full w-full">
+			<main className="relative max-w-[1480px] mx-auto px-4 w-full">
 				<h1>Submission UI</h1>
 			</main>
 		</div>

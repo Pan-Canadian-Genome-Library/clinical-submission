@@ -21,28 +21,12 @@ import { API_PATH_LOGIN, API_PATH_LOGOUT } from '@/api/paths';
 import { clearLangSessionInformation, setLangSessionInformation, SupportedLangs } from '@/global/localstorage/language';
 import i18n from '@/i18n/translations';
 import { useUserContext } from '@/providers/UserProvider';
-import { Theme, useTheme } from '@/styles/theme';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import PCGL from '../assets/pcgl-logo-colour.svg';
 import Button from './button/Button';
 
-const headerTop = (theme: Theme): React.CSSProperties => ({
-	padding: `${theme.spacing.md} ${theme.spacing.xxl}`,
-});
-
-const headerBody = (): React.CSSProperties => ({
-	display: 'flex',
-	alignItems: 'center',
-	justifyContent: 'space-between',
-});
-
-const headerImage = (): React.CSSProperties => ({
-	width: '250px',
-});
-
 const Header = () => {
-	const { theme } = useTheme();
 	const { isLoggedIn } = useUserContext();
 	const [lang, setLanguage] = useState(i18n.language);
 	const {
@@ -63,9 +47,9 @@ const Header = () => {
 	};
 
 	return (
-		<header style={headerTop(theme)}>
-			<div style={headerBody()}>
-				<img style={headerImage()} src={PCGL} alt="PCGL Clinical Submission Home" />
+		<header className="py-4 px-16">
+			<div className="flex items-center justify-between">
+				<img className="w-[250px]" src={PCGL} alt="PCGL Clinical Submission Home" />
 				<>
 					<Button defaultText={t('common:languageSwitch')} handler={languageSwitch} />
 					<h2>Submission UI</h2>

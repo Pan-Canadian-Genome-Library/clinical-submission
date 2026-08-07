@@ -17,9 +17,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { useTheme } from '@/styles/theme';
-import { useState } from 'react';
-
 type ButtonProps = {
 	children?: React.ReactNode;
 	defaultText: string;
@@ -33,25 +30,10 @@ type ButtonProps = {
  * @returns
  */
 const Button = (props: ButtonProps) => {
-	const { theme } = useTheme();
-	const [isHovered, setIsHovered] = useState(false);
-
-	const buttonStyle: React.CSSProperties = {
-		backgroundColor: isHovered ? theme.colors.primary.main : theme.colors.primary.dark,
-		color: theme.colors.background.default,
-		borderRadius: '8px',
-		padding: `${theme.spacing.sm} ${theme.spacing.sm}`,
-		border: 'none',
-		cursor: 'pointer',
-		transition: 'background-color 0.3s ease',
-	};
-
 	return (
 		<button
-			style={buttonStyle}
+			className="bg-primary-800 hover:bg-primary-700  text-white font-bold rounded-lg px-1.5 py-1 cursor-pointer transition-colors duration-300 ease-in-out"
 			onClick={() => props.handler()}
-			onMouseEnter={() => setIsHovered(true)}
-			onMouseLeave={() => setIsHovered(false)}
 		>
 			{props.children ?? props.defaultText}
 		</button>
