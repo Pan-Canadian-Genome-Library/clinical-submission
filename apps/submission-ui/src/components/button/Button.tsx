@@ -32,7 +32,7 @@ type ButtonProps = {
 const Button = (props: ButtonProps) => {
 	return (
 		<button
-			className="bg-primary-800 hover:bg-primary-700  text-white font-bold rounded-lg px-1.5 py-1 cursor-pointer transition-colors duration-300 ease-in-out"
+			className="bg-primary-800 hover:bg-primary-700 text-white font-bold rounded-lg px-1.5 py-1 cursor-pointer transition-colors duration-300 ease-in-out text-sm"
 			onClick={() => props.handler()}
 		>
 			{props.children ?? props.defaultText}
