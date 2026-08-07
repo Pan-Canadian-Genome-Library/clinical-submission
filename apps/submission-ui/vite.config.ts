@@ -1,6 +1,7 @@
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
+import tailwindcss from '@tailwindcss/vite';
 
 const API_PROXY_PATH = '/api';
 
@@ -10,7 +11,7 @@ export default ({ mode }: { mode: string }) => {
 
 	// https://vitejs.dev/config/
 	return defineConfig({
-		plugins: [react()],
+		plugins: [react(), tailwindcss()],
 		build: {
 			outDir: 'dist',
 			emptyOutDir: true,
