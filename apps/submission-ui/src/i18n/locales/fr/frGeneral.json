@@ -5,6 +5,7 @@
 	"dataSubmission": "Soumission de données",
 	"dataDictionary": "Dictionnaire de données",
 	"login": "Connexion",
+	"logout": "Se déconnecter",
 	"helpDesk": "Assistance",
 	"spinner": "Chargement...",
 	"breadcrumbs": {

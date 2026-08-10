@@ -17,8 +17,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '@/styles/App.css';
-
 import AuditIcon from '@/assets/audit-outlined.png';
 import FileIcon from '@/assets/file-outlined.png';
 import Hero from '@/assets/hero-bar.png';
@@ -26,184 +24,55 @@ import SignatureIcon from '@/assets/signature-outlined.png';
 import UserIcon from '@/assets/user-outlined.png';
 import Button from '@/components/button/Button';
 import Text from '@/components/typography/Text';
-import { useMinWidth } from '@/global/hooks/useMinWidth';
-import { Theme, useTheme } from '@/styles/theme';
 import { useTranslation } from 'react-i18next';
 
-const Container = (): React.CSSProperties => ({
-	position: 'relative',
-	height: '100%',
-	width: '100%',
-	minHeight: '100vh',
-	display: 'flex',
-	flexDirection: 'column',
-});
-
-const MainContent = (): React.CSSProperties => ({
-	flex: 1,
-	width: '100%',
-});
-
-const heroSectionStyle: React.CSSProperties = {
-	backgroundPosition: 'center',
-	backgroundSize: 'cover',
-	backgroundImage: `url(${Hero})`,
-	padding: '4rem 2rem',
-	minHeight: '400px',
-	display: 'flex',
-	justifyContent: 'center',
-	alignItems: 'center',
-};
-
-const heroContentStyle: React.CSSProperties = {
-	maxWidth: '1200px',
-	width: '100%',
-	margin: '0 auto',
-};
-
-const contentSectionStyle: React.CSSProperties = {
-	backgroundColor: '#ffffff',
-	padding: '3rem 2rem',
-};
-
-const contentWrapperStyle: React.CSSProperties = {
-	maxWidth: '1200px',
-	margin: '0 auto',
-};
-
-const twoColumnStyle = (minWidth: number): React.CSSProperties => ({
-	display: 'flex',
-	flexDirection: minWidth < 768 ? 'column' : 'row',
-	gap: '3rem',
-	marginBottom: '3rem',
-});
-
-const iconCircleStyle = (theme: Theme, bgColor: string): React.CSSProperties => ({
-	width: '50px',
-	height: '50px',
-	borderRadius: '50%',
-	backgroundColor: bgColor,
-	display: 'flex',
-	alignItems: 'center',
-	justifyContent: 'center',
-	flexShrink: 0,
-	color: theme.colors.text.white,
-	fontWeight: 'bold',
-	fontSize: '1.2rem',
-});
-
-const iconImageStyle: React.CSSProperties = {
-	width: '24px',
-	height: '24px',
-	objectFit: 'contain',
-};
-
-const stepContainerStyle: React.CSSProperties = {
-	display: 'flex',
-	gap: '1rem',
-	marginBottom: '1.5rem',
-	alignItems: 'flex-start',
-};
-
-const buttonGroupStyle: React.CSSProperties = {
-	display: 'flex',
-	gap: '1rem',
-	alignItems: 'center',
-	marginTop: '1.5rem',
-};
-
 function Home() {
-	const { theme } = useTheme();
 	const {
 		i18n: { t },
 	} = useTranslation();
 
-	const minWidth = useMinWidth();
-
 	return (
-		<div style={Container()}>
-			<main style={MainContent()}>
+		<div className="relative min-h-screen flex flex-col">
+			<main className="flex-1 w-full">
 				{/* Hero Section */}
-				<section style={heroSectionStyle}>
-					<div style={heroContentStyle}>
-						<h1
-							style={{
-								color: theme.colors.text.white,
-								fontSize: '2.5rem',
-								marginBottom: '1rem',
-								fontWeight: theme.typography.fontWeight.bold,
-								maxWidth: '650px',
-							}}
-						>
-							{t('common:hero.title')}
-						</h1>
-						<Text
-							styles={{
-								color: theme.colors.text.white,
-								marginBottom: '2rem',
-								maxWidth: '600px',
-							}}
-						>
-							{t('common:hero.description')}
-						</Text>
-						<div style={buttonGroupStyle}>
+				<section
+					className="bg-center bg-cover py-16 px-8 min-h-[400px] flex justify-center items-center"
+					style={{ backgroundImage: `url(${Hero})` }}
+				>
+					<div className="max-w-[1200px] w-full mx-auto">
+						<h1 className="text-white text-4xl mb-4 font-semibold max-w-[650px]">{t('common:hero.title')}</h1>
+						<p className="text-white mb-8 max-w-[600px]">{t('common:hero.description')}</p>
+						<div className="flex gap-4 items-center mt-6">
 							<Button type="secondary" defaultText={t('common:hero.submitFiles')} handler={() => {}} />
 						</div>
 					</div>
 				</section>
 
 				{/* Content Section */}
-				<section style={contentSectionStyle}>
-					<div style={contentWrapperStyle}>
-						<div style={twoColumnStyle(minWidth)}>
+				<section className="bg-white py-12 px-8">
+					<div className="max-w-[1200px] mx-auto">
+						<div className="flex flex-col md:flex-row gap-12 mb-12">
 							{/* Overview Section */}
-							<div style={{ flex: 1 }}>
-								<h2
-									style={{
-										color: theme.colors.text.primary,
-										fontSize: theme.typography.fontSize.xl,
-										marginBottom: '1rem',
-										fontWeight: theme.typography.fontWeight.bold,
-									}}
-								>
-									{t('common:overview.title')}
-								</h2>
-								<Text
-									styles={{
-										marginBottom: '1rem',
-									}}
-								>
-									{t('common:overview.paragraph1')}
-								</Text>
+							<div className="flex-1">
+								<h2 className="text-gray-900 text-2xl mb-4 font-semibold">{t('common:overview.title')}</h2>
+								<Text className="mb-4">{t('common:overview.paragraph1')}</Text>
 								<Text>{t('common:overview.paragraph2')}</Text>
 							</div>
 
 							{/* How to Register Section */}
-							<div style={{ flex: 1 }}>
-								<h2
-									style={{
-										color: theme.colors.text.primary,
-										fontSize: theme.typography.fontSize.xl,
-										marginBottom: '1.5rem',
-										fontWeight: theme.typography.fontWeight.bold,
-									}}
-								>
-									{t('common:howToRegister.title')}
-								</h2>
+							<div className="flex-1">
+								<h2 className="text-gray-900 text-2xl mb-6 font-semibold">{t('common:howToRegister.title')}</h2>
 
 								{/* Step 1 */}
-								<div style={stepContainerStyle}>
-									<div style={iconCircleStyle(theme, '#E8A4A2')}>
-										<img src={AuditIcon} alt="" style={iconImageStyle} />
+								<div className="flex gap-4 mb-6 items-start">
+									<div
+										className="w-[50px] h-[50px] rounded-full flex items-center justify-center shrink-0 text-white font-bold"
+										style={{ backgroundColor: '#E8A4A2' }}
+									>
+										<img src={SignatureIcon} alt="" className="w-6 h-6 object-contain" />
 									</div>
 									<Text>
-										<a
-											href="#helpdesk"
-											style={{
-												color: theme.colors.primary.main,
-												textDecoration: 'underline',
-											}}
-										>
+										<a href="#helpdesk" className="text-primary-600 underline">
 											{t('common:howToRegister.step1.linkText')}
 										</a>{' '}
 										{t('common:howToRegister.step1.text')}
@@ -211,25 +80,34 @@ function Home() {
 								</div>
 
 								{/* Step 2 */}
-								<div style={stepContainerStyle}>
-									<div style={iconCircleStyle(theme, '#A8D5BA')}>
-										<img src={SignatureIcon} alt="" style={iconImageStyle} />
+								<div className="flex gap-4 mb-6 items-start">
+									<div
+										className="w-[50px] h-[50px] rounded-full flex items-center justify-center shrink-0 text-white font-bold"
+										style={{ backgroundColor: '#A8D5BA' }}
+									>
+										<img src={AuditIcon} alt="" className="w-6 h-6 object-contain" />
 									</div>
 									<Text>{t('common:howToRegister.step2')}</Text>
 								</div>
 
 								{/* Step 3 */}
-								<div style={stepContainerStyle}>
-									<div style={iconCircleStyle(theme, '#F4D35E')}>
-										<img src={UserIcon} alt="" style={iconImageStyle} />
+								<div className="flex gap-4 mb-6 items-start">
+									<div
+										className="w-[50px] h-[50px] rounded-full flex items-center justify-center shrink-0 text-white font-bold"
+										style={{ backgroundColor: '#F4D35E' }}
+									>
+										<img src={UserIcon} alt="" className="w-6 h-6 object-contain" />
 									</div>
 									<Text>{t('common:howToRegister.step3')}</Text>
 								</div>
 
 								{/* Step 4 */}
-								<div style={stepContainerStyle}>
-									<div style={iconCircleStyle(theme, '#A4C2E4')}>
-										<img src={FileIcon} alt="" style={iconImageStyle} />
+								<div className="flex gap-4 mb-6 items-start">
+									<div
+										className="w-[50px] h-[50px] rounded-full flex items-center justify-center shrink-0 text-white font-bold"
+										style={{ backgroundColor: '#A4C2E4' }}
+									>
+										<img src={FileIcon} alt="" className="w-6 h-6 object-contain" />
 									</div>
 									<Text>{t('common:howToRegister.step4')}</Text>
 								</div>
@@ -239,27 +117,11 @@ function Home() {
 				</section>
 
 				{/* Submitting Genomic Data Section */}
-				<section style={{ padding: '3rem 2rem' }}>
-					<div style={contentWrapperStyle}>
-						<h2
-							style={{
-								color: theme.colors.text.primary,
-								fontSize: theme.typography.fontSize.xl,
-								marginBottom: '1rem',
-								fontWeight: theme.typography.fontWeight.bold,
-							}}
-						>
-							{t('common:genomicData.title')}
-						</h2>
+				<section className="py-12 px-8 ">
+					<div className="max-w-[1200px] mx-auto">
+						<h2 className="text-gray-900 text-2xl mb-4 font-semibold">{t('common:genomicData.title')}</h2>
 						<Text>{t('common:genomicData.paragraph')}</Text>
-						<a
-							href="#workflow"
-							style={{
-								color: theme.colors.primary.main,
-								textDecoration: 'underline',
-								fontSize: theme.typography.fontSize.base,
-							}}
-						>
+						<a href="#workflow" className="text-primary-600 underline text-base">
 							{t('common:genomicData.linkText')} →
 						</a>
 					</div>

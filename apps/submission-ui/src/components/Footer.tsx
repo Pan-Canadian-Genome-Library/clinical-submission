@@ -19,129 +19,64 @@
 
 import CIHRLogo from '@/assets/cihr-logo.png';
 import PCGLLogoWhite from '@/assets/pcgl-logo-white.png';
-import Text from '@/components/typography/Text';
-import { useMinWidth } from '@/global/hooks/useMinWidth';
-import { Theme, useTheme } from '@/styles/theme';
 import { useTranslation } from 'react-i18next';
-
-const FooterStyles = (theme: Theme): React.CSSProperties => ({
-	backgroundColor: theme.colors.primary.light,
-	color: theme.colors.text.white,
-	width: '100%',
-	padding: '2rem 2rem',
-});
-
-const FooterContent = (minWidth: number): React.CSSProperties => ({
-	display: 'flex',
-	flexDirection: minWidth < 768 ? 'column' : 'row',
-	justifyContent: 'space-between',
-	gap: '3rem',
-});
-
-const LogoSection = (): React.CSSProperties => ({
-	flex: '1',
-	display: 'flex',
-	flexDirection: 'column',
-	gap: '1rem',
-});
-
-const LogoContainer = (): React.CSSProperties => ({
-	display: 'flex',
-	gap: '1.5rem',
-	alignItems: 'center',
-});
-
-const LogoStyle: React.CSSProperties = {
-	height: '40px',
-	objectFit: 'contain',
-};
-
-const LinksSection = (minWidth: number): React.CSSProperties => ({
-	display: 'flex',
-	flexDirection: minWidth < 768 ? 'column' : 'row',
-	alignItems: minWidth < 768 ? 'flex-start' : 'center',
-	gap: minWidth < 768 ? '2rem' : '3rem',
-});
-
-const LinkColumn = (): React.CSSProperties => ({
-	display: 'flex',
-	flexDirection: 'column',
-	gap: '1.50rem',
-});
-
-const LinkStyle = (theme: Theme): React.CSSProperties => ({
-	color: theme.colors.text.white,
-	textDecoration: 'underline',
-	fontSize: theme.typography.fontSize.sm,
-	cursor: 'pointer',
-});
-
-const FooterTextStyle = (theme: Theme): React.CSSProperties => ({
-	color: theme.colors.text.white,
-	fontSize: theme.typography.fontSize.sm,
-	lineHeight: theme.typography.lineHeight.normal,
-	margin: 0,
-	paddingInline: 0,
-});
 
 const Footer = () => {
 	const {
 		i18n: { t },
 	} = useTranslation('common');
 	const currentDate = new Date().getFullYear();
-	const { theme } = useTheme();
-	const minWidth = useMinWidth();
 
 	return (
-		<footer style={FooterStyles(theme)}>
-			<div style={FooterContent(minWidth)}>
+		<footer className="bg-primary-400 text-white w-full p-8">
+			<div className="flex flex-col md:flex-row justify-between gap-12">
 				{/* Left Section - Logos and Text */}
-				<div style={LogoSection()}>
-					<div style={LogoContainer()}>
-						<img src={PCGLLogoWhite} alt="PCGL Logo" style={LogoStyle} />
-						<img src={CIHRLogo} alt="CIHR Logo" style={LogoStyle} />
+				<div className="flex-1 flex flex-col gap-4">
+					<div className="flex gap-6 items-center">
+						<img src={PCGLLogoWhite} alt="PCGL Logo" className="h-[40px] object-contain" />
+						<img src={CIHRLogo} alt="CIHR Logo" className="h-[40px] object-contain" />
 					</div>
-					<Text styles={FooterTextStyle(theme)}>{t('common:footer.supportedBy')}</Text>
-					<Text styles={FooterTextStyle(theme)}>{t('common:footer.copyright', { date: currentDate })}</Text>
+					<p className="text-white text-sm leading-normal">{t('common:footer.supportedBy')}</p>
+					<p className="text-white text-sm leading-normal">{t('common:footer.copyright', { date: currentDate })}</p>
 				</div>
 
 				{/* Right Section - Links */}
-				<div style={LinksSection(minWidth)}>
+				<div className="flex flex-col md:flex-row md:items-center gap-8 md:gap-12">
 					{/* Column 1 */}
-					<div style={LinkColumn()}>
-						<a href="#contact" style={LinkStyle(theme)}>
+					<div className="flex flex-col gap-6">
+						<a href="#contact" className="text-white underline text-sm cursor-pointer">
 							{t('common:footer.contactUs')}
 						</a>
-						<a href="#controlled-users" style={LinkStyle(theme)}>
+						<a href="#controlled-users" className="text-white underline text-sm cursor-pointer">
 							{t('common:footer.controlledDataUsers')}
 						</a>
-						<a href="#privacy" style={LinkStyle(theme)}>
+						<a href="#privacy" className="text-white underline text-sm cursor-pointer">
 							{t('common:footer.privacyPolicy')}
 						</a>
 					</div>
 
 					{/* Column 2 */}
-					<div style={LinkColumn()}>
-						<a href="#policies" style={LinkStyle(theme)}>
+					<div className="flex flex-col gap-6">
+						<a href="#policies" className="text-white underline text-sm cursor-pointer">
 							{t('common:footer.policiesGuidelines')}
 						</a>
-						<a href="#website" style={LinkStyle(theme)}>
+						<a href="#website" className="text-white underline text-sm cursor-pointer">
 							{t('common:footer.pcglWebsite')}
 						</a>
-						<a href="#terms" style={LinkStyle(theme)}>
+						<a href="#terms" className="text-white underline text-sm cursor-pointer">
 							{t('common:footer.termsConditions')}
 						</a>
 					</div>
 
 					{/* Column 3 */}
-					<div style={LinkColumn()}>
-						<a href="#help" style={LinkStyle(theme)}>
+					<div className="flex flex-col gap-6">
+						<a href="#help" className="text-white underline text-sm cursor-pointer">
 							{t('common:footer.helpGuides')}
 						</a>
-						<a href="#platform" style={LinkStyle(theme)}>
+						<a href="#platform" className="text-white underline text-sm cursor-pointer">
 							{t('common:footer.dataPlatform')}
 						</a>
-						<a href="#publication" style={LinkStyle(theme)}>
+						<a href="#publication" className="text-white underline text-sm cursor-pointer">
 							{t('common:footer.publicationPolicy')}
 						</a>
 					</div>

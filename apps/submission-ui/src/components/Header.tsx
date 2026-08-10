@@ -21,29 +21,13 @@ import { API_PATH_LOGIN, API_PATH_LOGOUT } from '@/api/paths';
 import { clearLangSessionInformation, setLangSessionInformation, SupportedLangs } from '@/global/localstorage/language';
 import i18n from '@/i18n/translations';
 import { useUserContext } from '@/providers/UserProvider';
-import { Theme, useTheme } from '@/styles/theme';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import PCGL from '../assets/pcgl-logo.png';
 import Button from './button/Button';
 import Text from './typography/Text';
 
-const headerTop = (theme: Theme): React.CSSProperties => ({
-	backgroundColor: theme.colors.background.default,
-	padding: `${theme.spacing.md} ${theme.spacing.lg}`,
-});
-
-const headerBody = (): React.CSSProperties => ({
-	display: 'flex',
-	alignItems: 'center',
-});
-
-const headerImage = (): React.CSSProperties => ({
-	width: '150px',
-});
-
 const Header = () => {
-	const { theme } = useTheme();
 	const { isLoggedIn } = useUserContext();
 	const [lang, setLanguage] = useState(i18n.language);
 	const {
@@ -64,14 +48,16 @@ const Header = () => {
 	};
 
 	return (
-		<header style={headerTop(theme)}>
-			<div style={headerBody()}>
-				<div style={{ display: 'flex', gap: theme.spacing.sm, flex: 1, alignItems: 'center' }}>
-					<img style={headerImage()} src={PCGL} alt={t('common:pcglLogoAltText')} />
-					<Text>{t('common:dataSubmission')}</Text>
-					<Text>{t('common:dataDictionary')}</Text>
+		<header className="bg-white py-4 px-6">
+			<div className="flex items-center">
+				<div className="flex gap-2 flex-1 items-center">
+					<img className="w-[150px]" src={PCGL} alt={t('common:pcglLogoAltText')} />
+					<div className="flex px-2 gap-2">
+						<Text>{t('common:dataSubmission')}</Text>
+						<Text>{t('common:dataDictionary')}</Text>
+					</div>
 				</div>
-				<div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1, gap: theme.spacing.sm }}>
+				<div className="flex justify-end flex-1 gap-2">
 					<Button type="secondary" defaultText={t('common:languageSwitch')} handler={languageSwitch} />
 					<Button type="secondary" defaultText={t('common:helpDesk')} handler={() => {}} />
 					<Button href={!isLoggedIn ? API_PATH_LOGIN : API_PATH_LOGOUT} defaultText={t('common:login')}>
