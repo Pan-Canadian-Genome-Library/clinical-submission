@@ -52,8 +52,10 @@ const Header = () => {
 			<div className="flex items-center">
 				<div className="flex gap-2 flex-1 items-center">
 					<img className="w-[150px]" src={PCGL} alt={t('common:pcglLogoAltText')} />
-					<Text>{t('common:dataSubmission')}</Text>
-					<Text>{t('common:dataDictionary')}</Text>
+					<div className="flex px-2 gap-2">
+						<Text>{t('common:dataSubmission')}</Text>
+						<Text>{t('common:dataDictionary')}</Text>
+					</div>
 				</div>
 				<div className="flex justify-end flex-1 gap-2">
 					<Button type="secondary" defaultText={t('common:languageSwitch')} handler={languageSwitch} />
