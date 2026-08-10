@@ -19,6 +19,7 @@
 			"collaborators": "Collaborateurs",
 			"publicationLinks": "Liens de publication",
 			"participantCriteria": "Critères de participation"
-		}
+		},
+		"error": "Erreur lors du chargement des informations sur l’étude."
 	}
 }

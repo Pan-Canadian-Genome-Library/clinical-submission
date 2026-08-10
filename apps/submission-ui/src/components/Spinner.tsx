@@ -17,7 +17,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { useTheme } from '@/styles/theme';
 import { useTranslation } from 'react-i18next';
 
 type SpinnerProps = {
@@ -31,35 +30,15 @@ const Spinner = ({ size = 40, label }: SpinnerProps) => {
 	} = useTranslation();
 
 	const currentLabel = label ?? t('common:spinner');
-	const { theme } = useTheme();
-
-	const wrapperStyle: React.CSSProperties = {
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'center',
-		justifyContent: 'center',
-		gap: theme.spacing.md,
-		padding: '2rem',
-	};
-
-	const ringStyle: React.CSSProperties = {
-		width: size,
-		height: size,
-		borderRadius: '50%',
-		border: `3px solid ${theme.colors.border.primary}`,
-		borderTopColor: theme.colors.primary.main,
-		animation: `spinner 0.75s linear infinite`,
-	};
-
-	const labelStyle: React.CSSProperties = {
-		color: theme.colors.text.secondary,
-		fontSize: theme.typography.fontSize.sm,
-	};
 
 	return (
-		<div style={wrapperStyle} role="status" aria-label={currentLabel}>
-			<div style={ringStyle} aria-hidden="true" />
-			<span style={labelStyle}>{currentLabel}</span>
+		<div className="flex flex-col items-center justify-center gap-4 p-8" role="status" aria-label={currentLabel}>
+			<div
+				className="rounded-full animate-spin border-[3px] border-gray-200 border-t-primary-600"
+				style={{ width: size, height: size }}
+				aria-hidden="true"
+			/>
+			<span className="text-gray-500 text-sm">{currentLabel}</span>
 		</div>
 	);
 };

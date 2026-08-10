@@ -17,7 +17,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { useTheme } from '@/styles/theme';
 import { Link } from 'react-router';
 
 type Crumb = {
@@ -36,7 +35,7 @@ const HomeIcon = () => (
 		height="14"
 		viewBox="0 0 24 24"
 		fill="currentColor"
-		style={{ display: 'inline-block', verticalAlign: 'middle', marginBottom: '2px' }}
+		className="inline-block align-middle mb-[2px]"
 		aria-hidden="true"
 	>
 		<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
@@ -44,63 +43,27 @@ const HomeIcon = () => (
 );
 
 const Breadcrumbs = ({ crumbs }: BreadcrumbsProps) => {
-	const { theme } = useTheme();
-
-	const barStyle: React.CSSProperties = {
-		backgroundColor: theme.colors.background.grey,
-		borderBottom: `1px solid ${theme.colors.border.primary}`,
-		padding: `${theme.spacing.lg} ${theme.spacing.lg}`,
-	};
-
-	const innerStyle: React.CSSProperties = {
-		marginInline: 'auto',
-		display: 'flex',
-		alignItems: 'center',
-		gap: '0.4rem',
-		flexWrap: 'wrap',
-	};
-
-	const linkStyle: React.CSSProperties = {
-		color: theme.colors.primary.main,
-		textDecoration: 'none',
-		fontSize: theme.typography.fontSize.sm,
-		display: 'inline-flex',
-		alignItems: 'center',
-		gap: '0.25rem',
-	};
-
-	const separatorStyle: React.CSSProperties = {
-		color: theme.colors.text.secondary,
-		fontSize: theme.typography.fontSize.sm,
-		userSelect: 'none',
-	};
-
-	const currentStyle: React.CSSProperties = {
-		color: theme.colors.text.secondary,
-		fontSize: theme.typography.fontSize.sm,
-	};
-
 	return (
-		<nav aria-label="Breadcrumb" style={barStyle}>
-			<ol style={{ ...innerStyle, listStyle: 'none', margin: 0, padding: 0 }}>
+		<nav aria-label="Breadcrumb" className="bg-gray-100 border-b border-gray-200 p-6">
+			<ol className="mx-auto flex items-center gap-[0.4rem] flex-wrap list-none m-0 p-0">
 				{crumbs.map((crumb, index) => {
 					const isLast = index === crumbs.length - 1;
 					const isFirst = index === 0;
 
 					return (
-						<li key={index} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-							{index > 0 && <span style={separatorStyle}>/</span>}
+						<li key={index} className="flex items-center gap-[0.4rem]">
+							{index > 0 && <span className="text-gray-500 text-sm select-none">/</span>}
 							{isLast ? (
-								<span style={currentStyle} aria-current="page">
+								<span className="text-gray-500 text-sm" aria-current="page">
 									{crumb.label}
 								</span>
 							) : crumb.href ? (
-								<Link to={crumb.href} style={linkStyle}>
+								<Link to={crumb.href} className="text-primary-600 no-underline text-sm inline-flex items-center gap-1">
 									{isFirst && <HomeIcon />}
 									{crumb.label}
 								</Link>
 							) : (
-								<span style={currentStyle}>
+								<span className="text-gray-500 text-sm">
 									{isFirst && <HomeIcon />}
 									{crumb.label}
 								</span>

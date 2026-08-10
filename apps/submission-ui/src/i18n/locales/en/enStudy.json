@@ -19,6 +19,7 @@
 			"collaborators": "Collaborators",
 			"publicationLinks": "Publication Links",
 			"participantCriteria": "Participant Criteria"
-		}
+		},
+		"error": "Error loading study information."
 	}
 }

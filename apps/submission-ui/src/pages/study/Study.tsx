@@ -21,7 +21,6 @@ import useGetStudy from '@/api/queries/useGetStudy';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import Spinner from '@/components/Spinner';
 import Text from '@/components/typography/Text';
-import { useTheme } from '@/styles/theme';
 import { useTranslation } from 'react-i18next';
 import { useMatch } from 'react-router';
 
@@ -30,7 +29,6 @@ const StudyDetails = () => {
 		params: { studyId },
 	} = useMatch('study/:studyId');
 
-	const { theme } = useTheme();
 	const { data: study, isLoading, isError } = useGetStudy({ studyId });
 
 	const {
@@ -38,148 +36,118 @@ const StudyDetails = () => {
 	} = useTranslation();
 
 	if (isLoading) {
-		return <Spinner label="Loading study information..." />;
+		return <Spinner label={t('common:study.loading')} />;
 	}
 
 	if (isError) {
 		return (
-			<div style={{ padding: '2rem' }}>
-				<Text>Error loading study information.</Text>
+			<div className="p-8">
+				<Text>{t('common:study.error')}</Text>
 			</div>
 		);
 	}
 
-	const pageStyle: React.CSSProperties = {
-		display: 'flex',
-		flexDirection: 'column',
-		flex: 1,
-	};
-
-	const contentStyle: React.CSSProperties = {
-		width: '90%',
-		marginInline: 'auto',
-		padding: `${theme.spacing.lg} 0 ${theme.spacing.xxl}`,
-	};
-
-	const headingStyle: React.CSSProperties = {
-		fontSize: theme.typography.fontSize.xxl,
-		fontWeight: theme.typography.fontWeight.bold,
-		color: theme.colors.text.primary,
-		margin: 0,
-		marginBottom: theme.spacing.lg,
-		padding: '2rem 0 2rem 0',
-	};
-
-	const dividerStyle: React.CSSProperties = {
-		border: 'none',
-		borderTop: `1px solid ${theme.colors.border.primary}`,
-		marginBottom: theme.spacing.lg,
-	};
-
-	const labelStyle: React.CSSProperties = {
-		minWidth: '220px',
-		fontWeight: theme.typography.fontWeight.bold,
-		color: theme.colors.text.primary,
-		fontSize: theme.typography.fontSize.base,
-		paddingTop: '0.1rem',
-		flexShrink: 0,
-	};
-
-	const rowStyle: React.CSSProperties = {
-		display: 'flex',
-		alignItems: 'flex-start',
-		marginBottom: theme.spacing.md,
-	};
-
 	return (
-		<div style={pageStyle}>
+		<div className="flex flex-col flex-1">
 			<Breadcrumbs
 				crumbs={[{ label: t('common:breadcrumbs.home'), href: '/' }, { label: t('common:breadcrumbs.studyDetails') }]}
 			/>
 
-			<div style={{ backgroundColor: theme.colors.background.default }}>
-				<div style={contentStyle}>
-					<h1 style={headingStyle}>{t('common:study.pageTitle')}</h1>
-					<hr style={dividerStyle} />
+			<div className="bg-white">
+				<div className="w-[90%] mx-auto pt-6 pb-16">
+					<h1 className="text-3xl font-semibold text-gray-900 m-0 mb-6 py-8">{t('common:study.pageTitle')}</h1>
+					<hr className="border-0 border-t border-gray-200 mb-6" />
 
-					<div style={{ paddingTop: '2rem' }}>
-						<div style={rowStyle}>
-							<span style={labelStyle}>{t('common:study.fields.studyName')}:</span>
-							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.studyName}</Text>
+					<div className="pt-8">
+						<div className="flex items-start mb-4">
+							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+								{t('common:study.fields.studyName')}:
+							</span>
+							<p className="m-0 text-base leading-normal">{study?.studyName}</p>
 						</div>
-						<div style={rowStyle}>
-							<span style={labelStyle}>{t('common:study.fields.description')}:</span>
-							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
-								{study?.translations[0].studyDescription}
-							</Text>
+						<div className="flex items-start mb-4">
+							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+								{t('common:study.fields.description')}:
+							</span>
+							<p className="m-0 text-base leading-normal">{study?.translations[0].studyDescription}</p>
 						</div>
-						<div style={rowStyle}>
-							<span style={labelStyle}>{t('common:study.fields.studyId')}:</span>
-							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.studyId}</Text>
+						<div className="flex items-start mb-4">
+							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+								{t('common:study.fields.studyId')}:
+							</span>
+							<p className="m-0 text-base leading-normal">{study?.studyId}</p>
 						</div>
-						<div style={rowStyle}>
-							<span style={labelStyle}>{t('common:study.fields.programName')}:</span>
-							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
-								{study?.translations[0].programName}
-							</Text>
+						<div className="flex items-start mb-4">
+							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+								{t('common:study.fields.programName')}:
+							</span>
+							<p className="m-0 text-base leading-normal">{study?.translations[0].programName}</p>
 						</div>
-						<div style={rowStyle}>
-							<span style={labelStyle}>{t('common:study.fields.keywords')}:</span>
-							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
-								{study?.translations[0].keywords.join(', ')}
-							</Text>
+						<div className="flex items-start mb-4">
+							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+								{t('common:study.fields.keywords')}:
+							</span>
+							<p className="m-0 text-base leading-normal">{study?.translations[0].keywords.join(', ')}</p>
 						</div>
-						<div style={rowStyle}>
-							<span style={labelStyle}>{t('common:study.fields.status')}:</span>
-							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.status}</Text>
+						<div className="flex items-start mb-4">
+							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+								{t('common:study.fields.status')}:
+							</span>
+							<p className="m-0 text-base leading-normal">{study?.status}</p>
 						</div>
-						<div style={rowStyle}>
-							<span style={labelStyle}>{t('common:study.fields.context')}:</span>
-							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.context}</Text>
+						<div className="flex items-start mb-4">
+							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+								{t('common:study.fields.context')}:
+							</span>
+							<p className="m-0 text-base leading-normal">{study?.context}</p>
 						</div>
-						<div style={rowStyle}>
-							<span style={labelStyle}>{t('common:study.fields.domain')}:</span>
-							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.domain}</Text>
+						<div className="flex items-start mb-4">
+							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+								{t('common:study.fields.domain')}:
+							</span>
+							<p className="m-0 text-base leading-normal">{study?.domain}</p>
 						</div>
-						<div style={rowStyle}>
-							<span style={labelStyle}>{t('common:study.fields.dacId')}:</span>
-							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>{study?.dacId}</Text>
+						<div className="flex items-start mb-4">
+							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+								{t('common:study.fields.dacId')}:
+							</span>
+							<p className="m-0 text-base leading-normal">{study?.dacId}</p>
 						</div>
-						<div style={rowStyle}>
-							<span style={labelStyle}>{t('common:study.fields.principalInvestigators')}:</span>
-							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
-								{study?.principalInvestigators.join(', ')}
-							</Text>
+						<div className="flex items-start mb-4">
+							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+								{t('common:study.fields.principalInvestigators')}:
+							</span>
+							<p className="m-0 text-base leading-normal">{study?.principalInvestigators.join(', ')}</p>
 						</div>
-						<div style={rowStyle}>
-							<span style={labelStyle}>{t('common:study.fields.leadOrganizations')}:</span>
-							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
-								{study?.leadOrganizations.join(', ')}
-							</Text>
+						<div className="flex items-start mb-4">
+							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+								{t('common:study.fields.leadOrganizations')}:
+							</span>
+							<p className="m-0 text-base leading-normal">{study?.leadOrganizations.join(', ')}</p>
 						</div>
-						<div style={rowStyle}>
-							<span style={labelStyle}>{t('common:study.fields.fundingSources')}:</span>
-							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
-								{study?.translations[0].fundingSources.join(', ')}
-							</Text>
+						<div className="flex items-start mb-4">
+							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+								{t('common:study.fields.fundingSources')}:
+							</span>
+							<p className="m-0 text-base leading-normal">{study?.translations[0].fundingSources.join(', ')}</p>
 						</div>
-						<div style={rowStyle}>
-							<span style={labelStyle}>{t('common:study.fields.collaborators')}:</span>
-							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
-								{study?.collaborators.join(', ')}
-							</Text>
+						<div className="flex items-start mb-4">
+							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+								{t('common:study.fields.collaborators')}:
+							</span>
+							<p className="m-0 text-base leading-normal">{study?.collaborators.join(', ')}</p>
 						</div>
-						<div style={rowStyle}>
-							<span style={labelStyle}>{t('common:study.fields.publicationLinks')}:</span>
-							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
-								{study?.publicationLinks.join(', ')}
-							</Text>
+						<div className="flex items-start mb-4">
+							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+								{t('common:study.fields.publicationLinks')}:
+							</span>
+							<p className="m-0 text-base leading-normal">{study?.publicationLinks.join(', ')}</p>
 						</div>
-						<div style={rowStyle}>
-							<span style={labelStyle}>{t('common:study.fields.participantCriteria')}:</span>
-							<Text styles={{ margin: 0, lineHeight: theme.typography.lineHeight.normal }}>
-								{study?.translations[0].participantCriteria}
-							</Text>
+						<div className="flex items-start mb-4">
+							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+								{t('common:study.fields.participantCriteria')}:
+							</span>
+							<p className="m-0 text-base leading-normal">{study?.translations[0].participantCriteria}</p>
 						</div>
 					</div>
 				</div>
