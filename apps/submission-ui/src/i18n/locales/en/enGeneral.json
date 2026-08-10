@@ -5,6 +5,7 @@
 	"dataSubmission": "Data Submission",
 	"dataDictionary": "Data Dictionary",
 	"login": "Login",
+	"logout": "Logout",
 	"helpDesk": "Help Desk",
 	"footer": {
 		"supportedBy": "PCGL is supported by the Canadian Institutes of Health Research (CIHR)",

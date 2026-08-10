@@ -17,10 +17,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { useTheme } from '@/styles/theme';
-import { useState } from 'react';
-import Text from '../typography/Text';
-
 type ButtonProps = {
 	children?: React.ReactNode;
 	defaultText: string;
@@ -37,48 +33,20 @@ type ButtonProps = {
  * @returns
  */
 const Button = (props: ButtonProps) => {
-	const { theme } = useTheme();
-	const [isHovered, setIsHovered] = useState(false);
-	const buttonType = props.type ?? 'primary';
+	const isPrimary = (props.type ?? 'primary') === 'primary';
 
-	const isPrimary = buttonType === 'primary';
+	const baseClasses = isPrimary
+		? 'bg-primary-800 hover:bg-primary-700 text-white font-semibold rounded-lg px-2 py-1 cursor-pointer transition-colors duration-300 text-sm'
+		: 'bg-white hover:bg-gray-100 text-black font-semibold rounded-lg px-2 py-1 cursor-pointer transition-colors duration-300 text-sm border border-gray-200';
 
-	const buttonStyle: React.CSSProperties = {
-		backgroundColor: isPrimary
-			? isHovered
-				? theme.colors.primary.main
-				: theme.colors.primary.dark
-			: isHovered
-				? theme.colors.background.grey
-				: theme.colors.background.default,
-		color: isPrimary ? theme.colors.background.default : theme.colors.secondary.black,
-		borderRadius: '8px',
-		padding: `${theme.spacing.sm} ${theme.spacing.sm}`,
-		border: isPrimary ? 'none' : `1px solid ${theme.colors.background.grey}`,
-		cursor: 'pointer',
-		transition: 'background-color 0.3s ease',
-	};
-
-	const content = (
-		<Text
-			styles={{
-				color: isPrimary ? theme.colors.text.white : theme.colors.secondary.black,
-				fontWeight: theme.typography.fontWeight.bold,
-			}}
-		>
-			{props.children ?? props.defaultText}
-		</Text>
-	);
+	const content = props.children ?? props.defaultText;
 
 	if (props.href) {
 		return (
 			<a
 				href={props.href}
-				className={props.className}
-				style={{ ...buttonStyle, textDecoration: 'none' }}
-				onClick={props.handler}
-				onMouseEnter={() => setIsHovered(true)}
-				onMouseLeave={() => setIsHovered(false)}
+				className={`${baseClasses} no-underline inline-block${props.className ? ` ${props.className}` : ''}`}
+				{...(props.handler ? { onClick: props.handler } : {})}
 			>
 				{content}
 			</a>
@@ -87,10 +55,8 @@ const Button = (props: ButtonProps) => {
 
 	return (
 		<button
-			style={buttonStyle}
-			onClick={() => props.handler()}
-			onMouseEnter={() => setIsHovered(true)}
-			onMouseLeave={() => setIsHovered(false)}
+			className={`${baseClasses}${props.className ? ` ${props.className}` : ''}`}
+			{...(props.handler ? { onClick: props.handler } : {})}
 		>
 			{content}
 		</button>

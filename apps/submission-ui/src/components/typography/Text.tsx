@@ -17,29 +17,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { useTheme } from '@/styles/theme';
-
 type TextProps = {
 	children: React.ReactNode;
-	styles?: React.CSSProperties;
+	className?: string;
 };
 
 /**
  * A generic text component
- * Styles can be overridden via the `styles` prop.
+ * Additional classes can be applied via the `className` prop.
  * @param props
  * @returns
  */
 const Text = (props: TextProps) => {
-	const { theme } = useTheme();
-
-	const textStyle: React.CSSProperties = {
-		color: theme.colors.text.primary,
-		fontSize: theme.typography.fontSize.base,
-		lineHeight: theme.typography.lineHeight.relaxed,
-	};
-
-	return <p style={{ ...textStyle, ...props.styles }}>{props.children}</p>;
+	return <p className={`text-base leading-relaxed text-primary-900 ${props.className ?? ''}`}>{props.children}</p>;
 };
 
 export default Text;
