@@ -1,4 +1,6 @@
 {
 	"PCGL": "Pan-Canadian Genome Library {{ date }}",
-	"languageSwitch": "Français"
+	"languageSwitch": "Français",
+	"login": "Login",
+	"logout": "Logout"
 }

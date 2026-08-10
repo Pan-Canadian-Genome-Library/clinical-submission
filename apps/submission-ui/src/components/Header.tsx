@@ -54,7 +54,7 @@ const Header = () => {
 					<Button defaultText={t('common:languageSwitch')} handler={languageSwitch} />
 					<h2>Submission UI</h2>
 					<a href={!isLoggedIn ? API_PATH_LOGIN : API_PATH_LOGOUT} className="login-button">
-						{!isLoggedIn ? 'Login' : 'Logout'}
+						{!isLoggedIn ? t('common:login') : t('common:logout')}
 					</a>
 				</>
 			</div>

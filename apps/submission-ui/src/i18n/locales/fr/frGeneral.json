@@ -1,4 +1,6 @@
 {
 	"PCGL": "Bibliothèque génomique pancanadienne {{ date }}",
-	"languageSwitch": "English"
+	"languageSwitch": "English",
+	"login": "Se connecter",
+	"logout": "Se déconnecter"
 }
