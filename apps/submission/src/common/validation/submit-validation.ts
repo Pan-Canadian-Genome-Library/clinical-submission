@@ -19,12 +19,12 @@
 
 import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
-import { z } from 'zod';
+import { z as zod } from 'zod';
 
 import { lyricProvider } from '@/core/provider.js';
 import { type RequestValidation } from '@/middleware/requestValidation.js';
 
-import { nonNegativeInteger, positiveInteger } from './common.js';
+import { categoryIdSchema, nonNegativeInteger, positiveInteger } from './common.js';
 
 interface SubmitRequestPathParams extends ParamsDictionary {
 	categoryId: string;
@@ -37,11 +37,11 @@ export const submitRequestSchema: RequestValidation<
 	ParsedQs,
 	SubmitRequestPathParams
 > = {
-	body: z.object({
-		organization: z.string(),
+	body: zod.object({
+		organization: zod.string(),
 	}),
-	pathParams: z.object({
-		categoryId: z.string(),
+	pathParams: zod.object({
+		categoryId: categoryIdSchema,
 	}),
 };
 
@@ -56,11 +56,11 @@ export const editDataRequestSchema: RequestValidation<
 	ParsedQs,
 	EditRequestPathParams
 > = {
-	body: z.object({
-		organization: z.string(),
+	body: zod.object({
+		organization: zod.string(),
 	}),
-	pathParams: z.object({
-		categoryId: z.string(),
+	pathParams: zod.object({
+		categoryId: categoryIdSchema,
 	}),
 };
 
@@ -74,7 +74,7 @@ export interface submissionDeleteEntityNameQueryParams extends ParsedQs {
 	index?: string;
 }
 
-const submissionActionTypeSchema = z
+const submissionActionTypeSchema = zod
 	.string()
 	.trim()
 	.min(1)
@@ -85,11 +85,11 @@ export const deleteEntityRequestSchema: RequestValidation<
 	submissionDeleteEntityNameQueryParams,
 	submissionDeleteEntityNameParams
 > = {
-	query: z.object({
-		entityName: z.string().trim().min(1),
+	query: zod.object({
+		entityName: zod.string().trim().min(1),
 		index: nonNegativeInteger.optional(),
 	}),
-	pathParams: z.object({
+	pathParams: zod.object({
 		actionType: submissionActionTypeSchema,
 		submissionId: positiveInteger,
 	}),

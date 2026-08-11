@@ -61,7 +61,7 @@ const Header = () => {
 					<Button type="secondary" defaultText={t('common:languageSwitch')} handler={languageSwitch} />
 					<Button type="secondary" defaultText={t('common:helpDesk')} handler={() => {}} />
 					<Button href={!isLoggedIn ? API_PATH_LOGIN : API_PATH_LOGOUT} defaultText={t('common:login')}>
-						{!isLoggedIn ? 'Login' : 'Logout'}
+						{!isLoggedIn ? t('common:login') : t('common:logout')}
 					</Button>
 				</div>
 			</div>

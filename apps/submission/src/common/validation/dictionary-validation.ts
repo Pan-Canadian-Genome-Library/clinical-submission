@@ -19,13 +19,14 @@
 
 import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
-import { z } from 'zod';
+import { z as zod } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
-import { stringNotEmpty, stringNotEmptyOptional } from './common.js';
+import { categoryAliasSchema, stringNotEmpty, stringNotEmptyOptional } from './common.js';
 
 type RegisterDictionaryBody = {
+	alias?: string;
 	studyId: string;
 	categoryName: string;
 	dictionaryName: string;
@@ -34,7 +35,8 @@ type RegisterDictionaryBody = {
 };
 
 export const registerDictionaryValidation: RequestValidation<RegisterDictionaryBody, ParsedQs, ParamsDictionary> = {
-	body: z.object({
+	body: zod.object({
+		alias: categoryAliasSchema.optional(),
 		studyId: stringNotEmpty,
 		categoryName: stringNotEmpty,
 		dictionaryName: stringNotEmpty,
