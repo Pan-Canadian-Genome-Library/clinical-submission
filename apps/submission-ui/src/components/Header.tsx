@@ -16,14 +16,47 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+import { API_PATH_LOGIN, API_PATH_LOGOUT } from '@/api/paths';
+import { clearLangSessionInformation, setLangSessionInformation, SupportedLangs } from '@/global/localstorage/language';
+import i18n from '@/i18n/translations';
+import { useUserContext } from '@/providers/UserProvider';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import PCGL from '../assets/pcgl-logo-colour.svg';
+import Button from './button/Button';
 
 const Header = () => {
+	const { isLoggedIn } = useUserContext();
+	const [lang, setLanguage] = useState(i18n.language);
+	const {
+		i18n: { t },
+	} = useTranslation();
+
+	const languageSwitch = () => {
+		clearLangSessionInformation();
+		if (lang === SupportedLangs.FRENCH) {
+			setLanguage(SupportedLangs.ENGLISH);
+			setLangSessionInformation({ lang: SupportedLangs.ENGLISH });
+			i18n.changeLanguage(SupportedLangs.ENGLISH);
+		} else {
+			setLanguage(SupportedLangs.FRENCH);
+			setLangSessionInformation({ lang: SupportedLangs.FRENCH });
+			i18n.changeLanguage(SupportedLangs.FRENCH);
+		}
+	};
+
 	return (
-		<header className="header">
-			<div className="header-body">
-				<img className="header-image" src={PCGL} alt="PCGL Clinical Submission Home" />
-				<h2>Submission UI</h2>
+		<header className="py-4 px-16">
+			<div className="flex items-center justify-between">
+				<img className="w-[250px]" src={PCGL} alt="PCGL Clinical Submission Home" />
+				<>
+					<Button defaultText={t('common:languageSwitch')} handler={languageSwitch} />
+					<h2>Submission UI</h2>
+					<a href={!isLoggedIn ? API_PATH_LOGIN : API_PATH_LOGOUT} className="login-button">
+						{!isLoggedIn ? t('common:login') : t('common:logout')}
+					</a>
+				</>
 			</div>
 		</header>
 	);

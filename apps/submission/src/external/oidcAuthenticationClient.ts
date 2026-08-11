@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
@@ -87,6 +87,12 @@ export const exchangeCodeForTokens = async (
 	}
 };
 
+/**
+ * Refreshes the user session using the given refresh token.
+ * @param authConfig Authentication configuration
+ * @param refreshToken Refresh token to use for refreshing the session
+ * @returns Refreshed token response
+ */
 export const refreshUserSession = async (
 	authConfig: AuthConfig,
 	{ refreshToken }: { refreshToken: string },
@@ -129,6 +135,12 @@ export const refreshUserSession = async (
 	}
 };
 
+/**
+ * Retrieves the user info from the OIDC provider using the given access token.
+ * @param authConfig Authentication configuration
+ * @param accessToken Access token to use for retrieving user info
+ * @returns User info
+ */
 export const getUserInfo = async (authConfig: AuthConfig, accessToken: string) => {
 	try {
 		const userResponse = await axios.get(urlJoin(authConfig.AUTH_PROVIDER_HOST, `/oauth2/userinfo`), {
@@ -145,5 +157,31 @@ export const getUserInfo = async (authConfig: AuthConfig, accessToken: string) =
 		// we'll just log the result and return a system error
 		logger.error(error, `Unexpected error occurred fetching OIDC User Info.`);
 		throw new lyricProvider.utils.errors.InternalServerError(`Unable to retrieve user info from OIDC Provider.`);
+	}
+};
+
+/**
+ * Revokes the given OIDC access token from the OIDC provider.
+ * @param authConfig Authentication configuration
+ * @param accessToken Access token to revoke
+ */
+export const revokeToken = async (authConfig: AuthConfig, accessToken: string) => {
+	try {
+		const params = new URLSearchParams({ token: accessToken });
+		await axios({
+			url: urlJoin(authConfig.AUTH_PROVIDER_HOST, `/oauth2/revoke`),
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+				'content-type': 'application/x-www-form-urlencoded',
+			},
+			params,
+		});
+	} catch (error) {
+		logger.error(error, `Unexpected error occurred revoking OIDC token.`);
+		if (error instanceof AxiosError) {
+			logger.error(error.response?.data);
+		}
+		throw new lyricProvider.utils.errors.InternalServerError(`Unable to revoke token from OIDC Provider.`);
 	}
 };

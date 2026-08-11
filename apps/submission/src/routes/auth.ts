@@ -21,6 +21,12 @@ import express, { json, Router, urlencoded } from 'express';
 
 import authController from '@/controllers/authController.js';
 
+/**
+ * This router contains the original auth implementation. It returns user token information directly to the requesting client and does not establish a session.
+ * PCGL is hosting a placeholder submission login page that uses these routes until the formal submission UI is available.
+ * This is intended to be replaced by the `auth-session` router/controller.
+ * TODO: Remove the `auth` router and controller and replace with `auth-session`
+ */
 export const authRouter: Router = (() => {
 	const router = express.Router();
 	router.use(json());

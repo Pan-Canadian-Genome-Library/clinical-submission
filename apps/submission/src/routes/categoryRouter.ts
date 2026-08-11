@@ -22,6 +22,8 @@ import express, { json, Router, urlencoded } from 'express';
 import categoryController from '@/controllers/categoryController.js';
 import { authMiddleware } from '@/middleware/auth.js';
 
+import { lyricProvider } from '../core/provider.js';
+
 export const categoryRouter: Router = (() => {
 	const router = express.Router();
 	router.use(json());
@@ -31,6 +33,16 @@ export const categoryRouter: Router = (() => {
 		'/:categoryId/study',
 		authMiddleware({ requireAdmin: true }),
 		categoryController.unlinkStudiesFromCategory,
+	);
+	router.put(
+		'/:categoryId/alias',
+		authMiddleware({ requireAdmin: true }),
+		lyricProvider.controllers.category.assignAlias,
+	);
+	router.delete(
+		'/:categoryId/alias',
+		authMiddleware({ requireAdmin: true }),
+		lyricProvider.controllers.category.unassignAlias,
 	);
 
 	// Public endpoints – do not require authentication

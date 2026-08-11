@@ -53,7 +53,7 @@ const DEFAULT_PAGE_SIZE = 20;
 
 const editData = validateRequest(editDataRequestSchema, async (req, res, next) => {
 	try {
-		const categoryId = Number(req.params.categoryId);
+		const categoryIdOrAlias = req.params.categoryId;
 		const files = Array.isArray(req.files) ? req.files : [];
 		const organization = req.body.organization;
 		const db = getDbInstance();
@@ -65,10 +65,15 @@ const editData = validateRequest(editDataRequestSchema, async (req, res, next) =
 			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 		}
 
-		const results = await studySvc.getStudiesByCategoryId(categoryId);
+		const category = await lyricProvider.services.category.getDetails(categoryIdOrAlias);
+		if (!category) {
+			throw new lyricProvider.utils.errors.NotFound(`No Category with ID or Alias - ${categoryIdOrAlias} found.`);
+		}
+
+		const results = await studySvc.getStudiesByCategoryId(category.id);
 
 		if (!results?.length) {
-			throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${categoryId}".`);
+			throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${category.id}".`);
 		}
 
 		const study = results[0];
@@ -88,10 +93,10 @@ const editData = validateRequest(editDataRequestSchema, async (req, res, next) =
 		}
 
 		// get the current dictionary
-		const currentDictionary = await lyricProvider.services.dictionary.getActiveDictionaryByCategory(categoryId);
+		const currentDictionary = await lyricProvider.services.dictionary.getActiveDictionaryByCategory(category.id);
 
 		if (!currentDictionary) {
-			throw new lyricProvider.utils.errors.BadRequest(`Dictionary in category '${categoryId}' not found`);
+			throw new lyricProvider.utils.errors.BadRequest(`Dictionary in category '${category.id}' not found`);
 		}
 
 		const fileErrors: BatchError[] = [];
@@ -123,7 +128,7 @@ const editData = validateRequest(editDataRequestSchema, async (req, res, next) =
 				const uploadResult = await lyricProvider.services.submittedData.editSubmittedData({
 					records: extractedData,
 					entityName,
-					categoryId,
+					categoryId: category.id,
 					organization,
 					username: username ?? '',
 				});
@@ -167,7 +172,7 @@ const CREATE_SUBMISSION_STATUS = {
 
 const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 	try {
-		const categoryId = Number(req.params.categoryId);
+		const categoryIdOrAlias = req.params.categoryId;
 		const files = Array.isArray(req.files) ? req.files : [];
 		const organization = req.body.organization;
 		const user = req.user;
@@ -184,24 +189,29 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 		}
 
-		const results = await studySvc.getStudiesByCategoryId(categoryId);
+		const category = await lyricProvider.services.category.getDetails(categoryIdOrAlias);
+		if (!category) {
+			throw new lyricProvider.utils.errors.NotFound(`No Category with ID or Alias - ${categoryIdOrAlias} found.`);
+		}
+
+		const results = await studySvc.getStudiesByCategoryId(category.id);
 
 		if (!results?.length) {
-			throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId - ${categoryId}.`);
+			throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId - ${category.id}.`);
 		}
 
 		const foundStudy = results[0];
 
 		if (foundStudy?.study_id !== organization) {
 			throw new lyricProvider.utils.errors.BadRequest(
-				`The provided organization '${organization}' is not associated with categoryId '${categoryId}'. Please verify that you are submitting to the correct categoryId for the organization`,
+				`The provided organization '${organization}' is not associated with categoryId '${category.id}'. Please verify that you are submitting to the correct categoryId for the organization`,
 			);
 		}
 
 		const username = user?.username;
 
 		logger.info(
-			`Upload Submission Request: categoryId '${categoryId}'` +
+			`Upload Submission Request: categoryId '${category.id}'` +
 				` organization '${organization}'` +
 				` files: '${files?.map((f) => f.originalname)}'`,
 		);
@@ -213,10 +223,10 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 		}
 
 		// get the current dictionary
-		const currentDictionary = await lyricProvider.services.dictionary.getActiveDictionaryByCategory(categoryId);
+		const currentDictionary = await lyricProvider.services.dictionary.getActiveDictionaryByCategory(category.id);
 
 		if (!currentDictionary) {
-			throw new lyricProvider.utils.errors.BadRequest(`Dictionary in category '${categoryId}' not found`);
+			throw new lyricProvider.utils.errors.BadRequest(`Dictionary in category '${category.id}' not found`);
 		}
 
 		const fileErrors: BatchError[] = [];
@@ -255,7 +265,7 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 		// Send submission data, organized by entity.
 		const submitResult = await lyricProvider.services.submission.submit({
 			data: entityData,
-			categoryId,
+			categoryId: category.id,
 			organization,
 			username: username ?? '',
 		});
@@ -291,7 +301,7 @@ const submit = validateRequest(submitRequestSchema, async (req, res, next) => {
 
 const commit = validateRequest(lyricProvider.utils.schema.submissionCommitRequestSchema, async (req, res, next) => {
 	try {
-		const categoryId = Number(req.params.categoryId);
+		const categoryIdOrAlias = req.params.categoryId;
 		const submissionId = Number(req.params.submissionId);
 		const user = req.user;
 
@@ -313,14 +323,19 @@ const commit = validateRequest(lyricProvider.utils.schema.submissionCommitReques
 			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource.');
 		}
 
-		if (categoryId !== submission.dictionaryCategory.id) {
+		const category = await lyricProvider.services.category.getDetails(categoryIdOrAlias);
+		if (!category) {
+			throw new lyricProvider.utils.errors.NotFound(`No Category with ID or Alias - ${categoryIdOrAlias} found.`);
+		}
+
+		if (category.id !== submission.dictionaryCategory.id) {
 			throw new lyricProvider.utils.errors.BadRequest(
 				'Mismatch between category ID and submission ID. No submission with the given ID exists for the specified category.',
 			);
 		}
 
 		const commitSubmission = await lyricProvider.services.submission.commitSubmission(
-			categoryId,
+			category.id,
 			submissionId,
 			user?.username,
 		);
@@ -415,15 +430,20 @@ const getSubmissionsByCategory = validateRequest(
 	lyricProvider.utils.schema.submissionsByCategoryRequestSchema,
 	async (req, res, next) => {
 		try {
-			const categoryId = Number(req.params.categoryId);
+			const categoryIdOrAlias = req.params.categoryId;
 			const onlyActive = req.query.onlyActive?.toLowerCase() === 'true';
 			const organization = req.query.organization;
 			const page = parseInt(String(req.query.page)) || DEFAULT_PAGE;
 			const pageSize = parseInt(String(req.query.pageSize)) || DEFAULT_PAGE_SIZE;
 			const user = req.user;
 
+			const category = await lyricProvider.services.category.getDetails(categoryIdOrAlias);
+			if (!category) {
+				throw new lyricProvider.utils.errors.NotFound(`No Category with ID or Alias - ${categoryIdOrAlias} found.`);
+			}
+
 			const submissionsResult = await lyricProvider.services.submission.getSubmissionsByCategory(
-				categoryId,
+				category.id,
 				{ page, pageSize },
 				{ onlyActive, username: user?.username, organization },
 			);
