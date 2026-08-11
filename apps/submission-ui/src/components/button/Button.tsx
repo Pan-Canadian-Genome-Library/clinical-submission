@@ -17,29 +17,27 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '@/i18n/translations';
-import '@/styles/App.css';
+type ButtonProps = {
+	children?: React.ReactNode;
+	defaultText: string;
+	handler: () => void;
+};
 
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { Route, Routes } from 'react-router';
-import Home from './pages/Home.tsx';
-import LoginRedirect from './pages/login/redirect.tsx';
-import PageWrapper from './pages/PageWrapper.tsx';
-import UserPage from './pages/user/user.tsx';
-import Providers from './providers/Providers.tsx';
+/**
+ * A button component that supports both text and children content.
+ * If a children prop is provided, it will be used instead of the default text.
+ * @param props
+ * @returns
+ */
+const Button = (props: ButtonProps) => {
+	return (
+		<button
+			className="bg-primary-800 hover:bg-primary-700 text-white font-bold rounded-lg px-1.5 py-1 cursor-pointer transition-colors duration-300 ease-in-out text-sm"
+			onClick={() => props.handler()}
+		>
+			{props.children ?? props.defaultText}
+		</button>
+	);
+};
 
-createRoot(document.getElementById('root')!).render(
-	<StrictMode>
-		<Providers>
-			<Routes>
-				<Route element={<PageWrapper />}>
-					<Route path="/" element={<Home />} />
-					<Route path="/login" element={<></>} />
-					<Route path="/login/redirect" element={<LoginRedirect />} />
-					<Route path="/user" element={<UserPage />} />
-				</Route>
-			</Routes>
-		</Providers>
-	</StrictMode>,
-);
+export default Button;

@@ -17,29 +17,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '@/i18n/translations';
-import '@/styles/App.css';
+import { defaultNS, resources } from '@/i18n/translations';
 
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { Route, Routes } from 'react-router';
-import Home from './pages/Home.tsx';
-import LoginRedirect from './pages/login/redirect.tsx';
-import PageWrapper from './pages/PageWrapper.tsx';
-import UserPage from './pages/user/user.tsx';
-import Providers from './providers/Providers.tsx';
-
-createRoot(document.getElementById('root')!).render(
-	<StrictMode>
-		<Providers>
-			<Routes>
-				<Route element={<PageWrapper />}>
-					<Route path="/" element={<Home />} />
-					<Route path="/login" element={<></>} />
-					<Route path="/login/redirect" element={<LoginRedirect />} />
-					<Route path="/user" element={<UserPage />} />
-				</Route>
-			</Routes>
-		</Providers>
-	</StrictMode>,
-);
+declare module 'i18next' {
+	interface CustomTypeOptions {
+		defaultNS: typeof defaultNS;
+		resources: (typeof resources)['en'];
+	}
+}

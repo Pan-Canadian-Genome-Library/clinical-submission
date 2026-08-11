@@ -17,29 +17,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import '@/i18n/translations';
-import '@/styles/App.css';
+import frForm from '@/i18n/locales/fr/frForm.json';
+import frGeneral from '@/i18n/locales/fr/frGeneral.json';
+import { I18N_LOCALE_DICTIONARY } from '../en';
 
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { Route, Routes } from 'react-router';
-import Home from './pages/Home.tsx';
-import LoginRedirect from './pages/login/redirect.tsx';
-import PageWrapper from './pages/PageWrapper.tsx';
-import UserPage from './pages/user/user.tsx';
-import Providers from './providers/Providers.tsx';
-
-createRoot(document.getElementById('root')!).render(
-	<StrictMode>
-		<Providers>
-			<Routes>
-				<Route element={<PageWrapper />}>
-					<Route path="/" element={<Home />} />
-					<Route path="/login" element={<></>} />
-					<Route path="/login/redirect" element={<LoginRedirect />} />
-					<Route path="/user" element={<UserPage />} />
-				</Route>
-			</Routes>
-		</Providers>
-	</StrictMode>,
-);
+export const FRENCH_DICTIONARY = {
+	...frForm,
+	...frGeneral,
+} as const satisfies I18N_LOCALE_DICTIONARY;
