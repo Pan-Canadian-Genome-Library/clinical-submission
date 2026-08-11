@@ -4,11 +4,7 @@
     tags:
       - Audit
     parameters:
-      - name: categoryId
-        in: path
-        description: ID of the Category
-        type: string
-        required: true
+      - $ref: '#/components/parameters/path/CategoryId'
       - name: organization
         in: path
         description: Name of the Organization

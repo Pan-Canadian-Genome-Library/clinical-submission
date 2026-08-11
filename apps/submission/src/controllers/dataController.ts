@@ -86,18 +86,24 @@ const getCategoryById = validateRequest(
 			const studySvc = studyService(db);
 
 			// request params
-			const categoryId = Number(req.params.categoryId);
+			const categoryIdOrAlias = req.params.categoryId;
 			const entityName = asArray(req.query.entityName || []);
 			const page = parseInt(String(req.query.page)) || defaultPage;
 			const pageSize = parseInt(String(req.query.pageSize)) || defaultPageSize;
 			const view = convertToViewType(req.query.view) || defaultView;
 			const user = req.user;
 
-			const studiesByCategory = await studySvc.getStudiesByCategoryId(categoryId);
+			const category = await lyricProvider.services.category.getDetails(categoryIdOrAlias);
+
+			if (!category) {
+				throw new lyricProvider.utils.errors.NotFound(`No Category with ID or Alias - ${categoryIdOrAlias} found.`);
+			}
+
+			const studiesByCategory = await studySvc.getStudiesByCategoryId(category.id);
 			const studyByCategory = studiesByCategory[0];
 
 			if (!studyByCategory) {
-				throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${categoryId}".`);
+				throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${category.id}".`);
 			}
 
 			if (!hasAllowedAccess(studyByCategory.study_id, 'READ', user)) {
@@ -108,7 +114,7 @@ const getCategoryById = validateRequest(
 
 			// Send submission data, organized by entity.
 			const submitResult = await lyricProvider.services.submittedData.getSubmittedDataByCategory(
-				categoryId,
+				category.id,
 				{ page, pageSize },
 				{ entityName, view, organizations: [studyByCategory.study_id] },
 			);
@@ -141,16 +147,20 @@ const getCategoryBySystemId = validateRequest(
 			const studySvc = studyService(db);
 
 			// request params
-			const categoryId = Number(req.params.categoryId);
+			const categoryIdOrAlias = req.params.categoryId;
 			const systemId = req.params.systemId;
 			const view = convertToViewType(String(req.query.view)) || defaultView;
 			const user = req.user;
 
-			const studiesByCategory = await studySvc.getStudiesByCategoryId(categoryId);
+			const category = await lyricProvider.services.category.getDetails(categoryIdOrAlias);
+			if (!category) {
+				throw new lyricProvider.utils.errors.NotFound(`No Category with ID or Alias - ${categoryIdOrAlias} found.`);
+			}
+			const studiesByCategory = await studySvc.getStudiesByCategoryId(category.id);
 			const studyByCategory = studiesByCategory[0];
 
 			if (!studyByCategory) {
-				throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${categoryId}".`);
+				throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${category.id}".`);
 			}
 
 			if (!hasAllowedAccess(studyByCategory.study_id, 'READ', user)) {
@@ -160,9 +170,13 @@ const getCategoryBySystemId = validateRequest(
 			}
 
 			// Send submission data, organized by entity.
-			const submitResult = await lyricProvider.services.submittedData.getSubmittedDataBySystemId(categoryId, systemId, {
-				view,
-			});
+			const submitResult = await lyricProvider.services.submittedData.getSubmittedDataBySystemId(
+				category.id,
+				systemId,
+				{
+					view,
+				},
+			);
 
 			if (!submitResult.result) {
 				res.status(404).send(submitResult.metadata.errorMessage);
@@ -187,7 +201,7 @@ const getCategoryByOrganization = validateRequest(
 			const studySvc = studyService(db);
 
 			// request parameters
-			const categoryId = Number(req.params.categoryId);
+			const categoryIdOrAlias = req.params.categoryId;
 			const organization = req.params.organization;
 			const entityName = asArray(req.query.entityName || []);
 			const page = parseInt(String(req.query.page)) || defaultPage;
@@ -195,16 +209,21 @@ const getCategoryByOrganization = validateRequest(
 			const view = convertToViewType(String(req.query.view)) || defaultView;
 			const user = req.user;
 
-			const studiesByCategory = await studySvc.getStudiesByCategoryId(categoryId);
+			const category = await lyricProvider.services.category.getDetails(categoryIdOrAlias);
+			if (!category) {
+				throw new lyricProvider.utils.errors.NotFound(`No Category with ID or Alias - ${categoryIdOrAlias} found.`);
+			}
+
+			const studiesByCategory = await studySvc.getStudiesByCategoryId(category.id);
 			const studyByCategory = studiesByCategory[0];
 
 			if (!studyByCategory) {
-				throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${categoryId}".`);
+				throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${category.id}".`);
 			}
 
 			if (studyByCategory.study_id !== organization) {
 				throw new lyricProvider.utils.errors.BadRequest(
-					`The provided organization '${organization}' is not associated with categoryId '${categoryId}'. Please verify that you are using the correct categoryId for the organization `,
+					`The provided organization '${organization}' is not associated with categoryId '${category.id}'. Please verify that you are using the correct categoryId for the organization `,
 				);
 			}
 
@@ -216,7 +235,7 @@ const getCategoryByOrganization = validateRequest(
 
 			// Send submission data, organized by entity.
 			const submitResult = await lyricProvider.services.submittedData.getSubmittedDataByOrganization(
-				categoryId,
+				category.id,
 				organization,
 				{
 					page,
@@ -257,7 +276,7 @@ const getSubmittedDataByQuery = validateRequest(
 			const studySvc = studyService(db);
 
 			// request parameters
-			const categoryId = Number(req.params.categoryId);
+			const categoryIdOrAlias = req.params.categoryId;
 			const organization = req.params.organization;
 			const sqon = lyricProvider.utils.convertSqonToQuery.parseSQON(req.body);
 			const entityName = asArray(req.query.entityName || []);
@@ -266,16 +285,21 @@ const getSubmittedDataByQuery = validateRequest(
 			const view = convertToViewType(String(req.query.view)) || defaultView;
 			const user = req.user;
 
-			const studiesByCategory = await studySvc.getStudiesByCategoryId(categoryId);
+			const category = await lyricProvider.services.category.getDetails(categoryIdOrAlias);
+			if (!category) {
+				throw new lyricProvider.utils.errors.NotFound(`No Category with ID or Alias - ${categoryIdOrAlias} found.`);
+			}
+
+			const studiesByCategory = await studySvc.getStudiesByCategoryId(category.id);
 			const studyByCategory = studiesByCategory[0];
 
 			if (!studyByCategory) {
-				throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${categoryId}".`);
+				throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${category.id}".`);
 			}
 
 			if (studyByCategory.study_id !== organization) {
 				throw new lyricProvider.utils.errors.BadRequest(
-					`The provided organization '${organization}' is not associated with categoryId '${categoryId}'. Please verify that you are using the correct categoryId for the organization `,
+					`The provided organization '${organization}' is not associated with categoryId '${category.id}'. Please verify that you are using the correct categoryId for the organization `,
 				);
 			}
 
@@ -287,7 +311,7 @@ const getSubmittedDataByQuery = validateRequest(
 
 			// Send submission data, organized by entity.
 			const submitResult = await lyricProvider.services.submittedData.getSubmittedDataByOrganization(
-				categoryId,
+				category.id,
 				organization,
 				{
 					page,
@@ -320,14 +344,19 @@ const getSubmittedDataStream = validateRequest(
 	lyricProvider.utils.schema.dataGetByCategoryRequestSchema,
 	async (req, res, next) => {
 		try {
-			const categoryId = Number(req.params.categoryId);
+			const categoryIdOrAlias = req.params.categoryId;
 			const entityName = asArray(req.query.entityName || []);
 			const view = convertToViewType(String(req.query.view)) || defaultView;
+
+			const category = await lyricProvider.services.category.getDetails(categoryIdOrAlias);
+			if (!category) {
+				throw new lyricProvider.utils.errors.NotFound(`No Category with ID or Alias - ${categoryIdOrAlias} found.`);
+			}
 
 			res.setHeader('Transfer-Encoding', 'chunked');
 			res.setHeader('Content-Type', 'application/x-ndjson');
 
-			for await (const data of lyricProvider.services.submittedData.getSubmittedDataByCategoryStream(categoryId, {
+			for await (const data of lyricProvider.services.submittedData.getSubmittedDataByCategoryStream(category.id, {
 				view,
 				entityName,
 			})) {

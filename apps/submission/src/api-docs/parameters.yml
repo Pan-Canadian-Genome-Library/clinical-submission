@@ -7,7 +7,8 @@ components:
         required: true
         schema:
           type: string
-        description: ID of the category to which the data belongs
+        description: >-
+          Numeric ID or alias of the category to which the data belongs.
       DacId:
         name: dacId
         in: path
@@ -29,6 +30,13 @@ components:
         schema:
           type: string
         required: true
+      MigrationId:
+        name: migrationId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: The ID of the Migration
       Organization:
         name: organization
         in: path

@@ -88,8 +88,8 @@ importers:
         specifier: workspace:^
         version: link:../../packages/validation
       '@overture-stack/lyric':
-        specifier: ^0.17.0
-        version: 0.17.0(@types/pg@8.15.5)(@types/react@19.2.2)(react@19.2.0)
+        specifier: ^0.19.0
+        version: 0.19.0(@types/pg@8.15.5)(@types/react@19.2.2)(react@19.2.0)
       axios:
         specifier: ^1.10.0
         version: 1.12.2
@@ -991,11 +991,11 @@ packages:
   '@overture-stack/lectern-validation@2.0.0-beta.6':
     resolution: {integrity: sha512-DVIi9SSX/pqYm/Tj1a3zREMCg3SaFrkZ96slmhIco2PmY19ibTxyOwFSvJxYTqLrBhjyBeHyy3ihUJw55WslUw==}
 
-  '@overture-stack/lyric-data-model@0.17.0':
-    resolution: {integrity: sha512-u5scjkInShbqV+Rh7xvC7fgbAdyWJ/DRsDLg3msBN4KoFSr5ZquvIpkihrnBtIiyq1rjPmB0ex1gB+PiS7U8SQ==}
+  '@overture-stack/lyric-data-model@0.19.0':
+    resolution: {integrity: sha512-pUeydcVBOcOhE9Hkj+OkyHokuJlJAXgKEoSgSZHuO0I5FbRrEIqA5UBpD8jPY7+VX9ed5WV3d/HMZHYRsMrN7A==}
 
-  '@overture-stack/lyric@0.17.0':
-    resolution: {integrity: sha512-5AaiKtfB/C2dmgbV/op9/DRhm5hkewe9AkGcYVoUq1SoBJ+Ropb6wTXoyciIpXK1pu13c9qIpAQifLALBXbfBg==}
+  '@overture-stack/lyric@0.19.0':
+    resolution: {integrity: sha512-/FhZASHx0gk6AOkj6KIfydONW+bnK90e0AgPLvUGXZUs/qjYBFoO5rZrMgknSoa0+dGNYork9ElZaadGo5RgvA==}
     engines: {node: '>=20.0.0'}
 
   '@overture-stack/sqon-builder@1.1.0':
@@ -4662,7 +4662,7 @@ snapshots:
       lodash: 4.17.21
       zod: 3.25.76
 
-  '@overture-stack/lyric-data-model@0.17.0(@types/pg@8.15.5)(@types/react@19.2.2)(react@19.2.0)':
+  '@overture-stack/lyric-data-model@0.19.0(@types/pg@8.15.5)(@types/react@19.2.2)(react@19.2.0)':
     dependencies:
       '@overture-stack/lectern-client': 2.0.0-beta.6
       copyfiles: 2.4.1
@@ -4694,10 +4694,10 @@ snapshots:
       - sql.js
       - sqlite3
 
-  '@overture-stack/lyric@0.17.0(@types/pg@8.15.5)(@types/react@19.2.2)(react@19.2.0)':
+  '@overture-stack/lyric@0.19.0(@types/pg@8.15.5)(@types/react@19.2.2)(react@19.2.0)':
     dependencies:
       '@overture-stack/lectern-client': 2.0.0-beta.6
-      '@overture-stack/lyric-data-model': 0.17.0(@types/pg@8.15.5)(@types/react@19.2.2)(react@19.2.0)
+      '@overture-stack/lyric-data-model': 0.19.0(@types/pg@8.15.5)(@types/react@19.2.2)(react@19.2.0)
       '@overture-stack/sqon-builder': 1.1.0
       bytes: 3.1.2
       csv-parse: 6.2.1

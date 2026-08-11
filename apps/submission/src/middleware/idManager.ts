@@ -113,7 +113,7 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], 
 	return recordStats;
 };
 
-export const onFinishCommitCallback = (resultOnCommit: ResultOnCommit) => {
+export const onFinishCommitCallback = async (resultOnCommit: ResultOnCommit) => {
 	const { data } = resultOnCommit;
 	const db = getDbInstance();
 
@@ -124,5 +124,10 @@ export const onFinishCommitCallback = (resultOnCommit: ResultOnCommit) => {
 		return;
 	}
 
-	Promise.resolve(processInsertedRecords(data.inserts, db));
+	try {
+		await processInsertedRecords(data.inserts, db);
+	} catch (error) {
+		logger.error(`[Middleware/IIM]: Error processing inserted records: ${error}`);
+		// We don't want to throw an error here. We just log the error and continue.
+	}
 };

@@ -25,7 +25,7 @@ import { studyService } from '@/service/studyService.js';
 
 const registerDictionary = validateRequest(registerDictionaryValidation, async (req, res, next) => {
 	try {
-		const { studyId, categoryName, dictionaryName, dictionaryVersion, defaultCentricEntity } = req.body;
+		const { alias, studyId, categoryName, dictionaryName, dictionaryVersion, defaultCentricEntity } = req.body;
 		const user = req.user;
 
 		const db = getDbInstance();
@@ -46,6 +46,7 @@ const registerDictionary = validateRequest(registerDictionaryValidation, async (
 		}
 
 		const { dictionary, category } = await lyricProvider.services.dictionary.register({
+			alias,
 			categoryName,
 			dictionaryName,
 			dictionaryVersion,

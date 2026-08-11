@@ -99,6 +99,7 @@ app.use('/auth-session', authSessionRouter);
 
 // Lyric Routes
 app.use('/audit', lyricProvider.routers.audit);
+app.use('/migration', lyricProvider.routers.migration);
 
 /**
  * Lyric Custom Routes
