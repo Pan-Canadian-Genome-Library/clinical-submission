@@ -26,7 +26,7 @@ import { StudyResponse } from '@clinical-submission/data-model';
 /**
  * Query hook to fetch the current user from the study endpoint.
  */
-const useGetStudy = ({ studyId }: { studyId: string }) => {
+const useGetStudy = ({ studyId }: { studyId?: string }) => {
 	return useQuery<StudyResponse, ServerError>({
 		queryKey: ['study', studyId],
 		retry: 1,

@@ -25,10 +25,8 @@ import { useTranslation } from 'react-i18next';
 import { useMatch } from 'react-router';
 
 const StudyDetails = () => {
-	const {
-		params: { studyId },
-	} = useMatch('study/:studyId');
-
+	const match = useMatch('study/:studyId')!;
+	const studyId = match?.params.studyId;
 	const { data: study, isLoading, isError } = useGetStudy({ studyId });
 
 	const {
@@ -39,7 +37,7 @@ const StudyDetails = () => {
 		return <Spinner label={t('common:study.loading')} />;
 	}
 
-	if (isError) {
+	if (isError || !study) {
 		return (
 			<div className="p-8">
 				<Text>{t('common:study.error')}</Text>
@@ -60,94 +58,106 @@ const StudyDetails = () => {
 
 					<div className="pt-8">
 						<div className="flex items-start mb-4">
-							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.studyName')}:
 							</span>
-							<p className="m-0 text-base leading-normal">{study?.studyName}</p>
+							<p className="m-0 text-base leading-normal">{study.studyName}</p>
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.description')}:
 							</span>
-							<p className="m-0 text-base leading-normal">{study?.translations[0].studyDescription}</p>
+							{study.translations && study.translations[0] ? (
+								<p className="m-0 text-base leading-normal">{study.translations[0].studyDescription}</p>
+							) : null}
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.studyId')}:
 							</span>
-							<p className="m-0 text-base leading-normal">{study?.studyId}</p>
+							<p className="m-0 text-base leading-normal">{study.studyId}</p>
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.programName')}:
 							</span>
-							<p className="m-0 text-base leading-normal">{study?.translations[0].programName}</p>
+							{study.translations && study.translations[0] ? (
+								<p className="m-0 text-base leading-normal">{study.translations[0].programName}</p>
+							) : null}
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.keywords')}:
 							</span>
-							<p className="m-0 text-base leading-normal">{study?.translations[0].keywords.join(', ')}</p>
+							{study.translations && study.translations[0] && study.translations[0].keywords ? (
+								<p className="m-0 text-base leading-normal">{study.translations[0].keywords.join(', ')}</p>
+							) : null}
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.status')}:
 							</span>
-							<p className="m-0 text-base leading-normal">{study?.status}</p>
+							<p className="m-0 text-base leading-normal">{study.status}</p>
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.context')}:
 							</span>
-							<p className="m-0 text-base leading-normal">{study?.context}</p>
+							<p className="m-0 text-base leading-normal">{study.context}</p>
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.domain')}:
 							</span>
-							<p className="m-0 text-base leading-normal">{study?.domain}</p>
+							<p className="m-0 text-base leading-normal">{study.domain}</p>
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.dacId')}:
 							</span>
-							<p className="m-0 text-base leading-normal">{study?.dacId}</p>
+							<p className="m-0 text-base leading-normal">{study.dacId}</p>
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.principalInvestigators')}:
 							</span>
-							<p className="m-0 text-base leading-normal">{study?.principalInvestigators.join(', ')}</p>
+							<p className="m-0 text-base leading-normal">{study.principalInvestigators.join(', ')}</p>
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.leadOrganizations')}:
 							</span>
-							<p className="m-0 text-base leading-normal">{study?.leadOrganizations.join(', ')}</p>
+							<p className="m-0 text-base leading-normal">{study.leadOrganizations.join(', ')}</p>
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.fundingSources')}:
 							</span>
-							<p className="m-0 text-base leading-normal">{study?.translations[0].fundingSources.join(', ')}</p>
+							{study.translations && study.translations[0] ? (
+								<p className="m-0 text-base leading-normal">{study.translations[0].fundingSources.join(', ')}</p>
+							) : null}
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.collaborators')}:
 							</span>
-							<p className="m-0 text-base leading-normal">{study?.collaborators.join(', ')}</p>
+							{study.collaborators && <p className="m-0 text-base leading-normal">{study.collaborators.join(', ')}</p>}
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.publicationLinks')}:
 							</span>
-							<p className="m-0 text-base leading-normal">{study?.publicationLinks.join(', ')}</p>
+							{study.publicationLinks && (
+								<p className="m-0 text-base leading-normal">{study?.publicationLinks.join(', ')}</p>
+							)}
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-[220px] font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.participantCriteria')}:
 							</span>
-							<p className="m-0 text-base leading-normal">{study?.translations[0].participantCriteria}</p>
+							{study.translations && study.translations[0] ? (
+								<p className="m-0 text-base leading-normal">{study.translations[0].participantCriteria}</p>
+							) : null}
 						</div>
 					</div>
 				</div>
