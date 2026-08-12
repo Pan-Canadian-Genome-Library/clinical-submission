@@ -46,12 +46,12 @@ export const authMiddleware = ({ requireAdmin = false }: { requireAdmin?: boolea
 			}
 
 			const result = await fetchUserData(token);
+			req.user = result.user;
 
 			if (requireAdmin && !result.user?.isAdmin) {
 				throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 			}
 
-			req.user = result.user;
 			return next();
 		} catch (error) {
 			logger.error(error);

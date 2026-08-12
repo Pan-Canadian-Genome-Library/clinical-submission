@@ -19,24 +19,24 @@
 
 import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
-import { z } from 'zod';
+import { z as zod } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
-import { stringNotEmpty } from './common.js';
+import { categoryIdSchema } from './common.js';
 
 interface CategoryIDParams extends ParamsDictionary {
 	categoryId: string;
 }
 
 export const getCategoryByIDReqValidation: RequestValidation<object, ParsedQs, CategoryIDParams> = {
-	pathParams: z.object({
-		categoryId: stringNotEmpty,
+	pathParams: zod.object({
+		categoryId: categoryIdSchema,
 	}),
 };
 
 export const removeStudyLinkFromCategoryReqValidation: RequestValidation<object, ParsedQs, CategoryIDParams> = {
-	pathParams: z.object({
-		categoryId: stringNotEmpty,
+	pathParams: zod.object({
+		categoryId: categoryIdSchema,
 	}),
 };

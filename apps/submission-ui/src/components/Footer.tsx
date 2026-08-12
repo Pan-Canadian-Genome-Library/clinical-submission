@@ -17,15 +17,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { useTranslation } from 'react-i18next';
+
 const Footer = () => {
+	const {
+		i18n: { t },
+	} = useTranslation('common');
 	const currentDate = new Date().getFullYear();
 	return (
-		<footer className="footer">
-			<div className="footer-body">
-				<h3>&copy; Pan-Canadian Genome Library {currentDate}</h3>
+		<footer className="flex bg-primary-600 text-black">
+			<div className="flex items-center justify-between">
+				<h3>&copy; {t('common:PCGL', { date: currentDate })}</h3>
 			</div>
 		</footer>
 	);
 };
-
 export default Footer;

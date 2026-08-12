@@ -13,16 +13,22 @@ The repository is organized with the following directory structure:
 ```
 .
 ├── apps/
-    ├── data-dictionary-ui
-    └── submission
+│   ├── data-dictionary-ui
+│   ├── submission
+│   └── submission-ui
+└── packages/
+    └── validation
 ```
 
-| Component                                               | Package Name             | Path     | Description                                            |
-| ------------------------------------------------------- | ------------------------ | -------- | ------------------------------------------------------ |
-| [Data Dictionary UI](apps/data-dictionary-ui/README.md) | @clinical-submission/ui  | apps/ui  | React SPA website for Data Dictionary UI.              |
-| [Submission API](apps/submission/README.md)             | @clinical-submission/api | apps/api | ExpressJS backend service for submitting clinical data |
+| Component                                               | Package Name                       | Path                    | Description                                            |
+| ------------------------------------------------------- | ---------------------------------- | ----------------------- | ------------------------------------------------------ |
+| [Data Dictionary UI](apps/data-dictionary-ui/README.md) | @clinical-submission/ui            | apps/data-dictionary-ui | React SPA website for Data Dictionary UI.              |
+| [Submission API](apps/submission/README.md)             | @clinical-submission/api           | apps/submission         | ExpressJS backend service for submitting clinical data |
+| [Submission UI](apps/submission-ui/README.md)           | @clinical-submission/submission-ui | apps/submission-ui      | React SPA website for Clinical Submission UI.          |
+| [Validation](packages/validation/README.md)             | @clinical-submission/validation    | packages/validation     | Shared validation utilities and schemas                |
 
 - **apps/** - Standalone processes meant to be run.
+- **packages/** - Shared libraries and utilities used across applications.
 
 ## Local Development
 

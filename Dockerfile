@@ -84,7 +84,8 @@ COPY --from=prod-deps --chown=${APP_USER}:${APP_USER} ${SUBMISSION_DIR}/node_mod
 COPY --from=build --chown=${APP_USER}:${APP_USER} ${SUBMISSION_DIR}/dist .
 
 # Copy pnpm-workspace.yaml
-COPY --from=build --chown=${APP_USER}:${APP_USER} ${WORKDIR}/pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY --from=build --chown=${APP_USER}:${APP_USER} ${WORKDIR}/pnpm-workspace.yaml ${WORKDIR}/pnpm-workspace.yaml
+COPY --from=build --chown=${APP_USER}:${APP_USER} ${WORKDIR}/packages ${WORKDIR}/packages
 
 
 EXPOSE 3030

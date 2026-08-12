@@ -1,6 +1,6 @@
 {
 	"name": "clinical-submission",
-	"version": "0.3.1",
+	"version": "0.4.0",
 	"description": "",
 	"main": "dist/index.js",
 	"private": true,
@@ -9,16 +9,17 @@
 	"type": "module",
 	"scripts": {
 		"\n==================  LOCAL  ==================": "",
-		"build": "pnpm run build:submission-api && pnpm run build:dictionary-ui && pnpm run build:submission-ui",
+		"build": "pnpm run build:submission-api && pnpm run build:dictionary-ui && pnpm run build:submission-ui && pnpm run build:validation",
 		"build:dictionary-ui": "pnpm --filter ./apps/data-dictionary-ui run build",
+		"build:submission-api": "pnpm --filter ./apps/submission run build",
 		"build:submission-ui": "pnpm --filter ./apps/submission-ui run build",
-		"build:submission-api": "pnpm --filter ./apps/submission run build:all",
+		"build:validation": "pnpm --filter ./packages/validation run build",
 		"\n==================  NX  ==================": "",
 		"\n IMPORT-NOTE: NX currently doesn't like to run when building docker images. This does work locally though. But for our ci/cd pipelines, we utilize LOCAL scripts.": "",
-		"build:all": "nx run-many --all --target=build:all",
+		"build:all": "nx run-many --all --target=build",
 		"dev:all": "concurrently --names=data-dictionary-ui,submission,submission-ui \"pnpm -w dev:dictionary-ui\" \"pnpm -w dev:submission-api\" \"pnpm -w dev:submission-ui\"",
-		"dev:submission-api": "nx run @clinical-submission/submission:start:dev",
 		"dev:dictionary-ui": "nx run @clinical-submission/data-dictionary-ui:dev",
+		"dev:submission-api": "nx run @clinical-submission/submission:start:dev",
 		"dev:submission-ui": "nx run @clinical-submission/submission-ui:dev"
 	},
 	"devDependencies": {
@@ -30,7 +31,7 @@
 		"rimraf": "^6.0.1",
 		"tsx": "^4.19.2",
 		"typescript": "^5.7.3",
-		"vite": "^5.4.14"
+		"vite": "^7.1.2"
 	},
 	"aliases": {
 		"@": "src"
