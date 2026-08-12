@@ -36,12 +36,12 @@ function Home() {
 			<main className="flex-1 w-full">
 				{/* Hero Section */}
 				<section
-					className="bg-center bg-cover py-16 px-8 min-h-[400px] flex justify-center items-center"
+					className="bg-center bg-cover py-16 px-8 min-h-100 flex justify-center items-center"
 					style={{ backgroundImage: `url(${Hero})` }}
 				>
-					<div className="max-w-[1200px] w-full mx-auto">
-						<h1 className="text-white text-4xl mb-4 font-semibold max-w-[650px]">{t('common:hero.title')}</h1>
-						<p className="text-white mb-8 max-w-[600px]">{t('common:hero.description')}</p>
+					<div className="max-w-300 w-full mx-auto">
+						<h1 className="text-white text-4xl mb-4 font-semibold max-w-162.5">{t('common:hero.title')}</h1>
+						<p className="text-white mb-8 max-w-150">{t('common:hero.description')}</p>
 						<div className="flex gap-4 items-center mt-6">
 							<Button type="secondary" defaultText={t('common:hero.submitFiles')} handler={() => {}} />
 						</div>
@@ -50,7 +50,7 @@ function Home() {
 
 				{/* Content Section */}
 				<section className="bg-white py-12 px-8">
-					<div className="max-w-[1200px] mx-auto">
+					<div className="max-w-300 mx-auto">
 						<div className="flex flex-col md:flex-row gap-12 mb-12">
 							{/* Overview Section */}
 							<div className="flex-1">
@@ -66,7 +66,7 @@ function Home() {
 								{/* Step 1 */}
 								<div className="flex gap-4 mb-6 items-start">
 									<div
-										className="w-[50px] h-[50px] rounded-full flex items-center justify-center shrink-0 text-white font-bold"
+										className="w-12.5 h-12.5 rounded-full flex items-center justify-center shrink-0 text-white font-bold"
 										style={{ backgroundColor: '#E8A4A2' }}
 									>
 										<img src={SignatureIcon} alt="" className="w-6 h-6 object-contain" />
@@ -82,7 +82,7 @@ function Home() {
 								{/* Step 2 */}
 								<div className="flex gap-4 mb-6 items-start">
 									<div
-										className="w-[50px] h-[50px] rounded-full flex items-center justify-center shrink-0 text-white font-bold"
+										className="w-12.5 h-12.5 rounded-full flex items-center justify-center shrink-0 text-white font-bold"
 										style={{ backgroundColor: '#A8D5BA' }}
 									>
 										<img src={AuditIcon} alt="" className="w-6 h-6 object-contain" />
@@ -93,7 +93,7 @@ function Home() {
 								{/* Step 3 */}
 								<div className="flex gap-4 mb-6 items-start">
 									<div
-										className="w-[50px] h-[50px] rounded-full flex items-center justify-center shrink-0 text-white font-bold"
+										className="w-12.5 h-12.5 rounded-full flex items-center justify-center shrink-0 text-white font-bold"
 										style={{ backgroundColor: '#F4D35E' }}
 									>
 										<img src={UserIcon} alt="" className="w-6 h-6 object-contain" />
@@ -104,7 +104,7 @@ function Home() {
 								{/* Step 4 */}
 								<div className="flex gap-4 mb-6 items-start">
 									<div
-										className="w-[50px] h-[50px] rounded-full flex items-center justify-center shrink-0 text-white font-bold"
+										className="w-12.5 h-12.5 rounded-full flex items-center justify-center shrink-0 text-white font-bold"
 										style={{ backgroundColor: '#A4C2E4' }}
 									>
 										<img src={FileIcon} alt="" className="w-6 h-6 object-contain" />
@@ -118,7 +118,7 @@ function Home() {
 
 				{/* Submitting Genomic Data Section */}
 				<section className="py-12 px-8 ">
-					<div className="max-w-[1200px] mx-auto">
+					<div className="max-w-300 mx-auto">
 						<h2 className="text-gray-900 text-2xl mb-4 font-semibold">{t('common:genomicData.title')}</h2>
 						<Text>{t('common:genomicData.paragraph')}</Text>
 						<a href="#workflow" className="text-primary-600 underline text-base">
