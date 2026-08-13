@@ -36,7 +36,7 @@ const Spinner = ({ size = 40, label }: SpinnerProps) => {
 			<div
 				className="rounded-full animate-spin border-[3px] border-gray-200 border-t-primary-600"
 				style={{ width: size, height: size }}
-				aria-hidden="true"
+				aria-hidden
 			/>
 			<span className="text-gray-500 text-sm">{currentLabel}</span>
 		</div>
