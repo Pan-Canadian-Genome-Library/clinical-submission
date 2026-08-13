@@ -23,9 +23,9 @@ import i18n from '@/i18n/translations';
 import { useUserContext } from '@/providers/UserProvider';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import PCGL from '../assets/pcgl-logo.png';
-import Button from './button/Button';
-import Text from './typography/Text';
+import PCGL from '@/assets/pcgl-logo.png';
+import Button from '@/components/button/Button';
+import Text from '@/components/typography/Text';
 
 const Header = () => {
 	const { isLoggedIn } = useUserContext();
