@@ -17,24 +17,13 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// @description: Purpose of this wrapper is to ensure all elements on the page is sized consistently and properly across pages and elements
-export const contentWrapperStyles: React.CSSProperties = {
-	marginInline: 'auto',
-	width: '90%',
-	maxWidth: '1440px' /* Limit max sizes on large displays to enhance readability  */,
-};
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
-type ContentWrapperProps = {
-	style?: React.CSSProperties;
-	children: React.ReactElement;
-};
-
-const ContentWrapper = ({ style, children }: ContentWrapperProps) => {
-	return (
-		<div style={{ ...contentWrapperStyles, ...style, display: 'flex', flex: 1, justifyContent: 'center' }}>
-			{children}
-		</div>
-	);
-};
-
-export default ContentWrapper;
+/**
+ * Merges Tailwind class names, resolving conflicting utilities so the last one wins.
+ * Lets components accept a `className` prop that can override their default styles.
+ */
+export function cn(...inputs: ClassValue[]) {
+	return twMerge(clsx(inputs));
+}

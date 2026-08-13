@@ -29,7 +29,7 @@ type TextProps = {
  * @returns
  */
 const Text = (props: TextProps) => {
-	return <p className={`text-base leading-relaxed text-primary-900 ${props.className ?? ''}`}>{props.children}</p>;
+	return <p className={`text-base leading-relaxed text-black ${props.className ?? ''}`}>{props.children}</p>;
 };
 
 export default Text;

@@ -2,9 +2,10 @@
 
 @theme {
 	/* Primary (Tonal) */
-	--color-primary-900: #054a74;
-	--color-primary-800: #155680;
-	--color-primary-700: #1f6592;
+	--color-primary-1000: #054a74;
+	--color-primary-900: #155680;
+	--color-primary-800: #1f6592;
+	--color-primary-700: #3d7ca4;
 	--color-primary-600: #2b7aad;
 	--color-primary-400: #4794c6;
 	--color-primary-300: #60aadb;

@@ -28,13 +28,13 @@ const Footer = () => {
 	const currentDate = new Date().getFullYear();
 
 	return (
-		<footer className="bg-primary-400 text-white w-full p-8">
+		<footer className="bg-primary-700 text-white w-full p-8">
 			<div className="flex flex-col md:flex-row justify-between gap-12">
 				{/* Left Section - Logos and Text */}
 				<div className="flex-1 flex flex-col gap-4">
 					<div className="flex gap-6 items-center">
-						<img src={PCGLLogoWhite} alt="PCGL Logo" className="h-[40px] object-contain" />
-						<img src={CIHRLogo} alt="CIHR Logo" className="h-[40px] object-contain" />
+						<img src={PCGLLogoWhite} alt={t('common:pcglLogo')} className="h-10 object-contain" />
+						<img src={CIHRLogo} alt={t('common:cihrLogo')} className="h-10 object-contain" />
 					</div>
 					<p className="text-white text-sm leading-normal">{t('common:footer.supportedBy')}</p>
 					<p className="text-white text-sm leading-normal">{t('common:footer.copyright', { date: currentDate })}</p>

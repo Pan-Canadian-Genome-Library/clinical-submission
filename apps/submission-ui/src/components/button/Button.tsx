@@ -17,9 +17,10 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { cn } from '@/utils/twMerge';
+
 type ButtonProps = {
 	children?: React.ReactNode;
-	defaultText: string;
 	handler?: () => void;
 	type?: 'primary' | 'secondary';
 	href?: string;
@@ -35,17 +36,20 @@ type ButtonProps = {
 const Button = (props: ButtonProps) => {
 	const isPrimary = (props.type ?? 'primary') === 'primary';
 
-	const baseClasses = isPrimary
-		? 'bg-primary-800 hover:bg-primary-700 text-white font-semibold rounded-lg px-2 py-1 cursor-pointer transition-colors duration-300 text-sm'
-		: 'bg-white hover:bg-gray-100 text-black font-semibold rounded-lg px-2 py-1 cursor-pointer transition-colors duration-300 text-sm border border-gray-200';
+	const baseClasses = cn(
+		`font-semibold rounded-lg px-2 py-1 cursor-pointer transition-colors duration-300 text-sm`,
+		isPrimary
+			? 'bg-primary-800 hover:bg-primary-700 text-white'
+			: 'bg-white hover:bg-gray-100 text-black border border-gray-200',
+	);
 
-	const content = props.children ?? props.defaultText;
+	const content = props.children;
 
 	if (props.href) {
 		return (
 			<a
 				href={props.href}
-				className={`${baseClasses} no-underline inline-block${props.className ? ` ${props.className}` : ''}`}
+				className={cn(baseClasses, 'no-underline inline-block', props.className)}
 				{...(props.handler ? { onClick: props.handler } : {})}
 			>
 				{content}
@@ -54,10 +58,7 @@ const Button = (props: ButtonProps) => {
 	}
 
 	return (
-		<button
-			className={`${baseClasses}${props.className ? ` ${props.className}` : ''}`}
-			{...(props.handler ? { onClick: props.handler } : {})}
-		>
+		<button className={cn(baseClasses, props.className)} {...(props.handler ? { onClick: props.handler } : {})}>
 			{content}
 		</button>
 	);
