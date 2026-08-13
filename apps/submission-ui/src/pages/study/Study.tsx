@@ -17,12 +17,13 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { useTranslation } from 'react-i18next';
+import { useMatch } from 'react-router';
+
 import useGetStudy from '@/api/queries/useGetStudy';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import Spinner from '@/components/Spinner';
 import Text from '@/components/typography/Text';
-import { useTranslation } from 'react-i18next';
-import { useMatch } from 'react-router';
 
 const StudyDetails = () => {
 	const match = useMatch('study/:studyId')!;
