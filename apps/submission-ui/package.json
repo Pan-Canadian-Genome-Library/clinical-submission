@@ -10,7 +10,6 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"i18next": "^26.3.6",
 		"@clinical-submission/data-model": "workspace:^",
 		"@clinical-submission/validation": "workspace:^",
 		"@tailwindcss/vite": "^4.3.3",
