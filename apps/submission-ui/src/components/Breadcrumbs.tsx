@@ -18,6 +18,7 @@
  */
 
 import { Link } from 'react-router';
+import HomeIcon from '@/components/icons/HomeIcon';
 
 type Crumb = {
 	label: string;
@@ -28,20 +29,6 @@ type BreadcrumbsProps = {
 	crumbs: Crumb[];
 };
 
-const HomeIcon = () => (
-	<svg
-		xmlns="http://www.w3.org/2000/svg"
-		width="14"
-		height="14"
-		viewBox="0 0 24 24"
-		fill="currentColor"
-		className="inline-block align-middle mb-[2px]"
-		aria-hidden="true"
-	>
-		<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-	</svg>
-);
-
 const Breadcrumbs = ({ crumbs }: BreadcrumbsProps) => {
 	return (
 		<nav aria-label="Breadcrumb" className="bg-gray-100 border-b border-gray-200 p-6">
@@ -51,7 +38,7 @@ const Breadcrumbs = ({ crumbs }: BreadcrumbsProps) => {
 					const isFirst = index === 0;
 
 					return (
-						<li key={index} className="flex items-center gap-[0.4rem]">
+						<li key={crumb.label} className="flex items-center gap-[0.4rem]">
 							{index > 0 && <span className="text-gray-500 text-sm select-none">/</span>}
 							{isLast ? (
 								<span className="text-gray-500 text-sm" aria-current="page">
