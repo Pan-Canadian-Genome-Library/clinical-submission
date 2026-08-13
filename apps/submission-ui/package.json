@@ -15,11 +15,8 @@
 		"@clinical-submission/validation": "workspace:^",
 		"@tailwindcss/vite": "^4.3.3",
 		"@tanstack/react-query": "^5.101.0",
-<<<<<<< HEAD
-=======
 		"clsx": "^2.1.1",
 		"i18next": "^26.3.6",
->>>>>>> feat/187-homepage
 		"react": "^19.1.1",
 		"react-dom": "^19.1.1",
 		"react-i18next": "^17.0.9",

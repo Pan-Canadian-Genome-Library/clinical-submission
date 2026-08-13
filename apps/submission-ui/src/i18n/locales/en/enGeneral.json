@@ -7,16 +7,13 @@
 	"login": "Login",
 	"logout": "Logout",
 	"helpDesk": "Help Desk",
-<<<<<<< HEAD
 	"spinner": "Loading...",
+	"pcglLogo": "PCGL Logo",
+	"cihrLogo": "CIHR Logo",
 	"breadcrumbs": {
 		"home": "Home",
 		"studyDetails": "Study Details"
 	},
-=======
-	"pcglLogo": "PCGL Logo",
-	"cihrLogo": "CIHR Logo",
->>>>>>> feat/187-homepage
 	"footer": {
 		"supportedBy": "PCGL is supported by the Canadian Institutes of Health Research (CIHR)",
 		"copyright": "© {{ date }} PCGL Submission Portal. All rights reserved. UI v1.0 - API v1.0",

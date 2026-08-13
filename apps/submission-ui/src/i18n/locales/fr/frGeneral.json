@@ -7,16 +7,13 @@
 	"login": "Connexion",
 	"logout": "Se déconnecter",
 	"helpDesk": "Assistance",
-<<<<<<< HEAD
 	"spinner": "Chargement...",
+	"pcglLogo": "Logo PCGL",
+	"cihrLogo": "Logo IRSC",
 	"breadcrumbs": {
 		"home": "Accueil",
 		"studyDetails": "Détails de l'étude"
 	},
-=======
-	"pcglLogo": "Logo PCGL",
-	"cihrLogo": "Logo IRSC",
->>>>>>> feat/187-homepage
 	"footer": {
 		"supportedBy": "La BGPC est soutenue par les Instituts de recherche en santé du Canada (IRSC)",
 		"copyright": "© {{ date }} Portail de soumission de la BGPC. Tous droits réservés. UI v1.0 - API v1.0",
