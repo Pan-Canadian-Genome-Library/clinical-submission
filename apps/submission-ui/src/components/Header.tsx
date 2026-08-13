@@ -58,9 +58,13 @@ const Header = () => {
 					</div>
 				</div>
 				<div className="flex justify-end flex-1 gap-2">
-					<Button type="secondary" defaultText={t('common:languageSwitch')} handler={languageSwitch} />
-					<Button type="secondary" defaultText={t('common:helpDesk')} handler={() => {}} />
-					<Button href={!isLoggedIn ? API_PATH_LOGIN : API_PATH_LOGOUT} defaultText={t('common:login')}>
+					<Button type="secondary" handler={languageSwitch}>
+						{t('common:languageSwitch')}
+					</Button>
+					<Button type="secondary" handler={() => {}}>
+						{t('common:helpDesk')}
+					</Button>
+					<Button href={!isLoggedIn ? API_PATH_LOGIN : API_PATH_LOGOUT}>
 						{!isLoggedIn ? t('common:login') : t('common:logout')}
 					</Button>
 				</div>

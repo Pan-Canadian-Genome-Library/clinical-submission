@@ -19,7 +19,6 @@
 
 type ButtonProps = {
 	children?: React.ReactNode;
-	defaultText: string;
 	handler?: () => void;
 	type?: 'primary' | 'secondary';
 	href?: string;
@@ -39,7 +38,7 @@ const Button = (props: ButtonProps) => {
 		? 'bg-primary-800 hover:bg-primary-700 text-white font-semibold rounded-lg px-2 py-1 cursor-pointer transition-colors duration-300 text-sm'
 		: 'bg-white hover:bg-gray-100 text-black font-semibold rounded-lg px-2 py-1 cursor-pointer transition-colors duration-300 text-sm border border-gray-200';
 
-	const content = props.children ?? props.defaultText;
+	const content = props.children;
 
 	if (props.href) {
 		return (

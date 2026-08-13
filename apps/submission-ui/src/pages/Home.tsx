@@ -43,7 +43,9 @@ function Home() {
 						<h1 className="text-white text-4xl mb-4 font-semibold max-w-162.5">{t('common:hero.title')}</h1>
 						<p className="text-white mb-8 max-w-150">{t('common:hero.description')}</p>
 						<div className="flex gap-4 items-center mt-6">
-							<Button type="secondary" defaultText={t('common:hero.submitFiles')} handler={() => {}} />
+							<Button type="secondary" handler={() => {}}>
+								{t('common:hero.submitFiles')}
+							</Button>
 						</div>
 					</div>
 				</section>
