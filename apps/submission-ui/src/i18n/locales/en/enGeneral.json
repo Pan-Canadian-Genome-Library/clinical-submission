@@ -12,6 +12,7 @@
 	"cihrLogo": "CIHR Logo",
 	"breadcrumbs": {
 		"home": "Home",
+		"aria": "Breadcrumb",
 		"studyDetails": "Study Details"
 	},
 	"footer": {

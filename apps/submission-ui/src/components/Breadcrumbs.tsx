@@ -19,6 +19,7 @@
 
 import { Link } from 'react-router';
 import HomeIcon from '@/components/icons/HomeIcon';
+import { useTranslation } from 'react-i18next';
 
 type Crumb = {
 	label: string;
@@ -30,8 +31,12 @@ type BreadcrumbsProps = {
 };
 
 const Breadcrumbs = ({ crumbs }: BreadcrumbsProps) => {
+	const {
+		i18n: { t },
+	} = useTranslation('common');
+
 	return (
-		<nav aria-label="Breadcrumb" className="bg-gray-100 border-b border-gray-200 p-6">
+		<nav aria-label={t('breadcrumbs.aria')} className="bg-gray-100 border-b border-gray-200 p-6">
 			<ol className="mx-auto flex items-center gap-[0.4rem] flex-wrap list-none m-0 p-0">
 				{crumbs.map((crumb, index) => {
 					const isLast = index === crumbs.length - 1;

@@ -12,6 +12,7 @@
 	"cihrLogo": "Logo IRSC",
 	"breadcrumbs": {
 		"home": "Accueil",
+		"aria": "Fil d'Ariane",
 		"studyDetails": "Détails de l'étude"
 	},
 	"footer": {
