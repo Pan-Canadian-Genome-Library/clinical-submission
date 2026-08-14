@@ -41,11 +41,11 @@ const Breadcrumbs = ({ crumbs }: BreadcrumbsProps) => {
 						<li key={crumb.label} className="flex items-center gap-[0.4rem]">
 							{index > 0 && <span className="text-gray-500 text-sm select-none">/</span>}
 							{isLast ? (
-								<span className="text-gray-500 text-sm" aria-current="page">
+								<span className="text-sm" aria-current="page">
 									{crumb.label}
 								</span>
 							) : crumb.href ? (
-								<Link to={crumb.href} className="text-primary-600 no-underline text-sm inline-flex items-center gap-1">
+								<Link to={crumb.href} className="text-gray-500 no-underline text-sm inline-flex items-center gap-1">
 									{isFirst && <HomeIcon />}
 									{crumb.label}
 								</Link>
