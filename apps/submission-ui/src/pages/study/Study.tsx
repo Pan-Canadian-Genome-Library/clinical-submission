@@ -26,7 +26,7 @@ import Spinner from '@/components/Spinner';
 import Text from '@/components/typography/Text';
 
 const StudyDetails = () => {
-	const match = useMatch('study/:studyId')!;
+	const match = useMatch('study/:studyId');
 	const studyId = match?.params.studyId;
 	const { data: study, isLoading, isError } = useGetStudy({ studyId });
 
