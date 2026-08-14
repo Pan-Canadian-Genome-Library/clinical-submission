@@ -27,6 +27,9 @@
 	/* Success */
 	--color-success: #52c41a;
 	--color-success-light: #d9f7be;
+
+	/*Fonts*/
+	--font-jost: 'Jost', sans-serif;
 }
 
 :root {

@@ -54,18 +54,20 @@ const StudyDetails = () => {
 
 			<div className="bg-white">
 				<div className="w-[90%] mx-auto pt-6 pb-16">
-					<h1 className="text-3xl font-semibold text-gray-900 m-0 mb-6 py-8">{t('common:study.pageTitle')}</h1>
+					<h1 className="text-3xl font-jost font-semibold text-gray-900 m-0 mb-6 py-8">
+						{t('common:study.pageTitle')}
+					</h1>
 					<hr className="border-0 border-t border-gray-200 mb-6" />
 
 					<div className="pt-8">
 						<div className="flex items-start mb-4">
-							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.studyName')}:
 							</span>
 							<p className="m-0 text-base leading-normal">{study.studyName}</p>
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.description')}:
 							</span>
 							{study.translations && study.translations[0] ? (
@@ -73,13 +75,13 @@ const StudyDetails = () => {
 							) : null}
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.studyId')}:
 							</span>
 							<p className="m-0 text-base leading-normal">{study.studyId}</p>
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.programName')}:
 							</span>
 							{study.translations && study.translations[0] ? (
@@ -87,7 +89,7 @@ const StudyDetails = () => {
 							) : null}
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.keywords')}:
 							</span>
 							{study.translations && study.translations[0] && study.translations[0].keywords ? (
@@ -95,43 +97,43 @@ const StudyDetails = () => {
 							) : null}
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.status')}:
 							</span>
 							<p className="m-0 text-base leading-normal">{study.status}</p>
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.context')}:
 							</span>
 							<p className="m-0 text-base leading-normal">{study.context}</p>
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.domain')}:
 							</span>
 							<p className="m-0 text-base leading-normal">{study.domain}</p>
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.dacId')}:
 							</span>
 							<p className="m-0 text-base leading-normal">{study.dacId}</p>
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.principalInvestigators')}:
 							</span>
 							<p className="m-0 text-base leading-normal">{study.principalInvestigators.join(', ')}</p>
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.leadOrganizations')}:
 							</span>
 							<p className="m-0 text-base leading-normal">{study.leadOrganizations.join(', ')}</p>
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.fundingSources')}:
 							</span>
 							{study.translations && study.translations[0] ? (
@@ -139,13 +141,13 @@ const StudyDetails = () => {
 							) : null}
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.collaborators')}:
 							</span>
 							{study.collaborators && <p className="m-0 text-base leading-normal">{study.collaborators.join(', ')}</p>}
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.publicationLinks')}:
 							</span>
 							{study.publicationLinks && (
@@ -153,7 +155,7 @@ const StudyDetails = () => {
 							)}
 						</div>
 						<div className="flex items-start mb-4">
-							<span className="min-w-55 font-semibold text-gray-900 text-base pt-[0.1rem] shrink-0">
+							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
 								{t('common:study.fields.participantCriteria')}:
 							</span>
 							{study.translations && study.translations[0] ? (
