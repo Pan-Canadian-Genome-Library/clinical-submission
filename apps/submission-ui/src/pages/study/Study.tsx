@@ -24,6 +24,7 @@ import useGetStudy from '@/api/queries/useGetStudy';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import Spinner from '@/components/Spinner';
 import Text from '@/components/typography/Text';
+import StudyField from '@/components/StudyField';
 
 const StudyDetails = () => {
 	const match = useMatch('study/:studyId');
@@ -46,6 +47,23 @@ const StudyDetails = () => {
 		);
 	}
 
+	const studyFields = [
+		{ label: t('common:study.fields.studyName'), value: study.studyName },
+		{ label: t('common:study.fields.description'), value: study.translations?.[0]?.studyDescription },
+		{ label: t('common:study.fields.studyId'), value: study.studyId },
+		{ label: t('common:study.fields.programName'), value: study.translations?.[0]?.programName },
+		{ label: t('common:study.fields.keywords'), value: study.translations?.[0]?.keywords },
+		{ label: t('common:study.fields.status'), value: study.status },
+		{ label: t('common:study.fields.context'), value: study.context },
+		{ label: t('common:study.fields.domain'), value: study.domain },
+		{ label: t('common:study.fields.dacId'), value: study.dacId },
+		{ label: t('common:study.fields.principalInvestigators'), value: study.principalInvestigators },
+		{ label: t('common:study.fields.leadOrganizations'), value: study.leadOrganizations },
+		{ label: t('common:study.fields.fundingSources'), value: study.translations?.[0]?.fundingSources },
+		{ label: t('common:study.fields.collaborators'), value: study.collaborators },
+		{ label: t('common:study.fields.publicationLinks'), value: study.publicationLinks },
+		{ label: t('common:study.fields.participantCriteria'), value: study.translations?.[0]?.participantCriteria },
+	];
 	return (
 		<div className="flex flex-col flex-1">
 			<Breadcrumbs
@@ -60,108 +78,9 @@ const StudyDetails = () => {
 					<hr className="border-0 border-t border-gray-200 mb-6" />
 
 					<div className="pt-8">
-						<div className="flex items-start mb-4">
-							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
-								{t('common:study.fields.studyName')}:
-							</span>
-							<p className="m-0 text-base leading-normal">{study.studyName}</p>
-						</div>
-						<div className="flex items-start mb-4">
-							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
-								{t('common:study.fields.description')}:
-							</span>
-							{study.translations && study.translations[0] ? (
-								<p className="m-0 text-base leading-normal">{study.translations[0].studyDescription}</p>
-							) : null}
-						</div>
-						<div className="flex items-start mb-4">
-							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
-								{t('common:study.fields.studyId')}:
-							</span>
-							<p className="m-0 text-base leading-normal">{study.studyId}</p>
-						</div>
-						<div className="flex items-start mb-4">
-							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
-								{t('common:study.fields.programName')}:
-							</span>
-							{study.translations && study.translations[0] ? (
-								<p className="m-0 text-base leading-normal">{study.translations[0].programName}</p>
-							) : null}
-						</div>
-						<div className="flex items-start mb-4">
-							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
-								{t('common:study.fields.keywords')}:
-							</span>
-							{study.translations && study.translations[0] && study.translations[0].keywords ? (
-								<p className="m-0 text-base leading-normal">{study.translations[0].keywords.join(', ')}</p>
-							) : null}
-						</div>
-						<div className="flex items-start mb-4">
-							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
-								{t('common:study.fields.status')}:
-							</span>
-							<p className="m-0 text-base leading-normal">{study.status}</p>
-						</div>
-						<div className="flex items-start mb-4">
-							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
-								{t('common:study.fields.context')}:
-							</span>
-							<p className="m-0 text-base leading-normal">{study.context}</p>
-						</div>
-						<div className="flex items-start mb-4">
-							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
-								{t('common:study.fields.domain')}:
-							</span>
-							<p className="m-0 text-base leading-normal">{study.domain}</p>
-						</div>
-						<div className="flex items-start mb-4">
-							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
-								{t('common:study.fields.dacId')}:
-							</span>
-							<p className="m-0 text-base leading-normal">{study.dacId}</p>
-						</div>
-						<div className="flex items-start mb-4">
-							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
-								{t('common:study.fields.principalInvestigators')}:
-							</span>
-							<p className="m-0 text-base leading-normal">{study.principalInvestigators.join(', ')}</p>
-						</div>
-						<div className="flex items-start mb-4">
-							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
-								{t('common:study.fields.leadOrganizations')}:
-							</span>
-							<p className="m-0 text-base leading-normal">{study.leadOrganizations.join(', ')}</p>
-						</div>
-						<div className="flex items-start mb-4">
-							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
-								{t('common:study.fields.fundingSources')}:
-							</span>
-							{study.translations && study.translations[0] ? (
-								<p className="m-0 text-base leading-normal">{study.translations[0].fundingSources.join(', ')}</p>
-							) : null}
-						</div>
-						<div className="flex items-start mb-4">
-							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
-								{t('common:study.fields.collaborators')}:
-							</span>
-							{study.collaborators && <p className="m-0 text-base leading-normal">{study.collaborators.join(', ')}</p>}
-						</div>
-						<div className="flex items-start mb-4">
-							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
-								{t('common:study.fields.publicationLinks')}:
-							</span>
-							{study.publicationLinks && (
-								<p className="m-0 text-base leading-normal">{study?.publicationLinks.join(', ')}</p>
-							)}
-						</div>
-						<div className="flex items-start mb-4">
-							<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">
-								{t('common:study.fields.participantCriteria')}:
-							</span>
-							{study.translations && study.translations[0] ? (
-								<p className="m-0 text-base leading-normal">{study.translations[0].participantCriteria}</p>
-							) : null}
-						</div>
+						{studyFields.map(({ label, value }) => (
+							<StudyField key={label} label={label} value={value} />
+						))}
 					</div>
 				</div>
 			</div>
