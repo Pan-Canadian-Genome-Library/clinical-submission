@@ -72,7 +72,7 @@ const StudyDetails = () => {
 				crumbs={[{ label: t('common:breadcrumbs.home'), href: '/' }, { label: t('common:breadcrumbs.studyDetails') }]}
 			/>
 			<SectionLayout className="bg-white px-25 pb-20">
-				<h1 className="text-3xl font-jost font-semibold text-gray-900 m-0 mb-6 py-8">{t('common:study.pageTitle')}</h1>
+				<h1 className="text-3xl font-jost font-semibold text-gray-900 py-16">{t('common:study.pageTitle')}</h1>
 				<hr className="border-0 border-t border-gray-200 mb-6" />
 
 				<div className="pt-8">
