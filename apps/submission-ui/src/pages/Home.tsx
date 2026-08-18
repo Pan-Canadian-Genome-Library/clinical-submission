@@ -40,7 +40,7 @@ function Home() {
 					style={{ backgroundImage: `url(${Hero})` }}
 				>
 					<div className="max-w-300 w-full mx-auto">
-						<h1 className="text-white text-4xl mb-4 font-semibold max-w-162.5">{t('common:hero.title')}</h1>
+						<h1 className="text-white font-jost text-4xl mb-4 font-semibold max-w-162.5">{t('common:hero.title')}</h1>
 						<p className="text-white mb-8 max-w-150">{t('common:hero.description')}</p>
 						<div className="flex gap-4 items-center mt-6">
 							<Button type="secondary" handler={() => {}}>
@@ -56,14 +56,16 @@ function Home() {
 						<div className="flex flex-col md:flex-row gap-12 mb-12">
 							{/* Overview Section */}
 							<div className="flex-1">
-								<h2 className="text-gray-900 text-2xl mb-4 font-semibold">{t('common:overview.title')}</h2>
+								<h2 className="text-gray-900 font-jost text-2xl mb-4 font-semibold">{t('common:overview.title')}</h2>
 								<Text className="mb-4">{t('common:overview.paragraph1')}</Text>
 								<Text>{t('common:overview.paragraph2')}</Text>
 							</div>
 
 							{/* How to Register Section */}
 							<div className="flex-1">
-								<h2 className="text-gray-900 text-2xl mb-6 font-semibold">{t('common:howToRegister.title')}</h2>
+								<h2 className="text-gray-900 font-jost text-2xl mb-6 font-semibold">
+									{t('common:howToRegister.title')}
+								</h2>
 
 								{/* Step 1 */}
 								<div className="flex gap-4 mb-6 items-start">
@@ -121,7 +123,7 @@ function Home() {
 				{/* Submitting Genomic Data Section */}
 				<section className="py-12 px-8 ">
 					<div className="max-w-300 mx-auto">
-						<h2 className="text-gray-900 text-2xl mb-4 font-semibold">{t('common:genomicData.title')}</h2>
+						<h2 className="text-gray-900 font-jost text-2xl mb-4 font-semibold">{t('common:genomicData.title')}</h2>
 						<Text>{t('common:genomicData.paragraph')}</Text>
 						<a href="#workflow" className="text-primary-600 underline text-base">
 							{t('common:genomicData.linkText')} →

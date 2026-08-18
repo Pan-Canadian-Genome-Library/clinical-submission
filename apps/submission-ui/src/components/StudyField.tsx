@@ -26,7 +26,7 @@ const StudyField = ({ label, value }: StudyFieldProps) => {
 	const displayValue = Array.isArray(value) ? value.join(', ') : value;
 	return (
 		<div className="flex items-start mb-4">
-			<span className="min-w-55  text-gray-900 text-base pt-[0.1rem] shrink-0">{label}:</span>
+			<span className="min-w-55  text-black text-base pt-[0.1rem] shrink-0">{label}:</span>
 			{displayValue ? <p className="m-0 text-base leading-normal">{displayValue}</p> : null}
 		</div>
 	);
