@@ -1,6 +1,25 @@
 {
 	"PCGL": "Bibliothèque génomique pancanadienne {{ date }}",
+	"pcglLogoAltText": "Accueil de la soumission clinique PCGL",
 	"languageSwitch": "English",
-	"login": "Se connecter",
-	"logout": "Se déconnecter"
+	"dataSubmission": "Soumission de données",
+	"dataDictionary": "Dictionnaire de données",
+	"login": "Connexion",
+	"logout": "Se déconnecter",
+	"helpDesk": "Assistance",
+	"pcglLogo": "Logo PCGL",
+	"cihrLogo": "Logo IRSC",
+	"footer": {
+		"supportedBy": "La BGPC est soutenue par les Instituts de recherche en santé du Canada (IRSC)",
+		"copyright": "© {{ date }} Portail de soumission de la BGPC. Tous droits réservés. UI v1.0 - API v1.0",
+		"contactUs": "Nous contacter",
+		"controlledDataUsers": "Utilisateurs de données contrôlées",
+		"privacyPolicy": "Politique de confidentialité",
+		"policiesGuidelines": "Politiques et directives",
+		"pcglWebsite": "Site Web de la BGPC",
+		"termsConditions": "Conditions d'utilisation",
+		"helpGuides": "Guides d'aide",
+		"dataPlatform": "Plateforme de données",
+		"publicationPolicy": "Politique de publication"
+	}
 }

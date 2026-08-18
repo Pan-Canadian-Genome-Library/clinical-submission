@@ -17,13 +17,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import frForm from '@/i18n/locales/fr/frForm.json';
-import frGeneral from '@/i18n/locales/fr/frGeneral.json';
-import frHome from '@/i18n/locales/fr/frHome.json';
-import { I18N_LOCALE_DICTIONARY } from '../en';
+type TextProps = {
+	children: React.ReactNode;
+	className?: string;
+};
 
-export const FRENCH_DICTIONARY = {
-	...frForm,
-	...frGeneral,
-	...frHome,
-} as const satisfies I18N_LOCALE_DICTIONARY;
+/**
+ * A generic text component
+ * Additional classes can be applied via the `className` prop.
+ * @param props
+ * @returns
+ */
+const Text = (props: TextProps) => {
+	return <p className={`text-base leading-relaxed text-black ${props.className ?? ''}`}>{props.children}</p>;
+};
+
+export default Text;

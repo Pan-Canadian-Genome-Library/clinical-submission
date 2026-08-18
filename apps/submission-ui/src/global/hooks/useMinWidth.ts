@@ -17,13 +17,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import frForm from '@/i18n/locales/fr/frForm.json';
-import frGeneral from '@/i18n/locales/fr/frGeneral.json';
-import frHome from '@/i18n/locales/fr/frHome.json';
-import { I18N_LOCALE_DICTIONARY } from '../en';
+import { useEffect, useState } from 'react';
 
-export const FRENCH_DICTIONARY = {
-	...frForm,
-	...frGeneral,
-	...frHome,
-} as const satisfies I18N_LOCALE_DICTIONARY;
+/**
+ * Gets the current width of the screen as a number.
+ * @returns Current width of the screen.
+ */
+export const useMinWidth = (): number => {
+	const [minWidth, setMinWidth] = useState(window.innerWidth);
+	useEffect(() => {
+		const handleWidthChange = () => {
+			setMinWidth(window.innerWidth);
+		};
+		window.addEventListener('resize', handleWidthChange);
+
+		return () => {
+			//Remember to clean up after ourselves.
+			window.removeEventListener('resize', handleWidthChange);
+		};
+	}, []);
+
+	return minWidth;
+};

@@ -1,0 +1,27 @@
+{
+	"hero": {
+		"title": "Pan-Canadian Genome Library Data Submission Portal",
+		"description": "Contribute clinical data to Canada's genomic research. The PCGL submission portal makes it simple for institutions to securely submit health and clinical data, aligned with national standards — powering Canada's genomic research infrastructure.",
+		"submitFiles": "Submit Files"
+	},
+	"overview": {
+		"title": "Overview",
+		"paragraph1": "The Pan-Canadian Genome Library (PCGL) is a national initiative, funded by the Canadian Institutes of Health Research, building the framework for how Canada collects, stores, and shares human genomic data. This portal is the entry point for the clinical and health data component of that framework — where research institutions and health data custodians submit the clinical and health information linked to genomic research participants.",
+		"paragraph2": "This portal accepts only tabular clinical, health and biospecimen data — structured records such as demographic, diagnostic, treatment, and outcome information."
+	},
+	"howToRegister": {
+		"title": "How to Register",
+		"step1": {
+			"text": "with your study information. Our team will initiate the registration process.",
+			"linkText": "Reach out to the helpdesk"
+		},
+		"step2": "Get your account. Once your request is reviewed, the Helpdesk team will send you a registration link and configure your access.",
+		"step3": "Log in to the portal. Use your credentials to sign in to the PCGL submission portal.",
+		"step4": "Submit your data. Follow the guided submission workflow to upload your data."
+	},
+	"genomicData": {
+		"title": "Submitting Genomic Data",
+		"paragraph": "PCGL also collects molecular genomics data — sequencing reads, alignments, and variant calls — but not through this portal. Genomic data is submitted using the PCGL Molecular Data Submission Workflow, a Nextflow pipeline built on the nf-core framework for reproducible, portable, and scalable submission.",
+		"linkText": "View the molecular data submission workflow"
+	}
+}
