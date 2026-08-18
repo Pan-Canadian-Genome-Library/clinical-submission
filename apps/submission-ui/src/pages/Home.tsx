@@ -19,7 +19,7 @@
 
 import AuditIcon from '@/assets/audit-outlined.png';
 import FileIcon from '@/assets/file-outlined.png';
-import Hero from '@/assets/hero-bar.png';
+import Hero from '@/assets/hero-bar.jpg';
 import SignatureIcon from '@/assets/signature-outlined.png';
 import UserIcon from '@/assets/user-outlined.png';
 import Button from '@/components/button/Button';
