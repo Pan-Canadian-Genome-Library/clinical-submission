@@ -25,7 +25,7 @@ type WrapperProps = {
 
 /**
  * Section Layout component. Use to wrap inner sections of a new page.
- * Some components on a page must expand the entire width(ex: homepage hero banner ) so this does not wrap the entire page but specific sections.
+ * Some components on a page must expand the entire width(ex: homepage hero banner ) so this should not always wrap every section.
  */
 const SectionLayout = ({ className, children }: WrapperProps) => {
 	return <section className={cn('default-bg w-full mx-auto px-8', className)}>{children}</section>;
