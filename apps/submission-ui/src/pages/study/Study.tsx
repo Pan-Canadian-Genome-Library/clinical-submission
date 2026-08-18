@@ -25,6 +25,8 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import Spinner from '@/components/Spinner';
 import Text from '@/components/typography/Text';
 import StudyField from '@/components/StudyField';
+import SectionLayout from '@/components/layouts/SectionLayout';
+import PageLayout from '@/components/layouts/PageLayout';
 
 const StudyDetails = () => {
 	const match = useMatch('study/:studyId');
@@ -65,26 +67,21 @@ const StudyDetails = () => {
 		{ label: t('common:study.fields.participantCriteria'), value: study.translations?.[0]?.participantCriteria },
 	];
 	return (
-		<div className="flex flex-col flex-1">
+		<PageLayout>
 			<Breadcrumbs
 				crumbs={[{ label: t('common:breadcrumbs.home'), href: '/' }, { label: t('common:breadcrumbs.studyDetails') }]}
 			/>
+			<SectionLayout className="bg-white px-25 pb-20">
+				<h1 className="text-3xl font-jost font-semibold text-gray-900 m-0 mb-6 py-8">{t('common:study.pageTitle')}</h1>
+				<hr className="border-0 border-t border-gray-200 mb-6" />
 
-			<div className="bg-white">
-				<div className="w-[90%] mx-auto pt-6 pb-16">
-					<h1 className="text-3xl font-jost font-semibold text-gray-900 m-0 mb-6 py-8">
-						{t('common:study.pageTitle')}
-					</h1>
-					<hr className="border-0 border-t border-gray-200 mb-6" />
-
-					<div className="pt-8">
-						{studyFields.map(({ label, value }) => (
-							<StudyField key={label} label={label} value={value} />
-						))}
-					</div>
+				<div className="pt-8">
+					{studyFields.map(({ label, value }) => (
+						<StudyField key={label} label={label} value={value} />
+					))}
 				</div>
-			</div>
-		</div>
+			</SectionLayout>
+		</PageLayout>
 	);
 };
 
