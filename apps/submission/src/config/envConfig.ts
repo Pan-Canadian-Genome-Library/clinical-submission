@@ -36,6 +36,12 @@ const parseHttpMethods = (value: string) => {
 		.map((v) => v.trim().toUpperCase());
 };
 
+const parseRestrictedNames = (value?: string) =>
+	(value ?? '')
+		.split(',')
+		.filter((val) => val.trim() !== '')
+		.map((val) => val.trim().toLowerCase());
+
 const validatorConfigSchema = z.object({
 	categoryId: z.number(),
 	entityName: z.string(),
@@ -88,6 +94,9 @@ const envSchema = z.object({
 	LOG_LEVEL: z.enum(LogLevelOptions).default('info'),
 	NODE_ENV: z.enum(NodeEnvOptions).default('development'),
 	PLURALIZE_SCHEMAS_ENABLED: z.preprocess((val) => processCoercedBoolean(val), z.boolean()).default(true),
+	RESTRICT_READ_ACCESS_ENABLED: z.preprocess((val) => processCoercedBoolean(val), z.boolean()).default(true),
+	RESTRICTED_SCHEMA_NAMES: z.string().optional().transform(parseRestrictedNames),
+	RESTRICTED_FIELD_NAMES: z.string().optional().transform(parseRestrictedNames),
 	SERVER_PORT: z.coerce.number().min(100).default(3030),
 	SERVER_UPLOAD_LIMIT: z.string().default('10mb'),
 	VALIDATOR_CONFIG: z
