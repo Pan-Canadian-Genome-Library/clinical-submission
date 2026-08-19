@@ -24,13 +24,8 @@ import { logger } from '@/common/logger.js';
 import { authConfig } from '@/config/authConfig.js';
 import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
-import {
-	exchangeCodeForTokens,
-	getOidcAuthorizeUrl,
-	getUserInfo,
-	revokeToken,
-} from '@/external/oidcAuthenticationClient.js';
-import { getUserInformation } from '@/external/pcglAuthZClient.js';
+import * as oidcClient from '@/external/oidcAuthenticationClient.js';
+import * as authzClient from '@/external/pcglAuthZClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import { resetSession } from '@/session/index.js';
 
@@ -51,7 +46,7 @@ const loginSession = validateRequest({}, async (request, response, next) => {
 
 		const onSuccessRedirect = getOauthRedirectUri(env.UI_HOST);
 
-		const redirectUrl = getOidcAuthorizeUrl(authConfig, onSuccessRedirect);
+		const redirectUrl = oidcClient.getOidcAuthorizeUrl(authConfig, onSuccessRedirect);
 
 		response.redirect(redirectUrl);
 	} catch (error) {
@@ -80,7 +75,7 @@ const logoutSession = validateRequest({}, async (request, response, next) => {
 		return;
 	}
 	try {
-		await revokeToken(authConfig, account.accessToken);
+		await oidcClient.revokeToken(authConfig, account.accessToken);
 		// On logout success we can clear the session data.
 		resetSession(request.session);
 		response.redirect(logoutSuccessRedirectUrl);
@@ -105,7 +100,7 @@ const authToken = validateRequest({}, async (request, response) => {
 		if (typeof code !== 'string') {
 			throw new Error('Invalid Request. Must contain query parameter `code` with a single string value.');
 		}
-		const tokenResponse = await exchangeCodeForTokens(authConfig, {
+		const tokenResponse = await oidcClient.exchangeCodeForTokens(authConfig, {
 			code,
 			redirectUrl: getOauthRedirectUri(env.UI_HOST),
 		});
@@ -114,8 +109,16 @@ const authToken = validateRequest({}, async (request, response) => {
 			throw new Error(tokenResponse.error);
 		}
 
-		const pcglAuthzResponse = await getUserInformation(tokenResponse.access_token);
-		const oidcDataResponse = await getUserInfo(authConfig, tokenResponse.access_token);
+		const refreshTokenResponse = await oidcClient.refreshUserSession(authConfig, {
+			refreshToken: tokenResponse.refresh_token,
+		});
+
+		if ('error' in refreshTokenResponse) {
+			throw new lyricProvider.utils.errors.InternalServerError('Unable to retrieve user tokens from OIDC provider.');
+		}
+
+		const pcglAuthzResponse = await authzClient.getUserInformation(refreshTokenResponse.access_token); // authz userInfo
+		const oidcDataResponse = await oidcClient.getUserInfo(authConfig, tokenResponse.access_token); // cilogon user info
 
 		const userAccountAliasing = {
 			idToken: tokenResponse.id_token,
