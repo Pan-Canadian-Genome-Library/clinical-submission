@@ -17,11 +17,12 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { StudyDTO, StudyResponse, StudyTranslationDTO } from '@clinical-submission/data-model';
 import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
 
 import { logger } from '@/common/logger.js';
-import type { StudyDTO, StudyRecord, StudyResponse } from '@/common/types/study.js';
-import { StudyTranslationDTO, StudyTranslationRecord } from '@/common/types/studyTranslations.js';
+import { StudyRecord } from '@/common/types/study.js';
+import { StudyTranslationRecord } from '@/common/types/studyTranslations.js';
 import { StudyTranslationFields, UpsertStudyFields } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';

@@ -19,18 +19,4 @@
 
 import { studyTranslations } from '@/db/schemas/studyTranslationsSchema.js';
 
-import { AllowedLanguagesValues } from './study.js';
-
-export type StudyTranslationDTO = {
-	studyTranslationId?: number;
-	languageId: AllowedLanguagesValues;
-	studyDescription: string;
-	programName?: string | null;
-	keywords?: string[] | null;
-	participantCriteria?: string | null;
-	fundingSources: string[];
-	createdAt: string | Date;
-	updatedAt?: string | Date | null;
-};
-
 export type StudyTranslationRecord = typeof studyTranslations.$inferSelect;
