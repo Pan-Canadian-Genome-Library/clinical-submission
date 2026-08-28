@@ -60,7 +60,7 @@ export const authZUserInfo = zod.object({
 export type PCGLAuthZUserInfoResponse = zod.infer<typeof authZUserInfo>;
 
 export const authZStudyAuthorizationResponse = zod.object({
-	dac_authorizations: zod.object({}).or(zod.string()),
+	dac_id: zod.object({}).or(zod.string()),
 	data_submitters: zod.array(zod.string()),
 	date_created: zod.string(),
 	study_id: zod.string(),

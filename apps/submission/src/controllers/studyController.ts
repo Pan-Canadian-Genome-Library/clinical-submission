@@ -41,9 +41,9 @@ import type { PCGLAuthZStudyAuthorizationRequest } from '../common/validation/au
 const syncAuthzStudyDac = async (studyId: string, dacId: string, accessToken: string) => {
 	const authzStudy = await getAuthzStudyById(studyId, accessToken);
 
-	if (!authzStudy || authzStudy.dac_authorizations !== dacId) {
+	if (!authzStudy || authzStudy.dac_id !== dacId) {
 		const authzStudyData: PCGLAuthZStudyAuthorizationRequest = {
-			dac_authorizations: dacId,
+			dac_id: dacId,
 			data_submitters: authzStudy?.data_submitters || [],
 			study_id: studyId,
 			team_members: authzStudy?.team_members || [],
