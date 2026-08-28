@@ -36,6 +36,24 @@ import { validateRequest } from '@/middleware/requestValidation.js';
 import dacService from '@/service/dacService.js';
 import { studyService } from '@/service/studyService.js';
 
+import type { PCGLAuthZStudyAuthorizationRequest } from '../common/validation/authz-validation.js';
+
+const syncAuthzStudyDac = async (studyId: string, dacId: string, accessToken: string) => {
+	const authzStudy = await getAuthzStudyById(studyId, accessToken);
+
+	if (!authzStudy || authzStudy.dac_authorizations !== dacId) {
+		const authzStudyData: PCGLAuthZStudyAuthorizationRequest = {
+			dac_authorizations: dacId,
+			data_submitters: authzStudy?.data_submitters || [],
+			study_id: studyId,
+			team_members: authzStudy?.team_members || [],
+			date_created: authzStudy?.date_created,
+		};
+
+		await createAuthzStudy(authzStudyData, accessToken);
+	}
+};
+
 export const getAllStudies = validateRequest(listAllStudies, async (req, res, next) => {
 	const db = getDbInstance();
 	const { page, orderBy, pageSize } = req.query;
@@ -108,11 +126,7 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 				throw new lyricProvider.utils.errors.BadRequest(`Unable to create study with provided data.`);
 			}
 
-			const authzStudy = await getAuthzStudyById(results.studyId, accessToken);
-
-			if (!authzStudy) {
-				await createAuthzStudy(results.studyId, accessToken);
-			}
+			await syncAuthzStudyDac(results.studyId, studyData.dacId || '', accessToken);
 
 			return results;
 		});
@@ -216,10 +230,15 @@ export const addDacIdToStudy = validateRequest(dacToStudy, async (req, res, next
 	try {
 		const { studyId } = req.params;
 		const { dacId } = req.body;
+		const accessToken = extractAccessTokenFromHeader(req);
 
 		const db = getDbInstance();
 		const studyRepo = studyService(db);
 		const dacRepo = dacService(db);
+
+		if (!accessToken) {
+			throw new lyricProvider.utils.errors.Forbidden('Unauthorized: No access token provided');
+		}
 
 		const studyFound = await studyRepo.getStudyById(studyId);
 
@@ -238,6 +257,7 @@ export const addDacIdToStudy = validateRequest(dacToStudy, async (req, res, next
 		}
 
 		const updatedStudy = await studyRepo.updateStudyDacId({ studyId, dacId });
+		await syncAuthzStudyDac(studyId, dacId, accessToken);
 
 		res.status(200).send(updatedStudy);
 		return;
