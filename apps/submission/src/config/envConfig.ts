@@ -36,12 +36,6 @@ const parseHttpMethods = (value: string) => {
 		.map((v) => v.trim().toUpperCase());
 };
 
-const validatorConfigSchema = z.object({
-	categoryId: z.number(),
-	entityName: z.string(),
-	fieldName: z.string(),
-});
-
 dotenv.config();
 
 const envSchema = z.object({
