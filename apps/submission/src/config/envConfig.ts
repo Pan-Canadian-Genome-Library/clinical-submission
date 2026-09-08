@@ -90,22 +90,6 @@ const envSchema = z.object({
 	PLURALIZE_SCHEMAS_ENABLED: z.preprocess((val) => processCoercedBoolean(val), z.boolean()).default(true),
 	SERVER_PORT: z.coerce.number().min(100).default(3030),
 	SERVER_UPLOAD_LIMIT: z.string().default('10mb'),
-	VALIDATOR_CONFIG: z
-		.string()
-		.default('[]')
-		.transform((val, ctx) => {
-			try {
-				return JSON.parse(val);
-			} catch (error) {
-				ctx.addIssue({
-					code: z.ZodIssueCode.custom,
-					message: 'Not a valid JSON',
-				});
-
-				return z.NEVER;
-			}
-		})
-		.pipe(z.array(validatorConfigSchema)),
 });
 
 const envParsed = envSchema.safeParse(process.env);
