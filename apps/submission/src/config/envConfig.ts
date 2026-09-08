@@ -92,6 +92,7 @@ const envSchema = z.object({
 	SERVER_UPLOAD_LIMIT: z.string().default('10mb'),
 	VALIDATOR_CONFIG: z
 		.string()
+		.default('[]')
 		.transform((val, ctx) => {
 			try {
 				return JSON.parse(val);
