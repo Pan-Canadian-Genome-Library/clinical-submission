@@ -42,12 +42,6 @@ const parseRestrictedNames = (value?: string) =>
 		.filter((val) => val.trim() !== '')
 		.map((val) => val.trim().toLowerCase());
 
-const validatorConfigSchema = z.object({
-	categoryId: z.number(),
-	entityName: z.string(),
-	fieldName: z.string(),
-});
-
 dotenv.config();
 
 const envSchema = z.object({
@@ -99,21 +93,6 @@ const envSchema = z.object({
 	RESTRICTED_FIELD_NAMES: z.string().optional().transform(parseRestrictedNames),
 	SERVER_PORT: z.coerce.number().min(100).default(3030),
 	SERVER_UPLOAD_LIMIT: z.string().default('10mb'),
-	VALIDATOR_CONFIG: z
-		.string()
-		.transform((val, ctx) => {
-			try {
-				return JSON.parse(val);
-			} catch (error) {
-				ctx.addIssue({
-					code: z.ZodIssueCode.custom,
-					message: 'Not a valid JSON',
-				});
-
-				return z.NEVER;
-			}
-		})
-		.pipe(z.array(validatorConfigSchema)),
 });
 
 const envParsed = envSchema.safeParse(process.env);
