@@ -48,7 +48,6 @@ const defaultView = VIEW_TYPE.Values.flat;
 
 /**
  * Resolves the list of `entityName`s that are allowed based on the requested list and the category's dictionary.
- * @returns the list of allowed `entityName`s based on the requested list and the category's dictionary.
  */
 const resolveRestrictedEntityNames = async (categoryId: number, requested: string[]): Promise<string[]> => {
 	const currentDictionary = await lyricProvider.services.dictionary.getActiveDictionaryByCategory(categoryId);
