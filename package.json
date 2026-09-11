@@ -20,7 +20,8 @@
 		"dev:all": "concurrently --names=data-dictionary-ui,submission,submission-ui \"pnpm -w dev:dictionary-ui\" \"pnpm -w dev:submission-api\" \"pnpm -w dev:submission-ui\"",
 		"dev:dictionary-ui": "nx run @clinical-submission/data-dictionary-ui:dev",
 		"dev:submission-api": "nx run @clinical-submission/submission:start:dev",
-		"dev:submission-ui": "nx run @clinical-submission/submission-ui:dev"
+		"dev:submission-ui": "nx run @clinical-submission/submission-ui:dev",
+		"test": "nx run-many --all --target=test"
 	},
 	"devDependencies": {
 		"concurrently": "^9.1.2",
