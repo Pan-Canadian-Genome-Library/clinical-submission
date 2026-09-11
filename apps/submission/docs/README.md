@@ -7,3 +7,4 @@ The PCGL Submission server is an ExpressJS server application that is build on t
 - Study and DAC Service
 - Internal ID Management
 - [External Validation](./external-validation.md)
+- [Read Access Restriction](./read-access-restriction.md)

@@ -23,17 +23,12 @@ import { describe, it } from 'node:test';
 import { type SubmittedDataResponse } from '@overture-stack/lyric';
 
 import {
-	ALL_ENTITIES_RESTRICTED,
 	filterAllowedEntityNames,
 	isRestrictedEntityName,
 	isRestrictedFieldName,
 	shouldRestrictStudyData,
-	stripRestrictedEntities,
-	stripRestrictedFields,
+	stripRestrictedData,
 } from './accessRestrictionService.js';
-
-const RESTRICTED_SCHEMA_NAMES = ['sociodemographic'];
-const RESTRICTED_FIELD_NAMES = ['submitter_id'];
 
 const submittedDataResponse = (partial: Pick<SubmittedDataResponse, 'entityName' | 'data'>): SubmittedDataResponse => ({
 	isValid: true,
@@ -51,33 +46,35 @@ describe('shouldRestrictStudyData', () => {
 		assert.equal(shouldRestrictStudyData(true, true), false);
 	});
 
-	it('does not restrict when the flag is disabled, even for a READ-only user', () => {
+	it('does not restrict a user with neither READ nor WRITE access', () => {
+		// In practice a caller with no READ access is rejected earlier by the ordinary access
+		// check and never reaches this, but the function itself should not restrict on its own.
 		assert.equal(shouldRestrictStudyData(false, false), false);
 	});
 });
 
 describe('isRestrictedEntityName', () => {
-	it('matches the configured name case-insensitively', () => {
-		assert.equal(isRestrictedEntityName('Sociodemographic', RESTRICTED_SCHEMA_NAMES), true);
-		assert.equal(isRestrictedEntityName('SOCIODEMOGRAPHIC', RESTRICTED_SCHEMA_NAMES), true);
+	it('matches the restricted schema name case-insensitively', () => {
+		assert.equal(isRestrictedEntityName('Sociodemographic'), true);
+		assert.equal(isRestrictedEntityName('SOCIODEMOGRAPHIC'), true);
 	});
 
 	it('matches the pluralized form (compound-view nested keys are pluralized)', () => {
-		assert.equal(isRestrictedEntityName('sociodemographics', RESTRICTED_SCHEMA_NAMES), true);
+		assert.equal(isRestrictedEntityName('sociodemographics'), true);
 	});
 
 	it('does not match an unrelated entity', () => {
-		assert.equal(isRestrictedEntityName('participant', RESTRICTED_SCHEMA_NAMES), false);
+		assert.equal(isRestrictedEntityName('participant'), false);
 	});
 });
 
 describe('isRestrictedFieldName', () => {
-	it('matches a configured field name case-insensitively', () => {
-		assert.equal(isRestrictedFieldName('Submitter_ID', RESTRICTED_FIELD_NAMES), true);
+	it('matches the restricted field name case-insensitively', () => {
+		assert.equal(isRestrictedFieldName('Submitter_Participant_ID'), true);
 	});
 
 	it('does not match an unrelated field', () => {
-		assert.equal(isRestrictedFieldName('pcgl_participant_id', RESTRICTED_FIELD_NAMES), false);
+		assert.equal(isRestrictedFieldName('pcgl_participant_id'), false);
 	});
 });
 
@@ -85,34 +82,27 @@ describe('filterAllowedEntityNames', () => {
 	const allEntityNames = ['participant', 'treatment', 'sociodemographic'];
 
 	it('returns all non-restricted entities when nothing was explicitly requested', () => {
-		assert.deepEqual(filterAllowedEntityNames(allEntityNames, [], RESTRICTED_SCHEMA_NAMES), [
-			'participant',
-			'treatment',
-		]);
+		assert.deepEqual(filterAllowedEntityNames(allEntityNames, []), ['participant', 'treatment']);
 	});
 
 	it('intersects an explicit request with the allowed set', () => {
-		assert.deepEqual(
-			filterAllowedEntityNames(allEntityNames, ['participant', 'sociodemographic'], RESTRICTED_SCHEMA_NAMES),
-			['participant'],
-		);
+		assert.deepEqual(filterAllowedEntityNames(allEntityNames, ['participant', 'sociodemographic']), ['participant']);
 	});
 
-	it('returns the ALL_ENTITIES_RESTRICTED sentinel, not an empty array, when every requested entity is restricted', () => {
+	it('returns an empty array when every requested entity is restricted', () => {
 		// Regression guard: Lyric's own entityName filter treats an empty array as "no filter"
-		// (drizzle's `or()` with zero arguments matches everything), so forwarding [] here would
-		// silently return unfiltered data instead of nothing. Callers must check for the sentinel.
-		const result = filterAllowedEntityNames(allEntityNames, ['sociodemographic'], RESTRICTED_SCHEMA_NAMES);
-		assert.equal(result, ALL_ENTITIES_RESTRICTED);
-		assert.notDeepEqual(result, []);
+		// (drizzle's `or()` with zero arguments matches everything), so callers must check for
+		// an empty result themselves and short-circuit before forwarding it as the entityName
+		// filter, rather than assuming an empty filter means "no filter" here too.
+		assert.deepEqual(filterAllowedEntityNames(allEntityNames, ['sociodemographic']), []);
 	});
 
-	it('returns the ALL_ENTITIES_RESTRICTED sentinel when the dictionary has no non-restricted entities at all', () => {
-		assert.equal(filterAllowedEntityNames(['sociodemographic'], [], RESTRICTED_SCHEMA_NAMES), ALL_ENTITIES_RESTRICTED);
+	it('returns an empty array when the dictionary has no non-restricted entities at all', () => {
+		assert.deepEqual(filterAllowedEntityNames(['sociodemographic'], []), []);
 	});
 });
 
-describe('stripRestrictedEntities', () => {
+describe('stripRestrictedData', () => {
 	it('removes a top-level record whose entityName is restricted', () => {
 		const records = [
 			submittedDataResponse({ entityName: 'participant', data: { pcgl_participant_id: 'PT001' } }),
@@ -122,7 +112,7 @@ describe('stripRestrictedEntities', () => {
 			}),
 		];
 
-		const result = stripRestrictedEntities(records, RESTRICTED_SCHEMA_NAMES);
+		const result = stripRestrictedData(records);
 
 		assert.equal(result.length, 1);
 		assert.equal(result[0]?.entityName, 'participant');
@@ -139,7 +129,7 @@ describe('stripRestrictedEntities', () => {
 			}),
 		];
 
-		const result = stripRestrictedEntities(records, RESTRICTED_SCHEMA_NAMES);
+		const result = stripRestrictedData(records);
 
 		assert.deepEqual(result[0]?.data, { pcgl_participant_id: 'PT001' });
 	});
@@ -154,39 +144,46 @@ describe('stripRestrictedEntities', () => {
 			}),
 		];
 
-		const result = stripRestrictedEntities(records, RESTRICTED_SCHEMA_NAMES);
+		const result = stripRestrictedData(records);
 
 		assert.deepEqual(result[0]?.data, { treatments: [{ pcgl_treatment_id: 'TR001' }] });
 	});
-});
 
-describe('stripRestrictedFields', () => {
-	it('removes a top-level restricted field', () => {
-		const result = stripRestrictedFields(
-			{ submitter_id: 'SUBMITTER-001', pcgl_participant_id: 'PT001' },
-			RESTRICTED_FIELD_NAMES,
-		);
+	it('removes the restricted field at the top level', () => {
+		const records = [
+			submittedDataResponse({
+				entityName: 'participant',
+				data: { submitter_participant_id: 'SUBMITTER-001', pcgl_participant_id: 'PT001' },
+			}),
+		];
 
-		assert.deepEqual(result, { pcgl_participant_id: 'PT001' });
+		const result = stripRestrictedData(records);
+
+		assert.deepEqual(result[0]?.data, { pcgl_participant_id: 'PT001' });
 	});
 
-	it('removes a restricted field nested at any depth', () => {
-		const result = stripRestrictedFields(
-			{
-				pcgl_participant_id: 'PT001',
-				treatments: [{ submitter_id: 'SUBMITTER-002', pcgl_treatment_id: 'TR001' }],
-			},
-			RESTRICTED_FIELD_NAMES,
-		);
+	it('removes the restricted field nested at any depth', () => {
+		const records = [
+			submittedDataResponse({
+				entityName: 'study',
+				data: {
+					participants: [{ submitter_participant_id: 'SUBMITTER-002', pcgl_participant_id: 'PT002' }],
+				},
+			}),
+		];
 
-		assert.deepEqual(result, {
-			pcgl_participant_id: 'PT001',
-			treatments: [{ pcgl_treatment_id: 'TR001' }],
-		});
+		const result = stripRestrictedData(records);
+
+		assert.deepEqual(result[0]?.data, { participants: [{ pcgl_participant_id: 'PT002' }] });
 	});
 
-	it('leaves unrelated fields untouched', () => {
-		const result = stripRestrictedFields({ pcgl_participant_id: 'PT001', age: 42 }, RESTRICTED_FIELD_NAMES);
-		assert.deepEqual(result, { pcgl_participant_id: 'PT001', age: 42 });
+	it('leaves unrelated entities and fields untouched', () => {
+		const records = [
+			submittedDataResponse({ entityName: 'participant', data: { pcgl_participant_id: 'PT001', age: 42 } }),
+		];
+
+		const result = stripRestrictedData(records);
+
+		assert.deepEqual(result[0]?.data, { pcgl_participant_id: 'PT001', age: 42 });
 	});
 });

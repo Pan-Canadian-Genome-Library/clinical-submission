@@ -25,78 +25,75 @@ import {
 } from '@overture-stack/lyric';
 
 /**
- * Sentinel returned by {@link filterAllowedEntityNames} when every entity the caller asked
- * for is restricted. Callers must treat this as "return nothing" and short-circuit before
- * calling into Lyric: passing an empty array through as an `entityName` filter is NOT
- * equivalent to "match nothing" in Lyric's own query layer (`or()` with no arguments builds
- * no filter at all, which would return everything, unfiltered).
+ * Schema/entity name that is always excluded from a READ-only user's view of submitted data.
+ * Static and not configurable: this restriction is a fixed part of the access model, not an
+ * optional feature.
  */
-export const ALL_ENTITIES_RESTRICTED = 'ALL_ENTITIES_RESTRICTED' as const;
+export const RESTRICTED_ENTITY_NAME = 'sociodemographic';
 
 /**
- * Whether responses for a study should be filtered/restricted: true when the feature is
- * enabled and the caller does not have WRITE access to the study. Callers pass in
- * `hasAllowedAccess(study, 'WRITE', user)` for `hasWriteAccess`; that check already returns
- * `true` unconditionally when auth is disabled or the user is an admin, so this composes
- * correctly for those cases without any special-casing here.
+ * Field name that is always removed, wherever it appears across any entity, from a READ-only
+ * user's view of submitted data.
  */
-export const shouldRestrictStudyData = (restrictionEnabled: boolean, hasWriteAccess: boolean): boolean =>
-	restrictionEnabled && !hasWriteAccess;
-
-const restrictedSchemaNameVariants = (restrictedSchemaNames: string[]): Set<string> => {
-	const names = new Set<string>();
-	for (const rawName of restrictedSchemaNames) {
-		const name = rawName.trim().toLowerCase();
-		names.add(name);
-		names.add(pluralizeSchemaName(name).toLowerCase());
-	}
-	return names;
-};
+export const RESTRICTED_FIELD_NAME = 'submitter_participant_id';
 
 /**
- * True if `entityName` matches a configured restricted schema (`RESTRICTED_SCHEMA_NAMES`),
- * case-insensitively, checking both singular and pluralized forms since Lyric's compound
- * view keys nested entities by their pluralized name when `PLURALIZE_SCHEMAS_ENABLED` is set.
+ * Whether responses for a study should be filtered/restricted for the current caller: true
+ * only when they have READ access but not WRITE access to that specific study. A caller with
+ * neither is rejected earlier by the ordinary access check and never reaches this; a caller
+ * with WRITE access (which includes admins and the auth-disabled case, since those bypass the
+ * underlying access check entirely) is never restricted.
  */
-export const isRestrictedEntityName = (entityName: string, restrictedSchemaNames: string[]): boolean =>
-	restrictedSchemaNameVariants(restrictedSchemaNames).has(entityName.trim().toLowerCase());
+export const shouldRestrictStudyData = (hasReadAccess: boolean, hasWriteAccess: boolean): boolean =>
+	hasReadAccess && !hasWriteAccess;
+
+const restrictedEntityNameVariants = new Set(
+	[RESTRICTED_ENTITY_NAME, pluralizeSchemaName(RESTRICTED_ENTITY_NAME)].map((name) => name.toLowerCase()),
+);
 
 /**
- * True if `fieldName` matches a configured restricted field (`RESTRICTED_FIELD_NAMES`),
- * case-insensitively.
+ * True if `entityName` is the restricted schema, case-insensitively, checking both singular
+ * and pluralized forms since Lyric's compound view keys nested entities by their pluralized
+ * name when `PLURALIZE_SCHEMAS_ENABLED` is set.
  */
-export const isRestrictedFieldName = (fieldName: string, restrictedFieldNames: string[]): boolean =>
-	restrictedFieldNames.some((name) => name.trim().toLowerCase() === fieldName.trim().toLowerCase());
+export const isRestrictedEntityName = (entityName: string): boolean =>
+	restrictedEntityNameVariants.has(entityName.trim().toLowerCase());
+
+/**
+ * True if `fieldName` is the restricted field, case-insensitively.
+ */
+export const isRestrictedFieldName = (fieldName: string): boolean =>
+	fieldName.trim().toLowerCase() === RESTRICTED_FIELD_NAME;
 
 /**
  * Given the full list of entity names in a category's dictionary and the entity names the
- * caller explicitly requested (empty means "all"), returns the concrete `entityName` filter
- * to send to Lyric with restricted entities removed, or {@link ALL_ENTITIES_RESTRICTED} when
- * the result would otherwise be an empty array.
+ * caller explicitly requested (empty means "all"), returns the concrete `entityName` filter to
+ * send to Lyric with the restricted entity removed. Excluding the restricted entity here,
+ * before the query runs, avoids reading its rows from the database at all.
+ *
+ * Can return an empty array, meaning every requested entity was restricted. Callers must check
+ * for that and short-circuit before calling into Lyric rather than forwarding it as the
+ * `entityName` filter: an empty array is NOT equivalent to "match nothing" in Lyric's own query
+ * layer (`or()` with no arguments builds no filter at all, which would return everything,
+ * unfiltered).
  */
-export const filterAllowedEntityNames = (
-	allEntityNames: string[],
-	requested: string[],
-	restrictedSchemaNames: string[],
-): string[] | typeof ALL_ENTITIES_RESTRICTED => {
+export const filterAllowedEntityNames = (allEntityNames: string[], requested: string[]): string[] => {
 	const base = requested.length > 0 ? requested : allEntityNames;
-	const allowed = base.filter((name) => !isRestrictedEntityName(name, restrictedSchemaNames));
-
-	return allowed.length === 0 ? ALL_ENTITIES_RESTRICTED : allowed;
+	return base.filter((name) => !isRestrictedEntityName(name));
 };
 
 /**
- * Recursively removes any key matching a restricted schema name from `dataRecord`, at any
- * depth. This is the authoritative filter for sociodemographic-style exclusion: Lyric's
+ * Recursively removes any key matching the restricted entity name or the restricted field
+ * name from `dataRecord`, at any depth. This is the authoritative filter: Lyric's
  * `view=compound` re-embeds parent/child schemas by walking the dictionary hierarchy in
  * separate queries, independent of whatever `entityName` filter was applied to the root
  * query, so a query-level filter alone cannot be relied on to catch every case.
  */
-const stripRestrictedKeys = (dataRecord: DataRecordNested, restrictedSchemaNames: string[]): DataRecordNested => {
+const stripRestrictedKeys = (dataRecord: DataRecordNested): DataRecordNested => {
 	const result: DataRecordNested = {};
 
 	for (const [key, value] of Object.entries(dataRecord)) {
-		if (isRestrictedEntityName(key, restrictedSchemaNames)) {
+		if (isRestrictedEntityName(key) || isRestrictedFieldName(key)) {
 			continue;
 		}
 
@@ -106,67 +103,24 @@ const stripRestrictedKeys = (dataRecord: DataRecordNested, restrictedSchemaNames
 		}
 
 		if (Array.isArray(value)) {
-			result[key] = value.map((item) => stripRestrictedKeys(item, restrictedSchemaNames));
+			result[key] = value.map((item) => stripRestrictedKeys(item));
 			continue;
 		}
 
-		result[key] = stripRestrictedKeys(value, restrictedSchemaNames);
+		result[key] = stripRestrictedKeys(value);
 	}
 
 	return result;
 };
 
 /**
- * Removes restricted-entity records and any restricted-entity data nested inside the
- * remaining records (see {@link stripRestrictedKeys}).
+ * Removes records whose top-level `entityName` is restricted, and any restricted entity/field
+ * data nested inside the remaining records (see {@link stripRestrictedKeys}). Run this after
+ * `SanitizeLyricIdsWithInternal`: that step needs to read the original value of a restricted
+ * field (e.g. `submitter_participant_id`) to look up its generated PCGL system ID before this
+ * removes the field.
  */
-export const stripRestrictedEntities = (
-	records: SubmittedDataResponse[],
-	restrictedSchemaNames: string[],
-): SubmittedDataResponse[] =>
+export const stripRestrictedData = (records: SubmittedDataResponse[]): SubmittedDataResponse[] =>
 	records
-		.filter((record) => !isRestrictedEntityName(record.entityName, restrictedSchemaNames))
-		.map((record) => ({ ...record, data: stripRestrictedKeys(record.data, restrictedSchemaNames) }));
-
-/**
- * Recursively removes any key matching a restricted field name (`RESTRICTED_FIELD_NAMES`,
- * e.g. a submitter-supplied identifier) from `dataRecord`, at any depth. Independent of
- * `ID_MANAGER_CONFIG`: that config drives which fields get a PCGL system ID added alongside
- * them (unconditional, unrelated to this restriction), not which fields count as a
- * "Submitter ID" for removal purposes.
- */
-export const stripRestrictedFields = (
-	dataRecord: DataRecordNested,
-	restrictedFieldNames: string[],
-): DataRecordNested => {
-	const result: DataRecordNested = {};
-
-	for (const [key, value] of Object.entries(dataRecord)) {
-		if (isRestrictedFieldName(key, restrictedFieldNames)) {
-			continue;
-		}
-
-		if (isDataRecordValue(value)) {
-			result[key] = value;
-			continue;
-		}
-
-		if (Array.isArray(value)) {
-			result[key] = value.map((item) => stripRestrictedFields(item, restrictedFieldNames));
-			continue;
-		}
-
-		result[key] = stripRestrictedFields(value, restrictedFieldNames);
-	}
-
-	return result;
-};
-
-/**
- * Applies {@link stripRestrictedFields} to every record's `data`.
- */
-export const stripRestrictedFieldsFromRecords = (
-	records: SubmittedDataResponse[],
-	restrictedFieldNames: string[],
-): SubmittedDataResponse[] =>
-	records.map((record) => ({ ...record, data: stripRestrictedFields(record.data, restrictedFieldNames) }));
+		.filter((record) => !isRestrictedEntityName(record.entityName))
+		.map((record) => ({ ...record, data: stripRestrictedKeys(record.data) }));
