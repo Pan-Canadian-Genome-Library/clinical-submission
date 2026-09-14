@@ -47,9 +47,18 @@ const defaultPageSize = 20;
 const defaultView = VIEW_TYPE.Values.flat;
 
 /**
- * Resolves the list of `entityName`s that are allowed based on the requested list and the category's dictionary.
+ * Resolves the `entityName` filter to use: `requested` unchanged when `restrict` is false,
+ * otherwise `requested` narrowed to the entity names allowed by the category's dictionary.
  */
-const resolveRestrictedEntityNames = async (categoryId: number, requested: string[]): Promise<string[]> => {
+const resolveRestrictedEntityNames = async (
+	restrict: boolean,
+	categoryId: number,
+	requested: string[],
+): Promise<string[]> => {
+	if (!restrict) {
+		return requested;
+	}
+
 	const currentDictionary = await lyricProvider.services.dictionary.getActiveDictionaryByCategory(categoryId);
 	const allEntityNames = currentDictionary?.dictionary.map((schema) => schema.name) ?? [];
 	return filterAllowedEntityNames(allEntityNames, requested);
@@ -116,7 +125,6 @@ const getCategoryById = validateRequest(
 
 			// request params
 			const categoryIdOrAlias = req.params.categoryId;
-			let entityName = asArray(req.query.entityName || []);
 			const page = parseInt(String(req.query.page)) || defaultPage;
 			const pageSize = parseInt(String(req.query.pageSize)) || defaultPageSize;
 			const view = convertToViewType(req.query.view) || defaultView;
@@ -147,15 +155,13 @@ const getCategoryById = validateRequest(
 				hasAllowedAccess(studyByCategory.study_id, 'WRITE', user),
 			);
 
-			if (restrict) {
-				const allowedEntities = await resolveRestrictedEntityNames(category.id, entityName);
-				if (allowedEntities.length === 0) {
-					return res.status(200).send({
-						pagination: { currentPage: page, pageSize, totalPages: 0, totalRecords: 0 },
-						records: [],
-					} satisfies SubmittedDataPaginatedResponse);
-				}
-				entityName = allowedEntities;
+			const entityName = await resolveRestrictedEntityNames(restrict, category.id, asArray(req.query.entityName || []));
+
+			if (restrict && entityName.length === 0) {
+				return res.status(200).send({
+					pagination: { currentPage: page, pageSize, totalPages: 0, totalRecords: 0 },
+					records: [],
+				} satisfies SubmittedDataPaginatedResponse);
 			}
 
 			// Send submission data, organized by entity.
@@ -266,7 +272,6 @@ const getCategoryByOrganization = validateRequest(
 			// request parameters
 			const categoryIdOrAlias = req.params.categoryId;
 			const organization = req.params.organization;
-			let entityName = asArray(req.query.entityName || []);
 			const page = parseInt(String(req.query.page)) || defaultPage;
 			const pageSize = parseInt(String(req.query.pageSize)) || defaultPageSize;
 			const view = convertToViewType(String(req.query.view)) || defaultView;
@@ -299,15 +304,13 @@ const getCategoryByOrganization = validateRequest(
 
 			const restrict = shouldRestrictStudyData(hasReadAccess, hasAllowedAccess(organization, 'WRITE', user));
 
-			if (restrict) {
-				const allowedEntities = await resolveRestrictedEntityNames(category.id, entityName);
-				if (allowedEntities.length === 0) {
-					return res.status(200).send({
-						pagination: { currentPage: page, pageSize, totalPages: 0, totalRecords: 0 },
-						records: [],
-					} satisfies SubmittedDataPaginatedResponse);
-				}
-				entityName = allowedEntities;
+			const entityName = await resolveRestrictedEntityNames(restrict, category.id, asArray(req.query.entityName || []));
+
+			if (restrict && entityName.length === 0) {
+				return res.status(200).send({
+					pagination: { currentPage: page, pageSize, totalPages: 0, totalRecords: 0 },
+					records: [],
+				} satisfies SubmittedDataPaginatedResponse);
 			}
 
 			// Send submission data, organized by entity.
@@ -358,7 +361,6 @@ const getSubmittedDataByQuery = validateRequest(
 			const categoryIdOrAlias = req.params.categoryId;
 			const organization = req.params.organization;
 			const sqon = lyricProvider.utils.convertSqonToQuery.parseSQON(req.body);
-			let entityName = asArray(req.query.entityName || []);
 			const page = parseInt(String(req.query.page)) || defaultPage;
 			const pageSize = parseInt(String(req.query.pageSize)) || defaultPageSize;
 			const view = convertToViewType(String(req.query.view)) || defaultView;
@@ -391,12 +393,9 @@ const getSubmittedDataByQuery = validateRequest(
 
 			const restrict = shouldRestrictStudyData(hasReadAccess, hasAllowedAccess(organization, 'WRITE', user));
 
-			if (restrict) {
-				const allowedEntities = await resolveRestrictedEntityNames(category.id, asArray(req.query.entityName || []));
-				entityName = allowedEntities;
-			}
+			const entityName = await resolveRestrictedEntityNames(restrict, category.id, asArray(req.query.entityName || []));
 
-			if (entityName.length === 0) {
+			if (restrict && entityName.length === 0) {
 				return res.status(200).send({
 					pagination: { currentPage: page, pageSize, totalPages: 0, totalRecords: 0 },
 					records: [],
