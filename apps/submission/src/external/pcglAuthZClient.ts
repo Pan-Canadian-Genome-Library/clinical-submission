@@ -23,7 +23,12 @@ import urlJoin from 'url-join';
 import { logger } from '@/common/logger.js';
 import { ActionIDs, type ActionIDsValues, type PCGLUserSession, PCGLUserSessionResult } from '@/common/types/auth.js';
 import { Groups, ServiceTokenResponse, userDataResponseSchema } from '@/common/validation/auth-validation.js';
-import { authZUserInfo, PCGLAuthZUserInfoResponse } from '@/common/validation/authz-validation.js';
+import {
+	authZStudyAuthorizationResponse,
+	authZUserInfo,
+	type PCGLAuthZStudyAuthorizationRequest,
+	type PCGLAuthZUserInfoResponse,
+} from '@/common/validation/authz-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 
@@ -279,25 +284,20 @@ export const getStudyById = async (studyId: string, token: string) => {
 		return;
 	}
 
-	if (!response.ok) {
-		throw new lyricProvider.utils.errors.InternalServerError(
-			`Failed to fetch study in Authz with status ${response.status}`,
-		);
+	const res = await response.json();
+
+	const validatedAuthZData = authZStudyAuthorizationResponse.safeParse(res);
+
+	if (!validatedAuthZData.success) {
+		const message = `Malformed response object from AUTHZ for study ID ${studyId}.`;
+		logger.error(`[AUTHZ]: ${message}: ` + validatedAuthZData.error);
+		throw new lyricProvider.utils.errors.InternalServerError(message);
 	}
 
-	return await response.json();
+	return validatedAuthZData.data;
 };
 
-export const createStudy = async (studyId: string, token: string) => {
-	const todaysDate = new Date().toISOString();
-
-	const studyData = {
-		study_id: studyId,
-		data_submitters: [],
-		team_members: [],
-		creation_date: todaysDate,
-	};
-
+export const createStudy = async (studyData: PCGLAuthZStudyAuthorizationRequest, token: string) => {
 	const { AUTHZ_ENDPOINT } = authConfig;
 
 	const headers = new Headers({

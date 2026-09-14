@@ -17,6 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { logger } from '@/common/logger.js';
 import {
 	createStudy,
 	createStudyTranslation,
@@ -35,6 +36,45 @@ import {
 import { validateRequest } from '@/middleware/requestValidation.js';
 import dacService from '@/service/dacService.js';
 import { studyService } from '@/service/studyService.js';
+
+import type { PCGLAuthZStudyAuthorizationRequest } from '../common/validation/authz-validation.js';
+
+/**
+ * Ensures the AuthZ service's record of a study's DAC matches the given dacId, creating/updating
+ * the AuthZ study record if it doesn't. Callers should run this inside the same DB transaction as
+ * their local write so that a sync failure rolls back the local change instead of leaving the two
+ * systems inconsistent.
+ * @param studyId - ID of the study to sync
+ * @param dacId - DAC ID that should be associated with the study in AuthZ
+ * @param accessToken - Access token used to authenticate with AuthZ
+ * @throws ServiceUnavailable if the AuthZ read or write fails
+ */
+const syncAuthzStudyDac = async (studyId: string, dacId: string, accessToken: string) => {
+	try {
+		const authzStudy = await getAuthzStudyById(studyId, accessToken);
+
+		if (!authzStudy || authzStudy.dac_id !== dacId) {
+			const authzStudyData: PCGLAuthZStudyAuthorizationRequest = {
+				dac_id: dacId,
+				data_submitters: authzStudy?.data_submitters || [],
+				study_id: studyId,
+				team_members: authzStudy?.team_members || [],
+				date_created: authzStudy?.date_created,
+			};
+
+			await createAuthzStudy(authzStudyData, accessToken);
+		}
+	} catch (error) {
+		logger.error(
+			error,
+			`[AUTHZ]: Failed to sync DAC ID '${dacId}' for study '${studyId}' with the Authorization system.`,
+		);
+
+		throw new lyricProvider.utils.errors.ServiceUnavailable(
+			'Unable to sync changes with the Authorization system. Try again, but if errors persist contact system administrators.',
+		);
+	}
+};
 
 export const getAllStudies = validateRequest(listAllStudies, async (req, res, next) => {
 	const db = getDbInstance();
@@ -108,11 +148,7 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 				throw new lyricProvider.utils.errors.BadRequest(`Unable to create study with provided data.`);
 			}
 
-			const authzStudy = await getAuthzStudyById(results.studyId, accessToken);
-
-			if (!authzStudy) {
-				await createAuthzStudy(results.studyId, accessToken);
-			}
+			await syncAuthzStudyDac(results.studyId, studyData.dacId || '', accessToken);
 
 			return results;
 		});
@@ -216,10 +252,15 @@ export const addDacIdToStudy = validateRequest(dacToStudy, async (req, res, next
 	try {
 		const { studyId } = req.params;
 		const { dacId } = req.body;
+		const accessToken = extractAccessTokenFromHeader(req);
 
 		const db = getDbInstance();
 		const studyRepo = studyService(db);
 		const dacRepo = dacService(db);
+
+		if (!accessToken) {
+			throw new lyricProvider.utils.errors.Forbidden('Unauthorized: No access token provided');
+		}
 
 		const studyFound = await studyRepo.getStudyById(studyId);
 
@@ -237,7 +278,12 @@ export const addDacIdToStudy = validateRequest(dacToStudy, async (req, res, next
 			throw new lyricProvider.utils.errors.NotFound(`No DAC with ID - ${dacId} found.`);
 		}
 
-		const updatedStudy = await studyRepo.updateStudyDacId({ studyId, dacId });
+		const updatedStudy = await db.transaction(async (transaction) => {
+			const results = await studyRepo.updateStudyDacId({ studyId, dacId }, transaction);
+			await syncAuthzStudyDac(studyId, dacId, accessToken);
+
+			return results;
+		});
 
 		res.status(200).send(updatedStudy);
 		return;
