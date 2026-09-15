@@ -38,6 +38,7 @@ import { healthCheckRouter } from '@/routes/healthCheck.js';
 import { openAPIRouter } from '@/routes/openApi.js';
 import { studyRouter } from '@/routes/study.js';
 import { submissionRouter } from '@/routes/submission.js';
+import { userRouter } from '@/routes/user.js';
 import { validationRouter } from '@/routes/validationRouter.js';
 
 import sessionMiddleware from './session/sessionMiddleware.js';
@@ -96,6 +97,7 @@ app.use('/health', healthCheckRouter);
 app.use('/study', studyRouter);
 app.use('/auth', authRouter);
 app.use('/auth-session', authSessionRouter);
+app.use('/user', userRouter);
 
 // Lyric Routes
 app.use('/audit', lyricProvider.routers.audit);
