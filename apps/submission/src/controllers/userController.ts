@@ -22,7 +22,7 @@ import { logger } from '@/common/logger.js';
 import { getDbInstance } from '@/db/index.js';
 import { studyService } from '@/service/studyService.js';
 
-const getUserStudies = async (req: Request, res: Response, next: NextFunction) => {
+const getUserStudies = async (req: Request, res: Response, next: NextFunction): Promise<void | null> => {
 	const { user } = req.session;
 
 	if (!user) {
@@ -34,15 +34,15 @@ const getUserStudies = async (req: Request, res: Response, next: NextFunction) =
 
 	try {
 		const studyRepo = studyService(getDbInstance());
-		const studyNames = [];
+		const userStudies = [];
 
 		for (const studyId in editableStudies) {
 			const studyResponse = await studyRepo.getStudyById(studyId);
 			const { studyName } = studyResponse || {};
-			studyName && studyNames.push(studyName);
+			studyName && userStudies.push(studyName);
 		}
 
-		const response = { studyNames };
+		const response = { userStudies };
 		res.status(200).json(response);
 	} catch (e) {
 		logger.error(e, 'Error in getUserStudies');
@@ -50,7 +50,7 @@ const getUserStudies = async (req: Request, res: Response, next: NextFunction) =
 	}
 };
 
-const getUserToken = async (req: Request, res: Response) => {
+const getUserToken = async (req: Request, res: Response): Promise<void | null> => {
 	const { account } = req.session;
 
 	if (!account) {
@@ -58,7 +58,7 @@ const getUserToken = async (req: Request, res: Response) => {
 		return null;
 	}
 
-	const response = { token: account.refreshToken };
+	const response = { userToken: account.refreshToken };
 	res.status(200).json(response);
 };
 

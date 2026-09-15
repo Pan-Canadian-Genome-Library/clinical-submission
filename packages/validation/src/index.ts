@@ -19,3 +19,4 @@
 
 export * from './common/strings.js';
 export * from './model/session.js';
+export * from './model/userProfile.js';

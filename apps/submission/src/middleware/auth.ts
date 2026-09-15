@@ -23,7 +23,11 @@ import { logger } from '@/common/logger.js';
 import type { PCGLRequestWithUser, PCGLUserSessionResult } from '@/common/types/auth.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
-import { extractAccessTokenFromHeader, fetchUserData } from '@/external/pcglAuthZClient.js';
+import {
+	extractAccessTokenFromHeader,
+	extractAccessTokenFromSession,
+	fetchUserData,
+} from '@/external/pcglAuthZClient.js';
 
 /**
  * Middleware to handle authentication that returns PCGLUserSessionResult to req.user.
@@ -49,6 +53,41 @@ export const authMiddleware = ({ requireAdmin = false }: { requireAdmin?: boolea
 			req.user = result.user;
 
 			if (requireAdmin && !result.user?.isAdmin) {
+				throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
+			}
+
+			return next();
+		} catch (error) {
+			logger.error(error);
+			next(error);
+			return;
+		}
+	};
+};
+
+/**
+ * Specifically for Submission UI requests. Looks at session object instead of auth headers.
+ * Middleware to handle authentication. The middleware validates whether a token exists.
+ * Optionally, when `requireAdmin` is `true`, the middleware restricts access to `dataAdmin` users only.
+ * Any additional checks for user permissions must be done on the controller level from the passed `req.session.user` object.
+ * In the controller, use `req.session.user` to access user data, not `req.user`.
+ */
+export const uiAuthMiddleware = ({ requireAdmin = false }: { requireAdmin?: boolean } = {}) => {
+	const { enabled } = authConfig;
+	return async (req: PCGLRequestWithUser, _: Response, next: NextFunction) => {
+		try {
+			// If auth is disabled, then skip fetching user information
+			if (!enabled) {
+				return next();
+			}
+
+			const token = extractAccessTokenFromSession(req);
+
+			if (!token || !req.session.user) {
+				throw new lyricProvider.utils.errors.Forbidden('Unauthorized: No access token provided');
+			}
+
+			if (requireAdmin && !req.session.user.dataAdmin) {
 				throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
 			}
 

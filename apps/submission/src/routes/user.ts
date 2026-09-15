@@ -20,7 +20,7 @@
 import express, { json, Router, urlencoded } from 'express';
 
 import { getUserStudies, getUserToken } from '@/controllers/userController.js';
-import { authMiddleware } from '@/middleware/auth.js';
+import { uiAuthMiddleware } from '@/middleware/auth.js';
 
 export const userRouter: Router = (() => {
 	const router = express.Router();
@@ -28,8 +28,9 @@ export const userRouter: Router = (() => {
 	router.use(json());
 	router.use(urlencoded({ extended: false }));
 
-	router.get('/studies', authMiddleware(), getUserStudies);
-	router.get('/token', authMiddleware(), getUserToken);
+	// endpoints for Submission UI
+	router.get('/studies', uiAuthMiddleware(), getUserStudies);
+	router.get('/token', uiAuthMiddleware(), getUserToken);
 
 	return router;
 })();

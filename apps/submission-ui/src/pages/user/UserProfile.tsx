@@ -26,22 +26,37 @@ import PageLayout from '@/components/layouts/PageLayout';
 import SectionLayout from '@/components/layouts/SectionLayout';
 import Text from '@/components/typography/Text';
 import { useUserContext } from '@/providers/UserProvider';
+import useGetUserToken from '@/api/queries/useGetUserToken';
+// import useGetUserStudies from '@/api/queries/useGetUserStudies';
 
-const UserPage = () => {
+const UserProfile = () => {
 	const { isLoading, user, isLoggedIn } = useUserContext();
+	const { data: userToken, isLoading: tokenLoading, isError: tokenError } = useGetUserToken();
+	// const { data: userStudies, isLoading: studiesLoading, isError: studiesError } = useGetUserStudies();
 
 	const {
 		i18n: { t },
 	} = useTranslation();
 
-	if (isLoading) {
+	console.log({ user, isLoggedIn });
+
+	if (isLoading || tokenLoading) {
+		// || tokenLoading || studiesLoading
 		return <Spinner label={t('common:user.loading')} />;
 	}
 
-	if (!isLoggedIn || !user) {
+	if (!isLoggedIn || !user || !userToken) {
 		return (
 			<div className="p-8">
 				<Text>{t('common:user.notLoggedIn')}</Text>
+			</div>
+		);
+	}
+
+	if (tokenError) {
+		return (
+			<div className="p-8">
+				<Text>{t('common:user.error')}</Text>
 			</div>
 		);
 	}
@@ -72,8 +87,8 @@ const UserPage = () => {
 	];
 
 	const tokenFields = [
-		{ label: t('common:user.fields.loggedInWith'), value: userName },
-		{ label: t('common:user.fields.tokenExpires'), value: userName },
+		{ label: t('common:user.fields.loggedInWith'), value: userName }, // TODO 177
+		{ label: t('common:user.fields.tokenExpires'), value: userName }, // TODO 177
 	];
 
 	return (
@@ -87,21 +102,43 @@ const UserPage = () => {
 				<hr className="border-0 border-t border-gray-200 mb-6" />
 				<div className="pt-4 pb-8">
 					<h2 className="text-1xl font-jost font-semibold text-gray-900 pb-4">{t('common:user.userInfo')}</h2>
-					{userFields.map(({ label, value }) => (
-						<StudyField key={label} label={label} value={value} />
-					))}
+
+					<div className="grid grid-cols-2">
+						<div>
+							{userFields.map(({ label, value }) => (
+								<StudyField key={label} label={label} value={value} />
+							))}
+						</div>
+						<div>
+							<div className="flex items-start">
+								<span className="min-w-55  text-black text-base pt-[0.1rem] shrink-0">
+									{t('common:user.canSubmit')}:
+								</span>
+								<ul className="m-0 text-base leading-normal">
+									{/* {(userStudies || []).map((study) => (
+										<li key={study}>{study}</li>
+									))} */}
+								</ul>
+							</div>
+						</div>
+					</div>
 				</div>
 
 				<hr className="border-0 border-t border-gray-200 mb-6" />
 				<div className="pt-4">
 					<h2 className="text-1xl font-jost font-semibold text-gray-900 pb-4">{t('common:user.tokenInfo')}</h2>
-					{tokenFields.map(({ label, value }) => (
-						<StudyField key={label} label={label} value={value} />
-					))}
+					<div className="grid grid-cols-2">
+						<div>
+							{tokenFields.map(({ label, value }) => (
+								<StudyField key={label} label={label} value={value} />
+							))}
+						</div>
+						<div>hello</div>
+					</div>
 				</div>
 			</SectionLayout>
 		</PageLayout>
 	);
 };
 
-export default UserPage;
+export default UserProfile;

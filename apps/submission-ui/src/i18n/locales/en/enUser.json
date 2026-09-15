@@ -21,6 +21,8 @@
 			"siteAdmin": "Site Administrator",
 			"dataAdmin": "Data Administrator",
 			"none": "No Role"
-		}
+		},
+		"canSubmit": "Can submit to studies",
+		"error": "Error loading user profile information."
 	}
 }
