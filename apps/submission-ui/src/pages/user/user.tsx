@@ -17,92 +17,90 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { API_PATH_LOGOUT } from '@/api/paths';
+import { useTranslation } from 'react-i18next';
+
+import Breadcrumbs from '@/components/Breadcrumbs';
+import Spinner from '@/components/Spinner';
+import StudyField from '@/components/StudyField';
+import PageLayout from '@/components/layouts/PageLayout';
+import SectionLayout from '@/components/layouts/SectionLayout';
+import Text from '@/components/typography/Text';
 import { useUserContext } from '@/providers/UserProvider';
 
-// NOTE: temporary page. Will change.
 const UserPage = () => {
 	const { isLoading, user, isLoggedIn } = useUserContext();
 
+	const {
+		i18n: { t },
+	} = useTranslation();
+
 	if (isLoading) {
-		return (
-			<div style={{ padding: '2rem' }}>
-				<p>Loading user information...</p>
-			</div>
-		);
+		return <Spinner label={t('common:user.loading')} />;
 	}
 
 	if (!isLoggedIn || !user) {
 		return (
-			<div style={{ padding: '2rem' }}>
-				<p>You are not logged in. Please log in to view your profile.</p>
+			<div className="p-8">
+				<Text>{t('common:user.notLoggedIn')}</Text>
 			</div>
 		);
 	}
 
+	const userName =
+		user.givenName || user.familyName
+			? `${user.givenName || ''} ${user.familyName || ''}`.trim()
+			: t('common:user.notProvided');
+
+	const userEmails =
+		user.emails && user.emails.length > 0
+			? user.emails
+					.filter(Boolean)
+					.map((email) => email.address)
+					.join(',')
+			: t('common:user.noEmails');
+
+	const userRole = user.siteAdmin
+		? t('common:user.roles.siteAdmin')
+		: user.dataAdmin
+			? t('common:user.roles.dataAdmin')
+			: t('common:user.roles.none');
+
+	const userFields = [
+		{ label: t('common:user.fields.name'), value: userName },
+		{ label: t('common:user.fields.email'), value: userEmails },
+		{ label: t('common:user.fields.role'), value: userRole },
+	];
+
+	const tokenFields = [
+		{ label: t('common:user.fields.loggedInWith'), value: userName },
+		{ label: t('common:user.fields.tokenExpires'), value: userName },
+	];
+
 	return (
-		<div style={{ padding: '2rem', maxWidth: '800px' }}>
-			<h1>User Profile</h1>
+		<PageLayout>
+			<Breadcrumbs
+				crumbs={[{ label: t('common:breadcrumbs.home'), href: '/' }, { label: t('common:breadcrumbs.userProfile') }]}
+			/>
+			<SectionLayout className="bg-white px-25 pb-20">
+				<h1 className="text-3xl font-jost font-semibold text-gray-900 py-16">{t('common:user.pageTitle')}</h1>
 
-			{/* User Name */}
-			<section style={{ marginBottom: '2rem' }}>
-				<h2>Personal Information</h2>
-				<div>
-					<strong>Name:</strong>{' '}
-					{user.givenName || user.familyName
-						? `${user.givenName || ''} ${user.familyName || ''}`.trim()
-						: 'Not provided'}
+				<hr className="border-0 border-t border-gray-200 mb-6" />
+				<div className="pt-4 pb-8">
+					<h2 className="text-1xl font-jost font-semibold text-gray-900 pb-4">{t('common:user.userInfo')}</h2>
+					{userFields.map(({ label, value }) => (
+						<StudyField key={label} label={label} value={value} />
+					))}
 				</div>
-				<div>
-					<strong>User ID:</strong> {user.userId}
-				</div>
-			</section>
 
-			{/* Email Addresses */}
-			<section style={{ marginBottom: '2rem' }}>
-				<h2>Email Addresses</h2>
-				{user.emails && user.emails.length > 0 ? (
-					<ul>
-						{user.emails.map((email, index) => (
-							<li key={index}>{email.address}</li>
-						))}
-					</ul>
-				) : (
-					<p>No email addresses</p>
-				)}
-			</section>
-
-			{/* Admin Status */}
-			<section style={{ marginBottom: '2rem' }}>
-				<h2>Admin Status</h2>
-				<div>
-					<strong>Site Administrator:</strong> {user.siteAdmin ? 'Yes' : 'No'}
+				<hr className="border-0 border-t border-gray-200 mb-6" />
+				<div className="pt-4">
+					<h2 className="text-1xl font-jost font-semibold text-gray-900 pb-4">{t('common:user.tokenInfo')}</h2>
+					{tokenFields.map(({ label, value }) => (
+						<StudyField key={label} label={label} value={value} />
+					))}
 				</div>
-				<div>
-					<strong>Data Administrator:</strong> {user.dataAdmin ? 'Yes' : 'No'}
-				</div>
-			</section>
-
-			{/* Groups */}
-			<section style={{ marginBottom: '2rem' }}>
-				<h2>Groups</h2>
-				{user.groups && user.groups.length > 0 ? (
-					<ul>
-						{user.groups.map((group) => (
-							<li key={group.id}>
-								<strong>{group.name}</strong>
-								{group.description && ` - ${group.description}`}
-							</li>
-						))}
-					</ul>
-				) : (
-					<p>No groups assigned</p>
-				)}
-			</section>
-			<div>
-				<a href={API_PATH_LOGOUT}>Logout</a>
-			</div>
-		</div>
+			</SectionLayout>
+		</PageLayout>
 	);
 };
 

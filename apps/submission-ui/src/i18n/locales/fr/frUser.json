@@ -1,0 +1,26 @@
+{
+	"user": {
+		"loading": "Loading user information...",
+		"notLoggedIn": "You are not logged in. Please log in to view your profile.",
+		"pageTitle": "User Profile",
+		"userInfo": "User Information",
+		"tokenInfo": "Token Information",
+		"accessTokenTitle": "Access Token",
+		"accessTokenDescription": "You don't need access token to submit tabular data, but you will need it to submit genomic files. To generate a new token, please logout then log back in.",
+		"copy": "Copy",
+		"fields": {
+			"name": "Name",
+			"email": "Email",
+			"role": "Role",
+			"loggedInWith": "Logged in With",
+			"tokenExpires": "Token Expires"
+		},
+		"notProvided": "Not provided",
+		"noEmails": "No email addresses",
+		"roles": {
+			"siteAdmin": "Site Administrator",
+			"dataAdmin": "Data Administrator",
+			"none": "No Role"
+		}
+	}
+}
