@@ -28,12 +28,10 @@ import { userStudies } from '@clinical-submission/validation';
  */
 const useGetUserStudies = () => {
 	return useQuery<string[], ServerError>({
-		queryKey: ['user'],
+		queryKey: ['userStudies'],
 		retry: 1,
 		queryFn: async () => {
 			const response = await fetch(`/user/studies`);
-
-			console.log({ response });
 
 			if (!response.ok) {
 				console.debug(`[useGetUserStudies]: Error fetching /user/studies', response status ${response.status}`);
@@ -42,8 +40,6 @@ const useGetUserStudies = () => {
 
 			try {
 				const result = await response.json();
-
-				console.log({ result });
 
 				// Validate user object
 				const userParseResult = userStudies.safeParse(result);

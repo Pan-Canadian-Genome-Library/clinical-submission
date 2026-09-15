@@ -19,6 +19,8 @@
 
 import { useTranslation } from 'react-i18next';
 
+import useGetUserStudies from '@/api/queries/useGetUserStudies';
+import useGetUserToken from '@/api/queries/useGetUserToken';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import Spinner from '@/components/Spinner';
 import StudyField from '@/components/StudyField';
@@ -26,21 +28,17 @@ import PageLayout from '@/components/layouts/PageLayout';
 import SectionLayout from '@/components/layouts/SectionLayout';
 import Text from '@/components/typography/Text';
 import { useUserContext } from '@/providers/UserProvider';
-import useGetUserToken from '@/api/queries/useGetUserToken';
-// import useGetUserStudies from '@/api/queries/useGetUserStudies';
 
 const UserProfile = () => {
 	const { isLoading, user, isLoggedIn } = useUserContext();
 	const { data: userToken, isLoading: tokenLoading, isError: tokenError } = useGetUserToken();
-	// const { data: userStudies, isLoading: studiesLoading, isError: studiesError } = useGetUserStudies();
+	const { data: userStudies, isLoading: studiesLoading, isError: studiesError } = useGetUserStudies();
 
 	const {
 		i18n: { t },
 	} = useTranslation();
 
-	console.log({ user, isLoggedIn });
-
-	if (isLoading || tokenLoading) {
+	if (isLoading || studiesLoading || tokenLoading) {
 		// || tokenLoading || studiesLoading
 		return <Spinner label={t('common:user.loading')} />;
 	}
@@ -53,7 +51,7 @@ const UserProfile = () => {
 		);
 	}
 
-	if (tokenError) {
+	if (studiesError || tokenError || !userToken || !userStudies) {
 		return (
 			<div className="p-8">
 				<Text>{t('common:user.error')}</Text>
@@ -109,18 +107,20 @@ const UserProfile = () => {
 								<StudyField key={label} label={label} value={value} />
 							))}
 						</div>
-						<div>
-							<div className="flex items-start">
-								<span className="min-w-55  text-black text-base pt-[0.1rem] shrink-0">
-									{t('common:user.canSubmit')}:
-								</span>
-								<ul className="m-0 text-base leading-normal">
-									{/* {(userStudies || []).map((study) => (
-										<li key={study}>{study}</li>
-									))} */}
-								</ul>
+						{userStudies.length > 0 && (
+							<div>
+								<div className="flex items-start">
+									<span className="min-w-55  text-black text-base pt-[0.1rem] shrink-0">
+										{t('common:user.canSubmit')}:
+									</span>
+									<ul className="m-0 text-base leading-normal">
+										{userStudies.map((study) => (
+											<li key={study}>{study}</li>
+										))}
+									</ul>
+								</div>
 							</div>
-						</div>
+						)}
 					</div>
 				</div>
 
