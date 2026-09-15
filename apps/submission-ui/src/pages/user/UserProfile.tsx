@@ -90,6 +90,12 @@ const UserProfile = () => {
 		{ label: t('common:user.fields.tokenExpires'), value: userName }, // TODO 177
 	];
 
+	const fakeStudies = [
+		'beep',
+		'boop',
+		'very long study name so I can make sure that the study names wrap properly onto multiple lines when they are kind of long',
+	];
+
 	return (
 		<PageLayout>
 			<Breadcrumbs
@@ -108,18 +114,16 @@ const UserProfile = () => {
 								<StudyField key={label} label={label} value={value} />
 							))}
 						</div>
-						{userStudies.length > 0 && (
+						{fakeStudies.length > 0 && (
 							<div>
-								<div className="flex items-start">
-									<span className="min-w-55  text-black text-base pt-[0.1rem] shrink-0">
-										{t('common:user.canSubmit')}:
-									</span>
-									<ul className="m-0 text-base leading-normal">
-										{userStudies.map((study) => (
-											<li key={study}>{study}</li>
-										))}
-									</ul>
-								</div>
+								<span className="min-w-55  text-black text-base pt-[0.1rem] shrink-0">
+									{t('common:user.canSubmit')}:
+								</span>
+								<ul className="m-0 text-base leading-normal list-disc pl-5">
+									{fakeStudies.map((study) => (
+										<li key={study}>{study}</li>
+									))}
+								</ul>
 							</div>
 						)}
 					</div>
