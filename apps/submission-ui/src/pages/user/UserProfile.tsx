@@ -28,6 +28,7 @@ import PageLayout from '@/components/layouts/PageLayout';
 import SectionLayout from '@/components/layouts/SectionLayout';
 import Text from '@/components/typography/Text';
 import { useUserContext } from '@/providers/UserProvider';
+import CopyButton from '../../components/button/CopyButton';
 
 const UserProfile = () => {
 	const { isLoading, user, isLoggedIn } = useUserContext();
@@ -126,14 +127,35 @@ const UserProfile = () => {
 
 				<hr className="border-0 border-t border-gray-200 mb-6" />
 				<div className="pt-4">
-					<h2 className="text-1xl font-jost font-semibold text-gray-900 pb-4">{t('common:user.tokenInfo')}</h2>
 					<div className="grid grid-cols-2">
 						<div>
+							<h2 className="text-1xl font-jost font-semibold text-gray-900 pb-4">{t('common:user.tokenInfo')}</h2>
 							{tokenFields.map(({ label, value }) => (
 								<StudyField key={label} label={label} value={value} />
 							))}
 						</div>
-						<div>hello</div>
+						<div>
+							<h2 className="text-1xl font-jost font-semibold text-gray-900 pb-4">
+								{t('common:user.accessTokenTitle')}
+							</h2>
+							<p className="mb-2">{t('common:user.accessTokenDescription')}</p>
+							<div className="flex flex-col items-end">
+								<input
+									className="border border-gray-300 text-lg rounded-lg focus:ring-brand focus:border-brand block w-full px-2 py-1 placeholder:text-body mb-2"
+									type="password"
+									value={userToken}
+									name="userToken"
+									id="userToken"
+									readOnly
+									aria-readonly
+								/>
+								<CopyButton
+									textToCopy={userToken}
+									copyText={t('common:user.copy')}
+									copiedText={t('common:user.copied')}
+								/>
+							</div>
+						</div>
 					</div>
 				</div>
 			</SectionLayout>

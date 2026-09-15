@@ -27,7 +27,7 @@ import { userToken } from '@clinical-submission/validation';
  * Query hook to fetch the current user from the auth-session endpoint.
  */
 const useGetUserToken = () => {
-	return useQuery<string | undefined, ServerError>({
+	return useQuery<string, ServerError>({
 		queryKey: ['userToken'],
 		retry: 1,
 		queryFn: async () => {
@@ -37,7 +37,7 @@ const useGetUserToken = () => {
 
 			if (!response.ok) {
 				console.debug(`[useGetUserToken]: Error fetching /user/token', response status ${response.status}`);
-				return undefined;
+				return '';
 			}
 
 			try {
@@ -50,12 +50,12 @@ const useGetUserToken = () => {
 				if (!userParseResult.success) {
 					//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation.
 					console.debug('[useGetUserToken]: Response from user endpoint failed validation', userParseResult.error);
-					return undefined;
+					return '';
 				}
 				return userParseResult.data.userToken;
 			} catch (error) {
 				console.debug('[useGetUserToken]: Failed to parse response object', error);
-				return undefined;
+				return '';
 			}
 		},
 	});
