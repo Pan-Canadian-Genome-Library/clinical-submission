@@ -16,16 +16,50 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+import { NextFunction, Request, Response } from 'express';
 
-import { Request, Response } from 'express';
+import { logger } from '@/common/logger.js';
+import { getDbInstance } from '@/db/index.js';
+import { studyService } from '@/service/studyService.js';
 
-const health = (req: Request, res: Response) => {
-	const healthcheck = {
-		uptime: process.uptime(),
-		message: 'OK',
-		timestamp: Date.now(),
-	};
-	res.send(healthcheck);
+const getUserStudies = async (req: Request, res: Response, next: NextFunction) => {
+	const { user } = req.session;
+
+	if (!user) {
+		// No user session, this is an anon session
+		return null;
+	}
+
+	const { editableStudies = [] } = user.studyAuthorizations;
+
+	try {
+		const studyRepo = studyService(getDbInstance());
+		const studyNames = [];
+
+		for (const studyId in editableStudies) {
+			const studyResponse = await studyRepo.getStudyById(studyId);
+			const { studyName } = studyResponse || {};
+			studyName && studyNames.push(studyName);
+		}
+
+		const response = { studyNames };
+		res.status(200).json(response);
+	} catch (e) {
+		logger.error(e, 'Error in getUserStudies');
+		next(e);
+	}
 };
 
-export default { health };
+const getUserToken = async (req: Request, res: Response) => {
+	const { account } = req.session;
+
+	if (!account) {
+		// No user session, this is an anon session
+		return null;
+	}
+
+	const response = { token: account.refreshToken };
+	res.status(200).json(response);
+};
+
+export { getUserStudies, getUserToken };

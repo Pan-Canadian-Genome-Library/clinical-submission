@@ -17,14 +17,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import express, { Router } from 'express';
+import express, { json, Router, urlencoded } from 'express';
 
-import healthController from '@/controllers/healthController.js';
+import { getUserStudies, getUserToken } from '@/controllers/userController.js';
+import { authMiddleware } from '@/middleware/auth.js';
 
 export const userRouter: Router = (() => {
 	const router = express.Router();
 
-	router.get('/', healthController.health);
+	router.use(json());
+	router.use(urlencoded({ extended: false }));
+
+	router.get('/studies', authMiddleware(), getUserStudies);
+	router.get('/token', authMiddleware(), getUserToken);
 
 	return router;
 })();
