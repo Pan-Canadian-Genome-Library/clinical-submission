@@ -90,6 +90,7 @@ const UserProfile = () => {
 		{ label: t('common:user.fields.tokenExpires'), value: userName }, // TODO 177
 	];
 
+	// TODO 177 remove!
 	const fakeStudies = [
 		'beep',
 		'boop',
