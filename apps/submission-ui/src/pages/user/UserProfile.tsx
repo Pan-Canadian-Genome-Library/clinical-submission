@@ -24,11 +24,11 @@ import useGetUserToken from '@/api/queries/useGetUserToken';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import Spinner from '@/components/Spinner';
 import StudyField from '@/components/StudyField';
+import CopyButton from '@/components/button/CopyButton';
 import PageLayout from '@/components/layouts/PageLayout';
 import SectionLayout from '@/components/layouts/SectionLayout';
 import Text from '@/components/typography/Text';
 import { useUserContext } from '@/providers/UserProvider';
-import CopyButton from '../../components/button/CopyButton';
 
 const UserProfile = () => {
 	const { isLoading, user, isLoggedIn } = useUserContext();
@@ -36,6 +36,7 @@ const UserProfile = () => {
 	const { data: userStudies, isLoading: studiesLoading, isError: studiesError } = useGetUserStudies();
 
 	const { userToken, userTokenExpires } = userTokenResponse || {};
+	const { dataAdmin, emails, familyName, givenName, idpName, siteAdmin } = user || {};
 
 	const {
 		i18n: { t },
@@ -62,21 +63,14 @@ const UserProfile = () => {
 	}
 
 	const userName =
-		user.givenName || user.familyName
-			? `${user.givenName || ''} ${user.familyName || ''}`.trim()
-			: t('common:user.notProvided');
+		givenName || familyName ? `${givenName || ''} ${familyName || ''}`.trim() : t('common:user.notProvided');
 
 	const userEmails =
-		user.emails && user.emails.length > 0
-			? user.emails
-					.filter(Boolean)
-					.map((email) => email.address)
-					.join(',')
-			: t('common:user.noEmails');
+		emails && emails.length > 0 ? emails.map((email) => email.address).join(', ') : t('common:user.noEmails');
 
-	const userRole = user.siteAdmin
+	const userRole = siteAdmin
 		? t('common:user.roles.siteAdmin')
-		: user.dataAdmin
+		: dataAdmin
 			? t('common:user.roles.dataAdmin')
 			: t('common:user.roles.none');
 
@@ -87,7 +81,7 @@ const UserProfile = () => {
 	];
 
 	const tokenFields = [
-		{ label: t('common:user.fields.loggedInWith'), value: user.idpName },
+		{ label: t('common:user.fields.loggedInWith'), value: idpName },
 		{ label: t('common:user.fields.tokenExpires'), value: userTokenExpires },
 	];
 

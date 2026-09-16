@@ -24,7 +24,7 @@ import { ServerError } from '@/types/server';
 import { userStudies } from '@clinical-submission/validation';
 
 /**
- * Query hook to fetch the current user from the auth-session endpoint.
+ * Query hook to fetch the current user's studies from Submission API.
  */
 const useGetUserStudies = () => {
 	return useQuery<string[], ServerError>({

@@ -24,7 +24,7 @@ import { ServerError } from '@/types/server';
 import { userToken, type UserToken } from '@clinical-submission/validation';
 
 /**
- * Query hook to fetch the current user from the auth-session endpoint.
+ * Query hook to fetch the current user's token info from Submission API.
  */
 const useGetUserToken = () => {
 	return useQuery<UserToken, ServerError>({
@@ -34,8 +34,6 @@ const useGetUserToken = () => {
 			const defaultResponse = { userToken: '', userTokenExpires: '' };
 			const response = await fetch(`/user/token`);
 
-			// console.log({ response });
-
 			if (!response.ok) {
 				console.debug(`[useGetUserToken]: Error fetching /user/token', response status ${response.status}`);
 				return defaultResponse;
@@ -43,11 +41,9 @@ const useGetUserToken = () => {
 
 			try {
 				const result = await response.json();
-				// console.log({ result });
 
 				// Validate user object
 				const userParseResult = userToken.safeParse(result);
-				// console.log({ userParseResult });
 				if (!userParseResult.success) {
 					//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation.
 					console.debug('[useGetUserToken]: Response from user endpoint failed validation', userParseResult.error);

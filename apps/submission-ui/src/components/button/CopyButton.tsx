@@ -22,7 +22,7 @@ import { useState } from 'react';
 
 import CopyIcon from '@/components/icons/CopyIcon';
 
-// how long to show "Copied!" appearance, in milliseconds
+// how long to show "Copied" appearance, in milliseconds
 const copiedStateDelayMs = 500;
 
 const copyTokenClick = async (textToCopy: string) => {
@@ -45,7 +45,7 @@ const CopyButton = ({
 }) => {
 	const [isCopying, setIsCopying] = useState<boolean>(false);
 
-	// copy textToCopy to keyboard, and switch button to/from "Copied!" appearance
+	// copy textToCopy to keyboard, and switch button to/from "Copied" appearance
 	const handleClick = async () => {
 		if (isCopying) return;
 		setIsCopying(true);
@@ -63,7 +63,6 @@ const CopyButton = ({
 			)}
 			type="button"
 			onClick={handleClick}
-			aria-readonly
 		>
 			<CopyIcon />
 			{isCopying ? copiedText : copyText}
