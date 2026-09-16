@@ -21,23 +21,24 @@ import { useQuery } from '@tanstack/react-query';
 
 import { fetch } from '@/api/FetchClient';
 import { ServerError } from '@/types/server';
-import { userToken } from '@clinical-submission/validation';
+import { userToken, type UserToken } from '@clinical-submission/validation';
 
 /**
  * Query hook to fetch the current user from the auth-session endpoint.
  */
 const useGetUserToken = () => {
-	return useQuery<string, ServerError>({
+	return useQuery<UserToken, ServerError>({
 		queryKey: ['userToken'],
 		retry: 1,
 		queryFn: async () => {
+			const defaultResponse = { userToken: '', userTokenExpires: '' };
 			const response = await fetch(`/user/token`);
 
 			// console.log({ response });
 
 			if (!response.ok) {
 				console.debug(`[useGetUserToken]: Error fetching /user/token', response status ${response.status}`);
-				return '';
+				return defaultResponse;
 			}
 
 			try {
@@ -50,12 +51,12 @@ const useGetUserToken = () => {
 				if (!userParseResult.success) {
 					//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation.
 					console.debug('[useGetUserToken]: Response from user endpoint failed validation', userParseResult.error);
-					return '';
+					return defaultResponse;
 				}
-				return userParseResult.data.userToken;
+				return userParseResult.data;
 			} catch (error) {
 				console.debug('[useGetUserToken]: Failed to parse response object', error);
-				return '';
+				return defaultResponse;
 			}
 		},
 	});

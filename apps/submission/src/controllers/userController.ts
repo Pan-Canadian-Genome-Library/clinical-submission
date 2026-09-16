@@ -58,7 +58,13 @@ const getUserToken = async (req: Request, res: Response): Promise<void | null> =
 		return null;
 	}
 
-	const response = { userToken: account.refreshToken };
+	const tokenTimeToLive = Date.now() + (account.refreshTokenIat || 0);
+	const userTokenExpires = new Date(tokenTimeToLive).toLocaleString('en-CA', {
+		dateStyle: 'short',
+		timeStyle: 'medium',
+	});
+
+	const response = { userToken: account.refreshToken, userTokenExpires };
 	res.status(200).json(response);
 };
 

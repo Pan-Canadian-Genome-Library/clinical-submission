@@ -32,19 +32,20 @@ import CopyButton from '../../components/button/CopyButton';
 
 const UserProfile = () => {
 	const { isLoading, user, isLoggedIn } = useUserContext();
-	const { data: userToken, isLoading: tokenLoading, isError: tokenError } = useGetUserToken();
+	const { data: userTokenResponse, isLoading: tokenLoading, isError: tokenError } = useGetUserToken();
 	const { data: userStudies, isLoading: studiesLoading, isError: studiesError } = useGetUserStudies();
+
+	const { userToken, userTokenExpires } = userTokenResponse || {};
 
 	const {
 		i18n: { t },
 	} = useTranslation();
 
 	if (isLoading || studiesLoading || tokenLoading) {
-		// || tokenLoading || studiesLoading
 		return <Spinner label={t('common:user.loading')} />;
 	}
 
-	if (!isLoggedIn || !user || !userToken) {
+	if (!isLoggedIn || !user) {
 		return (
 			<div className="p-8">
 				<Text>{t('common:user.notLoggedIn')}</Text>
@@ -86,15 +87,8 @@ const UserProfile = () => {
 	];
 
 	const tokenFields = [
-		{ label: t('common:user.fields.loggedInWith'), value: userName }, // TODO 177
-		{ label: t('common:user.fields.tokenExpires'), value: userName }, // TODO 177
-	];
-
-	// TODO 177 remove!
-	const fakeStudies = [
-		'beep',
-		'boop',
-		'very long study name so I can make sure that the study names wrap properly onto multiple lines when they are kind of long',
+		{ label: t('common:user.fields.loggedInWith'), value: user.idpName },
+		{ label: t('common:user.fields.tokenExpires'), value: userTokenExpires },
 	];
 
 	return (
@@ -115,13 +109,13 @@ const UserProfile = () => {
 								<StudyField key={label} label={label} value={value} />
 							))}
 						</div>
-						{fakeStudies.length > 0 && (
+						{userStudies.length > 0 && (
 							<div>
 								<span className="min-w-55  text-black text-base pt-[0.1rem] shrink-0">
 									{t('common:user.canSubmit')}:
 								</span>
 								<ul className="m-0 text-base leading-normal list-disc pl-5">
-									{fakeStudies.map((study) => (
+									{userStudies.map((study) => (
 										<li key={study}>{study}</li>
 									))}
 								</ul>
