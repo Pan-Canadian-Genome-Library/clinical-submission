@@ -1,29 +1,29 @@
 {
 	"user": {
-		"loading": "Loading user information...",
-		"notLoggedIn": "You are not logged in. Please log in to view your profile.",
-		"pageTitle": "User Profile",
-		"userInfo": "User Information",
-		"tokenInfo": "Token Information",
+		"loading": "Chargement des informations utilisateur...",
+		"notLoggedIn": "Vous n'êtes pas connecté. Veuillez vous connecter pour consulter votre profil.",
+		"pageTitle": "Profil utilisateur",
+		"userInfo": "Informations sur l'utilisateur",
+		"tokenInfo": "Informations sur le jeton",
 		"accessTokenTitle": "Access Token",
-		"accessTokenDescription": "You don't need access token to submit tabular data, but you will need it to submit genomic files. To generate a new token, please logout then log back in.",
-		"copy": "Copy",
-		"copied": "Copied",
+		"accessTokenDescription": "Vous n'avez pas besoin de jeton d'accès pour soumettre des données tabulaires, mais il vous en faudra un pour soumettre des fichiers génomiques. Pour générer un nouveau jeton, veuillez vous déconnecter puis vous reconnecter.",
+		"copy": "Copier",
+		"copied": "Copié",
 		"fields": {
-			"name": "Name",
-			"email": "Email",
-			"role": "Role",
-			"loggedInWith": "Logged in With",
-			"tokenExpires": "Token Expires"
+			"name": "Nom",
+			"email": "E-mail",
+			"role": "Rôle",
+			"loggedInWith": "Connecté avec",
+			"tokenExpires": "Le jeton expire"
 		},
-		"notProvided": "Not provided",
-		"noEmails": "No email addresses",
+		"notProvided": "Non fourni",
+		"noEmails": "Aucune adresse e-mail",
 		"roles": {
-			"siteAdmin": "Site Administrator",
-			"dataAdmin": "Data Administrator",
-			"none": "No Role"
+			"siteAdmin": "Administrateur du site",
+			"dataAdmin": "Administrateur de données",
+			"none": "Aucun rôle"
 		},
-		"canSubmit": "Can submit to studies",
-		"error": "Error loading user profile information."
+		"canSubmit": "Peut participer à des études",
+		"error": "Erreur lors du chargement des informations du profil utilisateur."
 	}
 }
