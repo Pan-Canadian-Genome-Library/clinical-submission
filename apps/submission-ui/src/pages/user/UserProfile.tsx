@@ -68,6 +68,7 @@ const UserProfile = () => {
 	const userEmails =
 		emails && emails.length > 0 ? emails.map((email) => email.address).join(', ') : t('common:user.noEmails');
 
+	// users are admins or submitters
 	const userRole = dataAdmin ? t('common:user.roles.dataAdmin') : t('common:user.roles.dataSubmitter');
 
 	const userFields = [
