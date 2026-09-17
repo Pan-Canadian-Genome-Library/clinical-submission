@@ -32,8 +32,8 @@ import { useUserContext } from '@/providers/UserProvider';
 
 const UserProfile = () => {
 	const { isLoading, user, isLoggedIn } = useUserContext();
-	const { data: userTokenResponse, isLoading: tokenLoading, isError: tokenError } = useGetUserToken();
-	const { data: userStudies, isLoading: studiesLoading, isError: studiesError } = useGetUserStudies();
+	const { data: userTokenResponse, isLoading: tokenLoading, isError: tokenError } = useGetUserToken(user?.userToken);
+	const { data: userStudies, isLoading: studiesLoading, isError: studiesError } = useGetUserStudies(user?.userToken);
 
 	const { userToken, userTokenExpires } = userTokenResponse || {};
 	const { dataAdmin, emails, familyName, givenName, idpName } = user || {};

@@ -21,14 +21,26 @@
  * A wrapper for `fetch`, used to append the application API URL to all fetch calls.
  * @param resource This defines the resource that you wish to fetch. This can be a string or a `URL` object — that provides the URL of the resource you want to fetch. Important - prepend your request URLs with `/`
  * @param options A `RequestInit` object containing any custom settings that you want to apply to the request.
+ * @param token Access token for Submission API.
  * @returns A promise containing a `Response` object.
  * @link https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch
  */
-async function fetchClient(resource: string | URL, options?: RequestInit): Promise<Response> {
+async function fetchClient(
+	resource: string | URL,
+	args?: {
+		options?: RequestInit;
+		token?: string;
+	},
+): Promise<Response> {
+	const { options, token } = args || {};
+
 	// __API_PROXY_PATH__ is declared in the vite.config.ts so that we are sure to be using the same
 	// path here as is used by the server proxy.
 	const applicationAPIPrefix = __API_PROXY_PATH__;
-	const headers = new Headers({ 'Content-Type': 'application/json' });
+	const headers = new Headers({
+		'Content-Type': 'application/json',
+		...(token ? { Authorization: `Bearer ${token}` } : {}),
+	});
 
 	if (typeof resource === 'string') {
 		resource = applicationAPIPrefix + resource;
@@ -36,7 +48,7 @@ async function fetchClient(resource: string | URL, options?: RequestInit): Promi
 		resource.hostname = applicationAPIPrefix;
 	}
 
-	return await fetch(resource, { headers: headers, ...options });
+	return await fetch(resource, { headers, ...(options || {}) });
 }
 
 export { fetchClient as fetch };

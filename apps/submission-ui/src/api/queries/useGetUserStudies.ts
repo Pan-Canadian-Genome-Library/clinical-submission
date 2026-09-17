@@ -26,12 +26,12 @@ import { userStudies } from '@clinical-submission/validation';
 /**
  * Query hook to fetch the current user's studies from Submission API.
  */
-const useGetUserStudies = () => {
+const useGetUserStudies = (token?: string) => {
 	return useQuery<string[], ServerError>({
 		queryKey: ['userStudies'],
 		retry: 1,
 		queryFn: async () => {
-			const response = await fetch(`/user/studies`);
+			const response = await fetch(`/user/studies`, { token });
 
 			if (!response.ok) {
 				console.debug(`[useGetUserStudies]: Error fetching /user/studies', response status ${response.status}`);

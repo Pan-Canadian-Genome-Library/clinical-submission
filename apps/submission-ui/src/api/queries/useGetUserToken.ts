@@ -26,13 +26,13 @@ import { userToken, type UserToken } from '@clinical-submission/validation';
 /**
  * Query hook to fetch the current user's token info from Submission API.
  */
-const useGetUserToken = () => {
+const useGetUserToken = (token?: string) => {
 	return useQuery<UserToken, ServerError>({
 		queryKey: ['userToken'],
 		retry: 1,
 		queryFn: async () => {
 			const defaultResponse = { userToken: '', userTokenExpires: '' };
-			const response = await fetch(`/user/token`);
+			const response = await fetch(`/user/token`, { token });
 
 			if (!response.ok) {
 				console.debug(`[useGetUserToken]: Error fetching /user/token', response status ${response.status}`);
