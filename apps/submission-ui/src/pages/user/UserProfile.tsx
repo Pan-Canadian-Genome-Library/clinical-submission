@@ -36,7 +36,7 @@ const UserProfile = () => {
 	const { data: userStudies, isLoading: studiesLoading, isError: studiesError } = useGetUserStudies();
 
 	const { userToken, userTokenExpires } = userTokenResponse || {};
-	const { dataAdmin, emails, familyName, givenName, idpName, siteAdmin } = user || {};
+	const { dataAdmin, emails, familyName, givenName, idpName } = user || {};
 
 	const {
 		i18n: { t },
@@ -68,11 +68,7 @@ const UserProfile = () => {
 	const userEmails =
 		emails && emails.length > 0 ? emails.map((email) => email.address).join(', ') : t('common:user.noEmails');
 
-	const userRole = siteAdmin
-		? t('common:user.roles.siteAdmin')
-		: dataAdmin
-			? t('common:user.roles.dataAdmin')
-			: t('common:user.roles.none');
+	const userRole = dataAdmin ? t('common:user.roles.dataAdmin') : t('common:user.roles.dataSubmitter');
 
 	const userFields = [
 		{ label: t('common:user.fields.name'), value: userName },

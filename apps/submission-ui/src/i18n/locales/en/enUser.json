@@ -19,9 +19,8 @@
 		"notProvided": "Not provided",
 		"noEmails": "No email addresses",
 		"roles": {
-			"siteAdmin": "Site Administrator",
 			"dataAdmin": "Data Administrator",
-			"none": "No Role"
+			"dataSubmitter": "Data Submitter"
 		},
 		"canSubmit": "Can submit to studies",
 		"error": "Error loading user profile information."

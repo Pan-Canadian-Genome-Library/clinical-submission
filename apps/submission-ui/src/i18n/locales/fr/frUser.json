@@ -19,9 +19,8 @@
 		"notProvided": "Non fourni",
 		"noEmails": "Aucune adresse e-mail",
 		"roles": {
-			"siteAdmin": "Administrateur du site",
 			"dataAdmin": "Administrateur de données",
-			"none": "Aucun rôle"
+			"dataSubmitter": "Soumetteur de données"
 		},
 		"canSubmit": "Peut participer à des études",
 		"error": "Erreur lors du chargement des informations du profil utilisateur."
