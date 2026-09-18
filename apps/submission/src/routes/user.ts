@@ -19,7 +19,7 @@
 
 import express, { json, Router, urlencoded } from 'express';
 
-import { getUserStudies, getUserToken } from '@/controllers/userController.js';
+import { getRefreshToken, getUserEditableStudies } from '@/controllers/userController.js';
 import { authMiddleware } from '@/middleware/auth.js';
 
 export const userRouter: Router = (() => {
@@ -29,8 +29,8 @@ export const userRouter: Router = (() => {
 	router.use(urlencoded({ extended: false }));
 
 	// endpoints for Submission UI
-	router.get('/studies', authMiddleware(), getUserStudies);
-	router.get('/token', authMiddleware(), getUserToken);
+	router.get('/editable-studies', authMiddleware(), getUserEditableStudies);
+	router.get('/refresh-token', authMiddleware(), getRefreshToken);
 
 	return router;
 })();

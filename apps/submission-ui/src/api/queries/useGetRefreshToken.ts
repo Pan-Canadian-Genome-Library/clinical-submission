@@ -21,21 +21,21 @@ import { useQuery } from '@tanstack/react-query';
 
 import { fetch } from '@/api/FetchClient';
 import { ServerError } from '@/types/server';
-import { userToken, type UserToken } from '@clinical-submission/validation';
+import { refreshToken, type RefreshToken } from '@clinical-submission/validation';
 
 /**
  * Query hook to fetch the current user's token "time to live" from Submission API.
  */
-const useGetUserToken = (token?: string) => {
-	return useQuery<UserToken, ServerError>({
-		queryKey: ['userToken'],
+const useGetRefreshToken = (token?: string) => {
+	return useQuery<RefreshToken, ServerError>({
+		queryKey: ['refreshToken'],
 		retry: 1,
 		queryFn: async () => {
-			const defaultResponse = { userToken: '', refreshTokenIat: 0 };
-			const response = await fetch(`/user/token`, { token });
+			const defaultResponse = { refreshToken: '', refreshTokenIat: 0 };
+			const response = await fetch(`/user/refresh-token`, { token });
 
 			if (!response.ok) {
-				console.debug(`[useGetUserToken]: Error fetching /user/token', response status ${response.status}`);
+				console.debug(`[useGetRefreshToken]: Error fetching /user/refresh-token', response status ${response.status}`);
 				return defaultResponse;
 			}
 
@@ -43,19 +43,19 @@ const useGetUserToken = (token?: string) => {
 				const result = await response.json();
 
 				// Validate user object
-				const userParseResult = userToken.safeParse(result);
+				const userParseResult = refreshToken.safeParse(result);
 				if (!userParseResult.success) {
 					//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation.
-					console.debug('[useGetUserToken]: Response from user endpoint failed validation', userParseResult.error);
+					console.debug('[useGetRefreshToken]: Response from user endpoint failed validation', userParseResult.error);
 					return defaultResponse;
 				}
 				return userParseResult.data;
 			} catch (error) {
-				console.debug('[useGetUserToken]: Failed to parse response object', error);
+				console.debug('[useGetRefreshToken]: Failed to parse response object', error);
 				return defaultResponse;
 			}
 		},
 	});
 };
 
-export default useGetUserToken;
+export default useGetRefreshToken;

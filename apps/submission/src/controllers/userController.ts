@@ -22,7 +22,27 @@ import { logger } from '@/common/logger.js';
 import { getDbInstance } from '@/db/index.js';
 import { studyService } from '@/service/studyService.js';
 
-const getUserStudies = async (req: Request, res: Response, next: NextFunction): Promise<void | null> => {
+/**
+ * Get the user's refresh token and the token's "time to live".
+ */
+const getRefreshToken = async (req: Request, res: Response): Promise<void | null> => {
+	const { account } = req.session;
+
+	if (!account) {
+		// No user session, this is an anon session
+		return null;
+	}
+
+	const { refreshToken, refreshTokenIat } = account;
+
+	const response = { refreshToken, refreshTokenIat };
+	res.status(200).json(response);
+};
+
+/**
+ * Get the user's editable studies, for data submitters.
+ */
+const getUserEditableStudies = async (req: Request, res: Response, next: NextFunction): Promise<void | null> => {
 	const { user } = req.session;
 
 	if (!user) {
@@ -34,34 +54,20 @@ const getUserStudies = async (req: Request, res: Response, next: NextFunction): 
 
 	try {
 		const studyRepo = studyService(getDbInstance());
-		const userStudies = [];
+		const userEditableStudies = [];
 
 		for (const studyId in editableStudies) {
 			const studyResponse = await studyRepo.getStudyById(studyId);
 			const { studyName } = studyResponse || {};
-			studyName && userStudies.push(studyName);
+			studyName && userEditableStudies.push(studyName);
 		}
 
-		const response = { userStudies };
+		const response = { userEditableStudies };
 		res.status(200).json(response);
 	} catch (e) {
-		logger.error(e, 'Error in getUserStudies');
+		logger.error(e, 'Error in getUserEditableStudies');
 		next(e);
 	}
 };
 
-const getUserToken = async (req: Request, res: Response): Promise<void | null> => {
-	const { account } = req.session;
-
-	if (!account) {
-		// No user session, this is an anon session
-		return null;
-	}
-
-	const { refreshToken, refreshTokenIat } = account;
-
-	const response = { userToken: refreshToken, refreshTokenIat };
-	res.status(200).json(response);
-};
-
-export { getUserStudies, getUserToken };
+export { getRefreshToken, getUserEditableStudies };

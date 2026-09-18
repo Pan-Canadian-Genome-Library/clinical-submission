@@ -19,13 +19,13 @@
 
 import { z } from 'zod';
 
-export const userToken = z.object({
+export const refreshToken = z.object({
+	refreshToken: z.string(),
 	refreshTokenIat: z.number().int(),
-	userToken: z.string(),
 });
-export type UserToken = z.infer<typeof userToken>;
+export type RefreshToken = z.infer<typeof refreshToken>;
 
-export const userStudies = z.object({
-	userStudies: z.string().array(),
+export const userEditableStudies = z.object({
+	userEditableStudies: z.string().array(),
 });
-export type UserStudies = z.infer<typeof userStudies>;
+export type UserEditableStudies = z.infer<typeof userEditableStudies>;

@@ -24,17 +24,19 @@ import { ServerError } from '@/types/server';
 import { userStudies } from '@clinical-submission/validation';
 
 /**
- * Query hook to fetch the current user's studies from Submission API.
+ * Query hook to fetch the current user's editable studies from Submission API.
  */
-const useGetUserStudies = (token?: string) => {
+const useGetUserEditableStudies = (token?: string) => {
 	return useQuery<string[], ServerError>({
-		queryKey: ['userStudies'],
+		queryKey: ['userEditableStudies'],
 		retry: 1,
 		queryFn: async () => {
-			const response = await fetch(`/user/studies`, { token });
+			const response = await fetch(`/user/editable-studies`, { token });
 
 			if (!response.ok) {
-				console.debug(`[useGetUserStudies]: Error fetching /user/studies', response status ${response.status}`);
+				console.debug(
+					`[useGetUserEditableStudies]: Error fetching /user/editable-studies', response status ${response.status}`,
+				);
 				return [];
 			}
 
@@ -45,16 +47,19 @@ const useGetUserStudies = (token?: string) => {
 				const userParseResult = userStudies.safeParse(result);
 				if (!userParseResult.success) {
 					//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation.
-					console.debug('[useGetUserStudies]: Response from user endpoint failed validation', userParseResult.error);
+					console.debug(
+						'[useGetUserEditableStudies]: Response from user endpoint failed validation',
+						userParseResult.error,
+					);
 					return [];
 				}
 				return userParseResult.data.userStudies;
 			} catch (error) {
-				console.debug('[useGetUserStudies]: Failed to parse response object', error);
+				console.debug('[useGetUserEditableStudies]: Failed to parse response object', error);
 				return [];
 			}
 		},
 	});
 };
 
-export default useGetUserStudies;
+export default useGetUserEditableStudies;

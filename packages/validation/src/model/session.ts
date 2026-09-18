@@ -67,7 +67,7 @@ const authGeneratedSessionValues = z.object({
 			}),
 		)
 		.optional(),
-	userToken: z.string().optional(),
+	accessToken: z.string().optional(),
 });
 
 export type SessionUser = z.infer<typeof authGeneratedSessionValues>;
@@ -82,7 +82,7 @@ export const partialSessionState = authGeneratedSessionValues.pick({
 	dataAdmin: true,
 	groups: true,
 	idpName: true,
-	userToken: true,
+	accessToken: true,
 });
 
 export type PartialSessionState = Partial<z.infer<typeof authGeneratedSessionValues>>;

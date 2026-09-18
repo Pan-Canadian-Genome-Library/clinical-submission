@@ -19,8 +19,8 @@
 
 import { useTranslation } from 'react-i18next';
 
-import useGetUserStudies from '@/api/queries/useGetUserStudies';
-import useGetUserToken from '@/api/queries/useGetUserToken';
+import useGetUserEditableStudies from '@/api/queries/useGetUserEditableStudies';
+import useGetRefreshToken from '@/api/queries/useGetRefreshToken';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import Spinner from '@/components/Spinner';
 import StudyField from '@/components/StudyField';
@@ -32,17 +32,25 @@ import { useUserContext } from '@/providers/UserProvider';
 
 const UserProfile = () => {
 	const { isLoading, user, isLoggedIn } = useUserContext();
-	const { data: userTokenResponse, isLoading: tokenLoading, isError: tokenError } = useGetUserToken(user?.userToken);
-	const { data: userStudies, isLoading: studiesLoading, isError: studiesError } = useGetUserStudies(user?.userToken);
+	const {
+		data: refreshTokenResponse,
+		isLoading: refreshTokenLoading,
+		isError: refreshTokenError,
+	} = useGetRefreshToken(user?.accessToken);
+	const {
+		data: userStudies,
+		isLoading: studiesLoading,
+		isError: studiesError,
+	} = useGetUserEditableStudies(user?.accessToken);
 
-	const { userToken, refreshTokenIat } = userTokenResponse || {};
+	const { refreshToken, refreshTokenIat } = refreshTokenResponse || {};
 	const { dataAdmin, emails, familyName, givenName, idpName } = user || {};
 
 	const {
 		i18n: { t },
 	} = useTranslation();
 
-	if (isLoading || studiesLoading || tokenLoading) {
+	if (isLoading || studiesLoading || refreshTokenLoading) {
 		return <Spinner label={t('common:user.loading')} />;
 	}
 
@@ -54,7 +62,7 @@ const UserProfile = () => {
 		);
 	}
 
-	if (studiesError || tokenError || !userToken || !userStudies) {
+	if (studiesError || refreshTokenError || !refreshToken || !userStudies) {
 		return (
 			<div className="p-8">
 				<Text>{t('common:user.error')}</Text>
@@ -72,7 +80,7 @@ const UserProfile = () => {
 	const userRole = dataAdmin ? t('common:user.roles.dataAdmin') : t('common:user.roles.dataSubmitter');
 
 	const tokenTimeToLive = Date.now() + (refreshTokenIat || 0);
-	const userTokenExpires = new Date(tokenTimeToLive).toLocaleString(t('common:dateLang'), {
+	const refreshTokenExpires = new Date(tokenTimeToLive).toLocaleString(t('common:dateLang'), {
 		dateStyle: 'short',
 		timeStyle: 'medium',
 		timeZoneName: 'short',
@@ -86,7 +94,7 @@ const UserProfile = () => {
 
 	const tokenFields = [
 		{ label: t('common:user.fields.loggedInWith'), value: idpName },
-		{ label: t('common:user.fields.tokenExpires'), value: userTokenExpires },
+		{ label: t('common:user.fields.tokenExpires'), value: refreshTokenExpires },
 	];
 
 	return (
@@ -140,14 +148,14 @@ const UserProfile = () => {
 								<input
 									className="border border-gray-300 text-lg rounded-lg focus:ring-brand focus:border-brand block w-full px-2 py-1 placeholder:text-body mb-2"
 									type="password"
-									value={userToken}
-									name="userToken"
-									id="userToken"
+									value={refreshToken}
+									name="refreshToken"
+									id="refreshToken"
 									readOnly
 									aria-readonly
 								/>
 								<CopyButton
-									textToCopy={userToken}
+									textToCopy={refreshToken}
 									copyText={t('common:user.copy')}
 									copiedText={t('common:user.copied')}
 								/>
