@@ -147,6 +147,7 @@ const authToken = validateRequest({}, async (request, response) => {
 				};
 			}),
 			groups: pcglAuthzResponse.groups,
+			idpName: oidcDataResponse.idp_name,
 		};
 
 		request.session.account = userAccountAliasing;
@@ -181,6 +182,7 @@ const getUser = validateRequest({}, async (request, response) => {
 	}
 
 	const userSession = request.session?.user;
+	const { accessToken } = request.session?.account || {};
 
 	const output: { user?: PartialSessionState } = {
 		user: userSession
@@ -193,6 +195,8 @@ const getUser = validateRequest({}, async (request, response) => {
 					siteAdmin: userSession.siteAdmin,
 					dataAdmin: userSession.dataAdmin,
 					groups: userSession.groups,
+					idpName: userSession.idpName,
+					...(accessToken ? { accessToken } : {}),
 				}
 			: undefined,
 	};

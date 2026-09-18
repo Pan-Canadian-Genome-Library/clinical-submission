@@ -42,6 +42,7 @@ const authGeneratedSessionValues = z.object({
 				.optional(),
 		}),
 	),
+	idpName: z.string().optional(),
 	siteAdmin: z.boolean().default(false),
 	dataAdmin: z.boolean().default(false),
 	studyAuthorizations: z.object({
@@ -66,6 +67,7 @@ const authGeneratedSessionValues = z.object({
 			}),
 		)
 		.optional(),
+	accessToken: z.string().optional(),
 });
 
 export type SessionUser = z.infer<typeof authGeneratedSessionValues>;
@@ -79,6 +81,8 @@ export const partialSessionState = authGeneratedSessionValues.pick({
 	siteAdmin: true,
 	dataAdmin: true,
 	groups: true,
+	idpName: true,
+	accessToken: true,
 });
 
 export type PartialSessionState = Partial<z.infer<typeof authGeneratedSessionValues>>;

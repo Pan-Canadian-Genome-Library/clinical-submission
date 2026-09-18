@@ -17,18 +17,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import enForm from '@/i18n/locales/en/enForm.json';
-import enGeneral from '@/i18n/locales/en/enGeneral.json';
-import enHome from '@/i18n/locales/en/enHome.json';
-import enStudy from '@/i18n/locales/en/enStudy.json';
-import enUser from '@/i18n/locales/en/enUser.json';
+import express, { json, Router, urlencoded } from 'express';
 
-export const ENGLISH_LOCALE_DICTIONARY = {
-	...enForm,
-	...enGeneral,
-	...enHome,
-	...enStudy,
-	...enUser,
-} as const;
+import { getRefreshToken, getUserEditableStudies } from '@/controllers/userController.js';
+import { authMiddleware } from '@/middleware/auth.js';
 
-export type I18N_LOCALE_DICTIONARY = typeof ENGLISH_LOCALE_DICTIONARY;
+export const userRouter: Router = (() => {
+	const router = express.Router();
+
+	router.use(json());
+	router.use(urlencoded({ extended: false }));
+
+	// endpoints for Submission UI
+	router.get('/editable-studies', authMiddleware(), getUserEditableStudies);
+	router.get('/refresh-token', authMiddleware(), getRefreshToken);
+
+	return router;
+})();

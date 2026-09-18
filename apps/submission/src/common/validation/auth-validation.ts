@@ -67,6 +67,7 @@ export const oidcUserInfoResponseSchema = z.object({
 	given_name: z.string().optional(),
 	family_name: z.string().optional(),
 	email: z.string().optional(),
+	idp_name: z.string().optional(),
 });
 export type OIDCUserInfoResponse = z.infer<typeof oidcUserInfoResponseSchema>;
 

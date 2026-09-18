@@ -17,18 +17,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import enForm from '@/i18n/locales/en/enForm.json';
-import enGeneral from '@/i18n/locales/en/enGeneral.json';
-import enHome from '@/i18n/locales/en/enHome.json';
-import enStudy from '@/i18n/locales/en/enStudy.json';
-import enUser from '@/i18n/locales/en/enUser.json';
-
-export const ENGLISH_LOCALE_DICTIONARY = {
-	...enForm,
-	...enGeneral,
-	...enHome,
-	...enStudy,
-	...enUser,
-} as const;
-
-export type I18N_LOCALE_DICTIONARY = typeof ENGLISH_LOCALE_DICTIONARY;
+const CopyIcon = () => (
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		width="10"
+		height="13"
+		viewBox="0 0 10 13"
+		fill="none"
+		stroke="currentColor"
+		className="inline-block mr-1 mb-0.5 font-normal"
+		aria-hidden="true"
+	>
+		<path
+			d="M9.1875 0H1.85938C1.79922 0 1.75 0.0492187 1.75 0.109375V0.875C1.75 0.935156 1.79922 0.984375 1.85938 0.984375H8.64062V10.3906C8.64062 10.4508 8.68984 10.5 8.75 10.5H9.51562C9.57578 10.5 9.625 10.4508 9.625 10.3906V0.4375C9.625 0.195508 9.42949 0 9.1875 0ZM7.4375 1.75H0.4375C0.195508 1.75 0 1.94551 0 2.1875V9.44316C0 9.55938 0.0464843 9.67012 0.128516 9.75215L2.49785 12.1215C2.52793 12.1516 2.56211 12.1762 2.59902 12.1967V12.2227H2.65645C2.7043 12.2404 2.75488 12.25 2.80684 12.25H7.4375C7.67949 12.25 7.875 12.0545 7.875 11.8125V2.1875C7.875 1.94551 7.67949 1.75 7.4375 1.75ZM2.59766 10.8309L1.42051 9.65234H2.59766V10.8309ZM6.89062 11.2656H3.47266V9.32422C3.47266 9.02207 3.22793 8.77734 2.92578 8.77734H0.984375V2.73438H6.89062V11.2656Z"
+			fill="currentColor"
+		/>
+	</svg>
+);
+export default CopyIcon;
