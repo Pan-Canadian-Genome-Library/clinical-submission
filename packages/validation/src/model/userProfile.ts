@@ -20,8 +20,8 @@
 import { z } from 'zod';
 
 export const userToken = z.object({
+	refreshTokenIat: z.number().int(),
 	userToken: z.string(),
-	userTokenExpires: z.string(),
 });
 export type UserToken = z.infer<typeof userToken>;
 

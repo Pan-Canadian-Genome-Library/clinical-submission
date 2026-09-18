@@ -35,7 +35,7 @@ const UserProfile = () => {
 	const { data: userTokenResponse, isLoading: tokenLoading, isError: tokenError } = useGetUserToken(user?.userToken);
 	const { data: userStudies, isLoading: studiesLoading, isError: studiesError } = useGetUserStudies(user?.userToken);
 
-	const { userToken, userTokenExpires } = userTokenResponse || {};
+	const { userToken, refreshTokenIat } = userTokenResponse || {};
 	const { dataAdmin, emails, familyName, givenName, idpName } = user || {};
 
 	const {
@@ -70,6 +70,13 @@ const UserProfile = () => {
 
 	// users are admins or submitters
 	const userRole = dataAdmin ? t('common:user.roles.dataAdmin') : t('common:user.roles.dataSubmitter');
+
+	const tokenTimeToLive = Date.now() + (refreshTokenIat || 0);
+	const userTokenExpires = new Date(tokenTimeToLive).toLocaleString(t('common:dateLang'), {
+		dateStyle: 'short',
+		timeStyle: 'medium',
+		timeZoneName: 'short',
+	});
 
 	const userFields = [
 		{ label: t('common:user.fields.name'), value: userName },
