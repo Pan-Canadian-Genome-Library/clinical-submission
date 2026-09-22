@@ -28,7 +28,6 @@ import { allStudies } from '@clinical-submission/validation';
  */
 const useGetAllStudies = () => {
 	return useQuery<string[], ServerError>({
-		// TODO #177 FIX TYPE
 		queryKey: ['allStudies'],
 		retry: 1,
 		queryFn: async () => {
