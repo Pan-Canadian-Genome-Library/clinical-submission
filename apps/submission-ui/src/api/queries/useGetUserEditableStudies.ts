@@ -21,7 +21,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { fetch } from '@/api/FetchClient';
 import { ServerError } from '@/types/server';
-import { userStudies } from '@clinical-submission/validation';
+import { userEditableStudies } from '@clinical-submission/validation';
 
 /**
  * Query hook to fetch the current user's editable studies from Submission API.
@@ -43,8 +43,8 @@ const useGetUserEditableStudies = (token?: string) => {
 			try {
 				const result = await response.json();
 
-				// Validate user object
-				const userParseResult = userStudies.safeParse(result);
+				// Validate user editable studies object
+				const userParseResult = userEditableStudies.safeParse(result);
 				if (!userParseResult.success) {
 					//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation.
 					console.debug(
@@ -53,7 +53,7 @@ const useGetUserEditableStudies = (token?: string) => {
 					);
 					return [];
 				}
-				return userParseResult.data.userStudies;
+				return userParseResult.data.userEditableStudies;
 			} catch (error) {
 				console.debug('[useGetUserEditableStudies]: Failed to parse response object', error);
 				return [];

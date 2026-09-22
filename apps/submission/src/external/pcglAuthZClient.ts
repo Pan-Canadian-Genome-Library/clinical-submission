@@ -254,22 +254,6 @@ export const extractAccessTokenFromHeader = (req: Request): string | undefined =
 };
 
 /**
- * Function that takes in request object, checks if there's a session.account property,
- * and returns its ID token.
- * Only works with session object from requests from Submission UI.
- *
- * @param req Request object
- * @returns Access token or undefined depending if session.account has an ID token
- */
-export const extractAccessTokenFromSession = (req: Request): string | undefined => {
-	if (req.session && req.session.account && req.session.account.accessToken) {
-		return req.session.account.accessToken;
-	} else {
-		return;
-	}
-};
-
-/**
  * @param groups List of groups user belongs to
  * @returns array of strings with names of the groups
  */

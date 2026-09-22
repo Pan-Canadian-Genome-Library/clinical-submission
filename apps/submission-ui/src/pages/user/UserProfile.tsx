@@ -76,15 +76,18 @@ const UserProfile = () => {
 	const userEmails =
 		emails && emails.length > 0 ? emails.map((email) => email.address).join(', ') : t('common:user.noEmails');
 
-	// users are admins or submitters
+	// users are either admins or submitters
 	const userRole = dataAdmin ? t('common:user.roles.dataAdmin') : t('common:user.roles.dataSubmitter');
 
+	// get token expiry datetime & user's timezone
 	const tokenTimeToLive = Date.now() + (refreshTokenIat || 0);
-	const refreshTokenExpires = new Date(tokenTimeToLive).toLocaleString(t('common:dateLang'), {
+	const refreshTokenExpires = new Date(tokenTimeToLive)?.toLocaleString(t('common:dateLang'), {
 		dateStyle: 'short',
 		timeStyle: 'medium',
-		timeZoneName: 'short',
 	});
+	const userTimeZone = Intl.DateTimeFormat(t('common:dateLang'), { timeZoneName: 'short' })
+		.formatToParts()
+		.find((part) => part.type === 'timeZoneName')?.value;
 
 	const userFields = [
 		{ label: t('common:user.fields.name'), value: userName },
@@ -94,7 +97,7 @@ const UserProfile = () => {
 
 	const tokenFields = [
 		{ label: t('common:user.fields.loggedInWith'), value: idpName },
-		{ label: t('common:user.fields.tokenExpires'), value: refreshTokenExpires },
+		{ label: t('common:user.fields.tokenExpires'), value: `${refreshTokenExpires} ${userTimeZone}` },
 	];
 
 	return (
