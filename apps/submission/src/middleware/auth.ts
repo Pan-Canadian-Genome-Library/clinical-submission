@@ -29,8 +29,7 @@ import { extractAccessTokenFromHeader, fetchUserData } from '@/external/pcglAuth
  * Middleware to handle authentication that returns PCGLUserSessionResult to req.user.
  * The middleware validates whether a token exists; if valid, the user information returned from the authz service is added to `req.user`.
  * Optionally, when `requireAdmin` is `true`, the middleware restricts access to admin users only.
- * Any additional checks for user permissions must be done on the controller level from the passed `req.user` object.
- * Requires `Authorization: "Bearer {token}""` header, or a browser session from Submission UI.
+ * Any additional checks for user permissions must be done on the controller level from the passed `req.user` object
  */
 export const authMiddleware = ({ requireAdmin = false }: { requireAdmin?: boolean } = {}) => {
 	const { enabled } = authConfig;
