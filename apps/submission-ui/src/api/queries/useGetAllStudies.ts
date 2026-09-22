@@ -21,44 +21,41 @@ import { useQuery } from '@tanstack/react-query';
 
 import { fetch } from '@/api/FetchClient';
 import { ServerError } from '@/types/server';
-import { refreshToken, type RefreshToken } from '@clinical-submission/validation';
+import { allStudies } from '@clinical-submission/validation';
 
 /**
- * Query hook to fetch the current user's token "time to live" from Submission API.
+ * Query hook to fetch all studies from Submission API.
  */
-const useGetRefreshToken = (token?: string) => {
-	return useQuery<RefreshToken, ServerError>({
-		queryKey: ['refreshToken'],
+const useGetAllStudies = () => {
+	return useQuery<string[], ServerError>({
+		// TODO #177 FIX TYPE
+		queryKey: ['allStudies'],
 		retry: 1,
 		queryFn: async () => {
-			const defaultResponse = { refreshToken: '', refreshTokenIat: 0 };
-			const response = await fetch(`/user/refresh-token`, { token });
+			const response = await fetch(`/study`);
 
 			if (!response.ok) {
-				console.debug(`[useGetRefreshToken]: Error fetching /user/refresh-token', response status ${response.status}`);
-				return defaultResponse;
+				console.debug(`[useGetAllStudies]: Error fetching /study', response status ${response.status}`);
+				return [];
 			}
 
 			try {
 				const result = await response.json();
 
-				// Validate refresh token
-				const userParseResult = refreshToken.safeParse(result);
+				// Validate studies object
+				const userParseResult = allStudies.safeParse(result);
 				if (!userParseResult.success) {
 					//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation.
-					console.debug(
-						'[useGetRefreshToken]: Response from user refresh token endpoint failed validation',
-						userParseResult.error,
-					);
-					return defaultResponse;
+					console.debug('[useGetAllStudies]: Response from studies endpoint failed validation', userParseResult.error);
+					return [];
 				}
-				return userParseResult.data;
+				return userParseResult.data.map((study) => study.studyName);
 			} catch (error) {
-				console.debug('[useGetRefreshToken]: Failed to parse response object', error);
-				return defaultResponse;
+				console.debug('[useGetAllStudies]: Failed to parse response object', error);
+				return [];
 			}
 		},
 	});
 };
 
-export default useGetRefreshToken;
+export default useGetAllStudies;

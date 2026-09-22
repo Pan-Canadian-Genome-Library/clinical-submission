@@ -19,8 +19,9 @@
 
 import { useTranslation } from 'react-i18next';
 
-import useGetUserEditableStudies from '@/api/queries/useGetUserEditableStudies';
 import useGetRefreshToken from '@/api/queries/useGetRefreshToken';
+import useGetAllStudies from '@/api/queries/useGetAllStudies';
+import useGetUserEditableStudies from '@/api/queries/useGetUserEditableStudies';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import Spinner from '@/components/Spinner';
 import StudyField from '@/components/StudyField';
@@ -39,9 +40,10 @@ const UserProfile = () => {
 	} = useGetRefreshToken(user?.accessToken);
 	const {
 		data: userStudies,
-		isLoading: studiesLoading,
-		isError: studiesError,
+		isLoading: userStudiesLoading,
+		isError: userStudiesError,
 	} = useGetUserEditableStudies(user?.accessToken);
+	const { data: allStudies, isLoading: allStudiesLoading, isError: allStudiesError } = useGetAllStudies();
 
 	const { refreshToken, refreshTokenIat } = refreshTokenResponse || {};
 	const { dataAdmin, emails, familyName, givenName, idpName } = user || {};
@@ -50,7 +52,7 @@ const UserProfile = () => {
 		i18n: { t },
 	} = useTranslation();
 
-	if (isLoading || studiesLoading || refreshTokenLoading) {
+	if (isLoading || userStudiesLoading || refreshTokenLoading || allStudiesLoading) {
 		return <Spinner label={t('common:user.loading')} />;
 	}
 
@@ -62,7 +64,7 @@ const UserProfile = () => {
 		);
 	}
 
-	if (studiesError || refreshTokenError || !refreshToken || !userStudies) {
+	if (userStudiesError || refreshTokenError || !refreshToken || !userStudies || allStudiesError || !allStudies) {
 		return (
 			<div className="p-8">
 				<Text>{t('common:user.error')}</Text>
@@ -76,7 +78,7 @@ const UserProfile = () => {
 	const userEmails =
 		emails && emails.length > 0 ? emails.map((email) => email.address).join(', ') : t('common:user.noEmails');
 
-	// users are either admins or submitters
+	// users are either data admins or data submitters
 	const userRole = dataAdmin ? t('common:user.roles.dataAdmin') : t('common:user.roles.dataSubmitter');
 
 	// get token expiry datetime & user's timezone
@@ -100,6 +102,10 @@ const UserProfile = () => {
 		{ label: t('common:user.fields.tokenExpires'), value: `${refreshTokenExpires} ${userTimeZone}` },
 	];
 
+	// data admins: list all studies
+	// data submitters: list the user's editable studies
+	const studies = dataAdmin ? allStudies : userStudies;
+
 	return (
 		<PageLayout>
 			<Breadcrumbs
@@ -118,13 +124,13 @@ const UserProfile = () => {
 								<StudyField key={label} label={label} value={value} />
 							))}
 						</div>
-						{userStudies.length > 0 && (
+						{studies.length > 0 && (
 							<div>
 								<span className="min-w-55  text-black text-base pt-[0.1rem] shrink-0">
 									{t('common:user.canSubmit')}:
 								</span>
 								<ul className="m-0 text-base leading-normal list-disc pl-5">
-									{userStudies.map((study) => (
+									{studies.map((study: string) => (
 										<li key={study}>{study}</li>
 									))}
 								</ul>

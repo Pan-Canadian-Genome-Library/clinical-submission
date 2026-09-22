@@ -17,7 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export * from './common/strings.js';
-export * from './model/session.js';
-export * from './model/study.js';
-export * from './model/userProfile.js';
+import { z } from 'zod';
+
+export const allStudies = z.object({ studyName: z.string() }).array();
+export type AllStudies = z.infer<typeof allStudies>;

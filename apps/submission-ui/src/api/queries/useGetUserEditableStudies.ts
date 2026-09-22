@@ -48,7 +48,7 @@ const useGetUserEditableStudies = (token?: string) => {
 				if (!userParseResult.success) {
 					//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation.
 					console.debug(
-						'[useGetUserEditableStudies]: Response from user endpoint failed validation',
+						'[useGetUserEditableStudies]: Response from user editable studies endpoint failed validation',
 						userParseResult.error,
 					);
 					return [];
