@@ -23,13 +23,13 @@ import { getDbInstance } from '@/db/index.js';
 import { studyService } from '@/service/studyService.js';
 
 /**
- * Get the user's refresh token and the token's "time to live".
+ * Get the user's refresh token and the token's "time to live", for Submission UI.
  */
 const getRefreshToken = async (req: Request, res: Response): Promise<void | null> => {
 	const { account } = req.session;
 
 	if (!account) {
-		// No user session, this is an anon session
+		// No user session, this is not a Submission UI request
 		return null;
 	}
 
@@ -40,13 +40,13 @@ const getRefreshToken = async (req: Request, res: Response): Promise<void | null
 };
 
 /**
- * Get the user's editable studies, for data submitters.
+ * Get the user's editable studies, for data submitters, for Submission UI.
  */
 const getUserEditableStudies = async (req: Request, res: Response, next: NextFunction): Promise<void | null> => {
 	const { user } = req.session;
 
 	if (!user) {
-		// No user session, this is an anon session
+		// No user session, this is not a Submission UI request
 		return null;
 	}
 

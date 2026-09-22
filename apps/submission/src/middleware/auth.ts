@@ -40,7 +40,7 @@ export const authMiddleware = ({ requireAdmin = false }: { requireAdmin?: boolea
 			if (!enabled) {
 				return next();
 			}
-			const token = extractAccessTokenFromHeader(req) || req.session.account?.accessToken;
+			const token = extractAccessTokenFromHeader(req);
 
 			if (!token) {
 				throw new lyricProvider.utils.errors.Forbidden('Unauthorized: No access token provided');
