@@ -5,7 +5,7 @@
 		"pageTitle": "Profil utilisateur",
 		"userInfo": "Informations sur l'utilisateur",
 		"tokenInfo": "Informations sur le jeton",
-		"accessTokenTitle": "Access Token",
+		"accessTokenTitle": "Jeton d'accès",
 		"accessTokenDescription": "Vous n'avez pas besoin de jeton d'accès pour soumettre des données tabulaires, mais il vous en faudra un pour soumettre des fichiers génomiques. Pour générer un nouveau jeton, veuillez vous déconnecter puis vous reconnecter.",
 		"copy": "Copier",
 		"copied": "Copié",
