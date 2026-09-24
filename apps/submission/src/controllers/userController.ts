@@ -22,15 +22,18 @@ import { logger } from '@/common/logger.js';
 import { getDbInstance } from '@/db/index.js';
 import { studyService } from '@/service/studyService.js';
 
+// NOTE
+// UI-only requests have been deliberately omitted from Swagger docs.
+// They require a session cookie, and won't work in Swagger.
+
 /**
- * Get the user's refresh token and the token's "time to live", for Submission UI.
+ * Get the user's refresh token and the token's "time to live", for Submission UI. Requires a session cookie.
  */
 const getRefreshToken = async (req: Request, res: Response): Promise<void | null> => {
 	const { account } = req.session;
-
 	if (!account) {
-		// No user session, this is not a Submission UI request
-		return null;
+		res.status(400).send('Session required.');
+		return;
 	}
 
 	const { refreshToken, refreshTokenIat } = account;
@@ -40,14 +43,13 @@ const getRefreshToken = async (req: Request, res: Response): Promise<void | null
 };
 
 /**
- * Get the user's editable studies, for data submitters, for Submission UI.
+ * Get the user's editable studies, for data submitters, for Submission UI. Requires a session cookie.
  */
 const getUserEditableStudies = async (req: Request, res: Response, next: NextFunction): Promise<void | null> => {
 	const { user } = req.session;
-
 	if (!user) {
-		// No user session, this is not a Submission UI request
-		return null;
+		res.status(400).send('Session required.');
+		return;
 	}
 
 	const { editableStudies = [] } = user.studyAuthorizations;
