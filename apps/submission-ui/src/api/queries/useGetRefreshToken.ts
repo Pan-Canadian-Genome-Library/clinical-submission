@@ -31,31 +31,29 @@ const useGetRefreshToken = () => {
 		queryKey: ['refreshToken'],
 		retry: 1,
 		queryFn: async () => {
-			const defaultResponse = { refreshToken: '', refreshTokenIat: 0 };
-
 			const response = await fetch(`/user/refresh-token`);
 			if (!response.ok) {
 				console.debug(`[useGetRefreshToken]: Error fetching /user/refresh-token', response status ${response.status}`);
-				return defaultResponse;
+				throw new Error(`[useGetRefreshToken]: Failed to fetch refresh token: ${response.statusText}`);
 			}
 
 			try {
 				const result = await response.json();
 
 				// Validate refresh token
-				const userParseResult = refreshToken.safeParse(result);
-				if (!userParseResult.success) {
+				const parseResult = refreshToken.safeParse(result);
+				if (!parseResult.success) {
 					//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation.
 					console.debug(
 						'[useGetRefreshToken]: Response from user refresh token endpoint failed validation',
-						userParseResult.error,
+						parseResult.error,
 					);
-					return defaultResponse;
+					throw new Error(`[useGetRefreshToken]: Failed to safeParse: ${parseResult.error}`);
 				}
-				return userParseResult.data;
+				return parseResult.data;
 			} catch (error) {
 				console.debug('[useGetRefreshToken]: Failed to parse response object', error);
-				return defaultResponse;
+				throw error;
 			}
 		},
 	});

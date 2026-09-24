@@ -31,28 +31,26 @@ const useGetAllStudies = () => {
 		queryKey: ['allStudies'],
 		retry: 1,
 		queryFn: async () => {
-			const defaultResponse: AllStudies = [];
-
 			const response = await fetch(`/study`);
 			if (!response.ok) {
 				console.debug(`[useGetAllStudies]: Error fetching /study', response status ${response.status}`);
-				return defaultResponse;
+				throw new Error(`[useGetAllStudies]: Failed to fetch all studies: ${response.statusText}`);
 			}
 
 			try {
 				const result = await response.json();
 
 				// Validate studies object
-				const userParseResult = allStudies.safeParse(result);
-				if (!userParseResult.success) {
+				const parseResult = allStudies.safeParse(result);
+				if (!parseResult.success) {
 					//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation.
-					console.debug('[useGetAllStudies]: Response from studies endpoint failed validation', userParseResult.error);
-					return defaultResponse;
+					console.debug('[useGetAllStudies]: Response from studies endpoint failed validation', parseResult.error);
+					throw new Error(`[useGetAllStudies]: Failed to safeParse: ${parseResult.error}`);
 				}
-				return userParseResult.data;
+				return parseResult.data;
 			} catch (error) {
 				console.debug('[useGetAllStudies]: Failed to parse response object', error);
-				return defaultResponse;
+				throw error;
 			}
 		},
 	});

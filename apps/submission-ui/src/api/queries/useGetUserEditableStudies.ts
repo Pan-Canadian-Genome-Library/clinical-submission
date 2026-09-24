@@ -31,33 +31,31 @@ const useGetUserEditableStudies = () => {
 		queryKey: ['userEditableStudies'],
 		retry: 1,
 		queryFn: async () => {
-			const defaultResponse: UserEditableStudies = [];
-
 			const response = await fetch(`/user/editable-studies`);
 			if (!response.ok) {
 				console.debug(
 					`[useGetUserEditableStudies]: Error fetching /user/editable-studies', response status ${response.status}`,
 				);
-				return defaultResponse;
+				throw new Error(`[useGetUserEditableStudies]: Failed to fetch user's editable studies: ${response.statusText}`);
 			}
 
 			try {
 				const result = await response.json();
 
 				// Validate user editable studies object
-				const userParseResult = userEditableStudies.safeParse(result);
-				if (!userParseResult.success) {
+				const parseResult = userEditableStudies.safeParse(result);
+				if (!parseResult.success) {
 					//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation.
 					console.debug(
 						'[useGetUserEditableStudies]: Response from user editable studies endpoint failed validation',
-						userParseResult.error,
+						parseResult.error,
 					);
-					return defaultResponse;
+					throw new Error(`[useGetUserEditableStudies]: Failed to safeParse: ${parseResult.error}`);
 				}
-				return userParseResult.data;
+				return parseResult.data;
 			} catch (error) {
 				console.debug('[useGetUserEditableStudies]: Failed to parse response object', error);
-				return defaultResponse;
+				throw error;
 			}
 		},
 	});
