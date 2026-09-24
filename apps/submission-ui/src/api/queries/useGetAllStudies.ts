@@ -40,7 +40,7 @@ const useGetAllStudies = () => {
 			try {
 				const result = await response.json();
 
-				// Validate studies object
+				// Validate response object
 				const parseResult = allStudies.safeParse(result);
 				if (!parseResult.success) {
 					//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation.

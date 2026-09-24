@@ -263,9 +263,8 @@ export const extractAccessTokenFromHeader = (req: Request): string | undefined =
 export const extractAccessTokenFromSession = (req: Request): string | undefined => {
 	if (req.session && req.session.account && req.session.account.accessToken) {
 		return req.session.account.accessToken;
-	} else {
-		return;
 	}
+	return;
 };
 
 /**

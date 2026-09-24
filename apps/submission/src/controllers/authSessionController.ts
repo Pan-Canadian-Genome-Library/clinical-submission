@@ -182,7 +182,6 @@ const getUser = validateRequest({}, async (request, response) => {
 	}
 
 	const userSession = request.session?.user;
-	const { accessToken } = request.session?.account || {};
 
 	const output: { user?: PartialSessionState } = {
 		user: userSession
@@ -196,7 +195,6 @@ const getUser = validateRequest({}, async (request, response) => {
 					dataAdmin: userSession.dataAdmin,
 					groups: userSession.groups,
 					idpName: userSession.idpName,
-					...(accessToken ? { accessToken } : {}),
 				}
 			: undefined,
 	};

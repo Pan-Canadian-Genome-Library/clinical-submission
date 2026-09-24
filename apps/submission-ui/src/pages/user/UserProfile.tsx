@@ -38,7 +38,11 @@ const UserProfile = () => {
 		isLoading: refreshTokenLoading,
 		isError: refreshTokenError,
 	} = useGetRefreshToken();
-	const { data: userStudies, isLoading: userStudiesLoading, isError: userStudiesError } = useGetUserEditableStudies();
+	const {
+		data: userEditableStudies,
+		isLoading: userEditableStudiesLoading,
+		isError: userEditableStudiesError,
+	} = useGetUserEditableStudies();
 	const { data: allStudies, isLoading: allStudiesLoading, isError: allStudiesError } = useGetAllStudies();
 
 	const { refreshToken, refreshTokenIat } = refreshTokenResponse || {};
@@ -48,7 +52,7 @@ const UserProfile = () => {
 		i18n: { t },
 	} = useTranslation();
 
-	if (isLoading || userStudiesLoading || refreshTokenLoading || allStudiesLoading) {
+	if (isLoading || userEditableStudiesLoading || refreshTokenLoading || allStudiesLoading) {
 		return <Spinner label={t('common:user.loading')} />;
 	}
 
@@ -60,7 +64,14 @@ const UserProfile = () => {
 		);
 	}
 
-	if (userStudiesError || refreshTokenError || !refreshToken || !userStudies || allStudiesError || !allStudies) {
+	if (
+		allStudiesError ||
+		refreshTokenError ||
+		userEditableStudiesError ||
+		!allStudies ||
+		!refreshToken ||
+		!userEditableStudies
+	) {
 		return (
 			<div className="p-8">
 				<Text>{t('common:user.error')}</Text>
@@ -74,16 +85,16 @@ const UserProfile = () => {
 	const userEmails =
 		emails && emails.length > 0 ? emails.map((email) => email.address).join(', ') : t('common:user.noEmails');
 
-	// users are either data admins or data submitters
+	// users are either data administrators or data submitters
 	const userRole = dataAdmin ? t('common:user.roles.dataAdmin') : t('common:user.roles.dataSubmitter');
 
 	// get token expiry datetime & user's timezone
 	const tokenTimeToLive = Date.now() + (refreshTokenIat || 0);
-	const refreshTokenExpires = new Date(tokenTimeToLive)?.toLocaleString(t('common:dateLang'), {
+	const refreshTokenExpires = new Date(tokenTimeToLive)?.toLocaleString(t('common:localeCode'), {
 		dateStyle: 'short',
 		timeStyle: 'medium',
 	});
-	const userTimeZone = Intl.DateTimeFormat(t('common:dateLang'), { timeZoneName: 'short' })
+	const userTimeZone = Intl.DateTimeFormat(t('common:localeCode'), { timeZoneName: 'short' })
 		.formatToParts()
 		.find((part) => part.type === 'timeZoneName')?.value;
 
@@ -100,7 +111,7 @@ const UserProfile = () => {
 
 	// data admins: list all studies
 	// data submitters: list the user's editable studies
-	const studies = dataAdmin ? allStudies.map((study) => study.studyName) : userStudies;
+	const studies = dataAdmin ? allStudies.map((study) => study.studyName) : userEditableStudies;
 
 	return (
 		<PageLayout>

@@ -24,7 +24,7 @@ import { ServerError } from '@/types/server';
 import { refreshToken, type RefreshToken } from '@clinical-submission/validation';
 
 /**
- * Query hook to fetch the current user's token "time to live" from Submission API.
+ * Query hook to fetch the current user's token and its "time to live" from Submission API.
  */
 const useGetRefreshToken = () => {
 	return useQuery<RefreshToken, ServerError>({
@@ -40,7 +40,7 @@ const useGetRefreshToken = () => {
 			try {
 				const result = await response.json();
 
-				// Validate refresh token
+				// Validate response object
 				const parseResult = refreshToken.safeParse(result);
 				if (!parseResult.success) {
 					//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation.

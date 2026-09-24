@@ -28,12 +28,14 @@ const copiedStateDelayMs = 500;
 const copyTokenClick = async (textToCopy: string) => {
 	try {
 		await navigator.clipboard.writeText(textToCopy);
-		console.log('copied');
 	} catch (e) {
 		console.error(e);
 	}
 };
 
+/**
+ * React component for adding a button that allows the user to copy a provided string.
+ */
 const CopyButton = ({
 	copiedText,
 	copyText,

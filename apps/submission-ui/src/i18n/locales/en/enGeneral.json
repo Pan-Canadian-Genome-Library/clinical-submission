@@ -10,7 +10,7 @@
 	"spinner": "Loading...",
 	"pcglLogo": "PCGL Logo",
 	"cihrLogo": "CIHR Logo",
-	"dateLang": "en-CA",
+	"localeCode": "en-CA",
 	"breadcrumbs": {
 		"home": "Home",
 		"aria": "Breadcrumb",

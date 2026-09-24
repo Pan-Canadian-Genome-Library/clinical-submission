@@ -42,7 +42,7 @@ const useGetUserEditableStudies = () => {
 			try {
 				const result = await response.json();
 
-				// Validate user editable studies object
+				// Validate response object
 				const parseResult = userEditableStudies.safeParse(result);
 				if (!parseResult.success) {
 					//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation.
