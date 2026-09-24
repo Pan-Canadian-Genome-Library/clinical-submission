@@ -17,18 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import enForm from '@/i18n/locales/en/enForm.json';
-import enGeneral from '@/i18n/locales/en/enGeneral.json';
-import enHome from '@/i18n/locales/en/enHome.json';
-import enStudy from '@/i18n/locales/en/enStudy.json';
-import enUser from '@/i18n/locales/en/enUser.json';
+import { z } from 'zod';
 
-export const ENGLISH_LOCALE_DICTIONARY = {
-	...enForm,
-	...enGeneral,
-	...enHome,
-	...enStudy,
-	...enUser,
-} as const;
-
-export type I18N_LOCALE_DICTIONARY = typeof ENGLISH_LOCALE_DICTIONARY;
+export const allStudies = z.object({ studyName: z.string() }).array();
+export type AllStudies = z.infer<typeof allStudies>;

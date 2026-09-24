@@ -17,18 +17,13 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import enForm from '@/i18n/locales/en/enForm.json';
-import enGeneral from '@/i18n/locales/en/enGeneral.json';
-import enHome from '@/i18n/locales/en/enHome.json';
-import enStudy from '@/i18n/locales/en/enStudy.json';
-import enUser from '@/i18n/locales/en/enUser.json';
+import { z } from 'zod';
 
-export const ENGLISH_LOCALE_DICTIONARY = {
-	...enForm,
-	...enGeneral,
-	...enHome,
-	...enStudy,
-	...enUser,
-} as const;
+export const refreshToken = z.object({
+	refreshToken: z.string(),
+	refreshTokenIat: z.number().int(),
+});
+export type RefreshToken = z.infer<typeof refreshToken>;
 
-export type I18N_LOCALE_DICTIONARY = typeof ENGLISH_LOCALE_DICTIONARY;
+export const userEditableStudies = z.string().array();
+export type UserEditableStudies = z.infer<typeof userEditableStudies>;

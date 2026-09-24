@@ -10,10 +10,12 @@
 	"spinner": "Loading...",
 	"pcglLogo": "PCGL Logo",
 	"cihrLogo": "CIHR Logo",
+	"localeCode": "en-CA",
 	"breadcrumbs": {
 		"home": "Home",
 		"aria": "Breadcrumb",
-		"studyDetails": "Study Details"
+		"studyDetails": "Study Details",
+		"userProfile": "User Profile"
 	},
 	"footer": {
 		"supportedBy": "PCGL is supported by the Canadian Institutes of Health Research (CIHR)",
