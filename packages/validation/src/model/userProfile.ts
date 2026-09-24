@@ -25,7 +25,5 @@ export const refreshToken = z.object({
 });
 export type RefreshToken = z.infer<typeof refreshToken>;
 
-export const userEditableStudies = z.object({
-	userEditableStudies: z.string().array(),
-});
+export const userEditableStudies = z.string().array();
 export type UserEditableStudies = z.infer<typeof userEditableStudies>;

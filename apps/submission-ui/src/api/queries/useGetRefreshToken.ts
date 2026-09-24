@@ -26,14 +26,14 @@ import { refreshToken, type RefreshToken } from '@clinical-submission/validation
 /**
  * Query hook to fetch the current user's token "time to live" from Submission API.
  */
-const useGetRefreshToken = (token?: string) => {
+const useGetRefreshToken = () => {
 	return useQuery<RefreshToken, ServerError>({
 		queryKey: ['refreshToken'],
 		retry: 1,
 		queryFn: async () => {
 			const defaultResponse = { refreshToken: '', refreshTokenIat: 0 };
-			const response = await fetch(`/user/refresh-token`, { token });
 
+			const response = await fetch(`/user/refresh-token`);
 			if (!response.ok) {
 				console.debug(`[useGetRefreshToken]: Error fetching /user/refresh-token', response status ${response.status}`);
 				return defaultResponse;

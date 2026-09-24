@@ -21,21 +21,22 @@ import { useQuery } from '@tanstack/react-query';
 
 import { fetch } from '@/api/FetchClient';
 import { ServerError } from '@/types/server';
-import { allStudies } from '@clinical-submission/validation';
+import { allStudies, type AllStudies } from '@clinical-submission/validation';
 
 /**
  * Query hook to fetch all studies from Submission API.
  */
 const useGetAllStudies = () => {
-	return useQuery<string[], ServerError>({
+	return useQuery<AllStudies, ServerError>({
 		queryKey: ['allStudies'],
 		retry: 1,
 		queryFn: async () => {
-			const response = await fetch(`/study`);
+			const defaultResponse: AllStudies = [];
 
+			const response = await fetch(`/study`);
 			if (!response.ok) {
 				console.debug(`[useGetAllStudies]: Error fetching /study', response status ${response.status}`);
-				return [];
+				return defaultResponse;
 			}
 
 			try {
@@ -46,12 +47,12 @@ const useGetAllStudies = () => {
 				if (!userParseResult.success) {
 					//TODO: This should throw an alert if the response object returned from the api is successful but does not pass zod validation.
 					console.debug('[useGetAllStudies]: Response from studies endpoint failed validation', userParseResult.error);
-					return [];
+					return defaultResponse;
 				}
-				return userParseResult.data.map((study) => study.studyName);
+				return userParseResult.data;
 			} catch (error) {
 				console.debug('[useGetAllStudies]: Failed to parse response object', error);
-				return [];
+				return defaultResponse;
 			}
 		},
 	});

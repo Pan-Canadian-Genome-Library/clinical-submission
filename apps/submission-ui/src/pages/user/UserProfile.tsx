@@ -37,12 +37,8 @@ const UserProfile = () => {
 		data: refreshTokenResponse,
 		isLoading: refreshTokenLoading,
 		isError: refreshTokenError,
-	} = useGetRefreshToken(user?.accessToken);
-	const {
-		data: userStudies,
-		isLoading: userStudiesLoading,
-		isError: userStudiesError,
-	} = useGetUserEditableStudies(user?.accessToken);
+	} = useGetRefreshToken();
+	const { data: userStudies, isLoading: userStudiesLoading, isError: userStudiesError } = useGetUserEditableStudies();
 	const { data: allStudies, isLoading: allStudiesLoading, isError: allStudiesError } = useGetAllStudies();
 
 	const { refreshToken, refreshTokenIat } = refreshTokenResponse || {};
@@ -104,7 +100,7 @@ const UserProfile = () => {
 
 	// data admins: list all studies
 	// data submitters: list the user's editable studies
-	const studies = dataAdmin ? allStudies : userStudies;
+	const studies = dataAdmin ? allStudies.map((study) => study.studyName) : userStudies;
 
 	return (
 		<PageLayout>

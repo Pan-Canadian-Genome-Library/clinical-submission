@@ -23,7 +23,11 @@ import { logger } from '@/common/logger.js';
 import type { PCGLRequestWithUser, PCGLUserSessionResult } from '@/common/types/auth.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
-import { extractAccessTokenFromHeader, fetchUserData } from '@/external/pcglAuthZClient.js';
+import {
+	extractAccessTokenFromHeader,
+	extractAccessTokenFromSession,
+	fetchUserData,
+} from '@/external/pcglAuthZClient.js';
 
 /**
  * Middleware to handle authentication that returns PCGLUserSessionResult to req.user.
@@ -39,7 +43,7 @@ export const authMiddleware = ({ requireAdmin = false }: { requireAdmin?: boolea
 			if (!enabled) {
 				return next();
 			}
-			const token = extractAccessTokenFromHeader(req);
+			const token = extractAccessTokenFromSession(req) || extractAccessTokenFromHeader(req);
 
 			if (!token) {
 				throw new lyricProvider.utils.errors.Forbidden('Unauthorized: No access token provided');

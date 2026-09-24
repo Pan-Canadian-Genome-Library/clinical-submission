@@ -21,23 +21,24 @@ import { useQuery } from '@tanstack/react-query';
 
 import { fetch } from '@/api/FetchClient';
 import { ServerError } from '@/types/server';
-import { userEditableStudies } from '@clinical-submission/validation';
+import { userEditableStudies, type UserEditableStudies } from '@clinical-submission/validation';
 
 /**
  * Query hook to fetch the current user's editable studies from Submission API.
  */
-const useGetUserEditableStudies = (token?: string) => {
-	return useQuery<string[], ServerError>({
+const useGetUserEditableStudies = () => {
+	return useQuery<UserEditableStudies, ServerError>({
 		queryKey: ['userEditableStudies'],
 		retry: 1,
 		queryFn: async () => {
-			const response = await fetch(`/user/editable-studies`, { token });
+			const defaultResponse: UserEditableStudies = [];
 
+			const response = await fetch(`/user/editable-studies`);
 			if (!response.ok) {
 				console.debug(
 					`[useGetUserEditableStudies]: Error fetching /user/editable-studies', response status ${response.status}`,
 				);
-				return [];
+				return defaultResponse;
 			}
 
 			try {
@@ -51,12 +52,12 @@ const useGetUserEditableStudies = (token?: string) => {
 						'[useGetUserEditableStudies]: Response from user editable studies endpoint failed validation',
 						userParseResult.error,
 					);
-					return [];
+					return defaultResponse;
 				}
-				return userParseResult.data.userEditableStudies;
+				return userParseResult.data;
 			} catch (error) {
 				console.debug('[useGetUserEditableStudies]: Failed to parse response object', error);
-				return [];
+				return defaultResponse;
 			}
 		},
 	});

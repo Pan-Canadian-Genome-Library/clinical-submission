@@ -62,8 +62,7 @@ const getUserEditableStudies = async (req: Request, res: Response, next: NextFun
 			studyName && userEditableStudies.push(studyName);
 		}
 
-		const response = { userEditableStudies };
-		res.status(200).json(response);
+		res.status(200).json(userEditableStudies);
 	} catch (e) {
 		logger.error(e, 'Error in getUserEditableStudies');
 		next(e);

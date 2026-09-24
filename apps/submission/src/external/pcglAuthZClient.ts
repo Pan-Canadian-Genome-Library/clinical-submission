@@ -238,7 +238,7 @@ export const hasAllowedAccess = (study: string, action: ActionIDsValues, user?: 
 };
 
 /**
- *	Function that takes in request object, checks if theres an authorization header and returns its token
+ *	Function that takes in request object, checks if there's an authorization header and returns its token
  *  Only works with Bearer type authorization values
  *
  * @param req Request object
@@ -251,6 +251,21 @@ export const extractAccessTokenFromHeader = (req: Request): string | undefined =
 	}
 
 	return authHeader.replace('Bearer ', '').trim();
+};
+
+/**
+ *	Function that takes in request object, checks if there's a session with an access token, and returns the token.
+ *  Only works with requests from Submission UI, i.e. requests with a session.
+ *
+ * @param req Request object
+ * @returns Access token or undefined depending if the request includes a session.account.accesstoken
+ */
+export const extractAccessTokenFromSession = (req: Request): string | undefined => {
+	if (req.session && req.session.account && req.session.account.accessToken) {
+		return req.session.account.accessToken;
+	} else {
+		return;
+	}
 };
 
 /**
