@@ -119,7 +119,9 @@ const createStudyPropertiesBase = z
 type DiseaseRefineFields = Partial<
 	Pick<z.infer<typeof createStudyPropertiesBase>, 'duoPermission' | 'diseaseSpecificModifier'>
 >;
-
+/**
+ * Refer to README.md for more detailed scenarios for duo and disease rules
+ */
 const diseaseSuperRefine = (fields: DiseaseRefineFields, context: z.RefinementCtx) => {
 	const isDiseaseDUO = fields.duoPermission && checkIfDiseaseDUO(fields.duoPermission);
 
