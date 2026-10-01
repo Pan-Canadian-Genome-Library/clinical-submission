@@ -206,6 +206,8 @@ const studyService = (db: PostgresDb) => ({
 					collaborators: studyData.collaborators,
 					category_id: studyData.categoryId,
 					publication_links: studyData.publicationLinks,
+					duo_permission: studyData.duoPermission,
+					disease_specific_modifier: studyData.diseaseSpecificModifier,
 				})
 				.returning();
 

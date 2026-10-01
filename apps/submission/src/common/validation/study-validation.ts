@@ -136,7 +136,7 @@ const diseaseSuperRefine = (fields: DiseaseRefineFields, context: z.RefinementCt
 	if (isDiseaseDUO && (fields.diseaseSpecificModifier === undefined || fields.diseaseSpecificModifier.length === 0)) {
 		context.addIssue({
 			code: z.ZodIssueCode.custom,
-			message: '`diseaseSpecificModifier` requires an array of MONDO values if changing to disease DUO permission.',
+			message: '`diseaseSpecificModifier` requires an array of MONDO values.',
 			path: ['diseaseSpecificModifier'],
 		});
 	}
