@@ -30,7 +30,6 @@ export const studyContext = pcglSchema.enum('study_context', ['Clinical', 'Resea
 const STUDY_ID_PADDING = 4 as const;
 const STUDY_ID_PREFIX = 'PCGLST' as const;
 const STUDY_ID_SEQUENCE_NAME = 'study_id_seq' as const;
-const DEFAULT_DUO = 'DUO:00047'; // This is for existing studies after initial migration, users are forced to provide a valid DUO on study create.
 
 export const studyIdSequence = pcglSchema.sequence(STUDY_ID_SEQUENCE_NAME, {
 	startWith: 1,
@@ -60,8 +59,6 @@ export const study = pcglSchema.table(
 		lead_organizations: text().array().notNull(),
 		collaborators: text().array(),
 		publication_links: text().array(),
-		duo_permission: text().default(DEFAULT_DUO),
-		disease_specific_modifier: text().array(),
 		created_at: timestamp().notNull().defaultNow(),
 		updated_at: timestamp(),
 		category_id: integer().unique(),
