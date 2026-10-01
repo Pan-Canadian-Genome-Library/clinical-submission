@@ -32,6 +32,8 @@ export type StudyDTO = {
 	leadOrganizations: string[];
 	collaborators?: string[] | null;
 	publicationLinks?: string[] | null;
+	duoPermission: string;
+	diseaseSpecificModifier: string[];
 	createdAt: Date;
 	updatedAt?: Date | null;
 	categoryId?: number | null;
