@@ -19,6 +19,8 @@ components:
           - 'University Research Institute'
         fundingSources:
           - 'Cancer Institute, Grant #12345'
+        duoPermission: 'DUO:0000047'
+        diseaseSpecificModifier: []
 
     StudyMinimalFrench:
       summary: Required fields only in French
@@ -37,6 +39,8 @@ components:
           - 'Institut de recherche universitaire'
         fundingSources:
           - 'Institut du cancer, Subvention #12345'
+        duoPermission: 'DUO:0000047'
+        diseaseSpecificModifier: []
 
     StudyFullExample:
       summary: Complete example with all optional fields
@@ -69,6 +73,9 @@ components:
         publicationLinks:
           - 'https://example-link-1.com'
           - 'https://example-link-2.com'
+        duoPermission: 'DUO:0000007'
+        diseaseSpecificModifier:
+          - 'MONDO:0004992'
 
     # Study Translation API Examples
     StudyTranslationMinimalEnglish:
