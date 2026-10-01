@@ -44,6 +44,8 @@ const convertFromRecordToStudyDTO = (study: StudyRecord): StudyDTO => {
 		collaborators: study.collaborators,
 		publicationLinks: study.publication_links,
 		defaultTranslation: study.default_translation,
+		duoPermission: study.duo_permission,
+		diseaseSpecificModifier: study.disease_specific_modifier,
 		createdAt: study.created_at,
 		updatedAt: study.updated_at,
 		categoryId: study.category_id,

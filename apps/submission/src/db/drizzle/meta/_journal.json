@@ -113,6 +113,13 @@
       "when": 1779199615650,
       "tag": "0015_study_make_dacId_nullable",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1790878143125,
+      "tag": "0016_add_duo_disease_fields",
+      "breakpoints": true
     }
   ]
 }
