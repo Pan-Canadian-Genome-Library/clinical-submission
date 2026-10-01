@@ -282,6 +282,8 @@ const studyService = (db: PostgresDb) => ({
 					publication_links: studyData.publicationLinks,
 					category_id: studyData.categoryId,
 					default_translation: studyData.defaultTranslation,
+					duo_permission: studyData.duoPermission,
+					disease_specific_modifier: studyData.diseaseSpecificModifier,
 					updated_at: sql`NOW()`,
 				})
 				.where(eq(study.study_id, studyId))
