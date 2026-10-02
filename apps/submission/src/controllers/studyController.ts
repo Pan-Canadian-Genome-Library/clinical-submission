@@ -49,7 +49,15 @@ import type { PCGLAuthZStudyAuthorizationRequest } from '../common/validation/au
  * @param accessToken - Access token used to authenticate with AuthZ
  * @throws ServiceUnavailable if the AuthZ read or write fails
  */
-const syncAuthzStudyDac = async (studyId: string, dacId: string, accessToken: string) => {
+const syncAuthzStudyDac = async ({
+	studyId,
+	dacId,
+	accessToken,
+}: {
+	studyId: string;
+	dacId?: string | null;
+	accessToken: string;
+}) => {
 	try {
 		const authzStudy = await getAuthzStudyById(studyId, accessToken);
 
@@ -59,7 +67,7 @@ const syncAuthzStudyDac = async (studyId: string, dacId: string, accessToken: st
 				data_submitters: authzStudy?.data_submitters || [],
 				study_id: studyId,
 				team_members: authzStudy?.team_members || [],
-				date_created: authzStudy?.date_created,
+				creation_date: authzStudy?.creation_date,
 			};
 
 			await createAuthzStudy(authzStudyData, accessToken);
@@ -148,7 +156,11 @@ export const createNewStudy = validateRequest(createStudy, async (req, res, next
 				throw new lyricProvider.utils.errors.BadRequest(`Unable to create study with provided data.`);
 			}
 
-			await syncAuthzStudyDac(results.studyId, studyData.dacId || '', accessToken);
+			await syncAuthzStudyDac({
+				studyId: results.studyId,
+				dacId: studyData.dacId,
+				accessToken,
+			});
 
 			return results;
 		});
@@ -280,7 +292,7 @@ export const addDacIdToStudy = validateRequest(dacToStudy, async (req, res, next
 
 		const updatedStudy = await db.transaction(async (transaction) => {
 			const results = await studyRepo.updateStudyDacId({ studyId, dacId }, transaction);
-			await syncAuthzStudyDac(studyId, dacId, accessToken);
+			await syncAuthzStudyDac({ studyId, dacId, accessToken });
 
 			return results;
 		});

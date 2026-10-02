@@ -60,15 +60,15 @@ export const authZUserInfo = zod.object({
 export type PCGLAuthZUserInfoResponse = zod.infer<typeof authZUserInfo>;
 
 export const authZStudyAuthorizationResponse = zod.object({
-	dac_id: zod.object({}).or(zod.string()),
+	dac_id: zod.string().optional().nullable(),
 	data_submitters: zod.array(zod.string()),
-	date_created: zod.string(),
+	creation_date: zod.string(),
 	study_id: zod.string(),
 	team_members: zod.array(zod.string()),
 });
 export type PCGLAuthZStudyAuthorizationResponse = zod.infer<typeof authZStudyAuthorizationResponse>;
 
 export const authzStudyAuthorizationRequest = authZStudyAuthorizationResponse.extend({
-	date_created: authZStudyAuthorizationResponse.shape.date_created.optional(),
+	creation_date: authZStudyAuthorizationResponse.shape.creation_date.optional(),
 });
 export type PCGLAuthZStudyAuthorizationRequest = zod.infer<typeof authzStudyAuthorizationRequest>;
