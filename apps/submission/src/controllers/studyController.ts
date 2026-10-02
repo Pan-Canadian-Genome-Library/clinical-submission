@@ -40,10 +40,13 @@ import { studyService } from '@/service/studyService.js';
 import type { PCGLAuthZStudyAuthorizationRequest } from '../common/validation/authz-validation.js';
 
 /**
- * Ensures the AuthZ service's record of a study's DAC matches the given dacId, creating/updating
- * the AuthZ study record if it doesn't. Callers should run this inside the same DB transaction as
- * their local write so that a sync failure rolls back the local change instead of leaving the two
- * systems inconsistent.
+ * Synchronizes a study's DAC assignment with its record in the AuthZ service.
+ *
+ * Call this after creating a study or changing its DAC assignment. It creates or updates the AuthZ
+ * study record only when the record is missing or its DAC differs, and preserves existing team
+ * members and data submitters when creating the record. Run it inside the same database transaction
+ * as the local write so a sync failure rolls back the local change instead of leaving the systems
+ * inconsistent.
  * @param studyId - ID of the study to sync
  * @param dacId - DAC ID that should be associated with the study in AuthZ
  * @param accessToken - Access token used to authenticate with AuthZ
