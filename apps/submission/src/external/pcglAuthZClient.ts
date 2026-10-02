@@ -190,28 +190,35 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
  * @returns User information
  */
 export const getUserInformation = async (accessToken: string): Promise<PCGLAuthZUserInfoResponse> => {
+	let response: Response;
 	try {
-		const response = await fetchAuthZResource('/user/me', accessToken);
-
-		if (response.status === 204) {
-			// A "204 No content" response is returned when the user is not registered.
-			throw new Error('Unable to retrieve user information from the PCGL AuthZ service.');
-		}
-
-		const res = await response.json();
-
-		const validatedAuthZData = authZUserInfo.safeParse(res);
-
-		if (!validatedAuthZData.success) {
-			logger.error(`[AUTHZ]: AuthZ service returned unexpected, or malformed data.` + validatedAuthZData.error);
-			throw new Error('Unable to retrieve user information from the PCGL AuthZ service.');
-		}
-
-		return validatedAuthZData.data;
+		response = await fetchAuthZResource('/user/me', accessToken);
 	} catch (error) {
-		logger.error(`[AUTHZ]: Unexpected error while getting user info from the AuthZ service.` + error);
+		logger.error(error, `[AUTHZ]: Failed to request user info from the AuthZ service.`);
 		throw new Error(`Error contacting the PCGL Authorization Service.`);
 	}
+
+	if (response.status === 204) {
+		// A "204 No content" response is returned when the user is not registered.
+		throw new Error('Unable to retrieve user information from the PCGL AuthZ service.');
+	}
+
+	let res: unknown;
+	try {
+		res = await response.json();
+	} catch (error) {
+		logger.error(error, `[AUTHZ]: Failed to parse user info response from the AuthZ service.`);
+		throw new Error('Unable to retrieve user information from the PCGL AuthZ service.');
+	}
+
+	const validatedAuthZData = authZUserInfo.safeParse(res);
+
+	if (!validatedAuthZData.success) {
+		logger.error(validatedAuthZData.error, `[AUTHZ]: AuthZ service returned unexpected, or malformed data.`);
+		throw new Error('Unable to retrieve user information from the PCGL AuthZ service.');
+	}
+
+	return validatedAuthZData.data;
 };
 
 /**
