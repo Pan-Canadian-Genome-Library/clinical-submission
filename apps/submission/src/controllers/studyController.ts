@@ -17,6 +17,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { extractAccessTokenFromHeader } from '@/auth/index.js';
 import {
 	createStudy,
 	createStudyTranslation,
@@ -27,11 +28,7 @@ import {
 } from '@/common/validation/study-validation.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
-import {
-	createStudy as createAuthzStudy,
-	extractAccessTokenFromHeader,
-	getStudyById as getAuthzStudyById,
-} from '@/external/pcglAuthZClient.js';
+import { createStudy as createAuthzStudy, getStudyById as getAuthzStudyById } from '@/external/pcglAuthZClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import dacService from '@/service/dacService.js';
 import { studyService } from '@/service/studyService.js';

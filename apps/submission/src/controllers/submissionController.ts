@@ -25,6 +25,7 @@ import {
 	SUBMISSION_ACTION_TYPE,
 } from '@overture-stack/lyric';
 
+import { hasAllowedAccess } from '@/auth/index.js';
 import { logger } from '@/common/logger.js';
 import {
 	deleteEntityRequestSchema,
@@ -34,7 +35,6 @@ import {
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
-import { hasAllowedAccess } from '@/external/pcglAuthZClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import { studyService } from '@/service/studyService.js';
 import { prevalidateEditFile, prevalidateNewDataFile } from '@/submission/fileValidation.js';
