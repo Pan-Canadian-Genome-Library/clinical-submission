@@ -22,7 +22,12 @@ import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
 import { ActionIDs, type ActionIDsValues, type PCGLUserSession, PCGLUserSessionResult } from '@/common/types/auth.js';
-import { Groups, ServiceTokenResponse, userDataResponseSchema } from '@/common/validation/auth-validation.js';
+import {
+	AuthZErrorResponse,
+	Groups,
+	ServiceTokenResponse,
+	userDataResponseSchema,
+} from '@/common/validation/auth-validation.js';
 import { authZUserInfo, PCGLAuthZUserInfoResponse } from '@/common/validation/authz-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
@@ -42,7 +47,11 @@ let pendingRefreshAuthZServiceTokenRequest: Promise<void> | undefined = undefine
 /**
  * Fetches a new AuthZ service token and stores it in `serviceToken`. Calls made while a
  * request is in progress wait for that request instead of starting another.
- * @throws InternalServerError when AuthZ cannot be reached or returns a malformed token response.
+ * @throws InternalServerError when:
+ * - AuthZ cannot be reached
+ * - AuthZ responds with a status other than 200
+ * - AuthZ rejects the configured service UUID for the service ID
+ * - AuthZ responds without a token
  */
 const refreshAuthZServiceToken = async (): Promise<void> => {
 	// If request is in progress, return that one.
@@ -51,13 +60,15 @@ const refreshAuthZServiceToken = async (): Promise<void> => {
 	}
 
 	// Actual request to AuthZ for the Service Token
-	const requestServiceToken = async () => {
+	const requestServiceToken = async (): Promise<void> => {
 		const { AUTHZ_ENDPOINT } = authConfig;
+		const errorMessage = 'System Error: Something went wrong connecting to authorization service.';
 
+		const url = urlJoin(AUTHZ_ENDPOINT, `/service/${authConfig.service.id}/verify`);
+
+		let response: Response;
 		try {
-			const url = urlJoin(AUTHZ_ENDPOINT, `/service/${authConfig.service.id}/verify`);
-
-			const response = await fetch(url, {
+			response = await fetch(url, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -66,26 +77,37 @@ const refreshAuthZServiceToken = async (): Promise<void> => {
 					service_uuid: authConfig.service.uuid,
 				}),
 			});
-			if (!response.ok) {
-				throw new lyricProvider.utils.errors.InternalServerError(
-					`Failed to fetch service token with status ${response.status}`,
-				);
-			}
-			const tokenResponse = await response.json();
-
-			const validatedAuthZData = ServiceTokenResponse.safeParse(tokenResponse);
-
-			if (!validatedAuthZData.success) {
-				throw new Error(`Malformed token response`);
-			}
-
-			serviceToken = validatedAuthZData.data.token;
 		} catch (error) {
 			logger.error(error, `[AUTHZ]: Something went wrong fetching authz service token.`);
-			throw new lyricProvider.utils.errors.InternalServerError(
-				`Bad request: Something went wrong fetching from authz service`,
-			);
+			throw new lyricProvider.utils.errors.InternalServerError(errorMessage);
 		}
+
+		// Any status other than 200 is a failure, including 204 which AuthZ can return without a token.
+		if (response.status !== 200) {
+			const responseText = await response.text().catch(() => '');
+			logger.error(`[AUTHZ]: Service token request failed with status ${response.status}. ${responseText}`);
+			throw new lyricProvider.utils.errors.InternalServerError(errorMessage);
+		}
+
+		const responseBody: unknown = await response.json().catch(() => undefined);
+
+		const tokenResponse = ServiceTokenResponse.safeParse(responseBody);
+		if (tokenResponse.success) {
+			serviceToken = tokenResponse.data.token;
+			return;
+		}
+
+		// AuthZ responds with status 200 and an error body when the service UUID does not match the UUID
+		// registered for the service ID.
+		const errorResponse = AuthZErrorResponse.safeParse(responseBody);
+		if (errorResponse.success) {
+			logger.error(
+				`[AUTHZ]: AuthZ rejected the service token request: ${errorResponse.data.error}. Check that AUTHZ_SERVICE_UUID matches the UUID registered for AUTHZ_SERVICE_ID "${authConfig.service.id}".`,
+			);
+		} else {
+			logger.error(`[AUTHZ]: Malformed service token response.`);
+		}
+		throw new lyricProvider.utils.errors.InternalServerError(errorMessage);
 	};
 
 	pendingRefreshAuthZServiceTokenRequest = requestServiceToken().finally(() => {

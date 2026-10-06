@@ -99,3 +99,11 @@ export const ServiceTokenResponse = z.object({
 	token: z.string(),
 });
 export type ServiceTokenResponse = z.infer<typeof ServiceTokenResponse>;
+
+/**
+ * Error body returned by AuthZ, e.g. `{ "error": "Service UUID does not match service name" }`.
+ */
+export const AuthZErrorResponse = z.object({
+	error: z.string(),
+});
+export type AuthZErrorResponse = z.infer<typeof AuthZErrorResponse>;
