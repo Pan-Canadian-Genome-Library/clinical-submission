@@ -35,43 +35,63 @@ import { lyricProvider } from '@/core/provider.js';
 let serviceToken: string | undefined = undefined;
 
 /**
- * Function to fetch AuthZ serviceToken to append to header requirement X-Service-Token
+ * Service token request to AuthZ currently in progress, or undefined when none is running.
  */
-const refreshAuthZServiceToken = async () => {
-	const { AUTHZ_ENDPOINT } = authConfig;
+let pendingRefreshAuthZServiceTokenRequest: Promise<void> | undefined = undefined;
 
-	try {
-		const url = urlJoin(AUTHZ_ENDPOINT, `/service/${authConfig.service.id}/verify`);
+/**
+ * Fetches a new AuthZ service token and stores it in `serviceToken`. Calls made while a
+ * request is in progress wait for that request instead of starting another.
+ * @throws InternalServerError when AuthZ cannot be reached or returns a malformed token response.
+ */
+const refreshAuthZServiceToken = async (): Promise<void> => {
+	// If request is in progress, return that one.
+	if (pendingRefreshAuthZServiceTokenRequest) {
+		return pendingRefreshAuthZServiceTokenRequest;
+	}
 
-		const response = await fetch(url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				service_uuid: authConfig.service.uuid,
-			}),
-		});
-		if (!response.ok) {
+	// Actual request to AuthZ for the Service Token
+	const requestServiceToken = async () => {
+		const { AUTHZ_ENDPOINT } = authConfig;
+
+		try {
+			const url = urlJoin(AUTHZ_ENDPOINT, `/service/${authConfig.service.id}/verify`);
+
+			const response = await fetch(url, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					service_uuid: authConfig.service.uuid,
+				}),
+			});
+			if (!response.ok) {
+				throw new lyricProvider.utils.errors.InternalServerError(
+					`Failed to fetch service token with status ${response.status}`,
+				);
+			}
+			const tokenResponse = await response.json();
+
+			const validatedAuthZData = ServiceTokenResponse.safeParse(tokenResponse);
+
+			if (!validatedAuthZData.success) {
+				throw new Error(`Malformed token response`);
+			}
+
+			serviceToken = validatedAuthZData.data.token;
+		} catch (error) {
+			logger.error(error, `[AUTHZ]: Something went wrong fetching authz service token.`);
 			throw new lyricProvider.utils.errors.InternalServerError(
-				`Failed to fetch service token with status ${response.status}`,
+				`Bad request: Something went wrong fetching from authz service`,
 			);
 		}
-		const tokenResponse = await response.json();
+	};
 
-		const validatedAuthZData = ServiceTokenResponse.safeParse(tokenResponse);
-
-		if (!validatedAuthZData.success) {
-			throw new Error(`Malformed token response`);
-		}
-
-		serviceToken = validatedAuthZData.data.token;
-	} catch (error) {
-		logger.error(error, `[AUTHZ]: Something went wrong fetching authz service token.`);
-		throw new lyricProvider.utils.errors.InternalServerError(
-			`Bad request: Something went wrong fetching from authz service`,
-		);
-	}
+	pendingRefreshAuthZServiceTokenRequest = requestServiceToken().finally(() => {
+		pendingRefreshAuthZServiceTokenRequest = undefined;
+	});
+	return pendingRefreshAuthZServiceTokenRequest;
 };
 
 /**
@@ -110,6 +130,10 @@ const fetchAuthZResource = async (resource: string, token: string, options?: Req
 		await refreshAuthZServiceToken();
 	}
 
+	// store the current token so that if a failure happens we can check if a concurrent request replaces it
+	const tokenUsed = serviceToken;
+
+	// Make the actual desired request
 	const firstResponse = await _fetchFromAuthZ();
 	// CASE-1: Bad bearer token
 	if (!firstResponse.ok && firstResponse.status === 401) {
@@ -120,7 +144,10 @@ const fetchAuthZResource = async (resource: string, token: string, options?: Req
 	// CASE-2: Bad serviceToken
 	// Trigger refresh service token and recall with the new token
 	if (!firstResponse.ok && firstResponse.status === 403) {
-		await refreshAuthZServiceToken();
+		// Check if the service token was replaced while the first request was in flight
+		if (serviceToken === tokenUsed) {
+			await refreshAuthZServiceToken();
+		}
 		return await _fetchFromAuthZ();
 	}
 
