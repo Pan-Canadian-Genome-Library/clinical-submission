@@ -842,6 +842,16 @@ components:
       type: http
       scheme: bearer
       bearerFormat: Access Token
+    serviceId:
+      type: apiKey
+      in: header
+      name: X-Service-ID
+      description: AuthZ service ID of the requesting service. Used together with `X-Service-Token` for service-to-service requests.
+    serviceToken:
+      type: apiKey
+      in: header
+      name: X-Service-Token
+      description: Service token issued by AuthZ to the requesting service. Used together with `X-Service-ID` for service-to-service requests.
 
 security:
   - bearerAuth: []

@@ -25,7 +25,7 @@ import {
 	type OIDCTokenResponse,
 	oidcTokenResponseSchema,
 	oidcUserInfoResponseSchema,
-} from '@/common/validation/auth-validation.js';
+} from '@/common/validation/oidc-validation.js';
 import { type AuthConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 

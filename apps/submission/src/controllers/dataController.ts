@@ -25,12 +25,12 @@ import {
 	VIEW_TYPE,
 } from '@overture-stack/lyric';
 
+import { hasAllowedAccess, isAuthorizedService } from '@/auth/index.js';
 import { asArray, convertToViewType } from '@/common/formatUtils.js';
 import { getDataById } from '@/common/validation/data-validation.js';
 import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
-import { hasAllowedAccess } from '@/external/pcglAuthZClient.js';
 import { generateHash } from '@/internal/id-manager/utils.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import iimService from '@/service/idManagerService.js';
@@ -106,7 +106,7 @@ const getCategoryById = validateRequest(
 				throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${category.id}".`);
 			}
 
-			if (!hasAllowedAccess(studyByCategory.study_id, 'READ', user)) {
+			if (!(hasAllowedAccess(studyByCategory.study_id, 'READ', user) || isAuthorizedService(req.auth))) {
 				throw new lyricProvider.utils.errors.Forbidden(
 					'User is not authorized to read submitted data for this organization',
 				);
@@ -163,7 +163,7 @@ const getCategoryBySystemId = validateRequest(
 				throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${category.id}".`);
 			}
 
-			if (!hasAllowedAccess(studyByCategory.study_id, 'READ', user)) {
+			if (!(hasAllowedAccess(studyByCategory.study_id, 'READ', user) || isAuthorizedService(req.auth))) {
 				throw new lyricProvider.utils.errors.Forbidden(
 					'User is not authorized to read submitted data for this organization',
 				);
@@ -227,7 +227,7 @@ const getCategoryByOrganization = validateRequest(
 				);
 			}
 
-			if (!hasAllowedAccess(organization, 'READ', user)) {
+			if (!(hasAllowedAccess(organization, 'READ', user) || isAuthorizedService(req.auth))) {
 				throw new lyricProvider.utils.errors.Forbidden(
 					'User is not authorized to read submitted data for this organization',
 				);
@@ -303,7 +303,7 @@ const getSubmittedDataByQuery = validateRequest(
 				);
 			}
 
-			if (!hasAllowedAccess(organization, 'READ', user)) {
+			if (!(hasAllowedAccess(organization, 'READ', user) || isAuthorizedService(req.auth))) {
 				throw new lyricProvider.utils.errors.Forbidden(
 					'User is not authorized to read submitted data for this organization',
 				);

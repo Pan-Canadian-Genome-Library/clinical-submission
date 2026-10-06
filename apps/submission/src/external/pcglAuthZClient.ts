@@ -17,18 +17,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { Request } from 'express';
 import urlJoin from 'url-join';
 
+import { ServiceAuthHeaders } from '@/auth/serviceAuth.js';
+import type { PCGLUserAuthorizationResult } from '@/auth/types.js';
 import { logger } from '@/common/logger.js';
-import { ActionIDs, type ActionIDsValues, type PCGLUserSession, PCGLUserSessionResult } from '@/common/types/auth.js';
 import {
 	AuthZErrorResponse,
+	authZUserInfo,
 	Groups,
+	PCGLAuthZUserInfoResponse,
 	ServiceTokenResponse,
-	userDataResponseSchema,
-} from '@/common/validation/auth-validation.js';
-import { authZUserInfo, PCGLAuthZUserInfoResponse } from '@/common/validation/authz-validation.js';
+	ServiceTokenVerificationResponse,
+} from '@/common/validation/authz-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 
@@ -177,11 +178,11 @@ const fetchAuthZResource = async (resource: string, token: string, options?: Req
 };
 
 /**
- *	Fetches user data from authz. This user information is then return as a user object PCGLUserSessionResult
+ *	Fetches user data from authz. This user information is then return as a user object PCGLUserAuthorizationResult
  * @param token Access token from Authz
- * @returns validated object of UserDataResponse
+ * @returns the user mapped from the AuthZ `/user/me` response
  */
-export const fetchUserData = async (token: string): Promise<PCGLUserSessionResult> => {
+export const fetchUserData = async (token: string): Promise<PCGLUserAuthorizationResult> => {
 	const response = await fetchAuthZResource(`/user/me`, token);
 
 	if (!response.ok) {
@@ -207,7 +208,7 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 
 	const result = await response.json();
 
-	const responseValidation = userDataResponseSchema.safeParse(result);
+	const responseValidation = authZUserInfo.safeParse(result);
 
 	if (!responseValidation.success) {
 		logger.error(`[AUTHZ]: Malformed response object from AUTHZ. ${responseValidation.error}`);
@@ -215,12 +216,12 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 		throw new lyricProvider.utils.errors.ServiceUnavailable('User object response has unexpected format');
 	}
 
-	const userTokenInfo: PCGLUserSessionResult = {
+	const userTokenInfo: PCGLUserAuthorizationResult = {
 		user: {
 			username: `${responseValidation.data.userinfo.pcgl_id}`,
 			isAdmin: responseValidation.data.userinfo.data_admin,
-			allowedWriteOrganizations: responseValidation.data.study_authorizations.editable_studies,
-			allowedReadOrganizations: responseValidation.data.study_authorizations.readable_studies,
+			allowedWriteOrganizations: responseValidation.data.study_authorizations.editable_studies ?? [],
+			allowedReadOrganizations: responseValidation.data.study_authorizations.readable_studies ?? [],
 			groups: extractUserGroups({ groups: responseValidation.data.groups }),
 		},
 	};
@@ -259,55 +260,65 @@ export const getUserInformation = async (accessToken: string): Promise<PCGLAuthZ
 };
 
 /**
- * Checks if the user has allowed access to the given study based on their PCGL user session.
- * @param study Study user is trying to get access to
- * @param userStudies An array of user studies
- * @returns True or false depending if the user has access to the study
+ * Asks AuthZ whether a service token was issued to the service with the given service ID,
+ * using `GET /service/{service_id}/verify`.
+ *
+ * Returns:
+ * - true when AuthZ confirms the token belongs to the service
+ * - false when the token does not belong to the service, or AuthZ does not recognize the service ID
+ *
+ * @throws InternalServerError when:
+ * - AuthZ cannot be reached
+ * - AuthZ responds with a status other than 200 or 403
+ * - AuthZ responds with a malformed body
  */
-export const hasAllowedAccess = (study: string, action: ActionIDsValues, user?: PCGLUserSession): boolean => {
-	const { enabled } = authConfig;
+export const verifyServiceToken = async (serviceId: string, serviceToken: string): Promise<boolean> => {
+	const { AUTHZ_ENDPOINT } = authConfig;
+	const errorMessage = 'System Error: Something went wrong connecting to authorization service.';
 
-	// If auth is disabled or if the user is an admin, skip all auth steps
-	if (!enabled || user?.isAdmin) {
-		return true;
+	const url = urlJoin(AUTHZ_ENDPOINT, `/service/${encodeURIComponent(serviceId)}/verify`);
+
+	let response: Response;
+	try {
+		response = await fetch(url, {
+			method: 'GET',
+			headers: {
+				[ServiceAuthHeaders.SERVICE_TOKEN]: serviceToken,
+			},
+		});
+	} catch (error) {
+		logger.error(error, `[AUTHZ]: Something went wrong verifying service token.`);
+		throw new lyricProvider.utils.errors.InternalServerError(errorMessage);
 	}
 
-	if (user === undefined) {
+	// AuthZ responds with 403 when it cannot find the service ID in its service store.
+	if (response.status === 403) {
+		const responseText = await response.text().catch(() => '');
+		logger.warn(`[AUTHZ]: AuthZ could not verify a token for service "${serviceId}". ${responseText}`);
 		return false;
 	}
 
-	switch (action) {
-		case ActionIDs.READ:
-			return user.allowedReadOrganizations.some((currentStudy) => currentStudy === study);
-		case ActionIDs.WRITE:
-			return user.allowedWriteOrganizations.some((currentStudy) => currentStudy === study);
-		default:
-			return user.allowedWriteOrganizations.some((currentStudy) => currentStudy === study);
+	if (response.status !== 200) {
+		const responseText = await response.text().catch(() => '');
+		logger.error(`[AUTHZ]: Service token verification failed with status ${response.status}. ${responseText}`);
+		throw new lyricProvider.utils.errors.InternalServerError(errorMessage);
 	}
+
+	const responseBody: unknown = await response.json().catch(() => undefined);
+	const verificationResponse = ServiceTokenVerificationResponse.safeParse(responseBody);
+	if (!verificationResponse.success) {
+		logger.error(`[AUTHZ]: Malformed service token verification response.`);
+		throw new lyricProvider.utils.errors.InternalServerError(errorMessage);
+	}
+
+	return verificationResponse.data.result;
 };
 
 /**
- *	Function that takes in request object, checks if theres an authorization header and returns its token
- *  Only works with Bearer type authorization values
- *
- * @param req Request object
- * @returns Access token or undefined depending if authorization header exists or authorization type is NOT Bearer
- */
-export const extractAccessTokenFromHeader = (req: Request): string | undefined => {
-	const authHeader = req.headers['authorization'];
-	if (!authHeader || !authHeader.startsWith('Bearer ')) {
-		return;
-	}
-
-	return authHeader.replace('Bearer ', '').trim();
-};
-
-/**
- * @param groups List of groups user belongs to
- * @returns array of strings with names of the groups
+ * Returns the names of the groups the user belongs to, or an empty array when AuthZ returned no groups.
  */
 const extractUserGroups = ({ groups }: Groups): string[] => {
-	return groups.map((currentGroup) => currentGroup.name);
+	return (groups ?? []).map((currentGroup) => currentGroup.name);
 };
 
 export const getStudyById = async (studyId: string, token: string) => {

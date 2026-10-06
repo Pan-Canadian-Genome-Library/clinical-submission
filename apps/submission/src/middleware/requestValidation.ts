@@ -22,7 +22,7 @@ import { type ParamsDictionary, RequestHandler } from 'express-serve-static-core
 import type { ParsedQs } from 'qs';
 import { ZodError, ZodSchema } from 'zod';
 
-import type { PCGLUserSession } from '@/common/types/auth.js';
+import type { PCGLUserAuthorization } from '@/auth/index.js';
 import { lyricProvider } from '@/core/provider.js';
 
 export declare type RequestValidation<TBody, TQuery, TParams> = {
@@ -36,7 +36,7 @@ type RequestWithUser<
 	TBody = unknown,
 	TQuery extends ParsedQs = ParsedQs,
 > = Request<TParams, unknown, TBody, TQuery> & {
-	user?: PCGLUserSession;
+	user?: PCGLUserAuthorization;
 };
 
 /**
