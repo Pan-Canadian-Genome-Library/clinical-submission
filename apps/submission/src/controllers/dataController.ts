@@ -150,10 +150,8 @@ const getCategoryById = validateRequest(
 				);
 			}
 
-			const restrict = shouldRestrictStudyData(
-				hasReadAccess,
-				hasAllowedAccess(studyByCategory.study_id, 'WRITE', user),
-			);
+			const hasWriteAccess = hasAllowedAccess(studyByCategory.study_id, 'WRITE', user);
+			const restrict = shouldRestrictStudyData(hasReadAccess, hasWriteAccess);
 
 			const entityName = await resolveRestrictedEntityNames(restrict, category.id, asArray(req.query.entityName || []));
 
@@ -237,10 +235,8 @@ const getCategoryBySystemId = validateRequest(
 				return;
 			}
 
-			const restrict = shouldRestrictStudyData(
-				hasReadAccess,
-				hasAllowedAccess(studyByCategory.study_id, 'WRITE', user),
-			);
+			const hasWriteAccess = hasAllowedAccess(studyByCategory.study_id, 'WRITE', user);
+			const restrict = shouldRestrictStudyData(hasReadAccess, hasWriteAccess);
 
 			// getSubmittedDataBySystemId has no entity-name filter to apply before the read, since
 			// it fetches a single record by its system ID. Deny after the fact rather than leak it;
@@ -302,7 +298,8 @@ const getCategoryByOrganization = validateRequest(
 				);
 			}
 
-			const restrict = shouldRestrictStudyData(hasReadAccess, hasAllowedAccess(organization, 'WRITE', user));
+			const hasWriteAccess = hasAllowedAccess(organization, 'WRITE', user);
+			const restrict = shouldRestrictStudyData(hasReadAccess, hasWriteAccess);
 
 			const entityName = await resolveRestrictedEntityNames(restrict, category.id, asArray(req.query.entityName || []));
 
@@ -391,7 +388,8 @@ const getSubmittedDataByQuery = validateRequest(
 				);
 			}
 
-			const restrict = shouldRestrictStudyData(hasReadAccess, hasAllowedAccess(organization, 'WRITE', user));
+			const hasWriteAccess = hasAllowedAccess(organization, 'WRITE', user);
+			const restrict = shouldRestrictStudyData(hasReadAccess, hasWriteAccess);
 
 			const entityName = await resolveRestrictedEntityNames(restrict, category.id, asArray(req.query.entityName || []));
 
