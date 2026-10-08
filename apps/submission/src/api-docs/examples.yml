@@ -19,7 +19,7 @@ components:
           - 'University Research Institute'
         fundingSources:
           - 'Cancer Institute, Grant #12345'
-        duoPermission: 'DUO:0000047'
+        duoPermission: 'DUO:0000042'
         diseaseSpecificModifier: []
 
     StudyMinimalFrench:
@@ -39,7 +39,7 @@ components:
           - 'Institut de recherche universitaire'
         fundingSources:
           - 'Institut du cancer, Subvention #12345'
-        duoPermission: 'DUO:0000047'
+        duoPermission: 'DUO:0000042'
         diseaseSpecificModifier: []
 
     StudyFullExample:
