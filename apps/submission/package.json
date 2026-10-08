@@ -8,7 +8,7 @@
 	"description": "",
 	"main": "dist/index.js",
 	"scripts": {
-		"db:generate": "NODE_OPTIONS='--import tsx' drizzle-kit generate",
+		"db:generate": "NODE_OPTIONS='--import tsx' drizzle-kit generate --name=add_duo_disease_study",
 		"db:migrate": "NODE_OPTIONS='--import tsx' drizzle-kit migrate",
 		"studio": "NODE_OPTIONS='--import tsx' drizzle-kit studio",
 		"\n==================  Build  ==================": "",

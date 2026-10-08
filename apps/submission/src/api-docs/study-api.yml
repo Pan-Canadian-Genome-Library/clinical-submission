@@ -100,6 +100,14 @@
                 type: string
                 enum: ['en_ca', 'fr_ca']
                 description: The default language for the study translation (English Canada or French Canada).
+              duoPermission:
+                type: string
+                description: Data Use Ontology (DUO) permission code that defines the allowed uses of the study data (e.g. GRU, HMB, DS).
+              diseaseSpecificModifier:
+                type: array
+                items:
+                  type: string
+                description: List of disease-specific DUO modifier codes that further restrict data use to particular diseases or conditions.
           examples:
             minimal:
               $ref: '#/components/examples/StudyMinimal'
@@ -206,6 +214,14 @@
                 type: string
                 enum: ['Completed', 'Ongoing']
                 description: Indicate if the study is completed or ongoing.
+              duoPermission:
+                type: string
+                description: Data Use Ontology (DUO) permission code that defines the allowed uses of the study data (e.g. GRU, HMB, DS).
+              diseaseSpecificModifier:
+                type: array
+                items:
+                  type: string
+                description: List of disease-specific DUO modifier codes that further restrict data use to particular diseases or conditions.
     parameters:
       - name: studyId
         in: path
