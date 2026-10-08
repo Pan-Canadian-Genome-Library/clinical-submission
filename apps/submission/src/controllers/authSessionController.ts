@@ -109,6 +109,9 @@ const authToken = validateRequest({}, async (request, response) => {
 			throw new Error(tokenResponse.error);
 		}
 
+		// IMPORTANT-NOTE: The first token exchange refresh token, does not return userInfo from CILogon, but the
+		// token returned from `refreshUserSession` does. To resolve this, we immediately call `refreshUserSession`
+		// once on login and return those tokens instead, allowing AuthZ to use the refresh token as a long-lived access token.
 		const refreshTokenResponse = await oidcClient.refreshUserSession(authConfig, {
 			refreshToken: tokenResponse.refresh_token,
 		});
