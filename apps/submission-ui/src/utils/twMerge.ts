@@ -17,16 +17,13 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import enForm from '@/i18n/locales/en/enForm.json';
-import enGeneral from '@/i18n/locales/en/enGeneral.json';
-import enHome from '@/i18n/locales/en/enHome.json';
-import enStudy from '@/i18n/locales/en/enStudy.json';
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
-export const ENGLISH_LOCALE_DICTIONARY = {
-	...enForm,
-	...enGeneral,
-	...enHome,
-	...enStudy,
-} as const;
-
-export type I18N_LOCALE_DICTIONARY = typeof ENGLISH_LOCALE_DICTIONARY;
+/**
+ * Merges Tailwind class names, resolving conflicting utilities so the last one wins.
+ * Lets components accept a `className` prop that can override their default styles.
+ */
+export function cn(...inputs: ClassValue[]) {
+	return twMerge(clsx(inputs));
+}

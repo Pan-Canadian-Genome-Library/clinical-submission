@@ -1,0 +1,27 @@
+{
+	"hero": {
+		"title": "Portail de soumission de données de la Bibliothèque génomique pancanadienne",
+		"description": "Contribuez des données cliniques à la recherche génomique du Canada. Le portail de soumission de la BGPC permet aux établissements de soumettre facilement et en toute sécurité des données de santé et cliniques, alignées sur les normes nationales — propulsant l'infrastructure de recherche génomique du Canada.",
+		"submitFiles": "Soumettre des fichiers"
+	},
+	"overview": {
+		"title": "Aperçu",
+		"paragraph1": "La Bibliothèque génomique pancanadienne (BGPC) est une initiative nationale, financée par les Instituts de recherche en santé du Canada, qui établit le cadre de collecte, de stockage et de partage des données génomiques humaines au Canada. Ce portail est le point d'entrée pour la composante des données cliniques et de santé de ce cadre — où les établissements de recherche et les gardiens de données de santé soumettent les informations cliniques et de santé liées aux participants à la recherche génomique.",
+		"paragraph2": "Ce portail n'accepte que les données cliniques, de santé et de bioéchantillons sous forme tabulaire — des dossiers structurés tels que des informations démographiques, diagnostiques, de traitement et de résultats."
+	},
+	"howToRegister": {
+		"title": "Comment s'inscrire",
+		"step1": {
+			"text": "avec les informations de votre étude. Notre équipe lancera le processus d'inscription.",
+			"linkText": "Contactez l'assistance"
+		},
+		"step2": "Obtenez votre compte. Une fois votre demande examinée, l'équipe d'assistance vous enverra un lien d'inscription et configurera votre accès.",
+		"step3": "Connectez-vous au portail. Utilisez vos identifiants pour vous connecter au portail de soumission de la BGPC.",
+		"step4": "Soumettez vos données. Suivez le flux de travail de soumission guidé pour télécharger vos données."
+	},
+	"genomicData": {
+		"title": "Soumission de données génomiques",
+		"paragraph": "La BGPC collecte également des données de génomique moléculaire — lectures de séquençage, alignements et appels de variants — mais pas par ce portail. Les données génomiques sont soumises à l'aide du flux de travail de soumission de données moléculaires de la BGPC, un pipeline Nextflow construit sur le cadre nf-core pour une soumission reproductible, portable et évolutive.",
+		"linkText": "Voir le flux de travail de soumission de données moléculaires"
+	}
+}

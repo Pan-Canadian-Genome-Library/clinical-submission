@@ -17,16 +17,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import enForm from '@/i18n/locales/en/enForm.json';
-import enGeneral from '@/i18n/locales/en/enGeneral.json';
-import enHome from '@/i18n/locales/en/enHome.json';
-import enStudy from '@/i18n/locales/en/enStudy.json';
+import { useEffect, useState } from 'react';
 
-export const ENGLISH_LOCALE_DICTIONARY = {
-	...enForm,
-	...enGeneral,
-	...enHome,
-	...enStudy,
-} as const;
+/**
+ * Gets the current width of the screen as a number.
+ * @returns Current width of the screen.
+ */
+export const useMinWidth = (): number => {
+	const [minWidth, setMinWidth] = useState(window.innerWidth);
+	useEffect(() => {
+		const handleWidthChange = () => {
+			setMinWidth(window.innerWidth);
+		};
+		window.addEventListener('resize', handleWidthChange);
 
-export type I18N_LOCALE_DICTIONARY = typeof ENGLISH_LOCALE_DICTIONARY;
+		return () => {
+			//Remember to clean up after ourselves.
+			window.removeEventListener('resize', handleWidthChange);
+		};
+	}, []);
+
+	return minWidth;
+};

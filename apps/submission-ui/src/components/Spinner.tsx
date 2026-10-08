@@ -17,16 +17,30 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import enForm from '@/i18n/locales/en/enForm.json';
-import enGeneral from '@/i18n/locales/en/enGeneral.json';
-import enHome from '@/i18n/locales/en/enHome.json';
-import enStudy from '@/i18n/locales/en/enStudy.json';
+import { useTranslation } from 'react-i18next';
 
-export const ENGLISH_LOCALE_DICTIONARY = {
-	...enForm,
-	...enGeneral,
-	...enHome,
-	...enStudy,
-} as const;
+type SpinnerProps = {
+	size?: number;
+	label?: string;
+};
 
-export type I18N_LOCALE_DICTIONARY = typeof ENGLISH_LOCALE_DICTIONARY;
+const Spinner = ({ size = 40, label }: SpinnerProps) => {
+	const {
+		i18n: { t },
+	} = useTranslation();
+
+	const currentLabel = label ?? t('common:spinner');
+
+	return (
+		<div className="flex flex-col items-center justify-center gap-4 p-8" role="status" aria-label={currentLabel}>
+			<div
+				className="rounded-full animate-spin border-[3px] border-gray-200 border-t-primary-600"
+				style={{ width: size, height: size }}
+				aria-hidden
+			/>
+			<span className="text-gray-500 text-sm">{currentLabel}</span>
+		</div>
+	);
+};
+
+export default Spinner;

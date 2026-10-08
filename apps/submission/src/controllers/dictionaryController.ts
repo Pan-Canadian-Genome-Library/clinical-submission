@@ -45,7 +45,7 @@ const registerDictionary = validateRequest(registerDictionaryValidation, async (
 			}
 		}
 
-		const { dictionary, category } = await lyricProvider.services.dictionary.register({
+		const { dictionary, category, migrationId } = await lyricProvider.services.dictionary.register({
 			alias,
 			categoryName,
 			dictionaryName,
@@ -56,7 +56,14 @@ const registerDictionary = validateRequest(registerDictionaryValidation, async (
 
 		await studyRepo.updateStudy(studyId, { categoryId: category.id });
 
-		return res.status(200).json({ dictionary, category });
+		return res.status(200).json({
+			alias: category.alias,
+			categoryId: category.id,
+			categoryName: category.name,
+			dictionaryName: dictionary.name,
+			dictionaryVersion: dictionary.version,
+			migrationId,
+		});
 	} catch (exception) {
 		next(exception);
 	}

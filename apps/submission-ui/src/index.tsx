@@ -26,6 +26,7 @@ import { Route, Routes } from 'react-router';
 import Home from './pages/Home.tsx';
 import LoginRedirect from './pages/login/redirect.tsx';
 import PageWrapper from './pages/PageWrapper.tsx';
+import StudyDetails from './pages/study/Study.tsx';
 import UserPage from './pages/user/user.tsx';
 import Providers from './providers/Providers.tsx';
 
@@ -37,6 +38,8 @@ createRoot(document.getElementById('root')!).render(
 					<Route path="/" element={<Home />} />
 					<Route path="/login" element={<></>} />
 					<Route path="/login/redirect" element={<LoginRedirect />} />
+
+					<Route path="/study/:studyId" element={<StudyDetails />} />
 					<Route path="/user" element={<UserPage />} />
 				</Route>
 			</Routes>
