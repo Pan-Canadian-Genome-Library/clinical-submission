@@ -76,13 +76,7 @@ export const AllowedDUOPermissions = {
 
 export type AllowedDUOPermissionsValues = (typeof AllowedDUOPermissions)[keyof typeof AllowedDUOPermissions];
 
-const DUO_PERMISSIONS: string[] = [
-	AllowedDUOPermissions.GENERAL_RESEARCH_USE,
-	AllowedDUOPermissions.HEALTH_MEDICAL_BIOMEDICAL_RESEARCH,
-	AllowedDUOPermissions.DISEASE_SPECIFIC_MODIFIER,
-	AllowedDUOPermissions.POPULATION_ORIGINS_ANCESTRY_RESEARCH_ONLY,
-	AllowedDUOPermissions.NO_RESTRICTION,
-];
+const DUO_PERMISSIONS: string[] = Object.values(AllowedDUOPermissions);
 
 const createStudyPropertiesBase = z
 	.object({
@@ -161,7 +155,7 @@ const diseaseSuperRefine = (fields: DiseaseRefineFields, context: z.RefinementCt
 		context.addIssue({
 			code: z.ZodIssueCode.custom,
 			message:
-				'`diseaseSpecificModifier` must be an empty array if updating DUO permission outside disease research DUO code.',
+				'`diseaseSpecificModifier` must be an empty array if duoPermission is not `DUO:0000007` (Disease Specific Research)',
 			path: ['diseaseSpecificModifier'],
 		});
 	}
@@ -171,7 +165,7 @@ const diseaseSuperRefine = (fields: DiseaseRefineFields, context: z.RefinementCt
 		context.addIssue({
 			code: z.ZodIssueCode.custom,
 			message:
-				'`diseaseSpecificModifier` must not contain any values if duoPermission is not disease specific research',
+				'`diseaseSpecificModifier` must not contain any values if duoPermission is not `DUO:0000007` (Disease Specific Research)',
 			path: ['diseaseSpecificModifier'],
 		});
 	}
