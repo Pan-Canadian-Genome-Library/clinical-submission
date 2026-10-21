@@ -22,6 +22,8 @@ import { logger } from '@/common/logger.js';
 import { getDbInstance } from '@/db/index.js';
 import { studyService } from '@/service/studyService.js';
 
+import { calculateRefreshTokenExpiry } from './authController.js';
+
 // NOTE
 // UI-only requests have been deliberately omitted from Swagger docs.
 // They require a session cookie, and won't work in Swagger.
@@ -32,13 +34,15 @@ import { studyService } from '@/service/studyService.js';
 const getRefreshToken = async (req: Request, res: Response): Promise<void | null> => {
 	const { account } = req.session;
 	if (!account) {
-		res.status(400).send('Session required.');
+		res.status(401).send('Session required.');
 		return;
 	}
 
 	const { refreshToken, refreshTokenIat } = account;
 
-	const response = { refreshToken, refreshTokenIat };
+	const refreshTokenExpiry = calculateRefreshTokenExpiry(refreshTokenIat);
+
+	const response = { refreshToken, refreshTokenExpiry };
 	res.status(200).json(response);
 };
 

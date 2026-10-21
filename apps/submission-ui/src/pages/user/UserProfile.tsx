@@ -45,7 +45,7 @@ const UserProfile = () => {
 	} = useGetUserEditableStudies();
 	const { data: allStudies, isLoading: allStudiesLoading, isError: allStudiesError } = useGetAllStudies();
 
-	const { refreshToken, refreshTokenIat } = refreshTokenResponse || {};
+	const { refreshToken, refreshTokenExpiry = 0 } = refreshTokenResponse || {};
 	const { dataAdmin, emails, familyName, givenName, idpName } = user || {};
 
 	const {
@@ -89,8 +89,7 @@ const UserProfile = () => {
 	const userRole = dataAdmin ? t('common:user.roles.dataAdmin') : t('common:user.roles.dataSubmitter');
 
 	// get token expiry datetime & user's timezone
-	const tokenTimeToLive = Date.now() + (refreshTokenIat || 0);
-	const refreshTokenExpires = new Date(tokenTimeToLive)?.toLocaleString(t('common:localeCode'), {
+	const refreshTokenExpires = new Date(refreshTokenExpiry * 1000)?.toLocaleString(t('common:localeCode'), {
 		dateStyle: 'short',
 		timeStyle: 'medium',
 	});

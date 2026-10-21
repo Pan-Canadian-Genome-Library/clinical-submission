@@ -21,7 +21,7 @@ import { z } from 'zod';
 
 export const refreshToken = z.object({
 	refreshToken: z.string(),
-	refreshTokenIat: z.number().int(),
+	refreshTokenExpiry: z.number().int(),
 });
 export type RefreshToken = z.infer<typeof refreshToken>;
 
