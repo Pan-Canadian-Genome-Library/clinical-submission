@@ -261,10 +261,7 @@ export const extractAccessTokenFromHeader = (req: Request): string | undefined =
  * @returns Access token or undefined depending if the request includes a session.account.accesstoken
  */
 export const extractAccessTokenFromSession = (req: Request): string | undefined => {
-	if (req.session && req.session.account && req.session.account.accessToken) {
-		return req.session.account.accessToken;
-	}
-	return;
+	return req.session?.account?.accessToken;
 };
 
 /**
