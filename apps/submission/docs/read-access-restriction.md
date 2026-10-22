@@ -22,6 +22,12 @@ The restriction is enforced in the data-read endpoints (`src/controllers/dataCon
 
 `GET /data/category/:categoryId/stream` is unaffected: it is admin-only at the route level, and admins are never restricted.
 
+## Endpoints that are closed to READ-only users
+
+Other endpoints return restricted data in forms that can't be filtered as simply, so they are closed instead:
+
+- **`/audit` and `/migration` are admin-only** (`src/routes/audit.ts`, `src/routes/migration.ts`). Audit records hold the previous and new data of every updated or deleted record, and migration records hold submitted data, restricted entity included. Lyric's own routers only authenticate the caller, they never check access to the study, so any signed-in user could read any study's history. They also skip authentication for methods that are missing from `AUTH_PROTECT_METHODS`, which commonly leaves out GET. The admin check is therefore done in front of them, with the same middleware as the other admin endpoints, which does not depend on that setting.
+
 ## How it's enforced
 
 Two layers, not one:
@@ -30,3 +36,9 @@ Two layers, not one:
 2. **Response-level stripping.** After the query runs (and after the internal-ID sanitization step that reads the original `submitter_participant_id` value to look up its PCGL system ID), the response is walked recursively and any key matching the restricted entity or field name is removed, at any depth (`stripRestrictedData`). This is the layer that actually guarantees correctness: Lyric's compound/nested view re-embeds related schemas via separate queries that aren't covered by the query-level exclusion, so the restricted entity could otherwise resurface as a nested block regardless of what was excluded from the top-level query.
 
 The single-record-by-system-ID endpoint (`GET /data/category/:categoryId/id/:systemId`) has no entity filter to apply before the read, since it fetches one row directly by its system ID. For that endpoint only, the restricted entity is instead checked after the (unavoidable) read, and denied the same way as a missing record (`404`), so restricted records aren't distinguishable from ones that don't exist.
+
+## Tests
+
+Run the tests with `pnpm test`, which uses Node's built-in test runner. The logic of the restriction is unit tested in `src/service/accessRestrictionService.test.ts`.
+
+The tests in `src/test/` send HTTP requests to the real routers and middleware, as users with different access (admin, WRITE, READ-only, no access), and check that a denied request is denied. Only the AuthZ service is replaced, it is answered from a list of test users. Nothing connects to a real service. To add an endpoint, import its router in a test file and mount it with `startTestServer`, see `src/test/helpers/testApp.ts`.
