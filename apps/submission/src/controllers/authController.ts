@@ -20,8 +20,8 @@
 import type { Request, Response } from 'express';
 import { jwtDecode } from 'jwt-decode';
 
-import type { CILogonToken } from '@/common/types/auth.js';
-import { OIDCCodeResponse } from '@/common/validation/auth-validation.js';
+import type { CILogonToken } from '@/auth/index.js';
+import { AuthOIDCTokenRequest } from '@/common/validation/auth-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { exchangeCodeForTokens, getOidcAuthorizeUrl, refreshUserSession } from '@/external/oidcAuthenticationClient.js';
@@ -46,7 +46,7 @@ const logout = async (request: Request, response: Response) => {
 	response.redirect(redirectUrl);
 };
 
-const token = validateRequest(OIDCCodeResponse, async (request, response, next) => {
+const token = validateRequest(AuthOIDCTokenRequest, async (request, response, next) => {
 	if (!authConfig.enabled) {
 		response.status(400).json({ error: 'AUTH_DISABLED', message: 'Authentication is disabled.' });
 		return;

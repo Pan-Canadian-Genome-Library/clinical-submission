@@ -25,77 +25,12 @@ import { RequestValidation } from '@/middleware/requestValidation.js';
 
 import { stringNotEmpty } from './common.js';
 
-export const userDataResponseSchema = z.object({
-	userinfo: z.object({
-		emails: z.array(
-			z
-				.object({
-					type: z.string(),
-					address: z.string(),
-				})
-				.optional(),
-		),
-		pcgl_id: z.string(),
-		site_admin: z.boolean().default(false),
-		data_admin: z.boolean().default(false),
-	}),
-	study_authorizations: z.object({
-		editable_studies: z.array(z.string()),
-		readable_studies: z.array(z.string()),
-	}),
-	dac_authorizations: z.array(
-		z.object({
-			end_date: z.string(),
-			start_date: z.string(),
-			study_id: z.string(),
-		}),
-	),
-	groups: z.array(
-		z.object({
-			id: z.coerce.string(),
-			name: z.string(),
-			description: z.string(),
-		}),
-	),
-});
-
-export type UserDataResponseSchemaType = z.infer<typeof userDataResponseSchema>;
-export type Groups = Pick<UserDataResponseSchemaType, 'groups'>;
-
-export const oidcUserInfoResponseSchema = z.object({
-	sub: z.string(),
-	given_name: z.string().optional(),
-	family_name: z.string().optional(),
-	email: z.string().optional(),
-});
-export type OIDCUserInfoResponse = z.infer<typeof oidcUserInfoResponseSchema>;
-
-export const oidcTokenResponseSchema = z
-	.object({
-		access_token: z.string(),
-		refresh_token: z.string(),
-		refresh_token_iat: z.number(),
-		id_token: z.string(),
-	})
-	.or(
-		z.object({
-			error: z.string(),
-			error_description: z.string(),
-		}),
-	);
-export type OIDCTokenResponse = z.infer<typeof oidcTokenResponseSchema>;
-
 export interface OIDCCodeParams extends ParsedQs {
 	code: string;
 }
 
-export const OIDCCodeResponse: RequestValidation<object, OIDCCodeParams, ParamsDictionary> = {
+export const AuthOIDCTokenRequest: RequestValidation<object, OIDCCodeParams, ParamsDictionary> = {
 	query: z.object({
 		code: stringNotEmpty,
 	}),
 };
-
-export const ServiceTokenResponse = z.object({
-	token: z.string(),
-});
-export type ServiceTokenResponse = z.infer<typeof ServiceTokenResponse>;

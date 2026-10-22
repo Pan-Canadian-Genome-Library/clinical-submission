@@ -36,10 +36,10 @@ const authGeneratedSessionValues = z.object({
 	emails: z.array(
 		z.object({
 			address: z.string().email(),
-			type: z
-				.literal('official')
-				.or(z.literal('delivery').or(z.literal('forwarding').or(z.literal('personal'))))
-				.optional(),
+			/**
+			 * COManage email type, e.g. `official` or `personal`.
+			 */
+			type: z.string().optional(),
 		}),
 	),
 	siteAdmin: z.boolean().default(false),

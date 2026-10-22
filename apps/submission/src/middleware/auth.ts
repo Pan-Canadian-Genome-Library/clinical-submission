@@ -19,19 +19,45 @@
 
 import { NextFunction, Request, Response } from 'express';
 
+import {
+	extractAccessTokenFromHeader,
+	extractServiceCredentialsFromHeader,
+	type PCGLRequestAuth,
+	type PCGLRequestWithUser,
+	type PCGLUserAuthorizationResult,
+} from '@/auth/index.js';
 import { logger } from '@/common/logger.js';
-import type { PCGLRequestWithUser, PCGLUserSessionResult } from '@/common/types/auth.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
-import { extractAccessTokenFromHeader, fetchUserData } from '@/external/pcglAuthZClient.js';
+import { fetchUserData, verifyServiceToken } from '@/external/pcglAuthZClient.js';
+
+declare module 'express-serve-static-core' {
+	interface Request {
+		/**
+		 * Outcome of `authMiddleware` for this request. Undefined when `authMiddleware` did not run on the route,
+		 * or auth is disabled.
+		 */
+		auth?: PCGLRequestAuth;
+	}
+}
 
 /**
- * Middleware to handle authentication that returns PCGLUserSessionResult to req.user.
- * The middleware validates whether a token exists; if valid, the user information returned from the authz service is added to `req.user`.
- * Optionally, when `requireAdmin` is `true`, the middleware restricts access to admin users only.
- * Any additional checks for user permissions must be done on the controller level from the passed `req.user` object
+ * Middleware to handle authentication, storing the result in `req.auth` and the user in `req.user`.
+ *
+ * - Service requests: when `allowServices` is `true` and the request has the service ID and service token headers,
+ *   the token is verified with AuthZ and the result is added to `req.auth.service`. Verified services skip the
+ *   user checks, including `requireAdmin`. A service token that fails verification is rejected; the request is not
+ *   checked as a user request.
+ * - User requests: the access token is required, and the user information returned from AuthZ is added to
+ *   `req.user` and `req.auth.user`. When `requireAdmin` is `true`, only admin users are allowed.
+ *
+ * Any additional checks for user or service permissions must be done on the controller level from `req.auth`
+ * or `req.user`. When auth is disabled, the middleware does nothing.
  */
-export const authMiddleware = ({ requireAdmin = false }: { requireAdmin?: boolean } = {}) => {
+export const authMiddleware = ({
+	requireAdmin = false,
+	allowServices = false,
+}: { requireAdmin?: boolean; allowServices?: boolean } = {}) => {
 	const { enabled } = authConfig;
 	return async (req: PCGLRequestWithUser, _: Response, next: NextFunction) => {
 		try {
@@ -39,6 +65,24 @@ export const authMiddleware = ({ requireAdmin = false }: { requireAdmin?: boolea
 			if (!enabled) {
 				return next();
 			}
+
+			if (allowServices) {
+				const serviceCredentials = extractServiceCredentialsFromHeader(req);
+				if (serviceCredentials) {
+					const { serviceId, serviceToken } = serviceCredentials;
+					const verified = await verifyServiceToken(serviceId, serviceToken);
+					req.auth = { service: { serviceId, verified } };
+
+					if (!verified) {
+						throw new lyricProvider.utils.errors.Forbidden(
+							'Unauthorized: Service token is not valid for the requesting service',
+						);
+					}
+
+					return next();
+				}
+			}
+
 			const token = extractAccessTokenFromHeader(req);
 
 			if (!token) {
@@ -47,6 +91,7 @@ export const authMiddleware = ({ requireAdmin = false }: { requireAdmin?: boolea
 
 			const result = await fetchUserData(token);
 			req.user = result.user;
+			req.auth = { user: result.user };
 
 			if (requireAdmin && !result.user?.isAdmin) {
 				throw new lyricProvider.utils.errors.Forbidden('You must be an admin user to use this endpoint.');
@@ -68,7 +113,7 @@ export const authMiddleware = ({ requireAdmin = false }: { requireAdmin?: boolea
  * @param req request object
  * @returns
  */
-export const lyricAuthMiddleware = async (req: Request): Promise<PCGLUserSessionResult> => {
+export const lyricAuthMiddleware = async (req: Request): Promise<PCGLUserAuthorizationResult> => {
 	const { enabled } = authConfig;
 
 	try {

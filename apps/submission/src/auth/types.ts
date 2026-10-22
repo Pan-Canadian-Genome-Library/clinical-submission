@@ -26,23 +26,51 @@ export const ActionIDs = {
 
 export type ActionIDsValues = (typeof ActionIDs)[keyof typeof ActionIDs];
 
-export type UserDataResponseErrorType = {
-	type: string;
-	title: string;
-	detail: string;
-	status: number;
-	error: string;
-};
-
-export type UserSessionExtended = {
+/**
+ * PCGL fields added to Lyric's `UserSession`.
+ */
+export type UserAuthorizationExtended = {
+	/**
+	 * Names of the AuthZ groups the user belongs to.
+	 */
 	groups: string[];
 };
 
-export type PCGLUserSession = UserSession & UserSessionExtended;
+/**
+ * A user and their study permissions, as returned by AuthZ for the request's access token.
+ * Built on Lyric's `UserSession` type so it can be passed to Lyric as the request user.
+ */
+export type PCGLUserAuthorization = UserSession & UserAuthorizationExtended;
 
-export type PCGLRequestWithUser = RequestWithUser<PCGLUserSession>;
+export type PCGLRequestWithUser = RequestWithUser<PCGLUserAuthorization>;
 
-export type PCGLUserSessionResult = UserSessionResult<PCGLUserSession>;
+/**
+ * Result of looking up the user for a request's access token: the user, or an error code and message.
+ */
+export type PCGLUserAuthorizationResult = UserSessionResult<PCGLUserAuthorization>;
+
+/**
+ * Result of checking a requesting service's token with AuthZ.
+ */
+export type PCGLServiceAuthorization = {
+	/**
+	 * Service ID the requesting service identified itself with.
+	 */
+	serviceId: string;
+	/**
+	 * True when AuthZ confirmed that the service token belongs to `serviceId`.
+	 */
+	verified: boolean;
+};
+
+/**
+ * Outcome of authenticating a request: the user identified by the request's access token,
+ * or the service identified by its service headers.
+ */
+export type PCGLRequestAuth = {
+	user?: PCGLUserAuthorization;
+	service?: PCGLServiceAuthorization;
+};
 
 /**
  * JWT Token returned by CILogon on successful authentication. Note that some

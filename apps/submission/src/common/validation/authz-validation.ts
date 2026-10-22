@@ -19,15 +19,19 @@
 
 import { z } from 'zod';
 
+/**
+ * AuthZ `GET /user/{pcgl_id}` response, as returned for `/user/me`: the user's details,
+ * the studies they can read and edit, their DAC authorizations, and their COManage groups.
+ */
 export const authZUserInfo = z.object({
 	userinfo: z.object({
 		emails: z.array(
 			z.object({
-				address: z.string().email(),
-				type: z
-					.literal('official')
-					.or(z.literal('delivery').or(z.literal('forwarding').or(z.literal('personal'))))
-					.optional(),
+				address: z.string(),
+				/**
+				 * COManage email type, e.g. `official` or `personal`.
+				 */
+				type: z.string().optional(),
 			}),
 		),
 		pcgl_id: z.string(),
@@ -51,10 +55,36 @@ export const authZUserInfo = z.object({
 		.array(
 			z.object({
 				description: z.string(),
-				id: z.number().int(),
+				// COManage group IDs are integers, but numeric strings are accepted too.
+				id: z.coerce.number().int(),
 				name: z.string(),
 			}),
 		)
 		.optional(),
 });
 export type PCGLAuthZUserInfoResponse = z.infer<typeof authZUserInfo>;
+export type Groups = Pick<PCGLAuthZUserInfoResponse, 'groups'>;
+
+/**
+ * AuthZ `POST /service/{service_id}/verify` response containing a new service token.
+ */
+export const ServiceTokenResponse = z.object({
+	token: z.string(),
+});
+export type ServiceTokenResponse = z.infer<typeof ServiceTokenResponse>;
+
+/**
+ * AuthZ response to verifying a service token. `result` is true when the token belongs to the service.
+ */
+export const ServiceTokenVerificationResponse = z.object({
+	result: z.boolean(),
+});
+export type ServiceTokenVerificationResponse = z.infer<typeof ServiceTokenVerificationResponse>;
+
+/**
+ * Error body returned by AuthZ, e.g. `{ "error": "Service UUID does not match service name" }`.
+ */
+export const AuthZErrorResponse = z.object({
+	error: z.string(),
+});
+export type AuthZErrorResponse = z.infer<typeof AuthZErrorResponse>;

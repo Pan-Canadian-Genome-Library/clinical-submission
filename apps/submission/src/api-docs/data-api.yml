@@ -51,6 +51,8 @@
       - Data
     security:
       - bearerAuth: []
+      - serviceId: []
+        serviceToken: []
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
       - name: entityName
@@ -92,6 +94,8 @@
       - Data
     security:
       - bearerAuth: []
+      - serviceId: []
+        serviceToken: []
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
       - name: systemId
@@ -128,6 +132,8 @@
       - Data
     security:
       - bearerAuth: []
+      - serviceId: []
+        serviceToken: []
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
       - $ref: '#/components/parameters/path/Organization'
@@ -170,6 +176,8 @@
       - Data
     security:
       - bearerAuth: []
+      - serviceId: []
+        serviceToken: []
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
       - $ref: '#/components/parameters/path/Organization'
@@ -264,11 +272,13 @@
         $ref: '#/components/responses/ServiceUnavailableError'
 /data/category/{categoryId}/stream:
   get:
-    summary: Stream Submitted Data for a specific Category. (🔒 Admin only)
+    summary: Stream Submitted Data for a specific Category. (🔒 Admin or verified service only)
     tags:
       - Data
     security:
       - bearerAuth: []
+      - serviceId: []
+        serviceToken: []
     parameters:
       - $ref: '#/components/parameters/path/CategoryId'
       - $ref: '#/components/parameters/query/View'

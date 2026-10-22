@@ -30,24 +30,28 @@ export const dataRouter: Router = (() => {
 	// Public endpoints – do not require authentication
 	router.get('/entity/:entityName/:externalId/exists', dataController.getDataIdExists);
 
-	// Restricted endpoints - Admin or Submitter access required
-	router.get('/category/:categoryId', authMiddleware(), dataController.getCategoryById);
-	router.get('/category/:categoryId/id/:systemId', authMiddleware(), dataController.getCategoryBySystemId);
+	// Restricted endpoints - Admin, Submitter, or verified service access required
+	router.get('/category/:categoryId', authMiddleware({ allowServices: true }), dataController.getCategoryById);
+	router.get(
+		'/category/:categoryId/id/:systemId',
+		authMiddleware({ allowServices: true }),
+		dataController.getCategoryBySystemId,
+	);
 	router.get(
 		'/category/:categoryId/organization/:organization',
-		authMiddleware(),
+		authMiddleware({ allowServices: true }),
 		dataController.getCategoryByOrganization,
 	);
 	router.post(
 		'/category/:categoryId/organization/:organization/query',
-		authMiddleware(),
+		authMiddleware({ allowServices: true }),
 		dataController.getSubmittedDataByQuery,
 	);
 
-	// Restricted endpoints - Admin only access
+	// Restricted endpoints - Admin or verified service access only
 	router.get(
 		'/category/:categoryId/stream',
-		authMiddleware({ requireAdmin: true }),
+		authMiddleware({ requireAdmin: true, allowServices: true }),
 		dataController.getSubmittedDataStream,
 	);
 
