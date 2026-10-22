@@ -23,7 +23,12 @@ import urlJoin from 'url-join';
 import { logger } from '@/common/logger.js';
 import { ActionIDs, type ActionIDsValues, type PCGLUserSession, PCGLUserSessionResult } from '@/common/types/auth.js';
 import { Groups, ServiceTokenResponse, userDataResponseSchema } from '@/common/validation/auth-validation.js';
-import { authZUserInfo, PCGLAuthZUserInfoResponse } from '@/common/validation/authz-validation.js';
+import {
+	authZStudyAuthorizationResponse,
+	authZUserInfo,
+	type PCGLAuthZStudyAuthorizationRequest,
+	type PCGLAuthZUserInfoResponse,
+} from '@/common/validation/authz-validation.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 
@@ -185,28 +190,35 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
  * @returns User information
  */
 export const getUserInformation = async (accessToken: string): Promise<PCGLAuthZUserInfoResponse> => {
+	let response: Response;
 	try {
-		const response = await fetchAuthZResource('/user/me', accessToken);
-
-		if (response.status === 204) {
-			// A "204 No content" response is returned when the user is not registered.
-			throw new Error('Unable to retrieve user information from the PCGL AuthZ service.');
-		}
-
-		const res = await response.json();
-
-		const validatedAuthZData = authZUserInfo.safeParse(res);
-
-		if (!validatedAuthZData.success) {
-			logger.error(`[AUTHZ]: AuthZ service returned unexpected, or malformed data.` + validatedAuthZData.error);
-			throw new Error('Unable to retrieve user information from the PCGL AuthZ service.');
-		}
-
-		return validatedAuthZData.data;
+		response = await fetchAuthZResource('/user/me', accessToken);
 	} catch (error) {
-		logger.error(`[AUTHZ]: Unexpected error while getting user info from the AuthZ service.` + error);
+		logger.error(error, `[AUTHZ]: Failed to request user info from the AuthZ service.`);
 		throw new Error(`Error contacting the PCGL Authorization Service.`);
 	}
+
+	if (response.status === 204) {
+		// A "204 No content" response is returned when the user is not registered.
+		throw new Error('Unable to retrieve user information from the PCGL AuthZ service.');
+	}
+
+	let res: unknown;
+	try {
+		res = await response.json();
+	} catch (error) {
+		logger.error(error, `[AUTHZ]: Failed to parse user info response from the AuthZ service.`);
+		throw new Error('Unable to retrieve user information from the PCGL AuthZ service.');
+	}
+
+	const validatedAuthZData = authZUserInfo.safeParse(res);
+
+	if (!validatedAuthZData.success) {
+		logger.error(validatedAuthZData.error, `[AUTHZ]: AuthZ service returned unexpected, or malformed data.`);
+		throw new Error('Unable to retrieve user information from the PCGL AuthZ service.');
+	}
+
+	return validatedAuthZData.data;
 };
 
 /**
@@ -279,25 +291,20 @@ export const getStudyById = async (studyId: string, token: string) => {
 		return;
 	}
 
-	if (!response.ok) {
-		throw new lyricProvider.utils.errors.InternalServerError(
-			`Failed to fetch study in Authz with status ${response.status}`,
-		);
+	const res = await response.json();
+
+	const validatedAuthZData = authZStudyAuthorizationResponse.safeParse(res);
+
+	if (!validatedAuthZData.success) {
+		const message = `Malformed response object from AUTHZ for study ID ${studyId}.`;
+		logger.error(`[AUTHZ]: ${message}: ` + validatedAuthZData.error);
+		throw new lyricProvider.utils.errors.InternalServerError(message);
 	}
 
-	return await response.json();
+	return validatedAuthZData.data;
 };
 
-export const createStudy = async (studyId: string, token: string) => {
-	const todaysDate = new Date().toISOString();
-
-	const studyData = {
-		study_id: studyId,
-		data_submitters: [],
-		team_members: [],
-		creation_date: todaysDate,
-	};
-
+export const createStudy = async (studyData: PCGLAuthZStudyAuthorizationRequest, token: string) => {
 	const { AUTHZ_ENDPOINT } = authConfig;
 
 	const headers = new Headers({

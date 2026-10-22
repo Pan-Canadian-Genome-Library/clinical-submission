@@ -420,9 +420,14 @@ const studyService = (db: PostgresDb) => ({
 			}
 		}
 	},
-	updateStudyDacId: async (studyData: { studyId: string; dacId: string }): Promise<StudyResponse | undefined> => {
+	updateStudyDacId: async (
+		studyData: { studyId: string; dacId: string },
+		transaction?: PostgresTransaction,
+	): Promise<StudyResponse | undefined> => {
+		const dbDriver = transaction ? transaction : db;
+
 		try {
-			const updatedRecord = await db
+			const updatedRecord = await dbDriver
 				.update(study)
 				.set({
 					dac_id: studyData.dacId,
@@ -432,7 +437,7 @@ const studyService = (db: PostgresDb) => ({
 				.returning();
 
 			if (updatedRecord[0]) {
-				return await convertFromRecordToStudyResponse(updatedRecord[0], db);
+				return await convertFromRecordToStudyResponse(updatedRecord[0], dbDriver);
 			}
 			return;
 		} catch (error) {
