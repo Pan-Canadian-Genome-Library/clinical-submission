@@ -27,6 +27,7 @@ import express, { type Express } from 'express';
 
 import { logger } from '@/common/logger.js';
 import { lyricProvider } from '@/core/provider.js';
+import { connectToDb, getDbInstance } from '@/db/index.js';
 
 export const AUTHZ_ENDPOINT = process.env.AUTHZ_ENDPOINT ?? '';
 
@@ -98,6 +99,46 @@ export const stubAuthZ = () => {
 };
 
 /**
+ * Connects the app's database handle to an address nothing listens on, so any query that is not
+ * stubbed fails loudly instead of reaching a real database.
+ */
+export const connectTestDb = () => connectToDb('postgresql://test:test@127.0.0.1:5999/test');
+
+const parseBody = (text: string): unknown => {
+	try {
+		return text === '' ? undefined : JSON.parse(text);
+	} catch {
+		return text;
+	}
+};
+
+/**
+ * Answers `db.select().from(table)...` queries with the rows given for that table, whatever the
+ * conditions, joins or ordering that follow. A query on any other table throws, so a query the
+ * test did not expect fails loudly. Needs `connectTestDb()` to have been called.
+ */
+export const stubDbTables = (tables: ReadonlyArray<readonly [table: unknown, rows: () => unknown[]]>) =>
+	mock.method(getDbInstance(), 'select', () => ({
+		from: (table: unknown) => {
+			const rows = tables.find(([candidate]) => candidate === table)?.[1];
+			if (!rows) {
+				throw new Error('Unexpected database query in a test, add the table to stubDbTables');
+			}
+
+			const query = {
+				then: (resolve: (rows: unknown[]) => unknown, reject: (error: unknown) => unknown) =>
+					Promise.resolve(rows()).then(resolve, reject),
+				where: () => query,
+				leftJoin: () => query,
+				orderBy: () => query,
+				limit: () => query,
+				offset: () => query,
+			};
+			return query;
+		},
+	}));
+
+/**
  * Importing the Lyric provider starts a pool of worker threads that keeps the test process alive.
  * Shutting the pool down while it is still starting leaves a worker behind, because Lyric sends it
  * its configuration afterwards, so first wait for the pool to be ready. Any worker task does that,
@@ -123,14 +164,6 @@ const stopLyricWorkers = async () => {
 		await new Promise((resolve) => setTimeout(resolve, 50));
 	} finally {
 		mutedWrite.mock.restore();
-	}
-};
-
-const parseBody = (text: string): unknown => {
-	try {
-		return text === '' ? undefined : JSON.parse(text);
-	} catch {
-		return text;
 	}
 };
 
