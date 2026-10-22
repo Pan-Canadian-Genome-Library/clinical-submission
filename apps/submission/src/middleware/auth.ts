@@ -23,11 +23,16 @@ import { logger } from '@/common/logger.js';
 import type { PCGLRequestWithUser, PCGLUserSessionResult } from '@/common/types/auth.js';
 import { authConfig } from '@/config/authConfig.js';
 import { lyricProvider } from '@/core/provider.js';
-import { extractAccessTokenFromHeader, fetchUserData } from '@/external/pcglAuthZClient.js';
+import {
+	extractAccessTokenFromHeader,
+	extractAccessTokenFromSession,
+	fetchUserData,
+} from '@/external/pcglAuthZClient.js';
 
 /**
  * Middleware to handle authentication that returns PCGLUserSessionResult to req.user.
- * The middleware validates whether a token exists; if valid, the user information returned from the authz service is added to `req.user`.
+ * The middleware validates whether a token exists, in the browser session or auth header;
+ * if valid, the user information returned from the authz service is added to `req.user`.
  * Optionally, when `requireAdmin` is `true`, the middleware restricts access to admin users only.
  * Any additional checks for user permissions must be done on the controller level from the passed `req.user` object
  */
@@ -39,7 +44,7 @@ export const authMiddleware = ({ requireAdmin = false }: { requireAdmin?: boolea
 			if (!enabled) {
 				return next();
 			}
-			const token = extractAccessTokenFromHeader(req);
+			const token = extractAccessTokenFromSession(req) || extractAccessTokenFromHeader(req);
 
 			if (!token) {
 				throw new lyricProvider.utils.errors.Forbidden('Unauthorized: No access token provided');

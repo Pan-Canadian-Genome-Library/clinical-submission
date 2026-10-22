@@ -153,6 +153,7 @@ const authToken = validateRequest({}, async (request, response) => {
 				};
 			}),
 			groups: pcglAuthzResponse.groups,
+			idpName: oidcDataResponse.idp_name,
 		};
 
 		request.session.account = userAccountAliasing;
@@ -199,6 +200,7 @@ const getUser = validateRequest({}, async (request, response) => {
 					siteAdmin: userSession.siteAdmin,
 					dataAdmin: userSession.dataAdmin,
 					groups: userSession.groups,
+					idpName: userSession.idpName,
 				}
 			: undefined,
 	};
