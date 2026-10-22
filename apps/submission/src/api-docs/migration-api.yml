@@ -2,7 +2,7 @@
 
 /migration/category/{categoryId}:
   get:
-    summary: Retrieve the Migrations for a category
+    summary: Retrieve the Migrations for a category (🔒 Admin only)
     tags:
       - Migration
     parameters:
@@ -25,7 +25,7 @@
 
 /migration/{migrationId}:
   get:
-    summary: Get Migration general information by ID
+    summary: Get Migration general information by ID (🔒 Admin only)
     tags:
       - Migration
     parameters:
@@ -46,7 +46,7 @@
 
 /migration/{migrationId}/records:
   get:
-    summary: Retrieve the records for a migration
+    summary: Retrieve the records for a migration (🔒 Admin only)
     tags:
       - Migration
     parameters:
