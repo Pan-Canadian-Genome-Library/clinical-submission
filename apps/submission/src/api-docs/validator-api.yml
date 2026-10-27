@@ -1,6 +1,7 @@
 /validator/entity/{entityName}/field/{fieldName}/exists:
   get:
     summary: Check if a record exists based on category, organization, entity, and value
+    description: Records of the `sociodemographic` entity are never reported as found. The response is the same as for a record that does not exist.
     tags:
       - Validator
     parameters:
