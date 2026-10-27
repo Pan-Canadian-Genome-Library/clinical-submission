@@ -22,6 +22,15 @@ The restriction is enforced in the data-read endpoints (`src/controllers/dataCon
 
 `GET /data/category/:categoryId/stream` is unaffected: it is admin-only at the route level, and admins are never restricted.
 
+## Filtering by restricted fields
+
+The response of `POST /data/category/:categoryId/organization/:organization/query` leaves out the restricted data, but a filter on it would still reveal it: a user could narrow down a restricted value by what the query matches. So a user with READ access only to the study is rejected with a `400`, before anything is queried, if the filter, at any depth of its `and`, `or` and `not` combinations, uses:
+
+- the restricted field, `submitter_participant_id`
+- a field that only exists in the `sociodemographic` schema of the category's dictionary
+
+Field names are compared in any letter case. Fields that the `sociodemographic` schema shares with other schemas, such as the study ID, are allowed: the filter only matches the rows of the entities that are queried, and for these users that never includes `sociodemographic`. Users with WRITE access to the study can filter by any field.
+
 ## Endpoints that are closed to READ-only users
 
 Other endpoints return restricted data in forms that can't be filtered as simply, so they are closed instead:

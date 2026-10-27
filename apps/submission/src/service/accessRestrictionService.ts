@@ -124,3 +124,59 @@ export const stripRestrictedData = (records: SubmittedDataResponse[]): Submitted
 	records
 		.filter((record) => !isRestrictedEntityName(record.entityName))
 		.map((record) => ({ ...record, data: stripRestrictedKeys(record.data) }));
+
+/**
+ * The part of a dictionary schema that matters here, so that this module does not depend on the
+ * dictionary types.
+ */
+export type SchemaFields = { name: string; fields: ReadonlyArray<{ name: string }> };
+
+/**
+ * Names of the fields a SQON filters on, at any depth of its `and`, `or` and `not`
+ * combinations. A filter is an object with a `fieldName`, a combination has a list as `content`.
+ */
+export const getSqonFieldNames = (sqon: unknown): string[] => {
+	if (typeof sqon !== 'object' || sqon === null) {
+		return [];
+	}
+
+	const content = 'content' in sqon ? sqon.content : undefined;
+
+	if (Array.isArray(content)) {
+		return content.flatMap(getSqonFieldNames);
+	}
+
+	if (typeof content === 'object' && content !== null && 'fieldName' in content) {
+		return typeof content.fieldName === 'string' ? [content.fieldName] : [];
+	}
+
+	return [];
+};
+
+/**
+ * Names of the fields that users with READ access only can't use in a SQON: the restricted field,
+ * and the fields that only exist in the restricted entity.
+ *
+ * Fields the restricted entity shares with other entities, such as the study ID, are allowed. A
+ * filter only matches the rows of the entities that are queried, which never include the
+ * restricted one for these users, so filtering by a shared field says nothing about its data.
+ */
+export const getRestrictedFilterFieldNames = (schemas: ReadonlyArray<SchemaFields>): string[] => {
+	const fieldNamesOf = (matching: ReadonlyArray<SchemaFields>) =>
+		new Set(matching.flatMap((schema) => schema.fields.map((field) => field.name.toLowerCase())));
+
+	const restrictedEntityFields = fieldNamesOf(schemas.filter((schema) => isRestrictedEntityName(schema.name)));
+	const otherFields = fieldNamesOf(schemas.filter((schema) => !isRestrictedEntityName(schema.name)));
+
+	return [RESTRICTED_FIELD_NAME, ...[...restrictedEntityFields].filter((name) => !otherFields.has(name))];
+};
+
+/**
+ * The fields of the SQON that users with READ access only can't filter by, as they are written in
+ * the SQON. Empty when the SQON is allowed.
+ */
+export const findRestrictedFilterFields = (sqon: unknown, schemas: ReadonlyArray<SchemaFields>): string[] => {
+	const restricted = new Set(getRestrictedFilterFieldNames(schemas));
+
+	return [...new Set(getSqonFieldNames(sqon))].filter((fieldName) => restricted.has(fieldName.trim().toLowerCase()));
+};

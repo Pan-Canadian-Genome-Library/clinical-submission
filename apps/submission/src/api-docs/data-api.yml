@@ -166,6 +166,7 @@
 /data/category/{categoryId}/organization/{organization}/query:
   post:
     summary: Retrieve Submitted Data filtered by search parameters provided in the request body
+    description: Users with READ access only to the study are rejected with a 400 if the filter uses the submitter ID field, or a field that only exists in the `sociodemographic` entity.
     tags:
       - Data
     security:

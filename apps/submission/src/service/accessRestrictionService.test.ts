@@ -24,6 +24,9 @@ import { type SubmittedDataResponse } from '@overture-stack/lyric';
 
 import {
 	filterAllowedEntityNames,
+	findRestrictedFilterFields,
+	getRestrictedFilterFieldNames,
+	getSqonFieldNames,
 	isRestrictedEntityName,
 	isRestrictedFieldName,
 	shouldRestrictStudyData,
@@ -185,5 +188,85 @@ describe('stripRestrictedData', () => {
 		const result = stripRestrictedData(records);
 
 		assert.deepEqual(result[0]?.data, { pcgl_participant_id: 'PT001', age: 42 });
+	});
+});
+
+const schema = (name: string, ...fields: string[]) => ({ name, fields: fields.map((field) => ({ name: field })) });
+
+const SCHEMAS = [
+	schema('participant', 'submitter_participant_id', 'study_id', 'gender'),
+	schema('sociodemographic', 'submitter_participant_id', 'study_id', 'income', 'Ethnicity'),
+];
+
+const filter = (fieldName: string) => ({ op: 'in', content: { fieldName, value: ['x'] } });
+
+describe('getSqonFieldNames', () => {
+	it('returns the field of a filter', () => {
+		assert.deepEqual(getSqonFieldNames(filter('gender')), ['gender']);
+		assert.deepEqual(getSqonFieldNames({ op: 'gt', content: { fieldName: 'age', value: 3 } }), ['age']);
+	});
+
+	it('returns the fields of combinations at any depth', () => {
+		const sqon = {
+			op: 'and',
+			content: [filter('a'), { op: 'not', content: [{ op: 'or', content: [filter('b'), filter('c')] }] }],
+		};
+
+		assert.deepEqual(getSqonFieldNames(sqon), ['a', 'b', 'c']);
+	});
+
+	it('returns nothing for anything that is not a SQON', () => {
+		for (const input of [
+			undefined,
+			null,
+			'income',
+			3,
+			{},
+			[],
+			{ op: 'and', content: [] },
+			{ content: { fieldName: 3 } },
+		]) {
+			assert.deepEqual(getSqonFieldNames(input), []);
+		}
+	});
+});
+
+describe('getRestrictedFilterFieldNames', () => {
+	it('returns the restricted field and the fields only the restricted entity has', () => {
+		assert.deepEqual(getRestrictedFilterFieldNames(SCHEMAS), ['submitter_participant_id', 'income', 'ethnicity']);
+	});
+
+	it('leaves out the fields the restricted entity shares with another one', () => {
+		assert.ok(!getRestrictedFilterFieldNames(SCHEMAS).includes('study_id'));
+	});
+
+	it('treats the pluralized name of the restricted entity as the restricted entity', () => {
+		assert.ok(getRestrictedFilterFieldNames([schema('sociodemographics', 'income')]).includes('income'));
+	});
+
+	it('still returns the restricted field when the dictionary has no restricted entity', () => {
+		assert.deepEqual(getRestrictedFilterFieldNames([]), ['submitter_participant_id']);
+		assert.deepEqual(getRestrictedFilterFieldNames([schema('participant', 'gender')]), ['submitter_participant_id']);
+	});
+});
+
+describe('findRestrictedFilterFields', () => {
+	it('finds restricted fields, in any letter case, as they are written in the SQON', () => {
+		const sqon = { op: 'and', content: [filter('gender'), filter('INCOME'), filter('Submitter_Participant_ID')] };
+
+		assert.deepEqual(findRestrictedFilterFields(sqon, SCHEMAS), ['INCOME', 'Submitter_Participant_ID']);
+	});
+
+	it('finds a restricted field once, however many times it is used', () => {
+		const sqon = { op: 'or', content: [filter('income'), { op: 'not', content: [filter('income')] }] };
+
+		assert.deepEqual(findRestrictedFilterFields(sqon, SCHEMAS), ['income']);
+	});
+
+	it('finds nothing in a SQON that only uses allowed fields', () => {
+		const sqon = { op: 'and', content: [filter('gender'), filter('study_id')] };
+
+		assert.deepEqual(findRestrictedFilterFields(sqon, SCHEMAS), []);
+		assert.deepEqual(findRestrictedFilterFields(undefined, SCHEMAS), []);
 	});
 });

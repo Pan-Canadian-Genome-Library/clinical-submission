@@ -34,7 +34,12 @@ const STUDIES = [
 	{ study_id: 'STUDY-B', category_id: 2 },
 ];
 
-const DICTIONARY_ENTITIES = ['participant', 'treatment', 'sociodemographic'];
+// The restricted entity shares the study ID and the submitter ID with the others, income and ethnicity are its own
+const DICTIONARY = [
+	{ name: 'participant', fields: ['submitter_participant_id', 'study_id', 'gender'] },
+	{ name: 'treatment', fields: ['submitter_treatment_id', 'submitter_participant_id', 'study_id', 'drug'] },
+	{ name: 'sociodemographic', fields: ['submitter_participant_id', 'study_id', 'income', 'ethnicity'] },
+].map((schema) => ({ name: schema.name, fields: schema.fields.map((name) => ({ name })) }));
 
 // Values that only appear in restricted data
 const RESTRICTED_VALUES = ['sociodemographic', 'SD-INCOME', 'SD-ETHNICITY', 'submitter_participant_id', 'SUB-'];
@@ -106,7 +111,7 @@ const assertContains = (body: unknown, ...values: string[]) => {
 	}
 };
 
-type EntityFilter = { entityName?: string[]; view?: string; organizations?: string[] };
+type EntityFilter = { sqon?: unknown; entityName?: string[]; view?: string; organizations?: string[] };
 
 describe('data endpoints', () => {
 	let server: TestServer;
@@ -120,7 +125,7 @@ describe('data endpoints', () => {
 		getActiveDictionaryByCategory: mock.method(
 			lyricProvider.services.dictionary,
 			'getActiveDictionaryByCategory',
-			async () => ({ dictionary: DICTIONARY_ENTITIES.map((name) => ({ name })) }),
+			async () => ({ dictionary: DICTIONARY }),
 		),
 		getSubmittedDataByCategory: mock.method(
 			lyricProvider.services.submittedData,
@@ -154,6 +159,9 @@ describe('data endpoints', () => {
 	/** The entity names the controller passed to Lyric, one list per call */
 	const entityNamesSentByCategory = () =>
 		lyric.getSubmittedDataByCategory.mock.calls.map((call) => call.arguments[2].entityName);
+	/** The SQON of the last query, as the plain data it was sent as, Lyric gets it as a builder object */
+	const sqonSentToLyric = () =>
+		JSON.parse(JSON.stringify(lyric.getSubmittedDataByOrganization.mock.calls.at(-1)?.arguments[3].sqon));
 	const entityNamesSentByOrganization = () =>
 		lyric.getSubmittedDataByOrganization.mock.calls.map((call) => call.arguments[3].entityName);
 
@@ -308,6 +316,63 @@ describe('data endpoints', () => {
 			});
 		});
 
+		describe('POST /data/category/:categoryId/organization/:organization/query with a filter on a restricted field', () => {
+			const path = '/data/category/1/organization/STUDY-A/query';
+			const filter = (fieldName: string) => ({ op: 'in', content: { fieldName, value: ['x'] } });
+
+			const rejected = {
+				'a field of the restricted entity': filter('income'),
+				'another field of the restricted entity': filter('ethnicity'),
+				'the restricted field': filter('submitter_participant_id'),
+				'a field in another letter case': filter('Income'),
+				'a greater than filter': { op: 'gt', content: { fieldName: 'income', value: 3 } },
+				'a lesser than filter': { op: 'lt', content: { fieldName: 'income', value: 3 } },
+				'a filter combined with allowed ones': { op: 'and', content: [filter('gender'), filter('income')] },
+				'a filter nested in and, or and not': {
+					op: 'and',
+					content: [
+						filter('gender'),
+						{ op: 'not', content: [{ op: 'or', content: [filter('gender'), filter('ethnicity')] }] },
+					],
+				},
+			};
+
+			for (const [name, sqon] of Object.entries(rejected)) {
+				it(`rejects ${name}, without querying`, async () => {
+					const { status, body } = await server.request('POST', path, { as: 'reader', body: sqon });
+
+					assert.equal(status, 400);
+					assert.match(JSON.stringify(body), /can't filter by/);
+					assert.equal(lyric.getSubmittedDataByOrganization.mock.callCount(), 0);
+				});
+			}
+
+			it('names the fields that are not allowed', async () => {
+				const sqon = { op: 'and', content: [filter('gender'), filter('income'), filter('submitter_participant_id')] };
+				const { body } = await server.request('POST', path, { as: 'reader', body: sqon });
+
+				assert.match(JSON.stringify(body), /income, submitter_participant_id/);
+				assert.doesNotMatch(JSON.stringify(body), /gender/);
+			});
+
+			it('rejects it in every view, and when only the restricted entity is asked for', async () => {
+				for (const query of ['?view=compound', '?view=flat', '?entityName=sociodemographic']) {
+					const { status } = await server.request('POST', path + query, { as: 'reader', body: filter('income') });
+					assert.equal(status, 400, query);
+				}
+			});
+
+			it('allows filters on the other fields, including the ones the restricted entity shares', async () => {
+				for (const fieldName of ['gender', 'drug', 'study_id']) {
+					const sqon = filter(fieldName);
+					const { status } = await server.request('POST', path, { as: 'reader', body: sqon });
+
+					assert.equal(status, 200, fieldName);
+					assert.deepEqual(sqonSentToLyric(), sqon);
+				}
+			});
+		});
+
 		describe('GET /data/category/:categoryId/id/:systemId', () => {
 			it('does not return a record of the restricted entity, and answers as if it did not exist', async () => {
 				const restricted = await server.request('GET', '/data/category/1/id/STUDY-A-sociodemographic', {
@@ -359,6 +424,23 @@ describe('data endpoints', () => {
 		}
 	});
 
+	describe('filters of users that are not restricted', () => {
+		for (const as of ['writer', 'admin'] as const) {
+			it(`are accepted on any field for ${as}`, async () => {
+				for (const fieldName of ['income', 'ethnicity', 'submitter_participant_id']) {
+					const sqon = { op: 'in', content: { fieldName, value: ['x'] } };
+					const { status } = await server.request('POST', '/data/category/1/organization/STUDY-A/query', {
+						as,
+						body: sqon,
+					});
+
+					assert.equal(status, 200, fieldName);
+					assert.deepEqual(sqonSentToLyric(), sqon);
+				}
+			});
+		}
+	});
+
 	describe('restrictions are per study', () => {
 		it('restricts a user with WRITE access to one study only in the study they can just read', async () => {
 			const writable = await server.request('GET', '/data/category/1/organization/STUDY-A', { as: 'writerAReaderB' });
@@ -367,6 +449,22 @@ describe('data endpoints', () => {
 			const readOnly = await server.request('GET', '/data/category/2/organization/STUDY-B', { as: 'writerAReaderB' });
 			assertNoRestrictedData(readOnly.body);
 			assertContains(readOnly.body, 'Female');
+		});
+
+		it('only rejects filters on restricted fields in the study they can just read', async () => {
+			const sqon = { op: 'in', content: { fieldName: 'income', value: ['x'] } };
+
+			const writable = await server.request('POST', '/data/category/1/organization/STUDY-A/query', {
+				as: 'writerAReaderB',
+				body: sqon,
+			});
+			assert.equal(writable.status, 200);
+
+			const readOnly = await server.request('POST', '/data/category/2/organization/STUDY-B/query', {
+				as: 'writerAReaderB',
+				body: sqon,
+			});
+			assert.equal(readOnly.status, 400);
 		});
 	});
 
