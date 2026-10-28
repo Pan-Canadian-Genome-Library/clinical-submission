@@ -38,9 +38,9 @@ const getRefreshToken = async (req: Request, res: Response): Promise<void | null
 		return;
 	}
 
-	const { refreshToken, refreshTokenIat } = account;
+	const { refreshToken, refreshTokenIat, refreshTokenLifetime } = account;
 
-	const refreshTokenExpiry = calculateRefreshTokenExpiry(refreshTokenIat);
+	const refreshTokenExpiry = calculateRefreshTokenExpiry(refreshTokenIat, refreshTokenLifetime);
 
 	const response = { refreshToken, refreshTokenExpiry };
 	res.status(200).json(response);

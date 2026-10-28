@@ -77,6 +77,7 @@ export const oidcTokenResponseSchema = z
 		refresh_token: z.string(),
 		refresh_token_iat: z.number(),
 		id_token: z.string(),
+		refresh_token_lifetime: z.number(),
 	})
 	.or(
 		z.object({

@@ -24,6 +24,7 @@ export const sessionAccount = z.object({
 	accessToken: z.string(),
 	refreshToken: z.string(),
 	refreshTokenIat: z.number().int(),
+	refreshTokenLifetime: z.number(),
 });
 export type SessionAccount = z.infer<typeof sessionAccount>;
 

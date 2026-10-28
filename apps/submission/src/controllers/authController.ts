@@ -27,14 +27,12 @@ import { lyricProvider } from '@/core/provider.js';
 import { exchangeCodeForTokens, getOidcAuthorizeUrl, refreshUserSession } from '@/external/oidcAuthenticationClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 
-/** 21 days, in seconds */
-const REFRESH_TOKEN_LIFETIME = 1814400;
 /**
  * Calculate the expiry time, in seconds, for the refresh token.
  * Result must be multiplied by 1000 (for milliseconds) to be converted to a JS Date object.
  */
-export const calculateRefreshTokenExpiry = (refreshTokenIat: number): number => {
-	return REFRESH_TOKEN_LIFETIME + refreshTokenIat;
+export const calculateRefreshTokenExpiry = (refreshTokenIat: number, refreshTokenLifetime: number): number => {
+	return refreshTokenIat + refreshTokenLifetime;
 };
 
 const login = async (request: Request, response: Response) => {
@@ -114,7 +112,10 @@ const token = validateRequest(OIDCCodeResponse, async (request, response, next) 
 		 */
 		const tokenIssueTime = tokenData.iat * 1000;
 
-		const tokenExpiryTime = calculateRefreshTokenExpiry(refreshTokenResponse.refresh_token_iat);
+		const tokenExpiryTime = calculateRefreshTokenExpiry(
+			refreshTokenResponse.refresh_token_iat,
+			refreshTokenResponse.refresh_token_lifetime,
+		);
 
 		response.render('token.njk', {
 			app_title: 'Clinical Submission',
@@ -123,6 +124,7 @@ const token = validateRequest(OIDCCodeResponse, async (request, response, next) 
 			sub: tokenData.sub,
 
 			accessToken: refreshTokenResponse.refresh_token,
+			refreshTokenLifetime: refreshTokenResponse.refresh_token_lifetime,
 			expires: new Date(tokenExpiryTime * 1000).toLocaleString('en-CA', { dateStyle: 'short', timeStyle: 'medium' }),
 			valid_till: tokenExpiryTime,
 			idp_name: tokenData.idp_name,

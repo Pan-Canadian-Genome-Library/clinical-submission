@@ -122,6 +122,7 @@ const authToken = validateRequest({}, async (request, response) => {
 			accessToken: tokenResponse.access_token,
 			refreshToken: tokenResponse.refresh_token,
 			refreshTokenIat: tokenResponse.refresh_token_iat,
+			refreshTokenLifetime: tokenResponse.refresh_token_lifetime,
 		};
 
 		const sessionUserAliasing: SessionUser = {
