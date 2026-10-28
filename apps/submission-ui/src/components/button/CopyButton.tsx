@@ -18,20 +18,12 @@
  */
 
 import clsx from 'clsx';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import CopyIcon from '@/components/icons/CopyIcon';
 
 // how long to show "Copied" appearance, in milliseconds
 const copiedStateDelayMs = 500;
-
-const copyTokenClick = async (textToCopy: string) => {
-	try {
-		await navigator.clipboard.writeText(textToCopy);
-	} catch (e) {
-		console.error(e);
-	}
-};
 
 /**
  * React component for adding a button that allows the user to copy a provided string.
@@ -46,16 +38,36 @@ const CopyButton = ({
 	textToCopy: string;
 }) => {
 	const [isCopying, setIsCopying] = useState<boolean>(false);
+	const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	// copy textToCopy to keyboard, and switch button to/from "Copied" appearance
 	const handleClick = async () => {
+		// clear existing timeout if user clicks multiple times
+		if (timeoutRef.current) clearTimeout(timeoutRef.current);
 		if (isCopying) return;
+
 		setIsCopying(true);
-		await copyTokenClick(textToCopy);
-		setTimeout(() => {
+
+		// try to copy text to cipload
+		try {
+			await navigator.clipboard.writeText(textToCopy);
+			timeoutRef.current = setTimeout(() => {
+				setIsCopying(false);
+			}, copiedStateDelayMs);
+		} catch (e) {
 			setIsCopying(false);
-		}, copiedStateDelayMs);
+			console.error(e);
+		}
 	};
+
+	// cleanup timeout on unmount
+	useEffect(() => {
+		return () => {
+			if (timeoutRef.current) {
+				clearTimeout(timeoutRef.current);
+			}
+		};
+	}, []);
 
 	return (
 		<button

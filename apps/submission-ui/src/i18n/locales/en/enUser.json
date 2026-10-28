@@ -6,7 +6,7 @@
 		"userInfo": "User Information",
 		"tokenInfo": "Token Information",
 		"accessTokenTitle": "Access Token",
-		"accessTokenDescription": "You don't need access token to submit tabular data, but you will need it to submit genomic files. To generate a new token, please logout then log back in.",
+		"accessTokenDescription": "You don't need an access token to submit tabular data, but you will need it to submit genomic files. To generate a new token, please logout then log back in.",
 		"copy": "Copy",
 		"copied": "Copied",
 		"fields": {

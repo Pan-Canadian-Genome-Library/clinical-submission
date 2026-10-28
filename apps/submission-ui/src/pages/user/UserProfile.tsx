@@ -89,7 +89,7 @@ const UserProfile = () => {
 	const userRole = dataAdmin ? t('common:user.roles.dataAdmin') : t('common:user.roles.dataSubmitter');
 
 	// get token expiry datetime & user's timezone
-	const refreshTokenExpires = new Date(refreshTokenExpiry * 1000)?.toLocaleString(t('common:localeCode'), {
+	const refreshTokenExpires = new Date(refreshTokenExpiry * 1000).toLocaleString(t('common:localeCode'), {
 		dateStyle: 'short',
 		timeStyle: 'medium',
 	});
@@ -122,7 +122,7 @@ const UserProfile = () => {
 
 				<hr className="border-0 border-t border-gray-200 mb-6" />
 				<div className="pt-4 pb-8">
-					<h2 className="text-1xl font-jost font-semibold text-gray-900 pb-4">{t('common:user.userInfo')}</h2>
+					<h2 className="font-jost font-semibold text-gray-900 pb-4">{t('common:user.userInfo')}</h2>
 
 					<div className="grid grid-cols-2">
 						<div>
@@ -149,15 +149,13 @@ const UserProfile = () => {
 				<div className="pt-4">
 					<div className="grid grid-cols-2">
 						<div>
-							<h2 className="text-1xl font-jost font-semibold text-gray-900 pb-4">{t('common:user.tokenInfo')}</h2>
+							<h2 className="font-jost font-semibold text-gray-900 pb-4">{t('common:user.tokenInfo')}</h2>
 							{tokenFields.map(({ label, value }) => (
 								<StudyField key={label} label={label} value={value} />
 							))}
 						</div>
 						<div>
-							<h2 className="text-1xl font-jost font-semibold text-gray-900 pb-4">
-								{t('common:user.accessTokenTitle')}
-							</h2>
+							<h2 className="font-jost font-semibold text-gray-900 pb-4">{t('common:user.accessTokenTitle')}</h2>
 							<p className="mb-2">{t('common:user.accessTokenDescription')}</p>
 							<div className="flex flex-col items-end">
 								<input
