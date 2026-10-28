@@ -30,6 +30,9 @@ import PageLayout from '@/components/layouts/PageLayout';
 import SectionLayout from '@/components/layouts/SectionLayout';
 import Text from '@/components/typography/Text';
 import { useUserContext } from '@/providers/UserProvider';
+import i18n from '@/i18n/translations';
+
+const { language } = i18n;
 
 const UserProfile = () => {
 	const { isLoading, user, isLoggedIn } = useUserContext();
@@ -89,11 +92,11 @@ const UserProfile = () => {
 	const userRole = dataAdmin ? t('common:user.roles.dataAdmin') : t('common:user.roles.dataSubmitter');
 
 	// get token expiry datetime & user's timezone
-	const refreshTokenExpires = new Date(refreshTokenExpiry * 1000).toLocaleString(t('common:localeCode'), {
+	const refreshTokenExpires = new Date(refreshTokenExpiry * 1000).toLocaleString(language, {
 		dateStyle: 'short',
 		timeStyle: 'medium',
 	});
-	const userTimeZone = Intl.DateTimeFormat(t('common:localeCode'), { timeZoneName: 'short' })
+	const userTimeZone = Intl.DateTimeFormat(language, { timeZoneName: 'short' })
 		.formatToParts()
 		.find((part) => part.type === 'timeZoneName')?.value;
 
