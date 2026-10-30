@@ -34,7 +34,7 @@ import { hasAllowedAccess } from '@/external/pcglAuthZClient.js';
 import { generateHash } from '@/internal/id-manager/utils.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import {
-	filterAllowedEntityNames,
+	excludeRestrictedEntityNames,
 	findRestrictedFilterFields,
 	isRestrictedEntityName,
 	type SchemaFields,
@@ -49,29 +49,15 @@ const defaultPageSize = 20;
 const defaultView = VIEW_TYPE.Values.flat;
 
 /**
- * The schemas of the category's active dictionary. They are only needed to apply the restrictions,
- * so they are only read when the data is restricted.
+ * Fetches the schemas of the category's active Data Dictionary.
+ *
+ * @param categoryId The category ID of the dictionary to fetch.
+ * @returns An array of the dictionary's schemas, or an empty array if the category has no active dictionary.
  */
-const getSchemasWhenRestricted = async (restrict: boolean, categoryId: number): Promise<SchemaFields[]> => {
-	if (!restrict) {
-		return [];
-	}
-
+const getActiveDictionarySchemas = async (categoryId: number): Promise<SchemaFields[]> => {
 	const currentDictionary = await lyricProvider.services.dictionary.getActiveDictionaryByCategory(categoryId);
 	return currentDictionary?.dictionary ?? [];
 };
-
-/**
- * Resolves the `entityName` filter to use: `requested` unchanged when `restrict` is false,
- * otherwise `requested` narrowed to the entity names allowed by the dictionary's schemas.
- */
-const resolveRestrictedEntityNames = (restrict: boolean, schemas: SchemaFields[], requested: string[]): string[] =>
-	restrict
-		? filterAllowedEntityNames(
-				schemas.map((schema) => schema.name),
-				requested,
-			)
-		: requested;
 
 /**
  * Adds internal PCGL system IDs, then strips restricted entities/fields when `restrict` is true.
@@ -162,8 +148,14 @@ const getCategoryById = validateRequest(
 			const hasWriteAccess = hasAllowedAccess(studyByCategory.study_id, 'WRITE', user);
 			const restrict = shouldRestrictStudyData(hasReadAccess, hasWriteAccess);
 
-			const schemas = await getSchemasWhenRestricted(restrict, category.id);
-			const entityName = resolveRestrictedEntityNames(restrict, schemas, asArray(req.query.entityName || []));
+			const schemas = restrict ? await getActiveDictionarySchemas(category.id) : [];
+			const requestedEntityNames = asArray(req.query.entityName || []);
+			const entityName = restrict
+				? excludeRestrictedEntityNames(
+						schemas.map((schema) => schema.name),
+						requestedEntityNames,
+					)
+				: requestedEntityNames;
 
 			if (restrict && entityName.length === 0) {
 				return res.status(200).send({
@@ -311,8 +303,14 @@ const getCategoryByOrganization = validateRequest(
 			const hasWriteAccess = hasAllowedAccess(organization, 'WRITE', user);
 			const restrict = shouldRestrictStudyData(hasReadAccess, hasWriteAccess);
 
-			const schemas = await getSchemasWhenRestricted(restrict, category.id);
-			const entityName = resolveRestrictedEntityNames(restrict, schemas, asArray(req.query.entityName || []));
+			const schemas = restrict ? await getActiveDictionarySchemas(category.id) : [];
+			const requestedEntityNames = asArray(req.query.entityName || []);
+			const entityName = restrict
+				? excludeRestrictedEntityNames(
+						schemas.map((schema) => schema.name),
+						requestedEntityNames,
+					)
+				: requestedEntityNames;
 
 			if (restrict && entityName.length === 0) {
 				return res.status(200).send({
@@ -402,7 +400,7 @@ const getSubmittedDataByQuery = validateRequest(
 			const hasWriteAccess = hasAllowedAccess(organization, 'WRITE', user);
 			const restrict = shouldRestrictStudyData(hasReadAccess, hasWriteAccess);
 
-			const schemas = await getSchemasWhenRestricted(restrict, category.id);
+			const schemas = restrict ? await getActiveDictionarySchemas(category.id) : [];
 
 			// A filter on a restricted field would let a user find out the restricted values by what a query
 			// matches, even though the field is removed from the response, so reject it instead of ignoring it
@@ -413,7 +411,13 @@ const getSubmittedDataByQuery = validateRequest(
 				);
 			}
 
-			const entityName = resolveRestrictedEntityNames(restrict, schemas, asArray(req.query.entityName || []));
+			const requestedEntityNames = asArray(req.query.entityName || []);
+			const entityName = restrict
+				? excludeRestrictedEntityNames(
+						schemas.map((schema) => schema.name),
+						requestedEntityNames,
+					)
+				: requestedEntityNames;
 
 			if (restrict && entityName.length === 0) {
 				return res.status(200).send({

@@ -23,7 +23,7 @@ import { describe, it } from 'node:test';
 import { type SubmittedDataResponse } from '@overture-stack/lyric';
 
 import {
-	filterAllowedEntityNames,
+	excludeRestrictedEntityNames,
 	findRestrictedFilterFields,
 	getRestrictedFilterFieldNames,
 	getSqonFieldNames,
@@ -31,7 +31,7 @@ import {
 	isRestrictedFieldName,
 	shouldRestrictStudyData,
 	stripRestrictedData,
-} from './accessRestrictionService.js';
+} from '../service/accessRestrictionService.js';
 
 const submittedDataResponse = (partial: Pick<SubmittedDataResponse, 'entityName' | 'data'>): SubmittedDataResponse => ({
 	isValid: true,
@@ -81,15 +81,17 @@ describe('isRestrictedFieldName', () => {
 	});
 });
 
-describe('filterAllowedEntityNames', () => {
+describe('excludeRestrictedEntityNames', () => {
 	const allEntityNames = ['participant', 'treatment', 'sociodemographic'];
 
 	it('returns all non-restricted entities when nothing was explicitly requested', () => {
-		assert.deepEqual(filterAllowedEntityNames(allEntityNames, []), ['participant', 'treatment']);
+		assert.deepEqual(excludeRestrictedEntityNames(allEntityNames, []), ['participant', 'treatment']);
 	});
 
 	it('intersects an explicit request with the allowed set', () => {
-		assert.deepEqual(filterAllowedEntityNames(allEntityNames, ['participant', 'sociodemographic']), ['participant']);
+		assert.deepEqual(excludeRestrictedEntityNames(allEntityNames, ['participant', 'sociodemographic']), [
+			'participant',
+		]);
 	});
 
 	it('returns an empty array when every requested entity is restricted', () => {
@@ -97,11 +99,11 @@ describe('filterAllowedEntityNames', () => {
 		// (drizzle's `or()` with zero arguments matches everything), so callers must check for
 		// an empty result themselves and short-circuit before forwarding it as the entityName
 		// filter, rather than assuming an empty filter means "no filter" here too.
-		assert.deepEqual(filterAllowedEntityNames(allEntityNames, ['sociodemographic']), []);
+		assert.deepEqual(excludeRestrictedEntityNames(allEntityNames, ['sociodemographic']), []);
 	});
 
 	it('returns an empty array when the dictionary has no non-restricted entities at all', () => {
-		assert.deepEqual(filterAllowedEntityNames(['sociodemographic'], []), []);
+		assert.deepEqual(excludeRestrictedEntityNames(['sociodemographic'], []), []);
 	});
 });
 

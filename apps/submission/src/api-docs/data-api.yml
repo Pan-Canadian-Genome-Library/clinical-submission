@@ -166,7 +166,10 @@
 /data/category/{categoryId}/organization/{organization}/query:
   post:
     summary: Retrieve Submitted Data filtered by search parameters provided in the request body
-    description: Users with READ access only to the study are rejected with a 400 if the filter uses the submitter ID field, or a field that only exists in the `sociodemographic` entity.
+    description: |
+      Filter submitted data with a SQON, a JSON object that combines conditions on entity fields using operators such as `and`, `or`, `not`, `in`, `gt` and `lt`. See the request body examples.
+
+      Users with only READ access to the study receive responses without personal information: `sociodemographic` records and the `submitter_participant_id` field are removed. Their requests are rejected with a 400 if the filter uses `submitter_participant_id` or a field that only exists in `sociodemographic`.
     tags:
       - Data
     security:
