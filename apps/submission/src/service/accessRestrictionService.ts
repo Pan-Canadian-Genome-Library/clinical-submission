@@ -66,16 +66,14 @@ export const isRestrictedFieldName = (fieldName: string): boolean =>
 	fieldName.trim().toLowerCase() === RESTRICTED_FIELD_NAME;
 
 /**
- * Given the full list of entity names in a category's dictionary and the entity names the
- * caller explicitly requested (empty means "all"), returns the concrete `entityName` filter to
- * send to Lyric with the restricted entity removed. Excluding the restricted entity here,
- * before the query runs, avoids reading its rows from the database at all.
+ * Removes the {@link RESTRICTED_ENTITY_NAME} schema (`sociodemographic`) from a list of entity names.
+ * Names are matched case-insensitively, in both their singular and pluralized forms.
  *
- * Can return an empty array, meaning every requested entity was restricted. Callers must check
- * for that and short-circuit before calling into Lyric rather than forwarding it as the
- * `entityName` filter: an empty array is NOT equivalent to "match nothing" in Lyric's own query
- * layer (`or()` with no arguments builds no filter at all, which would return everything,
- * unfiltered).
+ * @param allEntityNames The names of every schema in a Data Dictionary. They are used when `requested` is empty.
+ * @param requested The entity names to filter. An empty array selects every name in `allEntityNames`.
+ * @returns The names from `requested`, or from `allEntityNames` when `requested` is empty, without the
+ * restricted entity. Names in `requested` are not checked against `allEntityNames`. The array is empty when
+ * every selected name is restricted.
  */
 export const excludeRestrictedEntityNames = (allEntityNames: string[], requested: string[]): string[] => {
 	const base = requested.length > 0 ? requested : allEntityNames;
@@ -173,8 +171,14 @@ export const getRestrictedFilterFieldNames = (schemas: ReadonlyArray<SchemaField
 };
 
 /**
- * Finds the field names in the SQON that correspond to restricted fields, based on the provided schemas.
- * Field names are returned in lowercase.
+ * Finds the field names in the SQON filter that cannot be used as filters by users with only READ access.
+ * This selects any field named {@link RESTRICTED_FIELD_NAME} (`submitter_participant_id`), and any field of the
+ * {@link RESTRICTED_ENTITY_NAME} schema (`sociodemographic`) that no other schema in `schemas` contains.
+ * Field names are matched case-insensitively and returned as they are spelled in the SQON, without duplicates.
+ *
+ * @param sqon The SQON from the request body. A value that is not a SQON object has no field names.
+ * @param schemas The schemas of the category's Data Dictionary.
+ * @returns The restricted field names found in the SQON, or an empty array when it uses none.
  */
 export const findRestrictedFilterFields = (sqon: unknown, schemas: ReadonlyArray<SchemaFields>): string[] => {
 	const restricted = new Set(getRestrictedFilterFieldNames(schemas));
