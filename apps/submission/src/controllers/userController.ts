@@ -62,7 +62,7 @@ const getUserEditableStudies = async (req: Request, res: Response, next: NextFun
 		const studyRepo = studyService(getDbInstance());
 		const userEditableStudies = [];
 
-		for (const studyId in editableStudies) {
+		for (const studyId of editableStudies) {
 			const studyResponse = await studyRepo.getStudyById(studyId);
 			const { studyName } = studyResponse || {};
 			studyName && userEditableStudies.push(studyName);
