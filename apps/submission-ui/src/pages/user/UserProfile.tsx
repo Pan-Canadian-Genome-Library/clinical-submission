@@ -20,7 +20,6 @@
 import { useTranslation } from 'react-i18next';
 
 import useGetRefreshToken from '@/api/queries/useGetRefreshToken';
-import useGetAllStudies from '@/api/queries/useGetAllStudies';
 import useGetUserEditableStudies from '@/api/queries/useGetUserEditableStudies';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import Spinner from '@/components/Spinner';
@@ -46,7 +45,6 @@ const UserProfile = () => {
 		isLoading: userEditableStudiesLoading,
 		isError: userEditableStudiesError,
 	} = useGetUserEditableStudies();
-	const { data: allStudies, isLoading: allStudiesLoading, isError: allStudiesError } = useGetAllStudies();
 
 	const { refreshToken, refreshTokenExpiry = 0 } = refreshTokenResponse || {};
 	const { dataAdmin, emails, familyName, givenName, idpName } = user || {};
@@ -55,7 +53,7 @@ const UserProfile = () => {
 		i18n: { t },
 	} = useTranslation();
 
-	if (isLoading || userEditableStudiesLoading || refreshTokenLoading || allStudiesLoading) {
+	if (isLoading || userEditableStudiesLoading || refreshTokenLoading) {
 		return <Spinner label={t('common:user.loading')} />;
 	}
 
@@ -67,14 +65,7 @@ const UserProfile = () => {
 		);
 	}
 
-	if (
-		allStudiesError ||
-		refreshTokenError ||
-		userEditableStudiesError ||
-		!allStudies ||
-		!refreshToken ||
-		!userEditableStudies
-	) {
+	if (refreshTokenError || userEditableStudiesError || !refreshToken || !userEditableStudies) {
 		return (
 			<div className="p-8">
 				<Text>{t('common:user.error')}</Text>
@@ -111,9 +102,9 @@ const UserProfile = () => {
 		{ label: t('common:user.fields.tokenExpires'), value: `${refreshTokenExpires} ${userTimeZone}` },
 	];
 
-	// data admins: list all studies
+	// data admins: show "All Studies"
 	// data submitters: list the user's editable studies
-	const studies = dataAdmin ? allStudies.map((study) => study.studyName) : userEditableStudies;
+	const studies = dataAdmin ? [t('common:user.allStudies')] : userEditableStudies;
 
 	return (
 		<PageLayout>
