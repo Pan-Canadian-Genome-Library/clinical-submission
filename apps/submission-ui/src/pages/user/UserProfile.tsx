@@ -29,9 +29,6 @@ import PageLayout from '@/components/layouts/PageLayout';
 import SectionLayout from '@/components/layouts/SectionLayout';
 import Text from '@/components/typography/Text';
 import { useUserContext } from '@/providers/UserProvider';
-import i18n from '@/i18n/translations';
-
-const { language } = i18n;
 
 const UserProfile = () => {
 	const { isLoading, user, isLoggedIn } = useUserContext();
@@ -50,7 +47,7 @@ const UserProfile = () => {
 	const { dataAdmin, emails, familyName, givenName, idpName } = user || {};
 
 	const {
-		i18n: { t },
+		i18n: { language, t },
 	} = useTranslation();
 
 	if (isLoading || userEditableStudiesLoading || refreshTokenLoading) {

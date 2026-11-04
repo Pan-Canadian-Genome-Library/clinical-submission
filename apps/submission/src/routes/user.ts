@@ -29,8 +29,8 @@ export const userRouter: Router = (() => {
 	router.use(urlencoded({ extended: false }));
 
 	// endpoints for Submission UI
-	router.get('/editable-studies', sessionAuthMiddleware, getUserEditableStudies);
-	router.get('/refresh-token', sessionAuthMiddleware, getRefreshToken);
+	router.get('/editable-studies', sessionAuthMiddleware(), getUserEditableStudies);
+	router.get('/refresh-token', sessionAuthMiddleware(), getRefreshToken);
 
 	return router;
 })();
