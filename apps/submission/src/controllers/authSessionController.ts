@@ -128,6 +128,7 @@ const authToken = validateRequest({}, async (request, response) => {
 			accessToken: tokenResponse.access_token,
 			refreshToken: tokenResponse.refresh_token,
 			refreshTokenIat: tokenResponse.refresh_token_iat,
+			refreshTokenLifetime: tokenResponse.refresh_token_lifetime,
 		};
 
 		const sessionUserAliasing: SessionUser = {
@@ -153,6 +154,7 @@ const authToken = validateRequest({}, async (request, response) => {
 				};
 			}),
 			groups: pcglAuthzResponse.groups,
+			idpName: oidcDataResponse.idp_name,
 		};
 
 		request.session.account = userAccountAliasing;
@@ -199,6 +201,7 @@ const getUser = validateRequest({}, async (request, response) => {
 					siteAdmin: userSession.siteAdmin,
 					dataAdmin: userSession.dataAdmin,
 					groups: userSession.groups,
+					idpName: userSession.idpName,
 				}
 			: undefined,
 	};
