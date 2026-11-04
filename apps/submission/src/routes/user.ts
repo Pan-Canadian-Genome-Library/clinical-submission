@@ -20,7 +20,7 @@
 import express, { json, Router, urlencoded } from 'express';
 
 import { getRefreshToken, getUserEditableStudies } from '@/controllers/userController.js';
-import { authMiddleware } from '@/middleware/auth.js';
+import { sessionAuthMiddleware } from '@/middleware/auth.js';
 
 export const userRouter: Router = (() => {
 	const router = express.Router();
@@ -29,8 +29,8 @@ export const userRouter: Router = (() => {
 	router.use(urlencoded({ extended: false }));
 
 	// endpoints for Submission UI
-	router.get('/editable-studies', authMiddleware({ requireSession: true }), getUserEditableStudies);
-	router.get('/refresh-token', authMiddleware({ requireSession: true }), getRefreshToken);
+	router.get('/editable-studies', sessionAuthMiddleware, getUserEditableStudies);
+	router.get('/refresh-token', sessionAuthMiddleware, getRefreshToken);
 
 	return router;
 })();
