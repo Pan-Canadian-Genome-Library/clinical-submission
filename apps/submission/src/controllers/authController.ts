@@ -27,13 +27,7 @@ import { lyricProvider } from '@/core/provider.js';
 import { exchangeCodeForTokens, getOidcAuthorizeUrl, refreshUserSession } from '@/external/oidcAuthenticationClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 
-/**
- * Calculate the expiry time, in seconds, for the refresh token.
- * Result must be multiplied by 1000 (for milliseconds) to be converted to a JS Date object.
- */
-export const calculateRefreshTokenExpiry = (refreshTokenIat: number, refreshTokenLifetime: number): number => {
-	return refreshTokenIat + refreshTokenLifetime;
-};
+import { calculateRefreshTokenExpiry } from './utils.js';
 
 const login = async (request: Request, response: Response) => {
 	response.render('login.njk', {

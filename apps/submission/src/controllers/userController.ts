@@ -22,7 +22,7 @@ import { logger } from '@/common/logger.js';
 import { getDbInstance } from '@/db/index.js';
 import { studyService } from '@/service/studyService.js';
 
-import { calculateRefreshTokenExpiry } from './authController.js';
+import { calculateRefreshTokenExpiry } from './utils.js';
 
 // NOTE
 // UI-only requests have been deliberately omitted from Swagger docs.
@@ -34,7 +34,7 @@ import { calculateRefreshTokenExpiry } from './authController.js';
 const getRefreshToken = async (req: Request, res: Response): Promise<void | null> => {
 	const { account } = req.session;
 	if (!account) {
-		res.status(401).send('Session required.');
+		res.status(401).json({ error: 'Unauthorized', message: 'Session required.' });
 		return;
 	}
 
@@ -52,7 +52,7 @@ const getRefreshToken = async (req: Request, res: Response): Promise<void | null
 const getUserEditableStudies = async (req: Request, res: Response, next: NextFunction): Promise<void | null> => {
 	const { user } = req.session;
 	if (!user) {
-		res.status(400).send('Session required.');
+		res.status(401).json({ error: 'Unauthorized', message: 'Session required.' });
 		return;
 	}
 

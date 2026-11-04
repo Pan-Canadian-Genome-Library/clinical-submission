@@ -35,8 +35,14 @@ import {
  * if valid, the user information returned from the authz service is added to `req.user`.
  * Optionally, when `requireAdmin` is `true`, the middleware restricts access to admin users only.
  * Any additional checks for user permissions must be done on the controller level from the passed `req.user` object
+ *
+ * @param requireAdmin Boolean for if the user must be an admin or not
+ * @param requireSession Boolean for if a browser session is required or optional
  */
-export const authMiddleware = ({ requireAdmin = false }: { requireAdmin?: boolean } = {}) => {
+export const authMiddleware = ({
+	requireAdmin = false,
+	requireSession = false,
+}: { requireAdmin?: boolean; requireSession?: boolean } = {}) => {
 	const { enabled } = authConfig;
 	return async (req: PCGLRequestWithUser, _: Response, next: NextFunction) => {
 		try {
@@ -44,8 +50,13 @@ export const authMiddleware = ({ requireAdmin = false }: { requireAdmin?: boolea
 			if (!enabled) {
 				return next();
 			}
-			const token = extractAccessTokenFromSession(req) || extractAccessTokenFromHeader(req);
 
+			const sessionToken = extractAccessTokenFromSession(req);
+			if (requireSession && !sessionToken) {
+				throw new lyricProvider.utils.errors.Forbidden('Unauthorized: No session provided');
+			}
+
+			const token = sessionToken || extractAccessTokenFromHeader(req);
 			if (!token) {
 				throw new lyricProvider.utils.errors.Forbidden('Unauthorized: No access token provided');
 			}
