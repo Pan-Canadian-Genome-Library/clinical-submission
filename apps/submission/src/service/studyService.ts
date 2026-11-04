@@ -44,6 +44,8 @@ const convertFromRecordToStudyDTO = (study: StudyRecord): StudyDTO => {
 		collaborators: study.collaborators,
 		publicationLinks: study.publication_links,
 		defaultTranslation: study.default_translation,
+		duoPermission: study.duo_permission,
+		diseaseSpecificModifier: study.disease_specific_modifier,
 		createdAt: study.created_at,
 		updatedAt: study.updated_at,
 		categoryId: study.category_id,
@@ -204,6 +206,8 @@ const studyService = (db: PostgresDb) => ({
 					collaborators: studyData.collaborators,
 					category_id: studyData.categoryId,
 					publication_links: studyData.publicationLinks,
+					duo_permission: studyData.duoPermission,
+					disease_specific_modifier: studyData.diseaseSpecificModifier,
 				})
 				.returning();
 
@@ -278,6 +282,8 @@ const studyService = (db: PostgresDb) => ({
 					publication_links: studyData.publicationLinks,
 					category_id: studyData.categoryId,
 					default_translation: studyData.defaultTranslation,
+					duo_permission: studyData.duoPermission,
+					disease_specific_modifier: studyData.diseaseSpecificModifier,
 					updated_at: sql`NOW()`,
 				})
 				.where(eq(study.study_id, studyId))
@@ -420,9 +426,14 @@ const studyService = (db: PostgresDb) => ({
 			}
 		}
 	},
-	updateStudyDacId: async (studyData: { studyId: string; dacId: string }): Promise<StudyResponse | undefined> => {
+	updateStudyDacId: async (
+		studyData: { studyId: string; dacId: string },
+		transaction?: PostgresTransaction,
+	): Promise<StudyResponse | undefined> => {
+		const dbDriver = transaction ? transaction : db;
+
 		try {
-			const updatedRecord = await db
+			const updatedRecord = await dbDriver
 				.update(study)
 				.set({
 					dac_id: studyData.dacId,
@@ -432,7 +443,7 @@ const studyService = (db: PostgresDb) => ({
 				.returning();
 
 			if (updatedRecord[0]) {
-				return await convertFromRecordToStudyResponse(updatedRecord[0], db);
+				return await convertFromRecordToStudyResponse(updatedRecord[0], dbDriver);
 			}
 			return;
 		} catch (error) {

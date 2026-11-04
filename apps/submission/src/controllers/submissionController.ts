@@ -366,7 +366,7 @@ const getSubmissionById = validateRequest(
 
 			const organization = submission?.organization;
 
-			if (!hasAllowedAccess(organization, 'READ', user)) {
+			if (!hasAllowedAccess(organization, 'WRITE', user)) {
 				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 			}
 
@@ -404,7 +404,7 @@ const getSubmissionDetailsById = validateRequest(
 
 			const organization = submission.organization;
 
-			if (!hasAllowedAccess(organization, 'READ', user)) {
+			if (!hasAllowedAccess(organization, 'WRITE', user)) {
 				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
 			}
 
@@ -442,6 +442,12 @@ const getSubmissionsByCategory = validateRequest(
 				throw new lyricProvider.utils.errors.NotFound(`No Category with ID or Alias - ${categoryIdOrAlias} found.`);
 			}
 
+			// When the user provides an organization, check it before querying so that a user without access
+			// gets the same response whether or not that organization has any submissions
+			if (organization && !hasAllowedAccess(organization, 'WRITE', user)) {
+				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
+			}
+
 			const submissionsResult = await lyricProvider.services.submission.getSubmissionsByCategory(
 				category.id,
 				{ page, pageSize },
@@ -452,12 +458,12 @@ const getSubmissionsByCategory = validateRequest(
 				throw new lyricProvider.utils.errors.NotFound(`Submission not found`);
 			}
 
-			const retrievedOrg = submissionsResult.result[0]?.organization;
-			// User can provide an organization optionally, if they do, we check against that input instead of the returned org from submissionsResult
-			const orgToCheck = organization ?? retrievedOrg;
-
-			if (!hasAllowedAccess(orgToCheck || '', 'READ', user)) {
-				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
+			// Without an organization filter the page can span several organizations, so every one must be allowed
+			const returnedOrganizations = new Set(submissionsResult.result.map((submission) => submission.organization));
+			for (const returnedOrganization of returnedOrganizations) {
+				if (!hasAllowedAccess(returnedOrganization, 'WRITE', user)) {
+					throw new lyricProvider.utils.errors.Forbidden('You do not have permission to access this resource');
+				}
 			}
 
 			const response = {
@@ -498,6 +504,10 @@ const deleteSubmissionById = validateRequest(
 				throw new lyricProvider.utils.errors.BadRequest(`Submission '${submissionId}' not found`);
 			}
 
+			if (!hasAllowedAccess(submission.organization, 'WRITE', user)) {
+				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to delete this resource');
+			}
+
 			if (authEnabled && !user?.isAdmin && user?.username !== submission?.createdBy) {
 				throw new lyricProvider.utils.errors.Forbidden('You do not have permission to delete this resource');
 			}
@@ -535,6 +545,10 @@ const deleteEntityName = validateRequest(deleteEntityRequestSchema, async (req, 
 
 		if (!submission) {
 			throw new lyricProvider.utils.errors.BadRequest(`Submission '${submissionId}' not found`);
+		}
+
+		if (!hasAllowedAccess(submission.organization, 'WRITE', user)) {
+			throw new lyricProvider.utils.errors.Forbidden('You do not have permission to delete this resource');
 		}
 
 		if (authEnabled && !user?.isAdmin && user?.username !== submission?.createdBy) {
