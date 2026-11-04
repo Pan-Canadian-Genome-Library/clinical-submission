@@ -82,6 +82,24 @@ This application is a wrapper around the [@overture-stack/lyric](https://github.
 | `VALKEY_USER`               | The username for authenticating with the Valkey server.                                                                                                                                                                                                                                                                                                       | 'default'                              |
 | `VALKEY_PASSWORD`           | The password for authenticating with the Valkey server.                                                                                                                                                                                                                                                                                                       | 'valkeypass'                           |
 
+### Internal ID Generation
+
+When data is committed, each inserted record of an entity listed in `ID_MANAGER_CONFIG` gets a PCGL ID. The ID is stored against an HMAC (keyed with `ID_MANAGER_SECRET`) of the entity name, the study ID and the record's submitter value. The same submitter value therefore gets its own PCGL ID in each entity and each study.
+
+- Data read endpoints add the PCGL ID next to every configured submitter ID field, including copies of it in other entities (e.g. `submitter_participant_id` in a specimen gets the participant's PCGL ID), using the study of the top-level record.
+- `GET /data/entity/{entityName}/{externalId}/exists` requires a `study` query parameter, and only reports IDs generated in that study.
+
+#### Rehashing existing IDs
+
+IDs generated before hashes were scoped by entity and study are stored against a hash of the submitter value alone, and are not found by the current lookups. Run this once per environment, after deploying the scoped hashes:
+
+```sh
+pnpm rehash:ids          # development (tsx)
+pnpm rehash:ids:prod     # compiled build, from dist/
+```
+
+The script reads all submitted data of every study through Lyric and moves each existing ID to its new hash, in a single transaction. It logs the number of IDs updated, already migrated, and records left without an ID. When the same submitter value was shared by several studies or entities, only the first record read keeps the existing ID; the others are counted as collisions and have no ID. Running the script again updates nothing.
+
 ### Update/Create DUO Permissions in Study Table
 
 The study table has two closely related fields: duo_permission and disease_specific_modifier. The following rules govern their relationship:

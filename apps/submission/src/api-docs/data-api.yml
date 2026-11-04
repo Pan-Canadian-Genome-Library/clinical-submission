@@ -1,6 +1,7 @@
 /data/entity/{entityName}/{externalId}/exists:
   get:
     summary: Retrieve boolean if record exists
+    description: Returns `true` when a PCGL ID has been generated for the external ID of this entity in the given study, and `false` otherwise, including when the entity has no ID configuration.
     tags:
       - Data
     parameters:
@@ -16,13 +17,12 @@
         schema:
           type: string
         required: true
-        # TODO: Feature to be added
-      # - name: parentId
-      #   description: Internal ID. The PCGL sequential ID for its parent. (e.g. a study ID "S00000001")
-      #   in: query
-      #   schema:
-      #     type: string
-      #   required: false
+      - name: study
+        description: ID of the study the record was submitted to. PCGL IDs are generated per entity and per study, so the same external ID can exist in one study and not in another.
+        in: query
+        schema:
+          type: string
+        required: true
     responses:
       200:
         description: Successful response indicating a boolean result

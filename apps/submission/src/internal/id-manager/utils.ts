@@ -121,6 +121,30 @@ const generateHash = (plainText: string, secret: string, outputOptions: BinaryTo
 };
 
 /**
+ * The submitter value of a record and where it belongs, which together identify the record that a PCGL ID is
+ * generated for.
+ */
+export type EntityHashSource = {
+	/** Name of the entity in the ID manager config. Letter case and surrounding spaces are ignored. */
+	entityName: string;
+	/** ID of the study the record was submitted to. */
+	studyId: string;
+	/** The submitter value configured for the entity, such as a `submitter_participant_id`. */
+	value: string;
+};
+
+/**
+ * Generates the hash that identifies a generated PCGL ID, scoped to an entity and a study. The same submitter value
+ * gives a different hash for each entity and each study, so each of them gets its own PCGL ID.
+ *
+ * Output is base64, like `generateHash`. The entity name is lowercased and trimmed, matching how entity names are
+ * stored in the ID manager config, so `Participant` and `participant` give the same hash.
+ */
+const generateEntityHash = ({ entityName, studyId, value }: EntityHashSource, secret: string): string => {
+	return generateHash(`${entityName.toLowerCase().trim()}:${studyId}:${value}`, secret);
+};
+
+/**
  * Finds a ID for an entity based upon its Hashed ID value.
  * @param hashedValue the Hashed ID for an entity.
  * @returns `Promise<IDGenerationConfigRecord | undefined>` - A promise containing the ID record. `undefined` if not found.
@@ -167,6 +191,7 @@ function isValidStudyField(value: string): value is keyof Omit<StudyModel, 'crea
 
 export {
 	findIDByHash,
+	generateEntityHash,
 	generateHash,
 	generateID,
 	getNextSequenceValue,

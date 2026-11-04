@@ -23,7 +23,7 @@ import { z } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
-import { stringNotEmpty, stringNotEmptyOptional } from './common.js';
+import { stringNotEmpty } from './common.js';
 
 interface DataIdParams extends ParamsDictionary {
 	externalId: string;
@@ -31,16 +31,19 @@ interface DataIdParams extends ParamsDictionary {
 }
 
 interface DataIdExistsQuery extends ParsedQs {
-	parentId?: string;
+	study: string;
 }
 
+/**
+ * Request validation for `GET /data/entity/:entityName/:externalId/exists`. The entity name, the external ID and the
+ * `study` query parameter are required and must not be empty. A request that fails validation is rejected with a 400.
+ */
 export const getDataById: RequestValidation<object, DataIdExistsQuery, DataIdParams> = {
 	pathParams: z.object({
 		externalId: stringNotEmpty,
 		entityName: stringNotEmpty,
-		parentId: stringNotEmptyOptional,
 	}),
 	query: z.object({
-		parentId: stringNotEmptyOptional,
+		study: stringNotEmpty,
 	}),
 };

@@ -32,7 +32,7 @@ import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import type { IDGenerationConfigRecord } from '@/db/types.js';
 import { hasAllowedAccess } from '@/external/pcglAuthZClient.js';
-import { generateHash } from '@/internal/id-manager/utils.js';
+import { generateEntityHash } from '@/internal/id-manager/utils.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 import {
 	excludeRestrictedEntityNames,
@@ -86,27 +86,32 @@ const getDataIdExists = validateRequest(getDataById, async (req, res, next) => {
 
 	try {
 		const { externalId, entityName } = req.params;
+		const { study: studyId } = req.query;
 
 		const idConfigResult = await iimRepo.getIIMConfig(entityName);
+		const idConfig = idConfigResult[0];
 
 		//  Check if entityName exists
-		if (!idConfigResult[0]) {
+		if (!idConfig) {
 			res.status(200).send(false);
 			return;
 		}
 
-		const idmHash = generateHash(String(externalId), env.ID_MANAGER_SECRET);
+		const idmHash = generateEntityHash(
+			{ entityName: idConfig.entityName, studyId, value: String(externalId) },
+			env.ID_MANAGER_SECRET,
+		);
 
 		const generatedIdentifierResult = await iimRepo.getIDByHash(idmHash);
 
-		// Check if the hash has been generated for ANY entity
+		// Check if an ID has been generated for this value in this study
 		if (!generatedIdentifierResult[0]) {
 			res.status(200).send(false);
 			return;
 		}
 
-		// Check if both the idConfigResult id matches the configId in the generatedIdentifierResult
-		if (generatedIdentifierResult[0]?.configId !== idConfigResult[0]?.id) {
+		// Check if the generated ID belongs to the config of the requested entity
+		if (generatedIdentifierResult[0].configId !== idConfig.id) {
 			res.status(200).send(false);
 			return;
 		}
@@ -513,10 +518,15 @@ const SanitizeLyricIdsWithInternal = async (
 ): Promise<SubmittedDataResponse[]> => {
 	const db = getDbInstance();
 	const iimRepo = iimService(db);
-	const fieldNamesToAdd = new Set(iimConfigs.map((config) => config.fieldName));
+	const configsByFieldName = new Map(iimConfigs.map((config) => [config.fieldName, config]));
 
 	const formatSubmittedResult = submittedResult.map(async (result) => {
-		return { ...result, data: await TransformerFunction(result.data, fieldNamesToAdd, iimRepo) };
+		// Records nested in a compound view belong to the same study as the top-level record, so the top-level
+		// organization scopes the hash of every configured field in the record
+		return {
+			...result,
+			data: await TransformerFunction(result.data, result.organization, configsByFieldName, iimRepo),
+		};
 	});
 
 	return Promise.all(formatSubmittedResult);
@@ -525,15 +535,17 @@ const SanitizeLyricIdsWithInternal = async (
 /**
  *	Recursive function that takes in DataRecordNested and adds the generated internal id's of entities determined from the the IIM config that was generated from the IIM service
  * @param dataRecord
- * @param fieldNames Fieldname values to replace with internalId
+ * @param studyId Study ID of the record, which scopes the hash of every configured field
+ * @param configsByFieldName ID configs keyed by the field name whose value has a generated ID
  * @param iimRepo iim service to query for internalId's
  * @returns Mutated Promise of DataRecordNested with field `internalId` injected with original entities
  */
 const TransformerFunction = async (
 	dataRecord: DataRecordNested,
-	fieldNamesToAdd: Set<string>,
+	studyId: string,
+	configsByFieldName: ReadonlyMap<string, IDGenerationConfigRecord>,
 	iimRepo: ReturnType<typeof iimService>,
-) => {
+): Promise<DataRecordNested> => {
 	const processInternalValue = async (dataRecordValue: DataRecordNested): Promise<DataRecordNested> => {
 		// The first call will always be DataRecordNested object
 		// the conditions in the Object.entries loop will check if other key/value pairs are isDataRecordValue or an DataRecordNested[] before recursive call
@@ -541,12 +553,21 @@ const TransformerFunction = async (
 
 		for (const [key, currentValue] of Object.entries(dataRecordValue)) {
 			// if current key of dataRecordValue is a key that has a generated ID, then start internal id inject logic
-			if (fieldNamesToAdd.has(key)) {
-				const hashedFieldName = generateHash(`${dataRecordValue[key]}`, env.ID_MANAGER_SECRET);
+			const idConfig = configsByFieldName.get(key);
+			if (idConfig) {
+				// The hash uses the entity of the field's config, not of the record holding it, so a copy of a
+				// submitter ID in another entity (e.g. `submitter_participant_id` in a specimen) resolves to the ID
+				// of the entity it refers to
+				const hashedFieldName = generateEntityHash(
+					{ entityName: idConfig.entityName, studyId, value: `${currentValue}` },
+					env.ID_MANAGER_SECRET,
+				);
 				const generatedIdResult = await iimRepo.getIDByHash(hashedFieldName);
+				const generatedIdRecord = generatedIdResult[0];
 
-				if (generatedIdResult[0] && generatedIdResult[0].internalId) {
-					result[generatedIdResult[0].internalId] = generatedIdResult[0]?.generatedId; // Add PCGL internal id
+				// A row generated for another config is not the ID of this field, so nothing is added for it
+				if (generatedIdRecord && generatedIdRecord.configId === idConfig.id && idConfig.internalId) {
+					result[idConfig.internalId] = generatedIdRecord.generatedId; // Add PCGL internal id
 					result[key] = currentValue; // Persist original id
 					continue;
 				}

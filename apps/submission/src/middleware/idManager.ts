@@ -24,7 +24,7 @@ import { env } from '@/config/envConfig.js';
 import { getDbInstance, type PostgresDb } from '@/db/index.js';
 import {
 	findIDByHash,
-	generateHash,
+	generateEntityHash,
 	generateID,
 	getNextSequenceValue,
 	retrieveAllIIMConfigurations,
@@ -68,7 +68,12 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], 
 			continue;
 		}
 
-		const idmHash = generateHash(String(hashableData), env.ID_MANAGER_SECRET);
+		// The organization of a submitted record is its study ID. Scoping the hash to the entity and study gives
+		// the same submitter value its own PCGL ID in each entity and each study.
+		const idmHash = generateEntityHash(
+			{ entityName: entityIIMConfig.entityName, studyId: record.organization, value: String(hashableData) },
+			env.ID_MANAGER_SECRET,
+		);
 		const existingHashEntry = await findIDByHash(idmHash);
 
 		if (existingHashEntry) {
