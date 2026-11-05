@@ -81,7 +81,7 @@ export const isRestrictedFieldName = (fieldName: string, restrictedFieldNames: R
 	return (
 		normalizedFieldName === RESTRICTED_FIELD_NAME ||
 		[...restrictedFieldNames].some(
-			(restrictedFieldName) => normalizeFieldName(restrictedFieldName) === normalizedFieldName,
+			(fieldName) => normalizeFieldName(fieldName) === normalizedFieldName,
 		)
 	);
 };
