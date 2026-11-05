@@ -9,7 +9,7 @@ This is a fixed part of the access model, not an optional feature: it applies au
 Two things, defined in [`src/service/accessRestrictionService.ts`](../src/service/accessRestrictionService.ts):
 
 - **The `sociodemographic` entity** is excluded entirely. No record of this schema is retrievable, whether requested directly, through pagination, through a SQON query, or re-embedded as a nested block by Lyric's `view=compound`/`view=nested` (which pulls in related schemas by walking the dictionary hierarchy, independently of any entity filter applied to the main query).
-- **The submitter ID fields** are removed from every entity's response, wherever they appear, at any nesting depth. These are every `fieldName` in the ID manager config (`ID_MANAGER_CONFIG`, stored in the `id_generation_config` table), such as `submitter_specimen_id` or `submitter_treatment_id`, plus `submitter_participant_id`, which is always restricted, even when the config does not list it (`getRestrictedFieldNames`). Field names are compared in any letter case.
+- **The submitter ID fields** are removed from every entity's response, wherever they appear, at any nesting depth. These are every `fieldName` in the ID manager config (`ID_MANAGER_CONFIG`, stored in the `id_generation_config` table), such as `submitter_specimen_id` or `submitter_treatment_id`, plus `submitter_participant_id`, which is always restricted, even when the config does not list it (`getRestrictedFieldNames`). Field names are compared case-insensitively.
 
 The same config adds a PCGL system ID (its `internalId` key, such as `pcgl_treatment_id`) next to each submitter ID, for every user. READ-only users get the PCGL system ID in place of the submitter ID; users with WRITE access get both.
 
@@ -31,7 +31,7 @@ The response of `POST /data/category/:categoryId/organization/:organization/quer
 - a submitter ID field: any `fieldName` in the ID manager config, or `submitter_participant_id`
 - a field that only exists in the `sociodemographic` schema of the category's dictionary
 
-Field names are compared in any letter case. Fields that the `sociodemographic` schema shares with other schemas, such as the study ID, are allowed, unless they are submitter ID fields: the filter only matches the rows of the entities that are queried, and for these users that never includes `sociodemographic`. Users with WRITE access to the study can filter by any field.
+Field names are compared case-insensitively. Fields that the `sociodemographic` schema shares with other schemas, such as the study ID, are allowed, unless they are submitter ID fields: the filter only matches the rows of the entities that are queried, and for these users that never includes `sociodemographic`. Users with WRITE access to the study can filter by any field.
 
 ## Endpoints that are closed to READ-only users
 
