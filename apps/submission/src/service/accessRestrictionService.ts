@@ -208,12 +208,10 @@ export const getRestrictedFilterFieldNames = (
 	const restrictedEntityFields = fieldNamesOf(schemas.filter((schema) => isRestrictedEntityName(schema.name)));
 	const otherFields = fieldNamesOf(schemas.filter((schema) => !isRestrictedEntityName(schema.name)));
 
-	return [
-		...new Set([
-			...normalizeRestrictedFieldNames(restrictedFieldNames),
-			...[...restrictedEntityFields].filter((name) => !otherFields.has(name)),
-		]),
-	];
+    const normalizedNames = normalizeRestrictedFieldNames(restrictedFieldNames);
+    const entityOnly = [...restrictedEntityFields].filter((name) => !otherFields.has(name));
+    // Remove duplicates with spread Set
+    return [...new Set([...normalized, ...entityOnly])];
 };
 
 /**
