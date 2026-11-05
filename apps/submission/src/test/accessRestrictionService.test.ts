@@ -40,6 +40,8 @@ const RESTRICTED_FIELD_NAMES = getRestrictedFieldNames([
 	{ fieldName: 'submitter_treatment_id' },
 ]);
 const NO_CONFIGURED_FIELD_NAMES: ReadonlySet<string> = new Set();
+// Configured field names as they could be passed in without normalizing, in mixed case and with whitespace
+const UNNORMALIZED_FIELD_NAMES: ReadonlySet<string> = new Set([' Submitter_Treatment_ID ']);
 
 const submittedDataResponse = (partial: Pick<SubmittedDataResponse, 'entityName' | 'data'>): SubmittedDataResponse => ({
 	isValid: true,
@@ -118,6 +120,10 @@ describe('isRestrictedFieldName', () => {
 	it('does not match an unrelated field', () => {
 		assert.equal(isRestrictedFieldName('pcgl_participant_id', RESTRICTED_FIELD_NAMES), false);
 		assert.equal(isRestrictedFieldName('submitter_treatment_id', NO_CONFIGURED_FIELD_NAMES), false);
+	});
+
+	it('matches field names that are passed in mixed case and with whitespace', () => {
+		assert.equal(isRestrictedFieldName('submitter_treatment_id', UNNORMALIZED_FIELD_NAMES), true);
 	});
 });
 
@@ -255,6 +261,19 @@ describe('stripRestrictedData', () => {
 		assert.deepEqual(result[0]?.data, { submitter_treatment_id: 'TREAT-1' });
 	});
 
+	it('removes configured fields whose names are passed in mixed case and with whitespace', () => {
+		const records = [
+			submittedDataResponse({
+				entityName: 'treatment',
+				data: { submitter_treatment_id: 'TREAT-1', drug: 'DRUG-X' },
+			}),
+		];
+
+		const result = stripRestrictedData(records, UNNORMALIZED_FIELD_NAMES);
+
+		assert.deepEqual(result[0]?.data, { drug: 'DRUG-X' });
+	});
+
 	it('leaves unrelated entities and fields untouched', () => {
 		const records = [
 			submittedDataResponse({ entityName: 'participant', data: { pcgl_participant_id: 'PT001', age: 42 } }),
@@ -344,6 +363,10 @@ describe('getRestrictedFilterFieldNames', () => {
 			'ethnicity',
 		]);
 	});
+
+	it('returns configured fields in lowercase when their names are passed in mixed case and with whitespace', () => {
+		assert.ok(getRestrictedFilterFieldNames(SCHEMAS, UNNORMALIZED_FIELD_NAMES).includes('submitter_treatment_id'));
+	});
 });
 
 describe('findRestrictedFilterFields', () => {
@@ -361,6 +384,12 @@ describe('findRestrictedFilterFields', () => {
 
 		assert.deepEqual(findRestrictedFilterFields(sqon, SCHEMAS, RESTRICTED_FIELD_NAMES), ['Submitter_Treatment_ID']);
 		assert.deepEqual(findRestrictedFilterFields(sqon, SCHEMAS, NO_CONFIGURED_FIELD_NAMES), []);
+	});
+
+	it('finds configured fields whose names are passed in mixed case and with whitespace', () => {
+		const sqon = { op: 'and', content: [filter('gender'), filter('submitter_treatment_id')] };
+
+		assert.deepEqual(findRestrictedFilterFields(sqon, SCHEMAS, UNNORMALIZED_FIELD_NAMES), ['submitter_treatment_id']);
 	});
 
 	it('finds a restricted field once, however many times it is used', () => {
