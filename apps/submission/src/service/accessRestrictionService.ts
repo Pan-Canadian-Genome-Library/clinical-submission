@@ -80,9 +80,7 @@ export const isRestrictedFieldName = (fieldName: string, restrictedFieldNames: R
 	const normalizedFieldName = normalizeFieldName(fieldName);
 	return (
 		normalizedFieldName === RESTRICTED_FIELD_NAME ||
-		[...restrictedFieldNames].some(
-			(fieldName) => normalizeFieldName(fieldName) === normalizedFieldName,
-		)
+		[...restrictedFieldNames].some((fieldName) => normalizeFieldName(fieldName) === normalizedFieldName)
 	);
 };
 
@@ -208,10 +206,10 @@ export const getRestrictedFilterFieldNames = (
 	const restrictedEntityFields = fieldNamesOf(schemas.filter((schema) => isRestrictedEntityName(schema.name)));
 	const otherFields = fieldNamesOf(schemas.filter((schema) => !isRestrictedEntityName(schema.name)));
 
-    const normalizedNames = normalizeRestrictedFieldNames(restrictedFieldNames);
-    const entityOnly = [...restrictedEntityFields].filter((name) => !otherFields.has(name));
-    // Remove duplicates with spread Set
-    return [...new Set([...normalized, ...entityOnly])];
+	const normalizedNames = normalizeRestrictedFieldNames(restrictedFieldNames);
+	const entityOnly = [...restrictedEntityFields].filter((name) => !otherFields.has(name));
+	// Remove duplicates with spread Set
+	return [...new Set([...normalizedNames, ...entityOnly])];
 };
 
 /**
