@@ -22,9 +22,11 @@ import './helpers/setupEnv.js';
 import assert from 'node:assert/strict';
 import { after, before, beforeEach, describe, it, mock } from 'node:test';
 
+import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { generatedIdentifiers, idGenerationConfig } from '@/db/schemas/idGenerationConfig.js';
 import { study } from '@/db/schemas/studiesSchema.js';
+import { generateHash } from '@/internal/id-manager/utils.js';
 import { dataRouter } from '@/routes/data.js';
 
 import { connectTestDb, startTestServer, stubAuthZ, stubDbTables, type TestServer } from './helpers/testApp.js';
@@ -41,8 +43,37 @@ const DICTIONARY = [
 	{ name: 'sociodemographic', fields: ['submitter_participant_id', 'study_id', 'income', 'ethnicity'] },
 ].map((schema) => ({ name: schema.name, fields: schema.fields.map((name) => ({ name })) }));
 
-// Values that only appear in restricted data
-const RESTRICTED_VALUES = ['sociodemographic', 'SD-INCOME', 'SD-ETHNICITY', 'submitter_participant_id', 'SUB-'];
+// Values that only appear in restricted data: the restricted entity, and the submitter IDs of the ID manager config
+const RESTRICTED_VALUES = [
+	'sociodemographic',
+	'SD-INCOME',
+	'SD-ETHNICITY',
+	'submitter_participant_id',
+	'SUB-',
+	'submitter_treatment_id',
+	'TREAT-1',
+];
+
+const ID_CONFIGS = [
+	{ id: 1, entityName: 'participant', fieldName: 'submitter_participant_id', internalId: 'pcgl_participant_id' },
+	{ id: 2, entityName: 'treatment', fieldName: 'submitter_treatment_id', internalId: 'pcgl_treatment_id' },
+];
+
+// The PCGL ID generated for each submitter ID, keyed by the hash it is looked up with
+const GENERATED_IDS = new Map(
+	[
+		{ submitterId: 'SUB-STUDY-A', generatedId: 'PT00000001', internalId: 'pcgl_participant_id' },
+		{ submitterId: 'SUB-STUDY-B', generatedId: 'PT00000002', internalId: 'pcgl_participant_id' },
+		{ submitterId: 'TREAT-1', generatedId: 'TR00000001', internalId: 'pcgl_treatment_id' },
+	].map(({ submitterId, ...generatedId }) => [generateHash(submitterId, env.ID_MANAGER_SECRET), generatedId]),
+);
+
+/** The generated ID rows whose hash is one of the values the query compares with */
+const generatedIdsFor = (conditionValues: unknown[]) =>
+	conditionValues.flatMap((value) => {
+		const generatedId = typeof value === 'string' ? GENERATED_IDS.get(value) : undefined;
+		return generatedId ? [generatedId] : [];
+	});
 
 const recordsFor = (organization: string) => {
 	const participant = {
@@ -171,11 +202,8 @@ describe('data endpoints', () => {
 		stubDbTables([
 			// The study of the category that was last looked up
 			[study, () => STUDIES.filter((candidate) => candidate.category_id === categoryId)],
-			[
-				idGenerationConfig,
-				() => [{ entityName: 'participant', fieldName: 'submitter_participant_id', internalId: 'pcgl_participant_id' }],
-			],
-			[generatedIdentifiers, () => [{ generatedId: 'PT00000001', internalId: 'pcgl_participant_id' }]],
+			[idGenerationConfig, () => ID_CONFIGS],
+			[generatedIdentifiers, generatedIdsFor],
 		]);
 		server = await startTestServer((app) => app.use('/data', dataRouter));
 	});
@@ -198,7 +226,7 @@ describe('data endpoints', () => {
 
 				assert.equal(status, 200);
 				assertNoRestrictedData(body);
-				assertContains(body, 'PT00000001', 'Female', 'DRUG-X');
+				assertContains(body, 'PT00000001', 'TR00000001', 'Female', 'DRUG-X');
 			});
 
 			it('does not read the restricted entity from the database', async () => {
@@ -238,7 +266,7 @@ describe('data endpoints', () => {
 
 				assert.equal(status, 200);
 				assertNoRestrictedData(body);
-				assertContains(body, 'Female', 'DRUG-X');
+				assertContains(body, 'PT00000001', 'TR00000001', 'Female', 'DRUG-X');
 			});
 		});
 
@@ -251,7 +279,7 @@ describe('data endpoints', () => {
 
 					assert.equal(status, 200, view);
 					assertNoRestrictedData(body);
-					assertContains(body, 'PT00000001', 'Female', 'DRUG-X');
+					assertContains(body, 'PT00000001', 'TR00000001', 'Female', 'DRUG-X');
 				}
 			});
 
@@ -291,7 +319,7 @@ describe('data endpoints', () => {
 
 					assert.equal(status, 200, view);
 					assertNoRestrictedData(body);
-					assertContains(body, 'PT00000001', 'Female', 'DRUG-X');
+					assertContains(body, 'PT00000001', 'TR00000001', 'Female', 'DRUG-X');
 				}
 			});
 
@@ -324,6 +352,7 @@ describe('data endpoints', () => {
 				'a field of the restricted entity': filter('income'),
 				'another field of the restricted entity': filter('ethnicity'),
 				'the restricted field': filter('submitter_participant_id'),
+				'a submitter ID field of the ID manager config': filter('submitter_treatment_id'),
 				'a field in another letter case': filter('Income'),
 				'a greater than filter': { op: 'gt', content: { fieldName: 'income', value: 3 } },
 				'a lesser than filter': { op: 'lt', content: { fieldName: 'income', value: 3 } },
@@ -394,6 +423,9 @@ describe('data endpoints', () => {
 					assert.equal(status, 200, view);
 					assertNoRestrictedData(body);
 					assertContains(body, 'PT00000001', 'Female');
+					if (view === 'compound') {
+						assertContains(body, 'TR00000001', 'DRUG-X');
+					}
 				}
 			});
 		});
@@ -410,12 +442,23 @@ describe('data endpoints', () => {
 					'SD-INCOME',
 					'submitter_participant_id',
 					'PT00000001',
+					'submitter_treatment_id',
+					'TREAT-1',
+					'TR00000001',
 					'DRUG-X',
 				);
 				assert.deepEqual(entityNamesSentByCategory(), [[]]);
 
 				const byOrganization = await server.request('GET', '/data/category/1/organization/STUDY-A', { as });
-				assertContains(byOrganization.body, 'sociodemographic', 'SD-INCOME', 'submitter_participant_id');
+				assertContains(
+					byOrganization.body,
+					'sociodemographic',
+					'SD-INCOME',
+					'submitter_participant_id',
+					'submitter_treatment_id',
+					'TREAT-1',
+					'TR00000001',
+				);
 
 				const sociodemographic = await server.request('GET', '/data/category/1/id/STUDY-A-sociodemographic', { as });
 				assert.equal(sociodemographic.status, 200);
@@ -427,7 +470,7 @@ describe('data endpoints', () => {
 	describe('filters of users that are not restricted', () => {
 		for (const as of ['writer', 'admin'] as const) {
 			it(`are accepted on any field for ${as}`, async () => {
-				for (const fieldName of ['income', 'ethnicity', 'submitter_participant_id']) {
+				for (const fieldName of ['income', 'ethnicity', 'submitter_participant_id', 'submitter_treatment_id']) {
 					const sqon = { op: 'in', content: { fieldName, value: ['x'] } };
 					const { status } = await server.request('POST', '/data/category/1/organization/STUDY-A/query', {
 						as,
@@ -448,7 +491,7 @@ describe('data endpoints', () => {
 
 			const readOnly = await server.request('GET', '/data/category/2/organization/STUDY-B', { as: 'writerAReaderB' });
 			assertNoRestrictedData(readOnly.body);
-			assertContains(readOnly.body, 'Female');
+			assertContains(readOnly.body, 'Female', 'PT00000002', 'TR00000001');
 		});
 
 		it('only rejects filters on restricted fields in the study they can just read', async () => {

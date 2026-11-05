@@ -23,6 +23,8 @@ import type { Server } from 'node:http';
 import { mock } from 'node:test';
 
 import { errorHandler } from '@overture-stack/lyric';
+import type { SQL } from 'drizzle-orm';
+import { PgDialect } from 'drizzle-orm/pg-core';
 import express, { type Express } from 'express';
 
 import { logger } from '@/common/logger.js';
@@ -112,12 +114,20 @@ const parseBody = (text: string): unknown => {
 	}
 };
 
+const pgDialect = new PgDialect();
+
 /**
  * Answers `db.select().from(table)...` queries with the rows given for that table, whatever the
- * conditions, joins or ordering that follow. A query on any other table throws, so a query the
- * test did not expect fails loudly. Needs `connectTestDb()` to have been called.
+ * joins or ordering that follow. A query on any other table throws, so a query the test did not
+ * expect fails loudly. Needs `connectTestDb()` to have been called.
+ *
+ * The rows callback receives the values bound in the query's `where` condition, such as the value
+ * compared by `eq(column, value)`, so it can answer differently per lookup. It receives an empty
+ * array when the query has no condition.
  */
-export const stubDbTables = (tables: ReadonlyArray<readonly [table: unknown, rows: () => unknown[]]>) =>
+export const stubDbTables = (
+	tables: ReadonlyArray<readonly [table: unknown, rows: (conditionValues: unknown[]) => unknown[]]>,
+) =>
 	mock.method(getDbInstance(), 'select', () => ({
 		from: (table: unknown) => {
 			const rows = tables.find(([candidate]) => candidate === table)?.[1];
@@ -125,10 +135,14 @@ export const stubDbTables = (tables: ReadonlyArray<readonly [table: unknown, row
 				throw new Error('Unexpected database query in a test, add the table to stubDbTables');
 			}
 
+			let conditionValues: unknown[] = [];
 			const query = {
 				then: (resolve: (rows: unknown[]) => unknown, reject: (error: unknown) => unknown) =>
-					Promise.resolve(rows()).then(resolve, reject),
-				where: () => query,
+					Promise.resolve(rows(conditionValues)).then(resolve, reject),
+				where: (condition?: SQL) => {
+					conditionValues = condition ? pgDialect.sqlToQuery(condition).params : [];
+					return query;
+				},
 				leftJoin: () => query,
 				orderBy: () => query,
 				limit: () => query,
