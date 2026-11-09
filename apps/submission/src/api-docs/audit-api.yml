@@ -1,6 +1,6 @@
 /audit/category/{categoryId}/organization/{organization}:
   get:
-    summary: Retrive change history of stored data
+    summary: Retrive change history of stored data (🔒 Admin only)
     tags:
       - Audit
     parameters:

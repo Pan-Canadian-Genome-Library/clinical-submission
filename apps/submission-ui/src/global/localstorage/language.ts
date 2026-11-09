@@ -21,8 +21,8 @@ import z from 'zod';
 
 const LANG_SESSION_INFO_KEY = 'pcgl-submission-lang-session';
 export const SupportedLangs = {
-	ENGLISH: 'en',
-	FRENCH: 'fr',
+	ENGLISH: 'en-CA',
+	FRENCH: 'fr-CA',
 } as const;
 
 export type SupportedLangsValues = (typeof SupportedLangs)[keyof typeof SupportedLangs];

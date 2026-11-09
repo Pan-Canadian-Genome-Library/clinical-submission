@@ -17,44 +17,62 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { z } from 'zod';
+import { z as zod } from 'zod';
 
-export const authZUserInfo = z.object({
-	userinfo: z.object({
-		emails: z.array(
-			z.object({
-				address: z.string().email(),
-				type: z
-					.literal('official')
-					.or(z.literal('delivery').or(z.literal('forwarding').or(z.literal('personal'))))
-					.optional(),
-			}),
+export const authZUserInfo = zod.object({
+	userinfo: zod.object({
+		emails: zod.array(
+			zod
+				.object({
+					type: zod.string(),
+					address: zod.string(),
+				})
+				.optional(),
 		),
-		pcgl_id: z.string(),
-		site_admin: z.boolean().default(false),
-		data_admin: z.boolean().default(false),
+		pcgl_id: zod.string(),
+		data_admin: zod.boolean().default(false),
 	}),
-	study_authorizations: z.object({
-		editable_studies: z.array(z.string()).optional(),
-		readable_studies: z.array(z.string()).optional(),
+	study_authorizations: zod.object({
+		editable_studies: zod.array(zod.string()).optional(),
+		readable_studies: zod.array(zod.string()).optional(),
 	}),
-	dac_authorizations: z.array(
-		z
-			.object({
-				study_id: z.string(),
-				start_date: z.string(),
-				end_date: z.string(),
-			})
-			.optional(),
-	),
-	groups: z
+	dac_authorizations: zod
 		.array(
-			z.object({
-				description: z.string(),
-				id: z.number().int(),
-				name: z.string(),
+			zod.object({
+				study_id: zod.string(),
+				start_date: zod.string(),
+				end_date: zod.string(),
 			}),
 		)
-		.optional(),
+		.optional()
+		.default([]),
+	groups: zod
+		.array(
+			zod.object({
+				description: zod.string().optional(),
+				id: zod.number().int().optional(),
+				name: zod.string(),
+			}),
+		)
+		.optional()
+		.default([]),
 });
-export type PCGLAuthZUserInfoResponse = z.infer<typeof authZUserInfo>;
+
+export type UserDataResponseSchemaType = zod.infer<typeof authZUserInfo>;
+export type Groups = Pick<UserDataResponseSchemaType, 'groups'>;
+
+export type PCGLAuthZUserInfoResponse = zod.infer<typeof authZUserInfo>;
+
+export const authZStudyAuthorizationResponse = zod.object({
+	dac_id: zod.string().optional().nullable(),
+	data_submitters: zod.array(zod.string()),
+	creation_date: zod.string(),
+	study_id: zod.string(),
+	team_members: zod.array(zod.string()),
+});
+export type PCGLAuthZStudyAuthorizationResponse = zod.infer<typeof authZStudyAuthorizationResponse>;
+
+export const authzStudyAuthorizationRequest = authZStudyAuthorizationResponse.extend({
+	creation_date: authZStudyAuthorizationResponse.shape.creation_date.optional(),
+});
+export type PCGLAuthZStudyAuthorizationRequest = zod.infer<typeof authzStudyAuthorizationRequest>;

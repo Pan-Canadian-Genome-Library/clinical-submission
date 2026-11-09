@@ -26,8 +26,8 @@ import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 import { env } from '@/config/envConfig.js';
-import { lyricProvider } from '@/core/provider.js';
 import { requestLogger } from '@/middleware/requestLogger.js';
+import { auditRouter } from '@/routes/audit.js';
 import { authRouter } from '@/routes/auth.js';
 import { authSessionRouter } from '@/routes/authSession.js';
 import { categoryRouter } from '@/routes/categoryRouter.js';
@@ -35,9 +35,11 @@ import { dacRouter } from '@/routes/dac.js';
 import { dataRouter } from '@/routes/data.js';
 import { dictionaryRouter } from '@/routes/dictionary.js';
 import { healthCheckRouter } from '@/routes/healthCheck.js';
+import { migrationRouter } from '@/routes/migration.js';
 import { openAPIRouter } from '@/routes/openApi.js';
 import { studyRouter } from '@/routes/study.js';
 import { submissionRouter } from '@/routes/submission.js';
+import { userRouter } from '@/routes/user.js';
 import { validationRouter } from '@/routes/validationRouter.js';
 
 import sessionMiddleware from './session/sessionMiddleware.js';
@@ -96,10 +98,11 @@ app.use('/health', healthCheckRouter);
 app.use('/study', studyRouter);
 app.use('/auth', authRouter);
 app.use('/auth-session', authSessionRouter);
+app.use('/user', userRouter);
 
-// Lyric Routes
-app.use('/audit', lyricProvider.routers.audit);
-app.use('/migration', lyricProvider.routers.migration);
+// Lyric Routes, restricted to admins
+app.use('/audit', auditRouter);
+app.use('/migration', migrationRouter);
 
 /**
  * Lyric Custom Routes
