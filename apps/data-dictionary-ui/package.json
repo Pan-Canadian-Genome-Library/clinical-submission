@@ -1,7 +1,7 @@
 {
 	"name": "@clinical-submission/data-dictionary-ui",
 	"private": true,
-	"version": "0.2.0",
+	"version": "1.0.0",
 	"type": "module",
 	"scripts": {
 		"build": "vite build --emptyOutDir",
@@ -10,7 +10,7 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"@overture-stack/lectern-ui": "0.0.1-beta.0",
+		"@overture-stack/lectern-ui": "1.1.0",
 		"react": "^19.1.1",
 		"react-dom": "^19.1.1"
 	},
