@@ -5,3 +5,6 @@ allowBuilds:
   '@scarf/scarf': false
   esbuild: false
   nx: true
+minimumReleaseAgeExclude:
+  - '@overture-stack/lyric-data-model@0.20.0'
+  - '@overture-stack/lyric@0.20.0'

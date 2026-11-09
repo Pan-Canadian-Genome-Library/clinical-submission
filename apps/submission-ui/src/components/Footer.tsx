@@ -17,6 +17,8 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import CIHRLogo from '@/assets/cihr-logo.png';
+import PCGLLogoWhite from '@/assets/pcgl-logo-white.png';
 import { useTranslation } from 'react-i18next';
 
 const Footer = () => {
@@ -24,10 +26,61 @@ const Footer = () => {
 		i18n: { t },
 	} = useTranslation('common');
 	const currentDate = new Date().getFullYear();
+
 	return (
-		<footer className="flex bg-primary-600 text-black">
-			<div className="flex items-center justify-between">
-				<h3>&copy; {t('common:PCGL', { date: currentDate })}</h3>
+		<footer className="bg-primary-700 text-white w-full p-8">
+			<div className="flex flex-col md:flex-row justify-between gap-12">
+				{/* Left Section - Logos and Text */}
+				<div className="flex-1 flex flex-col gap-4">
+					<div className="flex gap-6 items-center">
+						<img src={PCGLLogoWhite} alt={t('common:pcglLogo')} className="h-10 object-contain" />
+						<img src={CIHRLogo} alt={t('common:cihrLogo')} className="h-10 object-contain" />
+					</div>
+					<p className="text-white text-sm leading-normal">{t('common:footer.supportedBy')}</p>
+					<p className="text-white text-sm leading-normal">{t('common:footer.copyright', { date: currentDate })}</p>
+				</div>
+
+				{/* Right Section - Links */}
+				<div className="flex flex-col md:flex-row md:items-center gap-8 md:gap-12">
+					{/* Column 1 */}
+					<div className="flex flex-col gap-6">
+						<a href="#contact" className="text-white underline text-sm cursor-pointer">
+							{t('common:footer.contactUs')}
+						</a>
+						<a href="#controlled-users" className="text-white underline text-sm cursor-pointer">
+							{t('common:footer.controlledDataUsers')}
+						</a>
+						<a href="#privacy" className="text-white underline text-sm cursor-pointer">
+							{t('common:footer.privacyPolicy')}
+						</a>
+					</div>
+
+					{/* Column 2 */}
+					<div className="flex flex-col gap-6">
+						<a href="#policies" className="text-white underline text-sm cursor-pointer">
+							{t('common:footer.policiesGuidelines')}
+						</a>
+						<a href="#website" className="text-white underline text-sm cursor-pointer">
+							{t('common:footer.pcglWebsite')}
+						</a>
+						<a href="#terms" className="text-white underline text-sm cursor-pointer">
+							{t('common:footer.termsConditions')}
+						</a>
+					</div>
+
+					{/* Column 3 */}
+					<div className="flex flex-col gap-6">
+						<a href="#help" className="text-white underline text-sm cursor-pointer">
+							{t('common:footer.helpGuides')}
+						</a>
+						<a href="#platform" className="text-white underline text-sm cursor-pointer">
+							{t('common:footer.dataPlatform')}
+						</a>
+						<a href="#publication" className="text-white underline text-sm cursor-pointer">
+							{t('common:footer.publicationPolicy')}
+						</a>
+					</div>
+				</div>
 			</div>
 		</footer>
 	);

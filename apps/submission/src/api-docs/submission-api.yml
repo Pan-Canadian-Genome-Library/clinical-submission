@@ -2,7 +2,7 @@
 
 /submission/{submissionId}:
   get:
-    summary: Get submission information by ID
+    summary: Get submission information by ID (🔒 Requires WRITE access to the study)
     tags:
       - Submission
     parameters:
@@ -30,7 +30,7 @@
         $ref: '#/components/responses/ServiceUnavailableError'
 
   delete:
-    summary: Close an Active Submission by ID
+    summary: Close an Active Submission by ID (🔒 Requires WRITE access to the study)
     tags:
       - Submission
     parameters:
@@ -62,7 +62,7 @@
 
 /submission/{submissionId}/details:
   get:
-    summary: Fetch Submission Data records. Sorted in their original file order and grouped by `inserts`, `updates`, and `deletes`.
+    summary: Fetch Submission Data records. Sorted in their original file order and grouped by `inserts`, `updates`, and `deletes`. (🔒 Requires WRITE access to the study)
     tags:
       - Submission
     parameters:
@@ -109,7 +109,7 @@
 
 /submission/{submissionId}/{actionType}:
   delete:
-    summary: Clear Active Submission by entity name
+    summary: Clear Active Submission by entity name (🔒 Requires WRITE access to the study)
     tags:
       - Submission
     parameters:
@@ -162,7 +162,7 @@
 
 /submission/category/{categoryId}:
   get:
-    summary: Retrieve a list of Submissions for a category in this user session
+    summary: Retrieve a list of Submissions for a category in this user session (🔒 Requires WRITE access to the study)
     tags:
       - Submission
     parameters:

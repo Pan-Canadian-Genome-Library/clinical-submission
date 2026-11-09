@@ -23,8 +23,9 @@ import i18n from '@/i18n/translations';
 import { useUserContext } from '@/providers/UserProvider';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import PCGL from '../assets/pcgl-logo-colour.svg';
-import Button from './button/Button';
+import PCGL from '@/assets/pcgl-logo.png';
+import Button from '@/components/button/Button';
+import Text from '@/components/typography/Text';
 
 const Header = () => {
 	const { isLoggedIn } = useUserContext();
@@ -47,16 +48,26 @@ const Header = () => {
 	};
 
 	return (
-		<header className="py-4 px-16">
-			<div className="flex items-center justify-between">
-				<img className="w-[250px]" src={PCGL} alt="PCGL Clinical Submission Home" />
-				<>
-					<Button defaultText={t('common:languageSwitch')} handler={languageSwitch} />
-					<h2>Submission UI</h2>
-					<a href={!isLoggedIn ? API_PATH_LOGIN : API_PATH_LOGOUT} className="login-button">
+		<header className="bg-white py-4 px-6">
+			<div className="flex items-center">
+				<div className="flex gap-2 flex-1 items-center">
+					<img className="w-[150px]" src={PCGL} alt={t('common:pcglLogoAltText')} />
+					<div className="flex px-2 gap-2">
+						<Text>{t('common:dataSubmission')}</Text>
+						<Text>{t('common:dataDictionary')}</Text>
+					</div>
+				</div>
+				<div className="flex justify-end flex-1 gap-2">
+					<Button type="secondary" handler={languageSwitch}>
+						{t('common:languageSwitch')}
+					</Button>
+					<Button type="secondary" handler={() => {}}>
+						{t('common:helpDesk')}
+					</Button>
+					<Button href={!isLoggedIn ? API_PATH_LOGIN : API_PATH_LOGOUT}>
 						{!isLoggedIn ? t('common:login') : t('common:logout')}
-					</a>
-				</>
+					</Button>
+				</div>
 			</div>
 		</header>
 	);
