@@ -22,10 +22,11 @@ import urlJoin from 'url-join';
 
 import { logger } from '@/common/logger.js';
 import { ActionIDs, type ActionIDsValues, type PCGLUserSession, PCGLUserSessionResult } from '@/common/types/auth.js';
-import { Groups, ServiceTokenResponse, userDataResponseSchema } from '@/common/validation/auth-validation.js';
+import { ServiceTokenResponse } from '@/common/validation/auth-validation.js';
 import {
 	authZStudyAuthorizationResponse,
 	authZUserInfo,
+	Groups,
 	type PCGLAuthZStudyAuthorizationRequest,
 	type PCGLAuthZUserInfoResponse,
 } from '@/common/validation/authz-validation.js';
@@ -163,7 +164,7 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 
 	const result = await response.json();
 
-	const responseValidation = userDataResponseSchema.safeParse(result);
+	const responseValidation = authZUserInfo.safeParse(result);
 
 	if (!responseValidation.success) {
 		logger.error(`[AUTHZ]: Malformed response object from AUTHZ. ${responseValidation.error}`);
@@ -175,8 +176,8 @@ export const fetchUserData = async (token: string): Promise<PCGLUserSessionResul
 		user: {
 			username: `${responseValidation.data.userinfo.pcgl_id}`,
 			isAdmin: responseValidation.data.userinfo.data_admin,
-			allowedWriteOrganizations: responseValidation.data.study_authorizations.editable_studies,
-			allowedReadOrganizations: responseValidation.data.study_authorizations.readable_studies,
+			allowedWriteOrganizations: responseValidation.data.study_authorizations?.editable_studies ?? [],
+			allowedReadOrganizations: responseValidation.data.study_authorizations?.readable_studies ?? [],
 			groups: extractUserGroups({ groups: responseValidation.data.groups }),
 		},
 	};
@@ -281,6 +282,9 @@ export const extractAccessTokenFromSession = (req: Request): string | undefined 
  * @returns array of strings with names of the groups
  */
 const extractUserGroups = ({ groups }: Groups): string[] => {
+	if (groups === undefined) {
+		return [];
+	}
 	return groups.map((currentGroup) => currentGroup.name);
 };
 

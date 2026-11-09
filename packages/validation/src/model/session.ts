@@ -35,16 +35,14 @@ const authGeneratedSessionValues = z.object({
 	givenName: z.string().optional(),
 	familyName: z.string().optional(),
 	emails: z.array(
-		z.object({
-			address: z.string().email(),
-			type: z
-				.literal('official')
-				.or(z.literal('delivery').or(z.literal('forwarding').or(z.literal('personal'))))
-				.optional(),
-		}),
+		z
+			.object({
+				type: z.string(),
+				address: z.string(),
+			})
+			.optional(),
 	),
 	idpName: z.string().optional(),
-	siteAdmin: z.boolean().default(false),
 	dataAdmin: z.boolean().default(false),
 	studyAuthorizations: z.object({
 		editableStudies: z.array(z.string()).optional(),
@@ -62,8 +60,8 @@ const authGeneratedSessionValues = z.object({
 	groups: z
 		.array(
 			z.object({
-				description: z.string(),
-				id: z.number().int(),
+				description: z.string().optional(),
+				id: z.number().int().optional(),
 				name: z.string(),
 			}),
 		)
@@ -78,7 +76,6 @@ export const partialSessionState = authGeneratedSessionValues.pick({
 	familyName: true,
 	emails: true,
 	dacAuthorizations: true,
-	siteAdmin: true,
 	dataAdmin: true,
 	groups: true,
 	idpName: true,
