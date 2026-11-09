@@ -38,15 +38,14 @@ export const authZUserInfo = zod.object({
 	}),
 	dac_authorizations: zod
 		.array(
-			zod
-				.object({
-					study_id: zod.string(),
-					start_date: zod.string(),
-					end_date: zod.string(),
-				})
-				.optional(),
+			zod.object({
+				study_id: zod.string(),
+				start_date: zod.string(),
+				end_date: zod.string(),
+			}),
 		)
-		.optional(),
+		.optional()
+		.default([]),
 	groups: zod
 		.array(
 			zod.object({
@@ -55,8 +54,13 @@ export const authZUserInfo = zod.object({
 				name: zod.string(),
 			}),
 		)
-		.optional(),
+		.optional()
+		.default([]),
 });
+
+export type UserDataResponseSchemaType = zod.infer<typeof authZUserInfo>;
+export type Groups = Pick<UserDataResponseSchemaType, 'groups'>;
+
 export type PCGLAuthZUserInfoResponse = zod.infer<typeof authZUserInfo>;
 
 export const authZStudyAuthorizationResponse = zod.object({

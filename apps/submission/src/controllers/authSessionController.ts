@@ -154,7 +154,7 @@ const authToken = validateRequest({}, async (request, response) => {
 						};
 					})
 				: [],
-			groups: pcglAuthzResponse.groups ? pcglAuthzResponse.groups : [],
+			groups: pcglAuthzResponse.groups,
 			idpName: oidcDataResponse.idp_name,
 		};
 
