@@ -27,7 +27,11 @@
  * - Records whose old hash was already moved for another record (the same value in another study), or whose old
  *   hash belongs to another entity's config, are collisions and are left without an ID.
  * - Records that already have a row at their new hash are counted as already migrated, so running it again
- *   updates nothing.
+ *   never changes or removes an ID that was already moved.
+ * - Each collision and each record left without an ID is logged with its entity, study and Lyric system ID, and
+ *   collisions also name the record that kept the ID. Submitter values are never logged, since they are the values
+ *   PCGL IDs exist to hide.
+ * - The summary logs the totals, then the counts of each entity in each study.
  *
  * Every update runs in one transaction, which is rolled back if any of them fails.
  */
@@ -48,12 +52,45 @@ import iimService from '@/service/idManagerService.js';
 const db = connectToDb(dbConfig.connectionString);
 const iimRepo = iimService(db);
 
-const counts = {
+type RehashCounts = {
+	updated: number;
+	alreadyMigrated: number;
+	collisions: number;
+	withoutId: number;
+	missingValue: number;
+};
+
+// The record that kept the PCGL ID of an old hash. Old hashes are unique in the table, so each has one holder.
+type IdHolder = {
+	entityName: string;
+	studyId: string;
+	systemId: string;
+	generatedId: string;
+};
+
+const emptyCounts = (): RehashCounts => ({
 	updated: 0,
 	alreadyMigrated: 0,
 	collisions: 0,
 	withoutId: 0,
 	missingValue: 0,
+});
+
+const totals = emptyCounts();
+
+// Counts per entity, then per study, for the summary
+const countsByEntityAndStudy = new Map<string, Map<string, RehashCounts>>();
+
+const countRecord = (entityName: string, studyId: string, outcome: keyof RehashCounts): void => {
+	totals[outcome]++;
+
+	const countsByStudy = countsByEntityAndStudy.get(entityName) ?? new Map<string, RehashCounts>();
+	countsByEntityAndStudy.set(entityName, countsByStudy);
+
+	const studyCounts = countsByStudy.get(studyId) ?? emptyCounts();
+	countsByStudy.set(studyId, studyCounts);
+
+	studyCounts[outcome]++;
 };
 
 let exitCode = 0;
@@ -63,9 +100,7 @@ try {
 	const studies = await db.select().from(study).where(isNotNull(study.category_id));
 
 	await db.transaction(async (transaction) => {
-		// The new hash that each old hash, per config, was claimed by. A later record with the same old hash and a
-		// different new hash is a collision.
-		const claimedOldHashes = new Map<string, string>();
+		const holdersByOldHash = new Map<string, IdHolder>();
 
 		for (const studyRecord of studies) {
 			if (studyRecord.category_id === null) {
@@ -80,9 +115,15 @@ try {
 				});
 
 				for await (const record of records) {
+					const recordDetails = {
+						entityName: idConfig.entityName,
+						studyId: record.organization,
+						systemId: record.systemId,
+					};
+
 					const submitterValue = record.data[idConfig.fieldName];
 					if (submitterValue === undefined || submitterValue === null) {
-						counts.missingValue++;
+						countRecord(idConfig.entityName, record.organization, 'missingValue');
 						continue;
 					}
 
@@ -91,21 +132,35 @@ try {
 						{ entityName: idConfig.entityName, studyId: record.organization, value: String(submitterValue) },
 						env.ID_MANAGER_SECRET,
 					);
-					const claimKey = `${idConfig.id}:${oldHash}`;
 
 					const newHashRows = await iimRepo.getIDByHash(newHash, transaction);
-					if (newHashRows.some((row) => row.configId === idConfig.id)) {
-						counts.alreadyMigrated++;
+					const migratedRow = newHashRows.find((row) => row.configId === idConfig.id);
+					if (migratedRow !== undefined) {
+						countRecord(idConfig.entityName, record.organization, 'alreadyMigrated');
 						// Records later in the stream with the same old hash are collisions, as they are on the first run
-						if (!claimedOldHashes.has(claimKey)) {
-							claimedOldHashes.set(claimKey, newHash);
+						if (!holdersByOldHash.has(oldHash)) {
+							holdersByOldHash.set(oldHash, {
+								...recordDetails,
+								generatedId: migratedRow.generatedId,
+							});
 						}
 						continue;
 					}
 
-					const claimedBy = claimedOldHashes.get(claimKey);
-					if (claimedBy !== undefined && claimedBy !== newHash) {
-						counts.collisions++;
+					const holder = holdersByOldHash.get(oldHash);
+					if (holder !== undefined) {
+						countRecord(idConfig.entityName, record.organization, 'collisions');
+						logger.warn(
+							`[IIM rehash]: Collision, record left without a PCGL ID: ${JSON.stringify({
+								...recordDetails,
+								idKeptBy: {
+									entityName: holder.entityName,
+									studyId: holder.studyId,
+									systemId: holder.systemId,
+									generatedId: holder.generatedId,
+								},
+							})}`,
+						);
 						continue;
 					}
 
@@ -113,28 +168,48 @@ try {
 						.update(generatedIdentifiers)
 						.set({ sourceHash: newHash })
 						.where(and(eq(generatedIdentifiers.sourceHash, oldHash), eq(generatedIdentifiers.configId, idConfig.id)))
-						.returning({ id: generatedIdentifiers.id });
+						.returning({ generatedId: generatedIdentifiers.generatedId });
 
-					if (updatedRows.length > 0) {
-						counts.updated++;
-						claimedOldHashes.set(claimKey, newHash);
+					const updatedRow = updatedRows[0];
+					if (updatedRow !== undefined) {
+						countRecord(idConfig.entityName, record.organization, 'updated');
+						holdersByOldHash.set(oldHash, {
+							...recordDetails,
+							generatedId: updatedRow.generatedId,
+						});
 						continue;
 					}
 
 					// No row of this entity's config has the old hash. When another config's row has it, the value
-					// collided with another entity's submitter value and never got an ID of its own.
+					// collided with another entity's submitter value. That record has not been read yet, so only its
+					// entity and PCGL ID are known.
 					const oldHashRows = await iimRepo.getIDByHash(oldHash, transaction);
-					if (oldHashRows.length > 0) {
-						counts.collisions++;
-					} else {
-						counts.withoutId++;
+					const otherConfigRow = oldHashRows[0];
+					if (otherConfigRow !== undefined) {
+						countRecord(idConfig.entityName, record.organization, 'collisions');
+						const holderConfig = idConfigs.find((config) => config.id === otherConfigRow.configId);
+						logger.warn(
+							`[IIM rehash]: Collision, record left without a PCGL ID: ${JSON.stringify({
+								...recordDetails,
+								idKeptBy: { entityName: holderConfig?.entityName, generatedId: otherConfigRow.generatedId },
+							})}`,
+						);
+						continue;
 					}
+
+					countRecord(idConfig.entityName, record.organization, 'withoutId');
+					logger.warn(`[IIM rehash]: Record has no PCGL ID: ${JSON.stringify(recordDetails)}`);
 				}
 			}
 		}
 	});
 
-	logger.info(`[IIM rehash]: Finished rehashing generated IDs: ${JSON.stringify(counts)}`);
+	logger.info(`[IIM rehash]: Finished rehashing generated IDs. Totals: ${JSON.stringify(totals)}`);
+	for (const [entityName, countsByStudy] of countsByEntityAndStudy) {
+		for (const [studyId, studyCounts] of countsByStudy) {
+			logger.info(`[IIM rehash]: Counts for ${JSON.stringify({ entityName, studyId, ...studyCounts })}`);
+		}
+	}
 } catch (error) {
 	logger.error(error, '[IIM rehash]: Error rehashing generated IDs, no changes were saved');
 	exitCode = 1;

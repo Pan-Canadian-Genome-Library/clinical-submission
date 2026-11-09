@@ -39,24 +39,55 @@ pnpm rehash:ids:prod     # compiled build, from dist/
 3. For each record, computes the old and the current hash from the configured submitter field, then checks, in this order:
    - **Already migrated:** when the entity's config already has a row at the current hash, leaves it.
    - **Updated:** when the entity's config has a row at the old hash, moves that row to the current hash. The PCGL ID doesn't change.
-   - **Collision:** when the row at the old hash was already moved for another record, or belongs to another entity's config, leaves the record without an ID. This is a value that the old hash shared between studies or entities. Only the first record read with it keeps the existing ID.
-   - **Without ID:** when no row has either hash, leaves the record without an ID. The record was never given one, for example because it was committed before its entity was added to `ID_MANAGER_CONFIG`.
+   - **Collision:** when the row at the old hash was already moved for another record, or belongs to another entity's config, leaves the record without an ID and logs it. This is a value that the old hash shared between studies or entities. Only the first record read with it keeps the existing ID.
+   - **Without ID:** when no row has either hash, leaves the record without an ID and logs it. The record was never given one, for example because it was committed before its entity was added to `ID_MANAGER_CONFIG`.
    - **Missing value:** when the record has no value in the submitter field, skips it.
 
 Every update runs in one transaction. If any step fails, nothing is saved.
 
 ## Checking the result
 
-The script logs one line with the counts, for example:
+### Records left without an ID
+
+Each record left without an ID is logged at `warn` level as it is read. A log line identifies the record by its entity, its study and its Lyric system ID. Submitter values are never logged.
+
+A record without an ID:
 
 ```
-[IIM rehash]: Finished rehashing generated IDs: {"updated":120,"alreadyMigrated":0,"collisions":0,"withoutId":3,"missingValue":0}
+[IIM rehash]: Record has no PCGL ID: {"entityName":"specimen","studyId":"STUDY-B","systemId":"SPEC-SYS-7"}
 ```
+
+A collision with a record that was already read names that record and the PCGL ID it kept:
+
+```
+[IIM rehash]: Collision, record left without a PCGL ID: {"entityName":"participant","studyId":"STUDY-B","systemId":"PART-SYS-2","idKeptBy":{"entityName":"participant","studyId":"STUDY-A","systemId":"PART-SYS-1","generatedId":"PT00000001"}}
+```
+
+A collision with a record of another entity that has not been read yet can only name that record's entity and PCGL ID:
+
+```
+[IIM rehash]: Collision, record left without a PCGL ID: {"entityName":"specimen","studyId":"STUDY-A","systemId":"SPEC-SYS-3","idKeptBy":{"entityName":"participant","generatedId":"PT00000004"}}
+```
+
+### Summary
+
+When it finishes, the script logs the totals, then the counts of each entity in each study:
+
+```
+[IIM rehash]: Finished rehashing generated IDs. Totals: {"updated":120,"alreadyMigrated":0,"collisions":1,"withoutId":3,"missingValue":0}
+[IIM rehash]: Counts for {"entityName":"participant","studyId":"STUDY-A","updated":80,"alreadyMigrated":0,"collisions":0,"withoutId":0,"missingValue":0}
+[IIM rehash]: Counts for {"entityName":"participant","studyId":"STUDY-B","updated":40,"alreadyMigrated":0,"collisions":1,"withoutId":0,"missingValue":0}
+[IIM rehash]: Counts for {"entityName":"specimen","studyId":"STUDY-B","updated":0,"alreadyMigrated":0,"collisions":0,"withoutId":3,"missingValue":0}
+```
+
+The summary is only logged when the run succeeds. When it fails, the record logs written before the failure describe a state that was rolled back.
+
+### What the results mean
 
 - It exits with `0` when it finished and saved its changes, and with `1` when it failed and saved nothing. The error is logged.
 - `collisions` greater than `0` means some records lost their PCGL ID. Those records need IDs generated for them separately.
 - `withoutId` counts records that never had an ID. They are not affected by the migration.
-- Running it again is safe. Moved rows are counted as `alreadyMigrated` and nothing is updated, but records that collided are still counted as `collisions`.
+- Running it again is safe. It never changes or removes an ID that was already moved, and moved rows are counted as `alreadyMigrated`. Records are read in the order Lyric returns them, so a record that collided can be counted as `collisions` on one run and `withoutId` on the next.
 
 ## Limitations
 
