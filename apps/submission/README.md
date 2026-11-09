@@ -89,16 +89,7 @@ When data is committed, each inserted record of an entity listed in `ID_MANAGER_
 - Data read endpoints add the PCGL ID next to every configured submitter ID field, including copies of it in other entities (e.g. `submitter_participant_id` in a specimen gets the participant's PCGL ID), using the study of the top-level record.
 - `GET /data/entity/{entityName}/{externalId}/exists` requires a `study` query parameter, and only reports IDs generated in that study.
 
-#### Rehashing existing IDs
-
-IDs generated before hashes were scoped by entity and study are stored against a hash of the submitter value alone, and are not found by the current lookups. Run this once per environment, after deploying the scoped hashes:
-
-```sh
-pnpm rehash:ids          # development (tsx)
-pnpm rehash:ids:prod     # compiled build, from dist/
-```
-
-The script reads all submitted data of every study through Lyric and moves each existing ID to its new hash, in a single transaction. It logs the number of IDs updated, already migrated, and records left without an ID. When the same submitter value was shared by several studies or entities, only the first record read keeps the existing ID; the others are counted as collisions and have no ID. Running the script again updates nothing.
+IDs generated before hashes were scoped by entity and study must be migrated once per environment with `pnpm rehash:ids`. See [Rehashing Generated IDs](./docs/rehash-generated-ids.md).
 
 ### Update/Create DUO Permissions in Study Table
 
