@@ -22,36 +22,36 @@ import { z as zod } from 'zod';
 export const authZUserInfo = zod.object({
 	userinfo: zod.object({
 		emails: zod.array(
-			zod.object({
-				address: zod.string().email(),
-				type: zod
-					.literal('official')
-					.or(zod.literal('delivery').or(zod.literal('forwarding').or(zod.literal('personal'))))
-					.optional(),
-			}),
+			zod
+				.object({
+					type: zod.string(),
+					address: zod.string(),
+				})
+				.optional(),
 		),
 		pcgl_id: zod.string(),
-		site_admin: zod.boolean().default(false),
 		data_admin: zod.boolean().default(false),
 	}),
 	study_authorizations: zod.object({
 		editable_studies: zod.array(zod.string()).optional(),
 		readable_studies: zod.array(zod.string()).optional(),
 	}),
-	dac_authorizations: zod.array(
-		zod
-			.object({
-				study_id: zod.string(),
-				start_date: zod.string(),
-				end_date: zod.string(),
-			})
-			.optional(),
-	),
+	dac_authorizations: zod
+		.array(
+			zod
+				.object({
+					study_id: zod.string(),
+					start_date: zod.string(),
+					end_date: zod.string(),
+				})
+				.optional(),
+		)
+		.optional(),
 	groups: zod
 		.array(
 			zod.object({
-				description: zod.string(),
-				id: zod.number().int(),
+				description: zod.string().optional(),
+				id: zod.number().int().optional(),
 				name: zod.string(),
 			}),
 		)

@@ -125,10 +125,10 @@ const authToken = validateRequest({}, async (request, response) => {
 
 		const userAccountAliasing = {
 			idToken: tokenResponse.id_token,
-			accessToken: tokenResponse.access_token,
-			refreshToken: tokenResponse.refresh_token,
-			refreshTokenIat: tokenResponse.refresh_token_iat,
-			refreshTokenLifetime: tokenResponse.refresh_token_lifetime,
+			accessToken: refreshTokenResponse.access_token,
+			refreshToken: refreshTokenResponse.refresh_token,
+			refreshTokenIat: refreshTokenResponse.refresh_token_iat,
+			refreshTokenLifetime: refreshTokenResponse.refresh_token_lifetime,
 		};
 
 		const sessionUserAliasing: SessionUser = {
@@ -137,23 +137,24 @@ const authToken = validateRequest({}, async (request, response) => {
 			emails: pcglAuthzResponse.userinfo.emails,
 			givenName: oidcDataResponse.given_name,
 			familyName: oidcDataResponse.family_name,
-			siteAdmin: pcglAuthzResponse.userinfo.site_admin,
 			dataAdmin: pcglAuthzResponse.userinfo.data_admin,
 			studyAuthorizations: {
 				editableStudies: pcglAuthzResponse.study_authorizations.editable_studies,
 				readableStudies: pcglAuthzResponse.study_authorizations.readable_studies,
 			},
-			dacAuthorizations: pcglAuthzResponse.dac_authorizations.map((dacAuth) => {
-				if (!dacAuth) {
-					return undefined;
-				}
-				return {
-					studyId: dacAuth.study_id,
-					startDate: dacAuth.start_date,
-					endDate: dacAuth.end_date,
-				};
-			}),
-			groups: pcglAuthzResponse.groups,
+			dacAuthorizations: pcglAuthzResponse.dac_authorizations
+				? pcglAuthzResponse.dac_authorizations.map((dacAuth) => {
+						if (!dacAuth) {
+							return undefined;
+						}
+						return {
+							studyId: dacAuth.study_id,
+							startDate: dacAuth.start_date,
+							endDate: dacAuth.end_date,
+						};
+					})
+				: [],
+			groups: pcglAuthzResponse.groups ? pcglAuthzResponse.groups : [],
 			idpName: oidcDataResponse.idp_name,
 		};
 
@@ -198,7 +199,6 @@ const getUser = validateRequest({}, async (request, response) => {
 					familyName: userSession.familyName,
 					emails: userSession.emails,
 					dacAuthorizations: userSession.dacAuthorizations,
-					siteAdmin: userSession.siteAdmin,
 					dataAdmin: userSession.dataAdmin,
 					groups: userSession.groups,
 					idpName: userSession.idpName,

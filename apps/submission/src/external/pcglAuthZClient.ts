@@ -281,6 +281,9 @@ export const extractAccessTokenFromSession = (req: Request): string | undefined 
  * @returns array of strings with names of the groups
  */
 const extractUserGroups = ({ groups }: Groups): string[] => {
+	if (groups === undefined) {
+		return [];
+	}
 	return groups.map((currentGroup) => currentGroup.name);
 };
 

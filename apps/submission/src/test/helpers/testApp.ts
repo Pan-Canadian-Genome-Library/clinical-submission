@@ -62,7 +62,6 @@ const authZUserResponse = (name: string, user: TestUser) => ({
 	userinfo: {
 		emails: [],
 		pcgl_id: name,
-		site_admin: false,
 		data_admin: user.isAdmin ?? false,
 	},
 	study_authorizations: {

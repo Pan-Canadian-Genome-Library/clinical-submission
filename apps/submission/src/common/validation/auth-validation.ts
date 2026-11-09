@@ -36,27 +36,30 @@ export const userDataResponseSchema = z.object({
 				.optional(),
 		),
 		pcgl_id: z.string(),
-		site_admin: z.boolean().default(false),
 		data_admin: z.boolean().default(false),
 	}),
 	study_authorizations: z.object({
 		editable_studies: z.array(z.string()),
 		readable_studies: z.array(z.string()),
 	}),
-	dac_authorizations: z.array(
-		z.object({
-			end_date: z.string(),
-			start_date: z.string(),
-			study_id: z.string(),
-		}),
-	),
-	groups: z.array(
-		z.object({
-			id: z.coerce.string(),
-			name: z.string(),
-			description: z.string(),
-		}),
-	),
+	dac_authorizations: z
+		.array(
+			z.object({
+				end_date: z.string(),
+				start_date: z.string(),
+				study_id: z.string(),
+			}),
+		)
+		.optional(),
+	groups: z
+		.array(
+			z.object({
+				id: z.coerce.string().optional(),
+				name: z.string(),
+				description: z.string().optional(),
+			}),
+		)
+		.optional(),
 });
 
 export type UserDataResponseSchemaType = z.infer<typeof userDataResponseSchema>;
