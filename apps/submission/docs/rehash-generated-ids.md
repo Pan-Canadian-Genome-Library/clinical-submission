@@ -11,7 +11,7 @@ Each generated PCGL ID is stored against a hash of the record it belongs to, in 
 
 Both are keyed with `ID_MANAGER_SECRET`. A hash can't be reversed, so the rows can't be updated from the hash alone. The script reads the submitted data back and computes both hashes for every record.
 
-Until the script runs, IDs generated under the old hash are not found. Data read endpoints return those records without their PCGL ID, and `GET /data/entity/{entityName}/{externalId}/exists` reports them as not existing.
+Until the script runs, IDs generated under the old hash are not found. Data read endpoints return those records without their PCGL ID, and `GET /data/study/{studyId}/entity/{entityName}/{externalId}/exists` reports them as not existing.
 
 ## When to run it
 

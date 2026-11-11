@@ -1,12 +1,12 @@
-/data/entity/{entityName}/{externalId}/exists:
+/data/study/{studyId}/entity/{entityName}/{externalId}/exists:
   get:
     summary: Retrieve boolean if record exists
     description: Returns `true` when a PCGL ID has been generated for the external ID of this entity in the given study, and `false` otherwise, including when the entity has no ID configuration.
     tags:
       - Data
     parameters:
-      - name: externalId
-        description: External Id which represents the PHI value. (e.g. a participant ID "ABC1234")
+      - name: studyId
+        description: ID of the study the record was submitted to. PCGL IDs are generated per entity and per study, so the same external ID can exist in one study and not in another.
         in: path
         schema:
           type: string
@@ -17,9 +17,9 @@
         schema:
           type: string
         required: true
-      - name: study
-        description: ID of the study the record was submitted to. PCGL IDs are generated per entity and per study, so the same external ID can exist in one study and not in another.
-        in: query
+      - name: externalId
+        description: External Id which represents the PHI value. (e.g. a participant ID "ABC1234")
+        in: path
         schema:
           type: string
         required: true

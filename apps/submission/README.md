@@ -87,7 +87,7 @@ This application is a wrapper around the [@overture-stack/lyric](https://github.
 When data is committed, each inserted record of an entity listed in `ID_MANAGER_CONFIG` gets a PCGL ID. The ID is stored against an HMAC (keyed with `ID_MANAGER_SECRET`) of the entity name, the study ID and the record's submitter value. The same submitter value therefore gets its own PCGL ID in each entity and each study.
 
 - Data read endpoints add the PCGL ID next to every configured submitter ID field, including copies of it in other entities (e.g. `submitter_participant_id` in a specimen gets the participant's PCGL ID), using the study of the top-level record.
-- `GET /data/entity/{entityName}/{externalId}/exists` requires a `study` query parameter, and only reports IDs generated in that study.
+- `GET /data/study/{studyId}/entity/{entityName}/{externalId}/exists` only reports IDs generated in that study.
 
 ### Update/Create DUO Permissions in Study Table
 

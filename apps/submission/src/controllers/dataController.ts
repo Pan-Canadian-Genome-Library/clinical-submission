@@ -85,8 +85,7 @@ const getDataIdExists = validateRequest(getDataById, async (req, res, next) => {
 	const iimRepo = iimService(db);
 
 	try {
-		const { externalId, entityName } = req.params;
-		const { study: studyId } = req.query;
+		const { studyId, entityName, externalId } = req.params;
 
 		const idConfigResult = await iimRepo.getIIMConfig(entityName);
 		const idConfig = idConfigResult[0];

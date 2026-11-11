@@ -582,23 +582,23 @@ describe('data endpoints', () => {
 		});
 	});
 
-	describe('GET /data/entity/:entityName/:externalId/exists', () => {
+	describe('GET /data/study/:studyId/entity/:entityName/:externalId/exists', () => {
 		it('is true for a value that has a PCGL ID in the study', async () => {
-			const { status, body } = await server.request('GET', '/data/entity/participant/SUB-STUDY-A/exists?study=STUDY-A');
+			const { status, body } = await server.request('GET', '/data/study/STUDY-A/entity/participant/SUB-STUDY-A/exists');
 
 			assert.equal(status, 200);
 			assert.equal(body, true);
 		});
 
 		it('is false for the same value in another study', async () => {
-			const { status, body } = await server.request('GET', '/data/entity/participant/SUB-STUDY-A/exists?study=STUDY-B');
+			const { status, body } = await server.request('GET', '/data/study/STUDY-B/entity/participant/SUB-STUDY-A/exists');
 
 			assert.equal(status, 200);
 			assert.equal(body, false);
 		});
 
 		it('is false for an entity without an ID config', async () => {
-			const { body } = await server.request('GET', '/data/entity/specimen/SUB-STUDY-A/exists?study=STUDY-A');
+			const { body } = await server.request('GET', '/data/study/STUDY-A/entity/specimen/SUB-STUDY-A/exists');
 
 			assert.equal(body, false);
 		});
@@ -606,16 +606,15 @@ describe('data endpoints', () => {
 		it('is false when the row found for the hash belongs to another config', async () => {
 			generatedIdRows = GENERATED_IDS.map((row) => ({ ...row, configId: 2 }));
 
-			const { body } = await server.request('GET', '/data/entity/participant/SUB-STUDY-A/exists?study=STUDY-A');
+			const { body } = await server.request('GET', '/data/study/STUDY-A/entity/participant/SUB-STUDY-A/exists');
 
 			assert.equal(body, false);
 		});
 
-		it('rejects a request without a study', async () => {
-			for (const query of ['', '?study=']) {
-				const { status } = await server.request('GET', `/data/entity/participant/SUB-STUDY-A/exists${query}`);
-				assert.equal(status, 400, query);
-			}
+		it('rejects a blank study', async () => {
+			const { status } = await server.request('GET', '/data/study/%20/entity/participant/SUB-STUDY-A/exists');
+
+			assert.equal(status, 400);
 		});
 	});
 });
