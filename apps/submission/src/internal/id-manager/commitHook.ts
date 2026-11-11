@@ -36,7 +36,7 @@ import iimService from '@/service/idManagerService.js';
  *
  * @returns The number of records given an ID (`inserted`), `skipped` and `errored`, or `undefined` when the ID manager
  * config is empty, in which case no ID is generated.
- * @throws `InternalServerError` when the database can't be read or written. Records after the failing one are not
+ * @throws `Error` when the database can't be read or written. Records after the failing one are not
  * processed.
  */
 const processInsertedRecords = async (

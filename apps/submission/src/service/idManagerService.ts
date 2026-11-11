@@ -22,7 +22,6 @@ import { QueryResult } from 'pg';
 
 import { logger } from '@/common/logger.js';
 import { type IIMConfigObject } from '@/common/validation/id-manager-validation.js';
-import { lyricProvider } from '@/core/provider.js';
 import { PostgresDb } from '@/db/index.js';
 import { schemaName } from '@/db/schemas/generate.js';
 import { generatedIdentifiers, idGenerationConfig } from '@/db/schemas/idGenerationConfig.js';
@@ -61,7 +60,7 @@ const iimService = (db: PostgresDb) => ({
 				return;
 			} else {
 				logger.error(`[IIM]: Unable to insert IIM Configuration into database. ${exception}`);
-				throw new lyricProvider.utils.errors.InternalServerError('Unable to initialize IIM Service.');
+				throw new Error('Unable to initialize IIM Service.');
 			}
 		}
 	},
@@ -72,9 +71,7 @@ const iimService = (db: PostgresDb) => ({
 			return await dbTransaction.select().from(idGenerationConfig);
 		} catch (exception) {
 			logger.error(`[IIM]: Unexpected error retrieving IIM all configurations. ${exception}`);
-			throw new lyricProvider.utils.errors.InternalServerError(
-				'IIM service encountered an Unexpected error retrieving IIM configurations.',
-			);
+			throw new Error('IIM service encountered an Unexpected error retrieving IIM configurations.');
 		}
 	},
 
@@ -88,9 +85,7 @@ const iimService = (db: PostgresDb) => ({
 			return await dbTransaction.select().from(idGenerationConfig).where(eq(idGenerationConfig.entityName, entityName));
 		} catch (exception) {
 			logger.error(`[IIM]: Unexpected error retrieving IIM Configuration. ${exception}`);
-			throw new lyricProvider.utils.errors.InternalServerError(
-				'IIM service encountered an Unexpected error retrieving IIM Configuration.',
-			);
+			throw new Error('IIM service encountered an Unexpected error retrieving IIM Configuration.');
 		}
 	},
 
@@ -112,9 +107,7 @@ const iimService = (db: PostgresDb) => ({
 				.where(eq(generatedIdentifiers.sourceHash, hashedValue));
 		} catch (exception) {
 			logger.error(`[IIM]: Unexpected error retrieving ID . ${exception}`);
-			throw new lyricProvider.utils.errors.InternalServerError(
-				'IIM Service encountered an unexpected error while retrieving generated ID.',
-			);
+			throw new Error('IIM Service encountered an unexpected error while retrieving generated ID.');
 		}
 	},
 
@@ -127,9 +120,7 @@ const iimService = (db: PostgresDb) => ({
 			return nextValue.rows[0] ? nextValue.rows[0].nextval : undefined;
 		} catch (exception) {
 			logger.error(`[IIM]: Unexpected error getting next sequence value. ${exception}`);
-			throw new lyricProvider.utils.errors.InternalServerError(
-				'IIM Service encountered an unexpected error while retrieving next IIM sequence value.',
-			);
+			throw new Error('IIM Service encountered an unexpected error while retrieving next IIM sequence value.');
 		}
 	},
 
@@ -146,9 +137,7 @@ const iimService = (db: PostgresDb) => ({
 				.returning();
 		} catch (exception) {
 			logger.error(`[IIM]: Unexpected error. Unable to insert new generated ID record. ${exception}`);
-			throw new lyricProvider.utils.errors.InternalServerError(
-				'IIM Service encountered an error creating new generated ID.',
-			);
+			throw new Error('IIM Service encountered an error creating new generated ID.');
 		}
 	},
 
@@ -179,7 +168,7 @@ const iimService = (db: PostgresDb) => ({
 				return [undefined, sequenceName];
 			} else {
 				logger.error(`[IIM]: Unable to create sequence specified by IIM config record. ${exception}`);
-				throw new lyricProvider.utils.errors.InternalServerError('Unable to initialize IIM Service.');
+				throw new Error('Unable to initialize IIM Service.');
 			}
 		}
 	},

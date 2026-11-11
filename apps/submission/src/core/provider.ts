@@ -31,9 +31,7 @@ const appConfig: AppConfig = {
 		user: env.DB_USER,
 		password: env.DB_PASSWORD,
 	},
-	// Wrapped so the hook is only read when a commit finishes. The commit hook's module imports this one through the ID
-	// manager service, so when that module is loaded first, the hook is not defined yet while this config is built.
-	onFinishCommit: (resultOnCommit) => onFinishCommitCallback(resultOnCommit),
+	onFinishCommit: onFinishCommitCallback,
 	auth: {
 		enabled: env.AUTH_ENABLED,
 		protectedMethods: env.AUTH_PROTECT_METHODS,

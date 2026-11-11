@@ -208,7 +208,7 @@ export type GenerateIdForRecordResult =
  * transaction is not reused, and a value taken for an ID that another process stored first is not used.
  *
  * @param value The record's value of the config's `fieldName`.
- * @throws `InternalServerError` when the database can't be read or written.
+ * @throws `Error` when the database can't be read or written.
  * @throws `Error` when the insert reports an ID already stored at the record's hash, but reading it back finds none.
  */
 const generateIdForRecord = async (
