@@ -32,8 +32,6 @@ pnpm script:rehash-ids [options]          # development, runs the TypeScript sou
 pnpm script:rehash-ids:prod [options]     # compiled build, from dist/
 ```
 
-The logs are JSON lines. Pipe them through `pnpm exec pino-pretty` to read them more easily.
-
 | Option               | Effect                                                                                                                                                            |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--generate-missing` | Generates a PCGL ID for every collision and every record without an ID. Without it, those records are only logged.                                                |
@@ -116,9 +114,9 @@ Each collision and each record without an ID is logged at `warn` level. A log li
 
 The `action` field is one of:
 
-- `generated`, followed by the new `generatedId`.
-- `would generate (dry run)`.
-- `not generated (run with --generate-missing)`.
+- `generated`: a new PCGL ID was generated for the record, and is given in `generatedId`.
+- `would generate (dry run)`: a run with `--generate-missing` would generate a PCGL ID for the record. A dry run takes no sequence values, so the ID isn't known.
+- `not generated, run without --generate-missing`: the record was left without an ID because the script ran without `--generate-missing`. Running it again with `--generate-missing` generates one.
 
 A record without an ID:
 
@@ -132,10 +130,10 @@ A collision names the record that kept the existing ID, and that ID:
 [IIM rehash]: Collision, record does not keep the existing PCGL ID: {"entityName":"participant","studyId":"STUDY-B","systemId":"PART-SYS-2","idKeptBy":{"entityName":"participant","studyId":"STUDY-A","systemId":"PART-SYS-1","generatedId":"PT00000001"},"action":"generated","generatedId":"PT00000412"}
 ```
 
-When the existing ID belongs to a record that was not read, such as a record of a study without a category, only that record's entity and PCGL ID are known:
+Sometimes no record read in this run keeps the existing ID. For example, the record it was generated for was deleted, or a record of another entity with the same submitter value already has its own ID at its new hash. The existing ID then stays unused, and `idKeptBy` can only give its entity and the ID. The record in the line is still identified in full and is handled like any other collision:
 
 ```
-[IIM rehash]: Collision, record does not keep the existing PCGL ID: {"entityName":"specimen","studyId":"STUDY-A","systemId":"SPEC-SYS-3","idKeptBy":{"entityName":"participant","generatedId":"PT00000004"},"action":"not generated (run with --generate-missing)"}
+[IIM rehash]: Collision, record does not keep the existing PCGL ID: {"entityName":"specimen","studyId":"STUDY-A","systemId":"SPEC-SYS-3","idKeptBy":{"entityName":"participant","generatedId":"PT00000004"},"action":"generated","generatedId":"SP00000214"}
 ```
 
 ### Summary
@@ -151,11 +149,26 @@ When it finishes, the script logs the totals, then the counts of each entity in 
 
 A dry run starts the totals line with `Dry run finished, no changes were saved`, and `generated` counts the IDs that would be generated.
 
-The summary is only logged when the run succeeds. When it fails, the record logs written before the failure describe a state that was rolled back.
+The summary is only logged when the run succeeds.
+
+### When it fails
+
+On a failure, the script logs at `error` level what it was doing, with the error, and whether anything was saved. It then exits with `1`.
+
+- **Before or during the changes:** the transaction is rolled back and nothing is saved. Lines logged before the failure, including those that report a generated ID, describe changes that were rolled back. The script logs the counts reached before the failure. If it had generated IDs, it also logs that the sequence values taken for them won't be used again.
+
+  ```
+  [IIM rehash]: Failed while moving and generating IDs. The transaction was rolled back and nothing was saved, including the IDs reported as generated above
+  [IIM rehash]: Counts up to the failure, all rolled back: {"updated":64,"alreadyMigrated":0,"collisions":1,"withoutId":0,"missingValue":0,"generated":1}
+  [IIM rehash]: Postgres does not roll back sequence values, so the values taken for the IDs reported as generated above will not be used again
+  ```
+
+- **After the changes were saved:** for example while logging the summary. The log says the failure happened after the changes were saved. The changes are kept.
+- **While closing the connections:** the error is logged with whether the changes were saved. It doesn't change the exit code.
 
 ### What the results mean
 
-- It exits with `0` when it finished (a dry run included), and with `1` when it failed and saved nothing. The error is logged.
+- It exits with `0` when it finished (a dry run included), and with `1` when it failed. See [When it fails](#when-it-fails) for what was saved.
 - `collisions` and `withoutId` count the records that had no PCGL ID of their own after the move. `generated` counts the ones that were given one. Without `--generate-missing`, it is `0`.
 - Running it again is safe. It never changes or removes an ID that already belongs to a record. After a run with `--generate-missing`, every record with a submitter value has its own ID, so a second run counts everything as `alreadyMigrated` and changes nothing. After a run without it, a second run logs the same collisions and records without an ID again.
 
@@ -163,4 +176,3 @@ The summary is only logged when the run succeeds. When it fails, the record logs
 
 - **Collisions change the PCGL ID a record shows.** Under the old hash, every record that shared a submitter value showed the same PCGL ID: the one now kept by the earliest committed record. A collision gets a new ID, so any copy of its old PCGL ID made before the migration, in an export, another system or a note, now refers to a different record. The collision log lines list each of these records, with the ID it used to show (`idKeptBy.generatedId`) and its new ID.
 - **Sequence values are used up on failure.** Postgres doesn't roll back sequence values, so a run that fails after generating IDs leaves gaps in the IDs. IDs stay unique.
-- **Not tested against a database:** there are no automated tests for the script, and it has not been run against a real database. Run it with `--dry-run` against a copy of the environment's database first, and check that records read the same PCGL IDs before and after.

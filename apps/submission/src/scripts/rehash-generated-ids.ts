@@ -77,7 +77,8 @@ type ReadRecord = {
 	newHash: string;
 };
 
-// The record that kept the PCGL ID of an old hash. When that record was not read, only its entity is known.
+// The record that kept the PCGL ID of an old hash. When no record read in this run keeps it, only the ID's entity is
+// known.
 type IdHolder = {
 	entityName: string | undefined;
 	studyId?: string;
@@ -229,7 +230,7 @@ const generateMissingId = async (
 	transaction: PostgresTransaction,
 ): Promise<{ action: string; generatedId?: string }> => {
 	if (!generateMissing) {
-		return { action: 'not generated (run with --generate-missing)' };
+		return { action: 'not generated, run without --generate-missing' };
 	}
 
 	countRecord(record.idConfig.entityName, record.studyId, 'generated');
@@ -257,11 +258,16 @@ const generateMissingId = async (
 
 let exitCode = 0;
 
+// What the script was doing, for the failure log
+let phase = 'loading the ID configs';
+let changesSaved = false;
+
 try {
 	const idConfigs = await iimRepo.getAllIIMConfigs();
 	const entityNameOfConfig = (configId: number | null): string | undefined =>
 		idConfigs.find((config) => config.id === configId)?.entityName;
 
+	phase = 'reading submitted records';
 	const records = await readRecords(idConfigs);
 
 	const recordsByOldHash = new Map<string, ReadRecord[]>();
@@ -269,6 +275,7 @@ try {
 		recordsByOldHash.set(record.oldHash, [...(recordsByOldHash.get(record.oldHash) ?? []), record]);
 	}
 
+	phase = 'moving and generating IDs';
 	try {
 		await db.transaction(async (transaction) => {
 			const rowsByHash = new Map(
@@ -306,7 +313,8 @@ try {
 						holder = { ...recordDetails(keeper), generatedId: oldRow.generatedId };
 						withoutRow = withoutRow.filter((record) => record !== keeper);
 					} else {
-						// The row belongs to a record that was not read, such as a record of another entity's config
+						// No record read in this run keeps the row, for example because the record it was generated for was
+						// deleted, or because it already has an ID at its new hash
 						holder = { entityName: entityNameOfConfig(oldRow.configId), generatedId: oldRow.generatedId };
 					}
 				} else if (migrated.length > 0) {
@@ -344,12 +352,14 @@ try {
 				throw new DryRunRollback();
 			}
 		});
+		changesSaved = true;
 	} catch (error) {
 		if (!(error instanceof DryRunRollback)) {
 			throw error;
 		}
 	}
 
+	phase = 'logging the summary';
 	const runDescription = dryRun ? 'Dry run finished, no changes were saved' : 'Finished rehashing generated IDs';
 	logger.info(`[IIM rehash]: ${runDescription}. Totals: ${JSON.stringify(totals)}`);
 	for (const [entityName, countsByStudy] of countsByEntityAndStudy) {
@@ -358,11 +368,31 @@ try {
 		}
 	}
 } catch (error) {
-	logger.error(error, '[IIM rehash]: Error rehashing generated IDs, no changes were saved');
 	exitCode = 1;
+
+	if (changesSaved) {
+		logger.error(error, `[IIM rehash]: Failed while ${phase}, after the changes were saved`);
+	} else {
+		logger.error(
+			error,
+			`[IIM rehash]: Failed while ${phase}. The transaction was rolled back and nothing was saved, including the IDs reported as generated above`,
+		);
+		logger.error(`[IIM rehash]: Counts up to the failure, all rolled back: ${JSON.stringify(totals)}`);
+
+		if (totals.generated > 0 && !dryRun) {
+			logger.error(
+				'[IIM rehash]: Postgres does not roll back sequence values, so the values taken for the IDs reported as generated above will not be used again',
+			);
+		}
+	}
 } finally {
-	await lyricProvider.shutdown();
-	await db.$client.end();
+	try {
+		await lyricProvider.shutdown();
+		await db.$client.end();
+	} catch (closeError) {
+		const savedDescription = changesSaved ? 'the changes were saved' : 'nothing was saved';
+		logger.error(closeError, `[IIM rehash]: Error closing the connections after the run, ${savedDescription}`);
+	}
 }
 
 process.exit(exitCode);
