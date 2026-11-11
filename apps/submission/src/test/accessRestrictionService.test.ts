@@ -25,6 +25,7 @@ import { type SubmittedDataResponse } from '@overture-stack/lyric';
 import {
 	excludeRestrictedEntityNames,
 	findRestrictedFilterFields,
+	getRestrictedFieldNames,
 	getRestrictedFilterFieldNames,
 	getSqonFieldNames,
 	isRestrictedEntityName,
@@ -32,6 +33,15 @@ import {
 	shouldRestrictStudyData,
 	stripRestrictedData,
 } from '../service/accessRestrictionService.js';
+
+// The restricted fields of an ID manager config that lists the participant and treatment submitter IDs
+const RESTRICTED_FIELD_NAMES = getRestrictedFieldNames([
+	{ fieldName: 'submitter_participant_id' },
+	{ fieldName: 'submitter_treatment_id' },
+]);
+const NO_CONFIGURED_FIELD_NAMES: ReadonlySet<string> = new Set();
+// Configured field names as they could be passed in without normalizing, in mixed case and with whitespace
+const UNNORMALIZED_FIELD_NAMES: ReadonlySet<string> = new Set([' Submitter_Treatment_ID ']);
 
 const submittedDataResponse = (partial: Pick<SubmittedDataResponse, 'entityName' | 'data'>): SubmittedDataResponse => ({
 	isValid: true,
@@ -71,13 +81,49 @@ describe('isRestrictedEntityName', () => {
 	});
 });
 
+describe('getRestrictedFieldNames', () => {
+	it('returns the configured field names and the restricted field, in lowercase', () => {
+		const fieldNames = getRestrictedFieldNames([
+			{ fieldName: 'Submitter_Specimen_ID' },
+			{ fieldName: ' submitter_treatment_id ' },
+		]);
+
+		assert.deepEqual(
+			fieldNames,
+			new Set(['submitter_participant_id', 'submitter_specimen_id', 'submitter_treatment_id']),
+		);
+	});
+
+	it('includes the restricted field when the config does not list it, or is empty', () => {
+		assert.ok(getRestrictedFieldNames([{ fieldName: 'submitter_specimen_id' }]).has('submitter_participant_id'));
+		assert.deepEqual(getRestrictedFieldNames([]), new Set(['submitter_participant_id']));
+	});
+
+	it('lists the restricted field once when the config also lists it', () => {
+		assert.equal(getRestrictedFieldNames([{ fieldName: 'submitter_participant_id' }]).size, 1);
+	});
+});
+
 describe('isRestrictedFieldName', () => {
 	it('matches the restricted field name case-insensitively', () => {
-		assert.equal(isRestrictedFieldName('Submitter_Participant_ID'), true);
+		assert.equal(isRestrictedFieldName('Submitter_Participant_ID', RESTRICTED_FIELD_NAMES), true);
+	});
+
+	it('matches a configured field name case-insensitively', () => {
+		assert.equal(isRestrictedFieldName('Submitter_Treatment_ID', RESTRICTED_FIELD_NAMES), true);
+	});
+
+	it('matches the restricted field even when the set does not contain it', () => {
+		assert.equal(isRestrictedFieldName('submitter_participant_id', NO_CONFIGURED_FIELD_NAMES), true);
 	});
 
 	it('does not match an unrelated field', () => {
-		assert.equal(isRestrictedFieldName('pcgl_participant_id'), false);
+		assert.equal(isRestrictedFieldName('pcgl_participant_id', RESTRICTED_FIELD_NAMES), false);
+		assert.equal(isRestrictedFieldName('submitter_treatment_id', NO_CONFIGURED_FIELD_NAMES), false);
+	});
+
+	it('matches field names that are passed in mixed case and with whitespace', () => {
+		assert.equal(isRestrictedFieldName('submitter_treatment_id', UNNORMALIZED_FIELD_NAMES), true);
 	});
 });
 
@@ -117,7 +163,7 @@ describe('stripRestrictedData', () => {
 			}),
 		];
 
-		const result = stripRestrictedData(records);
+		const result = stripRestrictedData(records, RESTRICTED_FIELD_NAMES);
 
 		assert.equal(result.length, 1);
 		assert.equal(result[0]?.entityName, 'participant');
@@ -134,7 +180,7 @@ describe('stripRestrictedData', () => {
 			}),
 		];
 
-		const result = stripRestrictedData(records);
+		const result = stripRestrictedData(records, RESTRICTED_FIELD_NAMES);
 
 		assert.deepEqual(result[0]?.data, { pcgl_participant_id: 'PT001' });
 	});
@@ -149,7 +195,7 @@ describe('stripRestrictedData', () => {
 			}),
 		];
 
-		const result = stripRestrictedData(records);
+		const result = stripRestrictedData(records, RESTRICTED_FIELD_NAMES);
 
 		assert.deepEqual(result[0]?.data, { treatments: [{ pcgl_treatment_id: 'TR001' }] });
 	});
@@ -162,7 +208,7 @@ describe('stripRestrictedData', () => {
 			}),
 		];
 
-		const result = stripRestrictedData(records);
+		const result = stripRestrictedData(records, RESTRICTED_FIELD_NAMES);
 
 		assert.deepEqual(result[0]?.data, { pcgl_participant_id: 'PT001' });
 	});
@@ -177,9 +223,55 @@ describe('stripRestrictedData', () => {
 			}),
 		];
 
-		const result = stripRestrictedData(records);
+		const result = stripRestrictedData(records, RESTRICTED_FIELD_NAMES);
 
 		assert.deepEqual(result[0]?.data, { participants: [{ pcgl_participant_id: 'PT002' }] });
+	});
+
+	it('removes the configured fields at any depth, in any letter case, and keeps their PCGL IDs', () => {
+		const records = [
+			submittedDataResponse({
+				entityName: 'participant',
+				data: {
+					submitter_participant_id: 'SUBMITTER-001',
+					pcgl_participant_id: 'PT001',
+					treatments: [{ Submitter_Treatment_ID: 'TREAT-1', pcgl_treatment_id: 'TR001', drug: 'DRUG-X' }],
+				},
+			}),
+		];
+
+		const result = stripRestrictedData(records, RESTRICTED_FIELD_NAMES);
+
+		assert.deepEqual(result[0]?.data, {
+			pcgl_participant_id: 'PT001',
+			treatments: [{ pcgl_treatment_id: 'TR001', drug: 'DRUG-X' }],
+		});
+	});
+
+	it('removes the restricted field, and keeps fields that are not configured, when the config is empty', () => {
+		const records = [
+			submittedDataResponse({
+				entityName: 'treatment',
+				data: { submitter_participant_id: 'SUBMITTER-001', submitter_treatment_id: 'TREAT-1' },
+			}),
+		];
+
+		const result = stripRestrictedData(records, NO_CONFIGURED_FIELD_NAMES);
+
+		assert.deepEqual(result[0]?.data, { submitter_treatment_id: 'TREAT-1' });
+	});
+
+	it('removes configured fields whose names are passed in mixed case and with whitespace', () => {
+		const records = [
+			submittedDataResponse({
+				entityName: 'treatment',
+				data: { submitter_treatment_id: 'TREAT-1', drug: 'DRUG-X' },
+			}),
+		];
+
+		const result = stripRestrictedData(records, UNNORMALIZED_FIELD_NAMES);
+
+		assert.deepEqual(result[0]?.data, { drug: 'DRUG-X' });
 	});
 
 	it('leaves unrelated entities and fields untouched', () => {
@@ -187,7 +279,7 @@ describe('stripRestrictedData', () => {
 			submittedDataResponse({ entityName: 'participant', data: { pcgl_participant_id: 'PT001', age: 42 } }),
 		];
 
-		const result = stripRestrictedData(records);
+		const result = stripRestrictedData(records, RESTRICTED_FIELD_NAMES);
 
 		assert.deepEqual(result[0]?.data, { pcgl_participant_id: 'PT001', age: 42 });
 	});
@@ -235,20 +327,45 @@ describe('getSqonFieldNames', () => {
 
 describe('getRestrictedFilterFieldNames', () => {
 	it('returns the restricted field and the fields only the restricted entity has', () => {
-		assert.deepEqual(getRestrictedFilterFieldNames(SCHEMAS), ['submitter_participant_id', 'income', 'ethnicity']);
+		assert.deepEqual(getRestrictedFilterFieldNames(SCHEMAS, NO_CONFIGURED_FIELD_NAMES), [
+			'submitter_participant_id',
+			'income',
+			'ethnicity',
+		]);
 	});
 
 	it('leaves out the fields the restricted entity shares with another one', () => {
-		assert.ok(!getRestrictedFilterFieldNames(SCHEMAS).includes('study_id'));
+		assert.ok(!getRestrictedFilterFieldNames(SCHEMAS, NO_CONFIGURED_FIELD_NAMES).includes('study_id'));
 	});
 
 	it('treats the pluralized name of the restricted entity as the restricted entity', () => {
-		assert.ok(getRestrictedFilterFieldNames([schema('sociodemographics', 'income')]).includes('income'));
+		assert.ok(
+			getRestrictedFilterFieldNames([schema('sociodemographics', 'income')], NO_CONFIGURED_FIELD_NAMES).includes(
+				'income',
+			),
+		);
 	});
 
 	it('still returns the restricted field when the dictionary has no restricted entity', () => {
-		assert.deepEqual(getRestrictedFilterFieldNames([]), ['submitter_participant_id']);
-		assert.deepEqual(getRestrictedFilterFieldNames([schema('participant', 'gender')]), ['submitter_participant_id']);
+		assert.deepEqual(getRestrictedFilterFieldNames([], NO_CONFIGURED_FIELD_NAMES), ['submitter_participant_id']);
+		assert.deepEqual(getRestrictedFilterFieldNames([schema('participant', 'gender')], NO_CONFIGURED_FIELD_NAMES), [
+			'submitter_participant_id',
+		]);
+	});
+
+	it('returns the configured fields, without duplicates, even when other schemas share them', () => {
+		const schemas = [...SCHEMAS, schema('treatment', 'submitter_treatment_id', 'submitter_participant_id')];
+
+		assert.deepEqual(getRestrictedFilterFieldNames(schemas, RESTRICTED_FIELD_NAMES), [
+			'submitter_participant_id',
+			'submitter_treatment_id',
+			'income',
+			'ethnicity',
+		]);
+	});
+
+	it('returns configured fields in lowercase when their names are passed in mixed case and with whitespace', () => {
+		assert.ok(getRestrictedFilterFieldNames(SCHEMAS, UNNORMALIZED_FIELD_NAMES).includes('submitter_treatment_id'));
 	});
 });
 
@@ -256,19 +373,35 @@ describe('findRestrictedFilterFields', () => {
 	it('finds restricted fields, in any letter case, as they are written in the SQON', () => {
 		const sqon = { op: 'and', content: [filter('gender'), filter('INCOME'), filter('Submitter_Participant_ID')] };
 
-		assert.deepEqual(findRestrictedFilterFields(sqon, SCHEMAS), ['INCOME', 'Submitter_Participant_ID']);
+		assert.deepEqual(findRestrictedFilterFields(sqon, SCHEMAS, RESTRICTED_FIELD_NAMES), [
+			'INCOME',
+			'Submitter_Participant_ID',
+		]);
+	});
+
+	it('finds configured fields, in any letter case', () => {
+		const sqon = { op: 'and', content: [filter('gender'), filter('Submitter_Treatment_ID')] };
+
+		assert.deepEqual(findRestrictedFilterFields(sqon, SCHEMAS, RESTRICTED_FIELD_NAMES), ['Submitter_Treatment_ID']);
+		assert.deepEqual(findRestrictedFilterFields(sqon, SCHEMAS, NO_CONFIGURED_FIELD_NAMES), []);
+	});
+
+	it('finds configured fields whose names are passed in mixed case and with whitespace', () => {
+		const sqon = { op: 'and', content: [filter('gender'), filter('submitter_treatment_id')] };
+
+		assert.deepEqual(findRestrictedFilterFields(sqon, SCHEMAS, UNNORMALIZED_FIELD_NAMES), ['submitter_treatment_id']);
 	});
 
 	it('finds a restricted field once, however many times it is used', () => {
 		const sqon = { op: 'or', content: [filter('income'), { op: 'not', content: [filter('income')] }] };
 
-		assert.deepEqual(findRestrictedFilterFields(sqon, SCHEMAS), ['income']);
+		assert.deepEqual(findRestrictedFilterFields(sqon, SCHEMAS, RESTRICTED_FIELD_NAMES), ['income']);
 	});
 
 	it('finds nothing in a SQON that only uses allowed fields', () => {
 		const sqon = { op: 'and', content: [filter('gender'), filter('study_id')] };
 
-		assert.deepEqual(findRestrictedFilterFields(sqon, SCHEMAS), []);
-		assert.deepEqual(findRestrictedFilterFields(undefined, SCHEMAS), []);
+		assert.deepEqual(findRestrictedFilterFields(sqon, SCHEMAS, RESTRICTED_FIELD_NAMES), []);
+		assert.deepEqual(findRestrictedFilterFields(undefined, SCHEMAS, RESTRICTED_FIELD_NAMES), []);
 	});
 });

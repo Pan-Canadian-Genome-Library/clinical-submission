@@ -6,10 +6,12 @@ This is a fixed part of the access model, not an optional feature: it applies au
 
 ## What is restricted
 
-Two things, defined as constants in [`src/service/accessRestrictionService.ts`](../src/service/accessRestrictionService.ts):
+Two things, defined in [`src/service/accessRestrictionService.ts`](../src/service/accessRestrictionService.ts):
 
 - **The `sociodemographic` entity** is excluded entirely. No record of this schema is retrievable, whether requested directly, through pagination, through a SQON query, or re-embedded as a nested block by Lyric's `view=compound`/`view=nested` (which pulls in related schemas by walking the dictionary hierarchy, independently of any entity filter applied to the main query).
-- **The `submitter_participant_id` field** is removed from every entity's response, wherever it appears, at any nesting depth. This is independent of `ID_MANAGER_CONFIG` (the internal ID-manager config): that config controls which fields get a PCGL system ID added alongside them, unconditionally, for every user; this restriction controls which fields get their original submitter-supplied value removed, only for READ-only users.
+- **The submitter ID fields** are removed from every entity's response, wherever they appear, at any nesting depth. These are every `fieldName` in the ID manager config (`ID_MANAGER_CONFIG`, stored in the `id_generation_config` table), such as `submitter_specimen_id` or `submitter_treatment_id`, plus `submitter_participant_id`, which is always restricted, even when the config does not list it (`getRestrictedFieldNames`). Field names are compared case-insensitively.
+
+The same config adds a PCGL system ID (its `internalId` key, such as `pcgl_treatment_id`) next to each submitter ID, for every user. READ-only users get the PCGL system ID in place of the submitter ID; users with WRITE access get both.
 
 ## Where it applies
 
@@ -26,10 +28,10 @@ The restriction is enforced in the data-read endpoints (`src/controllers/dataCon
 
 The response of `POST /data/category/:categoryId/organization/:organization/query` leaves out the restricted data, but a filter on it would still reveal it: a user could narrow down a restricted value by what the query matches. So a user with READ access only to the study is rejected with a `400`, before anything is queried, if the filter, at any depth of its `and`, `or` and `not` combinations, uses:
 
-- the restricted field, `submitter_participant_id`
+- a submitter ID field: any `fieldName` in the ID manager config, or `submitter_participant_id`
 - a field that only exists in the `sociodemographic` schema of the category's dictionary
 
-Field names are compared in any letter case. Fields that the `sociodemographic` schema shares with other schemas, such as the study ID, are allowed: the filter only matches the rows of the entities that are queried, and for these users that never includes `sociodemographic`. Users with WRITE access to the study can filter by any field.
+Field names are compared case-insensitively. Fields that the `sociodemographic` schema shares with other schemas, such as the study ID, are allowed, unless they are submitter ID fields: the filter only matches the rows of the entities that are queried, and for these users that never includes `sociodemographic`. Users with WRITE access to the study can filter by any field.
 
 ## Endpoints that are closed to READ-only users
 
@@ -43,14 +45,14 @@ Other endpoints return restricted data in forms that can't be filtered as simply
 
 Two layers, not one:
 
-1. **Query-level exclusion.** Before querying Lyric for submitted data, the restricted entity is excluded from the `entityName` filter sent to the query. When the category's dictionary is fetched, the `sociodemographic` entity is dropped from the list of entities being requested (`filterAllowedEntityNames`), so its rows are never read from the database in the first place. If a caller's request would otherwise match only the restricted entity, that function returns an empty array, and the controller checks for that and returns an empty result immediately without querying at all — this specifically avoids ever passing an *empty* entity-name array through to Lyric's query layer, which would be interpreted as "no filter" and return everything, unfiltered.
-2. **Response-level stripping.** After the query runs (and after the internal-ID sanitization step that reads the original `submitter_participant_id` value to look up its PCGL system ID), the response is walked recursively and any key matching the restricted entity or field name is removed, at any depth (`stripRestrictedData`). This is the layer that actually guarantees correctness: Lyric's compound/nested view re-embeds related schemas via separate queries that aren't covered by the query-level exclusion, so the restricted entity could otherwise resurface as a nested block regardless of what was excluded from the top-level query.
+1. **Query-level exclusion.** Before querying Lyric for submitted data, the restricted entity is excluded from the `entityName` filter sent to the query. When the category's dictionary is fetched, the `sociodemographic` entity is dropped from the list of entities being requested (`filterAllowedEntityNames`), so its rows are never read from the database in the first place. If a caller's request would otherwise match only the restricted entity, that function returns an empty array, and the controller checks for that and returns an empty result immediately without querying at all — this specifically avoids ever passing an _empty_ entity-name array through to Lyric's query layer, which would be interpreted as "no filter" and return everything, unfiltered.
+2. **Response-level stripping.** After the query runs (and after the internal-ID sanitization step that reads the original submitter ID values to look up their PCGL system IDs), the response is walked recursively and any key matching the restricted entity or a submitter ID field name is removed, at any depth (`stripRestrictedData`). The submitter ID field names are read from the ID manager config on every request. This is the layer that actually guarantees correctness: Lyric's compound/nested view re-embeds related schemas via separate queries that aren't covered by the query-level exclusion, so the restricted entity could otherwise resurface as a nested block regardless of what was excluded from the top-level query.
 
 The single-record-by-system-ID endpoint (`GET /data/category/:categoryId/id/:systemId`) has no entity filter to apply before the read, since it fetches one row directly by its system ID. For that endpoint only, the restricted entity is instead checked after the (unavoidable) read, and denied the same way as a missing record (`404`), so restricted records aren't distinguishable from ones that don't exist.
 
 ## Tests
 
-Run the tests with `pnpm test`, which uses Node's built-in test runner. The logic of the restriction is unit tested in `src/service/accessRestrictionService.test.ts`.
+Run the tests with `pnpm test`, which uses Node's built-in test runner. The logic of the restriction is unit tested in `src/test/accessRestrictionService.test.ts`.
 
 The tests in `src/test/` send HTTP requests to the real routers, middleware and controllers, as users with different access (admin, WRITE, READ-only, no access) and check what comes back, for the endpoints above. A denied request has to be denied, and the data of a restricted request has to be missing from the response. Only the things outside of the server are replaced:
 
