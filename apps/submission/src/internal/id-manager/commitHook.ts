@@ -51,7 +51,7 @@ const processInsertedRecords = async (
 
 	if (!allIDConfigs) {
 		logger.error(
-			`[Middleware/IIM]: No ID config records exist in IIM configuration table. Configuration records must be added prior to attempting to use the IIM.`,
+			`[IIM commit]: No ID config records exist in IIM configuration table. Configuration records must be added prior to attempting to use the IIM.`,
 		);
 		return;
 	}
@@ -63,7 +63,7 @@ const processInsertedRecords = async (
 		 * Skip any records which don't have a config record associated with it, we don't need to hash these.
 		 */
 		if (!entityIIMConfig) {
-			logger.debug(`[Middleware/IIM]: ${record.entityName} does NOT exist in IIM configuration table. Skipping...`);
+			logger.debug(`[IIM commit]: ${record.entityName} does NOT exist in IIM configuration table. Skipping...`);
 			numberOfSkippedRecords++;
 			continue;
 		}
@@ -72,7 +72,7 @@ const processInsertedRecords = async (
 
 		if (hashableData === undefined) {
 			logger.error(
-				`[Middleware/IIM]: ${entityIIMConfig.fieldName} does NOT exist in table referenced. IIM may be misconfigured.`,
+				`[IIM commit]: ${entityIIMConfig.fieldName} does NOT exist in table referenced. IIM may be misconfigured.`,
 			);
 			numberOfErroredRecords++;
 			continue;
@@ -86,7 +86,7 @@ const processInsertedRecords = async (
 
 		if (generateResult.outcome === 'alreadyExists') {
 			logger.info(
-				`[Middleware/IIM]: ${generateResult.generatedId} record already exists in IIM table. Data must be unique.`,
+				`[IIM commit]: ${generateResult.generatedId} record already exists in IIM table. Data must be unique.`,
 			);
 			numberOfErroredRecords++;
 			continue;
@@ -94,7 +94,7 @@ const processInsertedRecords = async (
 
 		if (generateResult.outcome === 'missingSequence') {
 			logger.error(
-				`[Middleware/IIM]: Error creating new IIM record. IIM Config somehow references an unknown sequence? ${entityIIMConfig.sequenceName}`,
+				`[IIM commit]: Error creating new IIM record. IIM Config somehow references an unknown sequence? ${entityIIMConfig.sequenceName}`,
 			);
 			numberOfErroredRecords++;
 			continue;
@@ -109,7 +109,7 @@ const processInsertedRecords = async (
 		errored: numberOfErroredRecords,
 	};
 
-	logger.info(`[Middleware/IIM]: Number of ID records generated: ${JSON.stringify(recordStats)}`);
+	logger.info(`[IIM commit]: Number of ID records generated: ${JSON.stringify(recordStats)}`);
 	return recordStats;
 };
 
@@ -126,7 +126,7 @@ export const onFinishCommitCallback = async (resultOnCommit: ResultOnCommit) => 
 	try {
 		await processInsertedRecords(data.inserts);
 	} catch (error) {
-		logger.error(`[Middleware/IIM]: Error processing inserted records: ${error}`);
+		logger.error(`[IIM commit]: Error processing inserted records: ${error}`);
 		// We don't want to throw an error here. We just log the error and continue.
 	}
 };

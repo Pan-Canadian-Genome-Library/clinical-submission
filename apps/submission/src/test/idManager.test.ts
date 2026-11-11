@@ -27,8 +27,8 @@ import type { SubmittedDataResponse } from '@overture-stack/lyric';
 import { env } from '@/config/envConfig.js';
 import { generatedIdentifiers, idGenerationConfig } from '@/db/schemas/idGenerationConfig.js';
 import type { GeneratedIdentifiersTable } from '@/db/types.js';
+import { onFinishCommitCallback } from '@/internal/id-manager/commitHook.js';
 import { generateEntityHash, generateHash, generateIdForRecord } from '@/internal/id-manager/utils.js';
-import { onFinishCommitCallback } from '@/middleware/idManager.js';
 import iimService from '@/service/idManagerService.js';
 
 import { connectTestDb, stopLyricWorkers, stubDbTables } from './helpers/testApp.js';

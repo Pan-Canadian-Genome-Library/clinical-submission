@@ -20,8 +20,8 @@
 import { AppConfig, provider } from '@overture-stack/lyric';
 
 import { env } from '@/config/envConfig.js';
+import { onFinishCommitCallback } from '@/internal/id-manager/commitHook.js';
 import { lyricAuthMiddleware } from '@/middleware/auth.js';
-import { onFinishCommitCallback } from '@/middleware/idManager.js';
 
 const appConfig: AppConfig = {
 	db: {
@@ -31,7 +31,9 @@ const appConfig: AppConfig = {
 		user: env.DB_USER,
 		password: env.DB_PASSWORD,
 	},
-	onFinishCommit: onFinishCommitCallback,
+	// Wrapped so the hook is only read when a commit finishes. The commit hook's module imports this one through the ID
+	// manager service, so when that module is loaded first, the hook is not defined yet while this config is built.
+	onFinishCommit: (resultOnCommit) => onFinishCommitCallback(resultOnCommit),
 	auth: {
 		enabled: env.AUTH_ENABLED,
 		protectedMethods: env.AUTH_PROTECT_METHODS,
