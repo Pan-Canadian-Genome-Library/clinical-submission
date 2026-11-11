@@ -73,15 +73,15 @@ type ReadRecord = {
 	idConfig: IDGenerationConfigRecord;
 	studyId: string;
 	systemId: string;
-	/** The record's value of the config's `fieldName`. Used to generate an ID for the record, and never logged. */
+	/** The record's value of the config's `fieldName`. */
 	submitterValue: string;
 	oldHash: string;
 	newHash: string;
 };
 
 /**
- * The record that keeps the PCGL ID stored at an old hash, as it is named in collision logs. When no record read in
- * the run keeps the ID, only the ID's entity is known, and `studyId` and `systemId` are not set.
+ * The record that keeps the PCGL ID stored at an old hash. `studyId` and `systemId` are not set when only the ID's
+ * entity is known.
  */
 type IdHolder = {
 	entityName: string | undefined;
@@ -91,7 +91,7 @@ type IdHolder = {
 };
 
 /**
- * Thrown at the end of a dry run to roll the transaction back. It is not a failure.
+ * Error that ends a dry run. It is not a failure.
  */
 class DryRunRollback extends Error {}
 
@@ -109,7 +109,7 @@ const emptyCounts = (): RehashCounts => ({
 const totals = emptyCounts();
 
 /**
- * Counts of each study, then of each entity in that study, for the summary.
+ * Counts of each study, then of each entity in that study.
  */
 const countsByStudyAndEntity = new Map<string, Map<string, RehashCounts>>();
 
@@ -230,8 +230,11 @@ const chooseEarliestCommitted = async (
 };
 
 /**
- * Generates a PCGL ID for a record that has none, when `--generate-missing` is set, and describes what was done for
- * the log. Throws when the ID can't be generated, which rolls the run back.
+ * Generates a PCGL ID for a record that has none, when `--generate-missing` is set and the run is not a dry run.
+ *
+ * @returns What was done for the record as `action`, and the new ID as `generatedId` when one was generated.
+ * @throws `Error` when an ID is already stored for the record, when the config's sequence returns no value, or when
+ * the database can't be read or written.
  */
 const generateMissingId = async (
 	record: ReadRecord,
