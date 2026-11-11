@@ -41,6 +41,50 @@ The logs are JSON lines. Pipe them through `pnpm exec pino-pretty` to read them 
 
 Run it with `--dry-run` first, with the same other options, and check the logs before running it for real.
 
+### Running it in Kubernetes
+
+The `clinical-submission` image already contains the compiled script, so no separate image is needed. Run it as a Kubernetes Job that uses the API's image with a different command. The Job runs the script once and its pod exits when the script ends, without being restarted.
+
+- **Image:** use the exact image tag of the API release that scopes hashes by entity and study, so the script hashes the same way as the deployed API.
+- **Configuration:** use the same ConfigMap and Secret as the API Deployment. The script loads the API's whole environment configuration.
+- **Command:** runs the Lyric and PCGL migrations first, so the script never runs against an older schema, then the script. `node` is called directly so that the options reach the script.
+- **No retries:** `restartPolicy: Never` and `backoffLimit: 0` stop Kubernetes from running it again after it exits, whether it succeeded or failed. A failed run saves nothing. Read its logs before running it again by hand.
+- **Cleanup:** `ttlSecondsAfterFinished` removes the Job and its pod, with their logs, after 7 days. Save the logs before then.
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: clinical-submission-rehash-ids
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 604800
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: rehash-ids
+          image: <registry>/clinical-submission:<API release tag>
+          command: ['sh', '-c']
+          args:
+            - >-
+              pnpm migrate:db:prod &&
+              pnpm migrate:pcgl:db:prod &&
+              node --import=./register.js src/scripts/rehash-generated-ids.js --generate-missing
+          envFrom:
+            - configMapRef:
+                name: <API ConfigMap>
+            - secretRef:
+                name: <API Secret>
+```
+
+1. Roll out the API release.
+2. Apply the Job with `--dry-run --generate-missing` and another name, such as `clinical-submission-rehash-ids-dry-run`. Wait for it to complete, read its logs, then delete it.
+3. Apply the Job above. Check that it completes, that its logs end with the summary, and that records show the same PCGL IDs as before.
+4. Remove the Job manifest from the deployment configuration, so it isn't applied again.
+
+Run steps 2 and 3 when no data is being committed. If a commit stores a PCGL ID that the script is also generating, the script fails and saves nothing.
+
 ## What it does
 
 1. Loads every config in `pcgl.id_generation_config`, and every study that has a category.
