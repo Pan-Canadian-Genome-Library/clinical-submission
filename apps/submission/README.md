@@ -89,7 +89,7 @@ When data is committed, each inserted record of an entity listed in `ID_MANAGER_
 - Data read endpoints add the PCGL ID next to every configured submitter ID field, including copies of it in other entities (e.g. `submitter_participant_id` in a specimen gets the participant's PCGL ID), using the study of the top-level record.
 - `GET /data/entity/{entityName}/{externalId}/exists` requires a `study` query parameter, and only reports IDs generated in that study.
 
-IDs generated before hashes were scoped by entity and study must be migrated once per environment with `pnpm rehash:ids`. See [Rehashing Generated IDs](./docs/rehash-generated-ids.md).
+IDs generated before hashes were scoped by entity and study must be migrated once per environment with `pnpm script:rehash-ids`. See [Rehashing Generated IDs](./docs/rehash-generated-ids.md).
 
 ### Update/Create DUO Permissions in Study Table
 

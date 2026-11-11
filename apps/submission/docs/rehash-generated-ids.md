@@ -28,8 +28,8 @@ The script uses the same configuration as the API. It needs the API's environmen
 
 ```sh
 cd apps/submission
-pnpm rehash:ids [options]          # development, runs the TypeScript source with tsx
-pnpm rehash:ids:prod [options]     # compiled build, from dist/
+pnpm script:rehash-ids [options]          # development, runs the TypeScript source with tsx
+pnpm script:rehash-ids:prod [options]     # compiled build, from dist/
 ```
 
 The logs are JSON lines. Pipe them through `pnpm exec pino-pretty` to read them more easily.
