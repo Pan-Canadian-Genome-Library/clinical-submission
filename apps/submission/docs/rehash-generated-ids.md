@@ -142,9 +142,9 @@ When it finishes, the script logs the totals, then the counts of each entity in 
 
 ```
 [IIM rehash]: Finished rehashing generated IDs. Totals: {"updated":120,"alreadyMigrated":0,"collisions":1,"withoutId":3,"missingValue":0,"generated":4}
-[IIM rehash]: Counts for {"entityName":"participant","studyId":"STUDY-A","updated":80,"alreadyMigrated":0,"collisions":0,"withoutId":0,"missingValue":0,"generated":0}
-[IIM rehash]: Counts for {"entityName":"participant","studyId":"STUDY-B","updated":40,"alreadyMigrated":0,"collisions":1,"withoutId":0,"missingValue":0,"generated":1}
-[IIM rehash]: Counts for {"entityName":"specimen","studyId":"STUDY-B","updated":0,"alreadyMigrated":0,"collisions":0,"withoutId":3,"missingValue":0,"generated":3}
+[IIM rehash]: Counts for {"studyId":"STUDY-A","entityName":"participant","updated":80,"alreadyMigrated":0,"collisions":0,"withoutId":0,"missingValue":0,"generated":0}
+[IIM rehash]: Counts for {"studyId":"STUDY-B","entityName":"participant","updated":40,"alreadyMigrated":0,"collisions":1,"withoutId":0,"missingValue":0,"generated":1}
+[IIM rehash]: Counts for {"studyId":"STUDY-B","entityName":"specimen","updated":0,"alreadyMigrated":0,"collisions":0,"withoutId":3,"missingValue":0,"generated":3}
 ```
 
 A dry run starts the totals line with `Dry run finished, no changes were saved`, and `generated` counts the IDs that would be generated.

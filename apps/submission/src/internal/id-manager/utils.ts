@@ -189,7 +189,8 @@ const generateID = (
 /**
  * Result of {@link generateIdForRecord}:
  * - `created`: a new PCGL ID was generated and stored for the record.
- * - `alreadyExists`: the record already has a PCGL ID, which is returned unchanged.
+ * - `alreadyExists`: the record already has a PCGL ID, which is returned unchanged. This includes an ID stored by
+ *   another process between the check and the insert.
  * - `missingSequence`: the config's sequence returned no value, so no ID was generated.
  */
 export type GenerateIdForRecordResult =
@@ -202,18 +203,19 @@ export type GenerateIdForRecordResult =
  * the config's prefix followed by the next value of the config's sequence, padded to the config's padding length, and
  * it is stored against the record's hash scoped to the entity and study (see {@link generateEntityHash}).
  *
- * When `transaction` is given, the existence check and the stored ID are part of it. Sequence values are not
- * transactional in Postgres, so a value taken by a rolled back transaction is not reused.
+ * When `transaction` is given, the existence check and the stored ID are part of it. It must belong to the same
+ * database as `iimRepo`. Sequence values are not transactional in Postgres, so a value taken by a rolled back
+ * transaction is not reused, and a value taken for an ID that another process stored first is not used.
  *
  * @param value The record's value of the config's `fieldName`.
- * @throws `BadRequest` when another ID was stored at the same hash after the existence check.
  * @throws `InternalServerError` when the database can't be read or written.
+ * @throws `Error` when the insert reports an ID already stored at the record's hash, but reading it back finds none.
  */
 const generateIdForRecord = async (
+	iimRepo: ReturnType<typeof iimService>,
 	{ idConfig, studyId, value }: { idConfig: IDGenerationConfigRecord; studyId: string; value: string },
 	transaction?: PostgresTransaction,
 ): Promise<GenerateIdForRecordResult> => {
-	const iimRepo = iimService(getDbInstance());
 	const sourceHash = generateEntityHash({ entityName: idConfig.entityName, studyId, value }, env.ID_MANAGER_SECRET);
 
 	const existingRows = await iimRepo.getIDByHash(sourceHash, transaction);
@@ -228,9 +230,18 @@ const generateIdForRecord = async (
 	}
 
 	const generatedId = generateID(nextSequenceValue, idConfig.prefix, idConfig.paddingLength);
-	await iimRepo.createIDRecord({ sourceHash, configId: idConfig.id, generatedId }, transaction);
+	const insertedRows = await iimRepo.createIDRecord({ sourceHash, configId: idConfig.id, generatedId }, transaction);
+	if (insertedRows.length > 0) {
+		return { outcome: 'created', generatedId };
+	}
 
-	return { outcome: 'created', generatedId };
+	// Another process stored an ID at this hash after the existence check above
+	const storedRow = (await iimRepo.getIDByHash(sourceHash, transaction))[0];
+	if (storedRow === undefined) {
+		throw new Error(`Inserting the PCGL ID ${generatedId} reported a stored ID at its hash, but none was found`);
+	}
+
+	return { outcome: 'alreadyExists', generatedId: storedRow.generatedId };
 };
 
 function isValidStudyField(value: string): value is keyof Omit<StudyModel, 'created_at' | 'updated_at'> {

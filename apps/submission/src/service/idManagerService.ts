@@ -137,23 +137,18 @@ const iimService = (db: PostgresDb) => ({
 		const dbTransaction = transaction ?? db;
 
 		try {
-			const record = await dbTransaction.insert(generatedIdentifiers).values(IdRecord).returning();
-			return record;
+			// A hash that is already stored inserts nothing and returns no row. Skipping the conflict, instead of
+			// failing on it, keeps a surrounding transaction usable.
+			return await dbTransaction
+				.insert(generatedIdentifiers)
+				.values(IdRecord)
+				.onConflictDoNothing({ target: generatedIdentifiers.sourceHash })
+				.returning();
 		} catch (exception) {
-			const postgresError = isPostgresError(exception);
-			if (postgresError && postgresError.code === PostgresErrors.UNIQUE_KEY_VIOLATION) {
-				logger.error(
-					`[IIM]: Can't insert record with ID ${IdRecord.generatedId}. Record already exists within the table.`,
-				);
-				throw new lyricProvider.utils.errors.BadRequest(
-					`Unable to create new ID record ${IdRecord.generatedId}. ID already exists, but must be unique.`,
-				);
-			} else {
-				logger.error(`[IIM]: Unexpected error. Unable to insert new generated ID record. ${exception}`);
-				throw new lyricProvider.utils.errors.InternalServerError(
-					'IIM Service encountered an error creating new generated ID.',
-				);
-			}
+			logger.error(`[IIM]: Unexpected error. Unable to insert new generated ID record. ${exception}`);
+			throw new lyricProvider.utils.errors.InternalServerError(
+				'IIM Service encountered an error creating new generated ID.',
+			);
 		}
 	},
 

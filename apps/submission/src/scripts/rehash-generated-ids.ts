@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 The Ontario Institute for Cancer Research. All rights reserved
+ * Copyright (c) 2026 The Ontario Institute for Cancer Research. All rights reserved
  *
  * This program and the accompanying materials are made available under the terms of
  * the GNU Affero General Public License v3.0. You should have received a copy of the
@@ -66,19 +66,23 @@ const iimRepo = iimService(db);
 type RehashOutcome = 'updated' | 'alreadyMigrated' | 'collisions' | 'withoutId' | 'missingValue' | 'generated';
 type RehashCounts = Record<RehashOutcome, number>;
 
-// A submitted record of a configured entity, with the hashes computed from its submitter value
+/**
+ * A submitted record of a configured entity, with the old and new hashes computed from its submitter value.
+ */
 type ReadRecord = {
 	idConfig: IDGenerationConfigRecord;
 	studyId: string;
 	systemId: string;
-	// Needed to generate an ID for the record. Never logged.
+	/** The record's value of the config's `fieldName`. Used to generate an ID for the record, and never logged. */
 	submitterValue: string;
 	oldHash: string;
 	newHash: string;
 };
 
-// The record that kept the PCGL ID of an old hash. When no record read in this run keeps it, only the ID's entity is
-// known.
+/**
+ * The record that keeps the PCGL ID stored at an old hash, as it is named in collision logs. When no record read in
+ * the run keeps the ID, only the ID's entity is known, and `studyId` and `systemId` are not set.
+ */
 type IdHolder = {
 	entityName: string | undefined;
 	studyId?: string;
@@ -86,7 +90,9 @@ type IdHolder = {
 	generatedId: string;
 };
 
-// Thrown at the end of a dry run, so that the transaction is rolled back
+/**
+ * Thrown at the end of a dry run to roll the transaction back. It is not a failure.
+ */
 class DryRunRollback extends Error {}
 
 const submittedDataCreatedAt = z.object({ system_id: z.string(), created_at: z.string() });
@@ -102,19 +108,21 @@ const emptyCounts = (): RehashCounts => ({
 
 const totals = emptyCounts();
 
-// Counts per entity, then per study, for the summary
-const countsByEntityAndStudy = new Map<string, Map<string, RehashCounts>>();
+/**
+ * Counts of each study, then of each entity in that study, for the summary.
+ */
+const countsByStudyAndEntity = new Map<string, Map<string, RehashCounts>>();
 
 const countRecord = (entityName: string, studyId: string, outcome: RehashOutcome): void => {
 	totals[outcome]++;
 
-	const countsByStudy = countsByEntityAndStudy.get(entityName) ?? new Map<string, RehashCounts>();
-	countsByEntityAndStudy.set(entityName, countsByStudy);
+	const countsByEntity = countsByStudyAndEntity.get(studyId) ?? new Map<string, RehashCounts>();
+	countsByStudyAndEntity.set(studyId, countsByEntity);
 
-	const studyCounts = countsByStudy.get(studyId) ?? emptyCounts();
-	countsByStudy.set(studyId, studyCounts);
+	const entityCounts = countsByEntity.get(entityName) ?? emptyCounts();
+	countsByEntity.set(entityName, entityCounts);
 
-	studyCounts[outcome]++;
+	entityCounts[outcome]++;
 };
 
 const recordDetails = (record: ReadRecord): { entityName: string; studyId: string; systemId: string } => ({
@@ -240,6 +248,7 @@ const generateMissingId = async (
 	}
 
 	const result = await generateIdForRecord(
+		iimRepo,
 		{ idConfig: record.idConfig, studyId: record.studyId, value: record.submitterValue },
 		transaction,
 	);
@@ -375,9 +384,9 @@ try {
 	phase = 'logging the summary';
 	const runDescription = dryRun ? 'Dry run finished, no changes were saved' : 'Finished rehashing generated IDs';
 	logger.info(`[IIM rehash]: ${runDescription}. Totals: ${JSON.stringify(totals)}`);
-	for (const [entityName, countsByStudy] of countsByEntityAndStudy) {
-		for (const [studyId, studyCounts] of countsByStudy) {
-			logger.info(`[IIM rehash]: Counts for ${JSON.stringify({ entityName, studyId, ...studyCounts })}`);
+	for (const [studyId, countsByEntity] of countsByStudyAndEntity) {
+		for (const [entityName, entityCounts] of countsByEntity) {
+			logger.info(`[IIM rehash]: Counts for ${JSON.stringify({ studyId, entityName, ...entityCounts })}`);
 		}
 	}
 } catch (error) {

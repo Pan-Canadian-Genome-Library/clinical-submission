@@ -35,8 +35,8 @@ interface DataIdExistsQuery extends ParsedQs {
 }
 
 /**
- * Request validation for `GET /data/entity/:entityName/:externalId/exists`. The entity name, the external ID and the
- * `study` query parameter are required and must not be empty. A request that fails validation is rejected with a 400.
+ * Request validation for checking whether a PCGL ID was generated for an external ID. It requires an `entityName` and
+ * an `externalId` path parameter and a `study` query parameter, none of which may be empty.
  */
 export const getDataById: RequestValidation<object, DataIdExistsQuery, DataIdParams> = {
 	pathParams: z.object({

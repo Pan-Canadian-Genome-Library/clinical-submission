@@ -27,8 +27,9 @@ import type { SubmittedDataResponse } from '@overture-stack/lyric';
 import { env } from '@/config/envConfig.js';
 import { generatedIdentifiers, idGenerationConfig } from '@/db/schemas/idGenerationConfig.js';
 import type { GeneratedIdentifiersTable } from '@/db/types.js';
-import { generateEntityHash, generateHash } from '@/internal/id-manager/utils.js';
+import { generateEntityHash, generateHash, generateIdForRecord } from '@/internal/id-manager/utils.js';
 import { onFinishCommitCallback } from '@/middleware/idManager.js';
+import iimService from '@/service/idManagerService.js';
 
 import { connectTestDb, stopLyricWorkers, stubDbTables } from './helpers/testApp.js';
 
@@ -96,12 +97,18 @@ describe('ID generation on commit', () => {
 			[generatedIdentifiers, (whereParams) => createdRows.filter((row) => whereParams.includes(row.sourceHash))],
 		]);
 		mock.method(db, 'execute', async () => ({ rows: [{ nextval: nextSequenceValue++ }] }));
+		// An insert at a hash that is already stored inserts nothing, as with the unique source hash
 		mock.method(db, 'insert', () => ({
 			values: (row: GeneratedIdentifiersTable) => ({
-				returning: async () => {
-					createdRows.push(row);
-					return [row];
-				},
+				onConflictDoNothing: () => ({
+					returning: async () => {
+						if (createdRows.some((createdRow) => createdRow.sourceHash === row.sourceHash)) {
+							return [];
+						}
+						createdRows.push(row);
+						return [row];
+					},
+				}),
 			}),
 		}));
 	});
@@ -154,5 +161,38 @@ describe('ID generation on commit', () => {
 		await commit([record]);
 
 		assert.equal(createdRows.length, 1);
+	});
+});
+
+describe('generateIdForRecord', () => {
+	const ID_CONFIG = {
+		id: 1,
+		entityName: 'participant',
+		fieldName: 'submitter_participant_id',
+		prefix: 'PT',
+		paddingLength: 8,
+		internalId: 'pcgl_participant_id',
+		sequenceName: 'participant_submitter_participant_id_seq',
+		sequenceStart: 1,
+		createdAt: null,
+	};
+
+	after(() => {
+		mock.restoreAll();
+	});
+
+	it('returns the stored ID, without failing, when another process stores one after the existence check', async () => {
+		const iimRepo = iimService(connectTestDb());
+		const storedRow = { id: 7, sourceHash: 'hash', generatedId: 'PT00000007', configId: 1, createdAt: null };
+
+		// The first read happens before the other process stores its ID, the second one after
+		let hashReads = 0;
+		mock.method(iimRepo, 'getIDByHash', async () => (hashReads++ === 0 ? [] : [{ ...storedRow, internalId: null }]));
+		mock.method(iimRepo, 'getNextSequenceValue', async () => 8);
+		mock.method(iimRepo, 'createIDRecord', async () => []);
+
+		const result = await generateIdForRecord(iimRepo, { idConfig: ID_CONFIG, studyId: 'STUDY-A', value: 'SUB-1' });
+
+		assert.deepEqual(result, { outcome: 'alreadyExists', generatedId: 'PT00000007' });
 	});
 });

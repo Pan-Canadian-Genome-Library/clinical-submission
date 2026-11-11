@@ -20,9 +20,29 @@
 import type { ResultOnCommit, SubmittedDataResponse } from '@overture-stack/lyric';
 
 import { logger } from '@/common/logger.js';
+import { getDbInstance } from '@/db/index.js';
 import { generateIdForRecord, retrieveAllIIMConfigurations } from '@/internal/id-manager/utils.js';
+import iimService from '@/service/idManagerService.js';
 
-const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[]) => {
+/**
+ * Generates and stores a PCGL ID for each inserted record of an entity in the ID manager config. Records of other
+ * entities are skipped. Each ID is scoped to the record's entity and study, and records are handled one at a time,
+ * outside of any transaction, so the IDs stored before a failure are kept.
+ *
+ * A record is counted as errored, logged, and left without a new ID when:
+ * - it has no value in the config's `fieldName`.
+ * - it already has a PCGL ID.
+ * - the config's sequence returns no value.
+ *
+ * @returns The number of records given an ID (`inserted`), `skipped` and `errored`, or `undefined` when the ID manager
+ * config is empty, in which case no ID is generated.
+ * @throws `InternalServerError` when the database can't be read or written. Records after the failing one are not
+ * processed.
+ */
+const processInsertedRecords = async (
+	insertedRecords: SubmittedDataResponse[],
+): Promise<{ inserted: number; skipped: number; errored: number } | undefined> => {
+	const iimRepo = iimService(getDbInstance());
 	const allIDConfigs = await retrieveAllIIMConfigurations();
 
 	let numberOfInsertedRecords = 0;
@@ -58,9 +78,7 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[]) 
 			continue;
 		}
 
-		// The organization of a submitted record is its study ID. The ID is scoped to the entity and study, so the
-		// same submitter value gets its own PCGL ID in each entity and each study.
-		const generateResult = await generateIdForRecord({
+		const generateResult = await generateIdForRecord(iimRepo, {
 			idConfig: entityIIMConfig,
 			studyId: record.organization,
 			value: String(hashableData),
