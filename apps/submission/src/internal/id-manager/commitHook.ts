@@ -20,19 +20,29 @@
 import type { ResultOnCommit, SubmittedDataResponse } from '@overture-stack/lyric';
 
 import { logger } from '@/common/logger.js';
-import { env } from '@/config/envConfig.js';
-import { getDbInstance, type PostgresDb } from '@/db/index.js';
-import {
-	findIDByHash,
-	generateHash,
-	generateID,
-	getNextSequenceValue,
-	retrieveAllIIMConfigurations,
-} from '@/internal/id-manager/utils.js';
+import { getDbInstance } from '@/db/index.js';
+import { generateIdForRecord, retrieveAllIIMConfigurations } from '@/internal/id-manager/utils.js';
 import iimService from '@/service/idManagerService.js';
 
-const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], db: PostgresDb) => {
-	const iimRepo = iimService(db);
+/**
+ * Generates and stores a PCGL ID for each inserted record of an entity in the ID manager config. Records of other
+ * entities are skipped. Each ID is scoped to the record's entity and study, and records are handled one at a time,
+ * outside of any transaction, so the IDs stored before a failure are kept.
+ *
+ * A record is counted as errored, logged, and left without a new ID when:
+ * - it has no value in the config's `fieldName`.
+ * - it already has a PCGL ID.
+ * - the config's sequence returns no value.
+ *
+ * @returns The number of records given an ID (`inserted`), `skipped` and `errored`, or `undefined` when the ID manager
+ * config is empty, in which case no ID is generated.
+ * @throws `Error` when the database can't be read or written. Records after the failing one are not
+ * processed.
+ */
+const processInsertedRecords = async (
+	insertedRecords: SubmittedDataResponse[],
+): Promise<{ inserted: number; skipped: number; errored: number } | undefined> => {
+	const iimRepo = iimService(getDbInstance());
 	const allIDConfigs = await retrieveAllIIMConfigurations();
 
 	let numberOfInsertedRecords = 0;
@@ -41,7 +51,7 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], 
 
 	if (!allIDConfigs) {
 		logger.error(
-			`[Middleware/IIM]: No ID config records exist in IIM configuration table. Configuration records must be added prior to attempting to use the IIM.`,
+			`[IIM commit]: No ID config records exist in IIM configuration table. Configuration records must be added prior to attempting to use the IIM.`,
 		);
 		return;
 	}
@@ -53,7 +63,7 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], 
 		 * Skip any records which don't have a config record associated with it, we don't need to hash these.
 		 */
 		if (!entityIIMConfig) {
-			logger.debug(`[Middleware/IIM]: ${record.entityName} does NOT exist in IIM configuration table. Skipping...`);
+			logger.debug(`[IIM commit]: ${record.entityName} does NOT exist in IIM configuration table. Skipping...`);
 			numberOfSkippedRecords++;
 			continue;
 		}
@@ -62,40 +72,30 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], 
 
 		if (hashableData === undefined) {
 			logger.error(
-				`[Middleware/IIM]: ${entityIIMConfig.fieldName} does NOT exist in table referenced. IIM may be misconfigured.`,
+				`[IIM commit]: ${entityIIMConfig.fieldName} does NOT exist in table referenced. IIM may be misconfigured.`,
 			);
 			numberOfErroredRecords++;
 			continue;
 		}
 
-		const idmHash = generateHash(String(hashableData), env.ID_MANAGER_SECRET);
-		const existingHashEntry = await findIDByHash(idmHash);
-
-		if (existingHashEntry) {
-			logger.info(`[Middleware/IIM]: ${existingHashEntry} record already exists in IIM table. Data must be unique.`);
-			numberOfErroredRecords++;
-			continue;
-		}
-
-		const nextSequence = await getNextSequenceValue(entityIIMConfig.sequenceName);
-		if (!nextSequence) {
-			logger.error(
-				`[Middleware/IIM]: Error creating new IIM record. IIM Config somehow references an unknown sequence? ${entityIIMConfig.sequenceName}`,
-			);
-			numberOfErroredRecords++;
-			continue;
-		}
-
-		const generatedID = generateID(nextSequence, entityIIMConfig.prefix, entityIIMConfig.paddingLength);
-
-		const createID = await iimRepo.createIDRecord({
-			sourceHash: idmHash,
-			configId: entityIIMConfig.id,
-			generatedId: generatedID,
+		const generateResult = await generateIdForRecord(iimRepo, {
+			idConfig: entityIIMConfig,
+			studyId: record.organization,
+			value: String(hashableData),
 		});
 
-		if (!createID) {
-			logger.error(`[Middleware/IIM]: Error creating new IIM record. with provided data.`);
+		if (generateResult.outcome === 'alreadyExists') {
+			logger.info(
+				`[IIM commit]: ${generateResult.generatedId} record already exists in IIM table. Data must be unique.`,
+			);
+			numberOfErroredRecords++;
+			continue;
+		}
+
+		if (generateResult.outcome === 'missingSequence') {
+			logger.error(
+				`[IIM commit]: Error creating new IIM record. IIM Config somehow references an unknown sequence? ${entityIIMConfig.sequenceName}`,
+			);
 			numberOfErroredRecords++;
 			continue;
 		}
@@ -109,13 +109,12 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], 
 		errored: numberOfErroredRecords,
 	};
 
-	logger.info(`[Middleware/IIM]: Number of ID records generated: ${JSON.stringify(recordStats)}`);
+	logger.info(`[IIM commit]: Number of ID records generated: ${JSON.stringify(recordStats)}`);
 	return recordStats;
 };
 
 export const onFinishCommitCallback = async (resultOnCommit: ResultOnCommit) => {
 	const { data } = resultOnCommit;
-	const db = getDbInstance();
 
 	/**
 	 * For now, we only care about updating IIM data on insert.
@@ -125,9 +124,9 @@ export const onFinishCommitCallback = async (resultOnCommit: ResultOnCommit) => 
 	}
 
 	try {
-		await processInsertedRecords(data.inserts, db);
+		await processInsertedRecords(data.inserts);
 	} catch (error) {
-		logger.error(`[Middleware/IIM]: Error processing inserted records: ${error}`);
+		logger.error(`[IIM commit]: Error processing inserted records: ${error}`);
 		// We don't want to throw an error here. We just log the error and continue.
 	}
 };

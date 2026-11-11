@@ -26,7 +26,7 @@ import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { generatedIdentifiers, idGenerationConfig } from '@/db/schemas/idGenerationConfig.js';
 import { study } from '@/db/schemas/studiesSchema.js';
-import { generateHash } from '@/internal/id-manager/utils.js';
+import { generateEntityHash } from '@/internal/id-manager/utils.js';
 import { dataRouter } from '@/routes/data.js';
 
 import { connectTestDb, startTestServer, stubAuthZ, stubDbTables, type TestServer } from './helpers/testApp.js';
@@ -54,27 +54,6 @@ const RESTRICTED_VALUES = [
 	'TREAT-1',
 ];
 
-const ID_CONFIGS = [
-	{ id: 1, entityName: 'participant', fieldName: 'submitter_participant_id', internalId: 'pcgl_participant_id' },
-	{ id: 2, entityName: 'treatment', fieldName: 'submitter_treatment_id', internalId: 'pcgl_treatment_id' },
-];
-
-// The PCGL ID generated for each submitter ID, keyed by the hash it is looked up with
-const GENERATED_IDS = new Map(
-	[
-		{ submitterId: 'SUB-STUDY-A', generatedId: 'PT00000001', internalId: 'pcgl_participant_id' },
-		{ submitterId: 'SUB-STUDY-B', generatedId: 'PT00000002', internalId: 'pcgl_participant_id' },
-		{ submitterId: 'TREAT-1', generatedId: 'TR00000001', internalId: 'pcgl_treatment_id' },
-	].map(({ submitterId, ...generatedId }) => [generateHash(submitterId, env.ID_MANAGER_SECRET), generatedId]),
-);
-
-/** The generated ID rows whose hash is one of the values the query compares with */
-const generatedIdsFor = (conditionValues: unknown[]) =>
-	conditionValues.flatMap((value) => {
-		const generatedId = typeof value === 'string' ? GENERATED_IDS.get(value) : undefined;
-		return generatedId ? [generatedId] : [];
-	});
-
 const recordsFor = (organization: string) => {
 	const participant = {
 		systemId: `${organization}-participant`,
@@ -99,6 +78,23 @@ const recordsFor = (organization: string) => {
 	};
 	return { participant, treatment, sociodemographic };
 };
+
+const ID_CONFIGS = [
+	{ id: 1, entityName: 'participant', fieldName: 'submitter_participant_id', internalId: 'pcgl_participant_id' },
+	{ id: 2, entityName: 'treatment', fieldName: 'submitter_treatment_id', internalId: 'pcgl_treatment_id' },
+];
+
+const scopedHash = (entityName: string, organization: string, value: string) =>
+	generateEntityHash({ entityName, studyId: organization, value }, env.ID_MANAGER_SECRET);
+
+// The participant and the treatment of each study have their own PCGL ID. The treatments share a submitter ID, but
+// the hash is scoped to the entity and the study.
+const GENERATED_IDS = [
+	{ sourceHash: scopedHash('participant', 'STUDY-A', 'SUB-STUDY-A'), generatedId: 'PT00000001', configId: 1 },
+	{ sourceHash: scopedHash('participant', 'STUDY-B', 'SUB-STUDY-B'), generatedId: 'PT00000002', configId: 1 },
+	{ sourceHash: scopedHash('treatment', 'STUDY-A', 'TREAT-1'), generatedId: 'TR00000001', configId: 2 },
+	{ sourceHash: scopedHash('treatment', 'STUDY-B', 'TREAT-1'), generatedId: 'TR00000002', configId: 2 },
+];
 
 const ALL_RECORDS = ['STUDY-A', 'STUDY-B'].flatMap((organization) => Object.values(recordsFor(organization)));
 
@@ -147,6 +143,7 @@ type EntityFilter = { sqon?: unknown; entityName?: string[]; view?: string; orga
 describe('data endpoints', () => {
 	let server: TestServer;
 	let categoryId = 0;
+	let generatedIdRows = GENERATED_IDS;
 
 	const lyric = {
 		getDetails: mock.method(lyricProvider.services.category, 'getDetails', async (idOrAlias: string) => {
@@ -202,8 +199,23 @@ describe('data endpoints', () => {
 		stubDbTables([
 			// The study of the category that was last looked up
 			[study, () => STUDIES.filter((candidate) => candidate.category_id === categoryId)],
-			[idGenerationConfig, () => ID_CONFIGS],
-			[generatedIdentifiers, generatedIdsFor],
+			// Looked up by entity name, or all of them when there is no condition
+			[
+				idGenerationConfig,
+				(whereParams) =>
+					ID_CONFIGS.filter((config) => whereParams.length === 0 || whereParams.includes(config.entityName)),
+			],
+			// Looked up by source hash, joined with the config of the row
+			[
+				generatedIdentifiers,
+				(whereParams) =>
+					generatedIdRows
+						.filter((row) => whereParams.includes(row.sourceHash))
+						.map((row) => ({
+							...row,
+							internalId: ID_CONFIGS.find((config) => config.id === row.configId)?.internalId,
+						})),
+			],
 		]);
 		server = await startTestServer((app) => app.use('/data', dataRouter));
 	});
@@ -214,6 +226,7 @@ describe('data endpoints', () => {
 	});
 
 	beforeEach(() => {
+		generatedIdRows = GENERATED_IDS;
 		for (const stub of Object.values(lyric)) {
 			stub.mock.resetCalls();
 		}
@@ -491,7 +504,7 @@ describe('data endpoints', () => {
 
 			const readOnly = await server.request('GET', '/data/category/2/organization/STUDY-B', { as: 'writerAReaderB' });
 			assertNoRestrictedData(readOnly.body);
-			assertContains(readOnly.body, 'Female', 'PT00000002', 'TR00000001');
+			assertContains(readOnly.body, 'Female', 'PT00000002', 'TR00000002');
 		});
 
 		it('only rejects filters on restricted fields in the study they can just read', async () => {
@@ -518,6 +531,90 @@ describe('data endpoints', () => {
 				assert.equal(status, 403, `as ${as}`);
 			}
 			assert.equal(lyric.getSubmittedDataByCategory.mock.callCount(), 0);
+		});
+	});
+
+	describe('PCGL system IDs', () => {
+		const recordsOf = (body: unknown) => {
+			assert.ok(body && typeof body === 'object' && 'records' in body && Array.isArray(body.records));
+			return body.records;
+		};
+
+		it('adds the PCGL ID generated for the entity in the study of the record', async () => {
+			const studyA = await server.request('GET', '/data/category/1/organization/STUDY-A?entityName=participant', {
+				as: 'writer',
+			});
+			assert.equal(recordsOf(studyA.body)[0].data.pcgl_participant_id, 'PT00000001');
+
+			const studyB = await server.request('GET', '/data/category/2/organization/STUDY-B?entityName=participant', {
+				as: 'admin',
+			});
+			assert.equal(recordsOf(studyB.body)[0].data.pcgl_participant_id, 'PT00000002');
+		});
+
+		it('adds no PCGL ID when the row found for the hash belongs to another config', async () => {
+			generatedIdRows = GENERATED_IDS.map((row) => ({ ...row, configId: 2 }));
+
+			const { status, body } = await server.request('GET', '/data/category/1/organization/STUDY-A', { as: 'writer' });
+
+			assert.equal(status, 200);
+			assert.doesNotMatch(JSON.stringify(body), /pcgl_participant_id|PT0000000/);
+			assertContains(body, 'SUB-STUDY-A');
+		});
+
+		it('resolves a participant ID nested under another entity to the PCGL ID of the participant', async () => {
+			const { body } = await server.request('GET', '/data/category/1/organization/STUDY-A?view=compound', {
+				as: 'writer',
+			});
+			const participant = recordsOf(body).find((record) => record.entityName === 'participant');
+
+			assert.equal(participant.data.pcgl_participant_id, 'PT00000001');
+			assert.equal(participant.data.treatments[0].pcgl_participant_id, 'PT00000001');
+			assert.equal(participant.data.treatments[0].submitter_participant_id, 'SUB-STUDY-A');
+		});
+
+		it('adds the PCGL ID of the flat records of other entities that refer to the participant', async () => {
+			const { body } = await server.request('GET', '/data/category/1/organization/STUDY-A?entityName=treatment', {
+				as: 'writer',
+			});
+
+			assert.equal(recordsOf(body)[0].data.pcgl_participant_id, 'PT00000001');
+		});
+	});
+
+	describe('GET /data/study/:studyId/entity/:entityName/:externalId/exists', () => {
+		it('is true for a value that has a PCGL ID in the study', async () => {
+			const { status, body } = await server.request('GET', '/data/study/STUDY-A/entity/participant/SUB-STUDY-A/exists');
+
+			assert.equal(status, 200);
+			assert.equal(body, true);
+		});
+
+		it('is false for the same value in another study', async () => {
+			const { status, body } = await server.request('GET', '/data/study/STUDY-B/entity/participant/SUB-STUDY-A/exists');
+
+			assert.equal(status, 200);
+			assert.equal(body, false);
+		});
+
+		it('is false for an entity without an ID config', async () => {
+			const { body } = await server.request('GET', '/data/study/STUDY-A/entity/specimen/SUB-STUDY-A/exists');
+
+			assert.equal(body, false);
+		});
+
+		it('is false when the row found for the hash belongs to another config', async () => {
+			generatedIdRows = GENERATED_IDS.map((row) => ({ ...row, configId: 2 }));
+
+			const { body } = await server.request('GET', '/data/study/STUDY-A/entity/participant/SUB-STUDY-A/exists');
+
+			assert.equal(body, false);
+		});
+
+		it('rejects a blank study', async () => {
+			const { status } = await server.request('GET', '/data/study/%20/entity/participant/SUB-STUDY-A/exists');
+
+			assert.equal(status, 400);
 		});
 	});
 });

@@ -152,15 +152,15 @@ export const stubDbTables = (
 	}));
 
 /**
- * Importing the Lyric provider starts a pool of worker threads that keeps the test process alive.
- * Shutting the pool down while it is still starting leaves a worker behind, because Lyric sends it
- * its configuration afterwards, so first wait for the pool to be ready. Any worker task does that,
- * this one fails fast as the submission does not exist and there is no database.
- *
- * That failure is logged by Lyric as an error. It is expected, so those two log sources are muted
- * while the pool stops.
+ * Stops the pool of worker threads that importing the Lyric provider starts, and that otherwise
+ * keeps the test process alive. Resolves once the pool is shut down and the workers' output is in.
  */
-const stopLyricWorkers = async () => {
+export const stopLyricWorkers = async (): Promise<void> => {
+	// Shutting the pool down while it is still starting leaves a worker behind, because Lyric sends it
+	// its configuration afterwards, so first wait for the pool to be ready. Any worker task does that,
+	// this one fails fast as the submission does not exist and there is no database.
+	// That failure is logged by Lyric as an error. It is expected, so those two log sources are muted
+	// while the pool stops.
 	const write = process.stdout.write.bind(process.stdout);
 	const expectedLogs = /WORKER_POOL_MANAGER|ACTIVE_SUBMISSION_REPOSITORY/;
 	const mutedWrite = mock.method(
