@@ -282,7 +282,11 @@ try {
 				(await transaction.select().from(generatedIdentifiers)).map((row) => [row.sourceHash, row]),
 			);
 
+			// Each group holds every record whose submitter value gave the same old hash, across all entities and
+			// studies. Under the old hash they all shared the one PCGL ID stored at that hash, if any.
 			for (const [oldHash, groupRecords] of recordsByOldHash) {
+				// Records whose entity already has a row at their new hash keep that ID and are not changed. They were
+				// moved by an earlier run, or committed after the deploy and given an ID under the new hash.
 				const migrated = groupRecords.filter(
 					(record) => rowsByHash.get(record.newHash)?.configId === record.idConfig.id,
 				);
@@ -290,21 +294,27 @@ try {
 					countRecord(record.idConfig.entityName, record.studyId, 'alreadyMigrated');
 				}
 
+				// The remaining records have no ID at their new hash. When there are none, the group is done.
 				let withoutRow = groupRecords.filter((record) => !migrated.includes(record));
 				if (withoutRow.length === 0) {
 					continue;
 				}
 
+				// The record that keeps the group's existing PCGL ID, for the collision logs. It stays undefined when
+				// the group has no existing ID, so the remaining records are records without an ID.
 				let holder: IdHolder | undefined;
 				const oldRow = rowsByHash.get(oldHash);
 
 				if (oldRow !== undefined) {
+					// The existing ID stays with its entity. Of the records of the row's entity that have no ID yet, the
+					// earliest committed one keeps it.
 					const keeper = await chooseEarliestCommitted(
 						withoutRow.filter((record) => record.idConfig.id === oldRow.configId),
 						transaction,
 					);
 
 					if (keeper !== undefined) {
+						// Move the row to the keeper's new hash. The PCGL ID itself doesn't change.
 						await transaction
 							.update(generatedIdentifiers)
 							.set({ sourceHash: keeper.newHash })
@@ -326,6 +336,9 @@ try {
 					}
 				}
 
+				// Every record still without an ID is a collision when the group's existing ID went to another record,
+				// and a record without an ID otherwise. Each one is counted, given a new ID when --generate-missing is
+				// set, and logged.
 				for (const record of withoutRow) {
 					const outcome = holder === undefined ? 'withoutId' : 'collisions';
 					countRecord(record.idConfig.entityName, record.studyId, outcome);
