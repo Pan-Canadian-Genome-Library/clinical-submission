@@ -20,19 +20,9 @@
 import type { ResultOnCommit, SubmittedDataResponse } from '@overture-stack/lyric';
 
 import { logger } from '@/common/logger.js';
-import { env } from '@/config/envConfig.js';
-import { getDbInstance, type PostgresDb } from '@/db/index.js';
-import {
-	findIDByHash,
-	generateEntityHash,
-	generateID,
-	getNextSequenceValue,
-	retrieveAllIIMConfigurations,
-} from '@/internal/id-manager/utils.js';
-import iimService from '@/service/idManagerService.js';
+import { generateIdForRecord, retrieveAllIIMConfigurations } from '@/internal/id-manager/utils.js';
 
-const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], db: PostgresDb) => {
-	const iimRepo = iimService(db);
+const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[]) => {
 	const allIDConfigs = await retrieveAllIIMConfigurations();
 
 	let numberOfInsertedRecords = 0;
@@ -68,39 +58,26 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], 
 			continue;
 		}
 
-		// The organization of a submitted record is its study ID. Scoping the hash to the entity and study gives
-		// the same submitter value its own PCGL ID in each entity and each study.
-		const idmHash = generateEntityHash(
-			{ entityName: entityIIMConfig.entityName, studyId: record.organization, value: String(hashableData) },
-			env.ID_MANAGER_SECRET,
-		);
-		const existingHashEntry = await findIDByHash(idmHash);
+		// The organization of a submitted record is its study ID. The ID is scoped to the entity and study, so the
+		// same submitter value gets its own PCGL ID in each entity and each study.
+		const generateResult = await generateIdForRecord({
+			idConfig: entityIIMConfig,
+			studyId: record.organization,
+			value: String(hashableData),
+		});
 
-		if (existingHashEntry) {
-			logger.info(`[Middleware/IIM]: ${existingHashEntry} record already exists in IIM table. Data must be unique.`);
-			numberOfErroredRecords++;
-			continue;
-		}
-
-		const nextSequence = await getNextSequenceValue(entityIIMConfig.sequenceName);
-		if (!nextSequence) {
-			logger.error(
-				`[Middleware/IIM]: Error creating new IIM record. IIM Config somehow references an unknown sequence? ${entityIIMConfig.sequenceName}`,
+		if (generateResult.outcome === 'alreadyExists') {
+			logger.info(
+				`[Middleware/IIM]: ${generateResult.generatedId} record already exists in IIM table. Data must be unique.`,
 			);
 			numberOfErroredRecords++;
 			continue;
 		}
 
-		const generatedID = generateID(nextSequence, entityIIMConfig.prefix, entityIIMConfig.paddingLength);
-
-		const createID = await iimRepo.createIDRecord({
-			sourceHash: idmHash,
-			configId: entityIIMConfig.id,
-			generatedId: generatedID,
-		});
-
-		if (!createID) {
-			logger.error(`[Middleware/IIM]: Error creating new IIM record. with provided data.`);
+		if (generateResult.outcome === 'missingSequence') {
+			logger.error(
+				`[Middleware/IIM]: Error creating new IIM record. IIM Config somehow references an unknown sequence? ${entityIIMConfig.sequenceName}`,
+			);
 			numberOfErroredRecords++;
 			continue;
 		}
@@ -120,7 +97,6 @@ const processInsertedRecords = async (insertedRecords: SubmittedDataResponse[], 
 
 export const onFinishCommitCallback = async (resultOnCommit: ResultOnCommit) => {
 	const { data } = resultOnCommit;
-	const db = getDbInstance();
 
 	/**
 	 * For now, we only care about updating IIM data on insert.
@@ -130,7 +106,7 @@ export const onFinishCommitCallback = async (resultOnCommit: ResultOnCommit) => 
 	}
 
 	try {
-		await processInsertedRecords(data.inserts, db);
+		await processInsertedRecords(data.inserts);
 	} catch (error) {
 		logger.error(`[Middleware/IIM]: Error processing inserted records: ${error}`);
 		// We don't want to throw an error here. We just log the error and continue.

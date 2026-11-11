@@ -24,9 +24,10 @@ import { getTableColumns } from 'drizzle-orm';
 import { logger } from '@/common/logger.js';
 import { StudyModel } from '@/common/types/study.js';
 import { type IIMConfig, type IIMConfigObject } from '@/common/validation/id-manager-validation.js';
+import { env } from '@/config/envConfig.js';
 import { getDbInstance } from '@/db/index.js';
 import { study } from '@/db/schemas/studiesSchema.js';
-import { GeneratedIdentifiersRecord, type IDGenerationConfigRecord } from '@/db/types.js';
+import { GeneratedIdentifiersRecord, type IDGenerationConfigRecord, type PostgresTransaction } from '@/db/types.js';
 import iimService from '@/service/idManagerService.js';
 
 /**
@@ -185,6 +186,53 @@ const generateID = (
 	return `${entityPrefix}${paddedString}`;
 };
 
+/**
+ * Result of {@link generateIdForRecord}:
+ * - `created`: a new PCGL ID was generated and stored for the record.
+ * - `alreadyExists`: the record already has a PCGL ID, which is returned unchanged.
+ * - `missingSequence`: the config's sequence returned no value, so no ID was generated.
+ */
+export type GenerateIdForRecordResult =
+	| { outcome: 'created'; generatedId: string }
+	| { outcome: 'alreadyExists'; generatedId: string }
+	| { outcome: 'missingSequence' };
+
+/**
+ * Generates and stores the PCGL ID of one record of a configured entity, unless the record already has one. The ID is
+ * the config's prefix followed by the next value of the config's sequence, padded to the config's padding length, and
+ * it is stored against the record's hash scoped to the entity and study (see {@link generateEntityHash}).
+ *
+ * When `transaction` is given, the existence check and the stored ID are part of it. Sequence values are not
+ * transactional in Postgres, so a value taken by a rolled back transaction is not reused.
+ *
+ * @param value The record's value of the config's `fieldName`.
+ * @throws `BadRequest` when another ID was stored at the same hash after the existence check.
+ * @throws `InternalServerError` when the database can't be read or written.
+ */
+const generateIdForRecord = async (
+	{ idConfig, studyId, value }: { idConfig: IDGenerationConfigRecord; studyId: string; value: string },
+	transaction?: PostgresTransaction,
+): Promise<GenerateIdForRecordResult> => {
+	const iimRepo = iimService(getDbInstance());
+	const sourceHash = generateEntityHash({ entityName: idConfig.entityName, studyId, value }, env.ID_MANAGER_SECRET);
+
+	const existingRows = await iimRepo.getIDByHash(sourceHash, transaction);
+	const existingRow = existingRows[0];
+	if (existingRow !== undefined) {
+		return { outcome: 'alreadyExists', generatedId: existingRow.generatedId };
+	}
+
+	const nextSequenceValue = await iimRepo.getNextSequenceValue(idConfig.sequenceName);
+	if (!nextSequenceValue) {
+		return { outcome: 'missingSequence' };
+	}
+
+	const generatedId = generateID(nextSequenceValue, idConfig.prefix, idConfig.paddingLength);
+	await iimRepo.createIDRecord({ sourceHash, configId: idConfig.id, generatedId }, transaction);
+
+	return { outcome: 'created', generatedId };
+};
+
 function isValidStudyField(value: string): value is keyof Omit<StudyModel, 'created_at' | 'updated_at'> {
 	return Object.keys(getTableColumns(study)).includes(value);
 }
@@ -194,6 +242,7 @@ export {
 	generateEntityHash,
 	generateHash,
 	generateID,
+	generateIdForRecord,
 	getNextSequenceValue,
 	isValidStudyField,
 	processIIMConfiguration,
