@@ -91,8 +91,8 @@ importers:
         specifier: workspace:^
         version: link:../../packages/validation
       '@overture-stack/lyric':
-        specifier: ^0.20.0
-        version: 0.20.0(@types/pg@8.15.5)(@types/react@19.2.2)(react@19.2.0)
+        specifier: ^0.23.0
+        version: 0.23.0(@types/pg@8.15.5)(@types/react@19.2.2)(react@19.2.0)
       axios:
         specifier: ^1.10.0
         version: 1.12.2
@@ -1015,8 +1015,8 @@ packages:
   '@overture-stack/lyric-data-model@0.20.0':
     resolution: {integrity: sha512-N5AtWnFj8z1hxK8LNoZmIysp8zy6qnYGc1U/C3cShesodR7RE/c2hnRp3JuOKWCJfB5SGt49PhRKVGVcHW7M1g==}
 
-  '@overture-stack/lyric@0.20.0':
-    resolution: {integrity: sha512-a9j/8wfcjruBaUoHKkIji7dKaMcgNRQ/3bV4cYNpZMLnRCbpdpEjlAI2bP+n+OtbAfWvIfd6mMqonN58TfqkAw==}
+  '@overture-stack/lyric@0.23.0':
+    resolution: {integrity: sha512-SI7RdBcN49meItmL7MZmJDzjS00xM2EGj6FLPDIPumVcNlHpCxnhK8r9La9kUlRQNH+qJz4xe43TFjdmLO/vnA==}
     engines: {node: '>=20.0.0'}
 
   '@overture-stack/sqon-builder@1.1.0':
@@ -4764,7 +4764,7 @@ snapshots:
       - sql.js
       - sqlite3
 
-  '@overture-stack/lyric@0.20.0(@types/pg@8.15.5)(@types/react@19.2.2)(react@19.2.0)':
+  '@overture-stack/lyric@0.23.0(@types/pg@8.15.5)(@types/react@19.2.2)(react@19.2.0)':
     dependencies:
       '@overture-stack/lectern-client': 2.0.0-beta.6
       '@overture-stack/lyric-data-model': 0.20.0(@types/pg@8.15.5)(@types/react@19.2.2)(react@19.2.0)
