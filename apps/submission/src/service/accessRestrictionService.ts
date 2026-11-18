@@ -33,9 +33,22 @@ export const RESTRICTED_ENTITY_NAME = 'sociodemographic';
 
 /**
  * Field name that is always removed, wherever it appears across any entity, from a READ-only
- * user's view of submitted data.
+ * user's view of submitted data, whether or not the ID manager config lists it.
  */
 export const RESTRICTED_FIELD_NAME = 'submitter_participant_id';
+
+const normalizeFieldName = (fieldName: string): string => fieldName.trim().toLowerCase();
+
+/**
+ * Builds the set of field names that are removed from a READ-only user's view of submitted data, and
+ * that they can't filter by: every submitter ID field in the ID manager config, and
+ * {@link RESTRICTED_FIELD_NAME}, which is included even when the config does not list it.
+ *
+ * @param idConfigs The ID manager config rows. Only their `fieldName` is read.
+ * @returns The field names, trimmed and in lowercase.
+ */
+export const getRestrictedFieldNames = (idConfigs: ReadonlyArray<{ fieldName: string }>): Set<string> =>
+	new Set([RESTRICTED_FIELD_NAME, ...idConfigs.map((config) => config.fieldName)].map(normalizeFieldName));
 
 /**
  * Whether responses for a study should be filtered/restricted for the current caller: true
@@ -60,10 +73,23 @@ export const isRestrictedEntityName = (entityName: string): boolean =>
 	restrictedEntityNameVariants.has(entityName.trim().toLowerCase());
 
 /**
- * True if `fieldName` is the restricted field, case-insensitively.
+ * True if `fieldName` is {@link RESTRICTED_FIELD_NAME} or one of `restrictedFieldNames`. Names are compared
+ * case-insensitively and without surrounding whitespace.
  */
-export const isRestrictedFieldName = (fieldName: string): boolean =>
-	fieldName.trim().toLowerCase() === RESTRICTED_FIELD_NAME;
+export const isRestrictedFieldName = (fieldName: string, restrictedFieldNames: ReadonlySet<string>): boolean => {
+	const normalizedFieldName = normalizeFieldName(fieldName);
+	return (
+		normalizedFieldName === RESTRICTED_FIELD_NAME ||
+		[...restrictedFieldNames].some((fieldName) => normalizeFieldName(fieldName) === normalizedFieldName)
+	);
+};
+
+/**
+ * Trimmed, lowercase copy of `restrictedFieldNames` plus {@link RESTRICTED_FIELD_NAME}. Built once per call of
+ * an exported function, so the per-key checks of a recursive walk stay a single set lookup.
+ */
+const normalizeRestrictedFieldNames = (restrictedFieldNames: ReadonlySet<string>): Set<string> =>
+	new Set([RESTRICTED_FIELD_NAME, ...[...restrictedFieldNames].map(normalizeFieldName)]);
 
 /**
  * Removes the {@link RESTRICTED_ENTITY_NAME} schema (`sociodemographic`) from a list of entity names.
@@ -81,17 +107,20 @@ export const excludeRestrictedEntityNames = (allEntityNames: string[], requested
 };
 
 /**
- * Recursively removes any key matching the restricted entity name or the restricted field
+ * Recursively removes any key matching the restricted entity name or a restricted field
  * name from `dataRecord`, at any depth. This is the authoritative filter: Lyric's
  * `view=compound` re-embeds parent/child schemas by walking the dictionary hierarchy in
  * separate queries, independent of whatever `entityName` filter was applied to the root
  * query, so a query-level filter alone cannot be relied on to catch every case.
  */
-const stripRestrictedKeys = (dataRecord: DataRecordNested): DataRecordNested => {
+const stripRestrictedKeys = (
+	dataRecord: DataRecordNested,
+	normalizedRestrictedFieldNames: ReadonlySet<string>,
+): DataRecordNested => {
 	const result: DataRecordNested = {};
 
 	for (const [key, value] of Object.entries(dataRecord)) {
-		if (isRestrictedEntityName(key) || isRestrictedFieldName(key)) {
+		if (isRestrictedEntityName(key) || normalizedRestrictedFieldNames.has(normalizeFieldName(key))) {
 			continue;
 		}
 
@@ -101,27 +130,34 @@ const stripRestrictedKeys = (dataRecord: DataRecordNested): DataRecordNested => 
 		}
 
 		if (Array.isArray(value)) {
-			result[key] = value.map((item) => stripRestrictedKeys(item));
+			result[key] = value.map((item) => stripRestrictedKeys(item, normalizedRestrictedFieldNames));
 			continue;
 		}
 
-		result[key] = stripRestrictedKeys(value);
+		result[key] = stripRestrictedKeys(value, normalizedRestrictedFieldNames);
 	}
 
 	return result;
 };
 
 /**
- * Removes records whose top-level `entityName` is restricted, and any restricted entity/field
- * data nested inside the remaining records (see {@link stripRestrictedKeys}). Run this after
- * `SanitizeLyricIdsWithInternal`: that step needs to read the original value of a restricted
- * field (e.g. `submitter_participant_id`) to look up its generated PCGL system ID before this
- * removes the field.
+ * Removes records whose top-level `entityName` is restricted. Inside the remaining records, at any depth,
+ * it removes nested blocks of the restricted entity and every field named {@link RESTRICTED_FIELD_NAME} or one
+ * of `restrictedFieldNames`. Names are matched case-insensitively and without surrounding whitespace. Other
+ * fields, such as the PCGL system IDs added next to a submitter ID, are kept.
+ *
+ * @returns New records. The records passed in are not modified.
  */
-export const stripRestrictedData = (records: SubmittedDataResponse[]): SubmittedDataResponse[] =>
-	records
+export const stripRestrictedData = (
+	records: SubmittedDataResponse[],
+	restrictedFieldNames: ReadonlySet<string>,
+): SubmittedDataResponse[] => {
+	const normalizedRestrictedFieldNames = normalizeRestrictedFieldNames(restrictedFieldNames);
+
+	return records
 		.filter((record) => !isRestrictedEntityName(record.entityName))
-		.map((record) => ({ ...record, data: stripRestrictedKeys(record.data) }));
+		.map((record) => ({ ...record, data: stripRestrictedKeys(record.data, normalizedRestrictedFieldNames) }));
+};
 
 /**
  * The part of a dictionary schema that matters here, so that this module does not depend on the
@@ -152,36 +188,47 @@ export const getSqonFieldNames = (sqon: unknown): string[] => {
 };
 
 /**
- * Collects the names of the fields that identify the restricted data: the restricted field, and the
- * fields that exist in the restricted entity but in no other schema. Fields the restricted entity
- * shares with another schema are not included.
+ * Collects the names of the fields that identify the restricted data: {@link RESTRICTED_FIELD_NAME}, the
+ * `restrictedFieldNames`, and the fields that exist in the restricted entity but in no other schema. A field
+ * the restricted entity shares with another schema is only included when it is a restricted field.
  *
  * @param schemas The schemas of a Data Dictionary.
- * @returns An array of the restricted field name and the field names only found in
- * the restricted entity. Field names are in lowercase.
+ * @returns The restricted field names, followed by the field names only found in the restricted entity.
+ * Field names are in lowercase, without duplicates.
  */
-export const getRestrictedFilterFieldNames = (schemas: ReadonlyArray<SchemaFields>): string[] => {
-	const fieldNamesOf = (matching: ReadonlyArray<SchemaFields>) =>
-		new Set(matching.flatMap((schema) => schema.fields.map((field) => field.name.toLowerCase())));
+export const getRestrictedFilterFieldNames = (
+	schemas: ReadonlyArray<SchemaFields>,
+	restrictedFieldNames: ReadonlySet<string>,
+): string[] => {
+	const fieldNamesOf = (matching: ReadonlyArray<SchemaFields>): Set<string> =>
+		new Set(matching.flatMap((schema) => schema.fields.map((field) => normalizeFieldName(field.name))));
 
 	const restrictedEntityFields = fieldNamesOf(schemas.filter((schema) => isRestrictedEntityName(schema.name)));
 	const otherFields = fieldNamesOf(schemas.filter((schema) => !isRestrictedEntityName(schema.name)));
 
-	return [RESTRICTED_FIELD_NAME.toLowerCase(), ...[...restrictedEntityFields].filter((name) => !otherFields.has(name))];
+	const normalizedNames = normalizeRestrictedFieldNames(restrictedFieldNames);
+	const entityOnly = [...restrictedEntityFields].filter((name) => !otherFields.has(name));
+	// Remove duplicates with spread Set
+	return [...new Set([...normalizedNames, ...entityOnly])];
 };
 
 /**
  * Finds the field names in the SQON filter that cannot be used as filters by users with only READ access.
- * This selects any field named {@link RESTRICTED_FIELD_NAME} (`submitter_participant_id`), and any field of the
- * {@link RESTRICTED_ENTITY_NAME} schema (`sociodemographic`) that no other schema in `schemas` contains.
- * Field names are matched case-insensitively and returned as they are spelled in the SQON, without duplicates.
+ * This selects any field named {@link RESTRICTED_FIELD_NAME} (`submitter_participant_id`) or one of
+ * `restrictedFieldNames`, and any field of the {@link RESTRICTED_ENTITY_NAME} schema (`sociodemographic`) that
+ * no other schema in `schemas` contains. Field names are matched case-insensitively and returned as they are
+ * spelled in the SQON, without duplicates.
  *
  * @param sqon The SQON from the request body. A value that is not a SQON object has no field names.
  * @param schemas The schemas of the category's Data Dictionary.
  * @returns The restricted field names found in the SQON, or an empty array when it uses none.
  */
-export const findRestrictedFilterFields = (sqon: unknown, schemas: ReadonlyArray<SchemaFields>): string[] => {
-	const restricted = new Set(getRestrictedFilterFieldNames(schemas));
+export const findRestrictedFilterFields = (
+	sqon: unknown,
+	schemas: ReadonlyArray<SchemaFields>,
+	restrictedFieldNames: ReadonlySet<string>,
+): string[] => {
+	const restricted = new Set(getRestrictedFilterFieldNames(schemas, restrictedFieldNames));
 
-	return [...new Set(getSqonFieldNames(sqon))].filter((fieldName) => restricted.has(fieldName.trim().toLowerCase()));
+	return [...new Set(getSqonFieldNames(sqon))].filter((fieldName) => restricted.has(normalizeFieldName(fieldName)));
 };
