@@ -27,7 +27,7 @@ import { type IIMConfig, type IIMConfigObject } from '@/common/validation/id-man
 import { env } from '@/config/envConfig.js';
 import { getDbInstance } from '@/db/index.js';
 import { study } from '@/db/schemas/studiesSchema.js';
-import { GeneratedIdentifiersRecord, type IDGenerationConfigRecord, type PostgresTransaction } from '@/db/types.js';
+import type { IDGenerationConfigRecord, PostgresTransaction } from '@/db/types.js';
 import iimService from '@/service/idManagerService.js';
 
 /**
@@ -146,31 +146,6 @@ const generateEntityHash = ({ entityName, studyId, value }: EntityHashSource, se
 };
 
 /**
- * Finds a ID for an entity based upon its Hashed ID value.
- * @param hashedValue the Hashed ID for an entity.
- * @returns `Promise<IDGenerationConfigRecord | undefined>` - A promise containing the ID record. `undefined` if not found.
- */
-const findIDByHash = async (hashedValue: string): Promise<GeneratedIdentifiersRecord | undefined> => {
-	const database = getDbInstance();
-	const hashedRecord = await iimService(database).getIDByHash(hashedValue);
-
-	if (hashedRecord.length && hashedRecord[0]) {
-		return hashedRecord[0];
-	}
-	return undefined;
-};
-
-/**
- * Gets the next value in a specified sequence.
- * @param sequenceName The name of the sequence in the database.
- * @returns `Promise<number | undefined>` - A number containing the next value in the sequence. `undefined` if not found.
- */
-const getNextSequenceValue = async (sequenceName: string): Promise<number | undefined> => {
-	const database = getDbInstance();
-	return await iimService(database).getNextSequenceValue(sequenceName);
-};
-
-/**
  * Generates an unique padded ID based upon the next sequence value provided to it via the DB, the prefix for the entity and the padding length.
  * @param nextSequenceValue `number` containing the next sequence value.
  * @param entityPrefix `string` containing the prefix for the ID.
@@ -218,8 +193,7 @@ const generateIdForRecord = async (
 ): Promise<GenerateIdForRecordResult> => {
 	const sourceHash = generateEntityHash({ entityName: idConfig.entityName, studyId, value }, env.ID_MANAGER_SECRET);
 
-	const existingRows = await iimRepo.getIDByHash(sourceHash, transaction);
-	const existingRow = existingRows[0];
+	const existingRow = (await iimRepo.getIDByHash(sourceHash, transaction))[0];
 	if (existingRow !== undefined) {
 		return { outcome: 'alreadyExists', generatedId: existingRow.generatedId };
 	}
@@ -249,12 +223,10 @@ function isValidStudyField(value: string): value is keyof Omit<StudyModel, 'crea
 }
 
 export {
-	findIDByHash,
 	generateEntityHash,
 	generateHash,
 	generateID,
 	generateIdForRecord,
-	getNextSequenceValue,
 	isValidStudyField,
 	processIIMConfiguration,
 	retrieveAllIIMConfigurations,

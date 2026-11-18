@@ -63,8 +63,19 @@ const dryRun = process.argv.includes('--dry-run');
 const db = connectToDb(dbConfig.connectionString);
 const iimRepo = iimService(db);
 
-type RehashOutcome = 'updated' | 'alreadyMigrated' | 'collisions' | 'withoutId' | 'missingValue' | 'generated';
-type RehashCounts = Record<RehashOutcome, number>;
+/**
+ * What happened to a record in the run. Each outcome is a count in the summary.
+ */
+const RehashOutcome = {
+	UPDATED: 'updated',
+	ALREADY_MIGRATED: 'alreadyMigrated',
+	COLLISIONS: 'collisions',
+	WITHOUT_ID: 'withoutId',
+	MISSING_VALUE: 'missingValue',
+	GENERATED: 'generated',
+} as const;
+type RehashOutcomeValues = (typeof RehashOutcome)[keyof typeof RehashOutcome];
+type RehashCounts = Record<RehashOutcomeValues, number>;
 
 /**
  * A submitted record of a configured entity, with the old and new hashes computed from its submitter value.
@@ -98,12 +109,12 @@ class DryRunRollback extends Error {}
 const submittedDataCreatedAt = z.object({ system_id: z.string(), created_at: z.string() });
 
 const emptyCounts = (): RehashCounts => ({
-	updated: 0,
-	alreadyMigrated: 0,
-	collisions: 0,
-	withoutId: 0,
-	missingValue: 0,
-	generated: 0,
+	[RehashOutcome.UPDATED]: 0,
+	[RehashOutcome.ALREADY_MIGRATED]: 0,
+	[RehashOutcome.COLLISIONS]: 0,
+	[RehashOutcome.WITHOUT_ID]: 0,
+	[RehashOutcome.MISSING_VALUE]: 0,
+	[RehashOutcome.GENERATED]: 0,
 });
 
 const totals = emptyCounts();
@@ -113,7 +124,7 @@ const totals = emptyCounts();
  */
 const countsByStudyAndEntity = new Map<string, Map<string, RehashCounts>>();
 
-const countRecord = (entityName: string, studyId: string, outcome: RehashOutcome): void => {
+const countRecord = (entityName: string, studyId: string, outcome: RehashOutcomeValues): void => {
 	totals[outcome]++;
 
 	const countsByEntity = countsByStudyAndEntity.get(studyId) ?? new Map<string, RehashCounts>();
@@ -154,7 +165,7 @@ const readRecords = async (idConfigs: IDGenerationConfigRecord[]): Promise<ReadR
 			for await (const record of records) {
 				const fieldValue = record.data[idConfig.fieldName];
 				if (fieldValue === undefined || fieldValue === null) {
-					countRecord(idConfig.entityName, record.organization, 'missingValue');
+					countRecord(idConfig.entityName, record.organization, RehashOutcome.MISSING_VALUE);
 					continue;
 				}
 
@@ -244,7 +255,7 @@ const generateMissingId = async (
 		return { action: 'not generated, run without --generate-missing' };
 	}
 
-	countRecord(record.idConfig.entityName, record.studyId, 'generated');
+	countRecord(record.idConfig.entityName, record.studyId, RehashOutcome.GENERATED);
 
 	if (dryRun) {
 		return { action: 'would generate (dry run)' };
@@ -303,7 +314,7 @@ try {
 					(record) => rowsByHash.get(record.newHash)?.configId === record.idConfig.id,
 				);
 				for (const record of migrated) {
-					countRecord(record.idConfig.entityName, record.studyId, 'alreadyMigrated');
+					countRecord(record.idConfig.entityName, record.studyId, RehashOutcome.ALREADY_MIGRATED);
 				}
 
 				// The remaining records have no ID at their new hash. When there are none, the group is done.
@@ -331,7 +342,7 @@ try {
 							.update(generatedIdentifiers)
 							.set({ sourceHash: keeper.newHash })
 							.where(eq(generatedIdentifiers.id, oldRow.id));
-						countRecord(keeper.idConfig.entityName, keeper.studyId, 'updated');
+						countRecord(keeper.idConfig.entityName, keeper.studyId, RehashOutcome.UPDATED);
 						holder = { ...recordDetails(keeper), generatedId: oldRow.generatedId };
 						withoutRow = withoutRow.filter((record) => record !== keeper);
 					} else {
@@ -352,12 +363,12 @@ try {
 				// and a record without an ID otherwise. Each one is counted, given a new ID when --generate-missing is
 				// set, and logged.
 				for (const record of withoutRow) {
-					const outcome = holder === undefined ? 'withoutId' : 'collisions';
+					const outcome = holder === undefined ? RehashOutcome.WITHOUT_ID : RehashOutcome.COLLISIONS;
 					countRecord(record.idConfig.entityName, record.studyId, outcome);
 
 					const generation = await generateMissingId(record, transaction);
 
-					if (holder === undefined) {
+					if (outcome === RehashOutcome.WITHOUT_ID) {
 						logger.warn(
 							`[IIM rehash]: Record has no PCGL ID: ${JSON.stringify({ ...recordDetails(record), ...generation })}`,
 						);
