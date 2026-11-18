@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router';
 /**
  * Redirect page that handles post-login navigation.
  *
+ *
  * This component checks the user's authentication status and redirects accordingly:
  * - Redirects unauthenticated users to the home page ('/')
  * - Redirects authenticated users to the user dashboard ('/user')

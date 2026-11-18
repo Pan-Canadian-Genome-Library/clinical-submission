@@ -27,6 +27,8 @@ import { lyricProvider } from '@/core/provider.js';
 import { exchangeCodeForTokens, getOidcAuthorizeUrl, refreshUserSession } from '@/external/oidcAuthenticationClient.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
 
+import { calculateRefreshTokenExpiry } from './utils.js';
+
 const login = async (request: Request, response: Response) => {
 	response.render('login.njk', {
 		app_title: 'Clinical Submission',
@@ -102,8 +104,12 @@ const token = validateRequest(OIDCCodeResponse, async (request, response, next) 
 		 * whereas JS expects it as milliseconds, so we have to multiply by 1000
 		 * to make it compatible for any arithmetic.
 		 */
-		const tokenTimeToLive = Date.now() + (refreshTokenResponse.refresh_token_iat || 0);
 		const tokenIssueTime = tokenData.iat * 1000;
+
+		const tokenExpiryTime = calculateRefreshTokenExpiry(
+			refreshTokenResponse.refresh_token_iat,
+			refreshTokenResponse.refresh_token_lifetime,
+		);
 
 		response.render('token.njk', {
 			app_title: 'Clinical Submission',
@@ -112,8 +118,9 @@ const token = validateRequest(OIDCCodeResponse, async (request, response, next) 
 			sub: tokenData.sub,
 
 			accessToken: refreshTokenResponse.refresh_token,
-			expires: new Date(tokenTimeToLive).toLocaleString('en-CA', { dateStyle: 'short', timeStyle: 'medium' }),
-			valid_till: tokenTimeToLive,
+			refreshTokenLifetime: refreshTokenResponse.refresh_token_lifetime,
+			expires: new Date(tokenExpiryTime * 1000).toLocaleString('en-CA', { dateStyle: 'short', timeStyle: 'medium' }),
+			valid_till: tokenExpiryTime,
 			idp_name: tokenData.idp_name,
 			iat: new Date(tokenIssueTime).toLocaleString('en-CA', { dateStyle: 'short', timeStyle: 'medium' }),
 			name: tokenData.name,

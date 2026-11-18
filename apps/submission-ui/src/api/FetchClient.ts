@@ -28,7 +28,9 @@ async function fetchClient(resource: string | URL, options?: RequestInit): Promi
 	// __API_PROXY_PATH__ is declared in the vite.config.ts so that we are sure to be using the same
 	// path here as is used by the server proxy.
 	const applicationAPIPrefix = __API_PROXY_PATH__;
-	const headers = new Headers({ 'Content-Type': 'application/json' });
+	const headers = new Headers({
+		'Content-Type': 'application/json',
+	});
 
 	if (typeof resource === 'string') {
 		resource = applicationAPIPrefix + resource;

@@ -28,10 +28,10 @@ const { lang } = getLangSessionInformation();
 
 export const defaultNS = 'common';
 export const resources = {
-	en: {
+	['en-CA']: {
 		[defaultNS]: ENGLISH_LOCALE_DICTIONARY,
 	},
-	fr: {
+	['fr-CA']: {
 		[defaultNS]: FRENCH_DICTIONARY,
 	},
 };
