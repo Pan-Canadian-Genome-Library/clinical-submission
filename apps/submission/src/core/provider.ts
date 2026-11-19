@@ -20,8 +20,8 @@
 import { AppConfig, provider } from '@overture-stack/lyric';
 
 import { env } from '@/config/envConfig.js';
+import { onFinishCommitCallback } from '@/internal/id-manager/commitHook.js';
 import { lyricAuthMiddleware } from '@/middleware/auth.js';
-import { onFinishCommitCallback } from '@/middleware/idManager.js';
 
 const appConfig: AppConfig = {
 	db: {
