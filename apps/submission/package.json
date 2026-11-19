@@ -20,11 +20,13 @@
 		"lint": "eslint .",
 		"lint:fix": "eslint --fix .",
 		"migrate:db:dev": "tsx src/scripts/migration.ts && pnpm db:migrate",
+		"script:rehash-ids": "tsx src/scripts/rehash-generated-ids.ts",
 		"start:dev": "pnpm migrate:db:dev && tsx watch --clear-screen=false src/index.ts | pino-pretty",
 		"test": "tsx --test \"src/**/*.test.ts\"",
 		"\n========  Prod environment (compiled) =======": "",
 		"migrate:db:prod": "node --import=./register.js src/scripts/migration.js",
 		"migrate:pcgl:db:prod": "node --import=./register.js src/scripts/pcgl-migration.js",
+		"script:rehash-ids:prod": "node --import=./register.js src/scripts/rehash-generated-ids.js",
 		"start:prod": "pnpm migrate:db:prod && pnpm migrate:pcgl:db:prod && NODE_ENV=production node --import=./register.js src/index.js"
 	},
 	"dependencies": {
