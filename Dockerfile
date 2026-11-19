@@ -99,7 +99,7 @@ CMD [ "pnpm", "start:prod" ]
 # Data Dictionary UI Server
 #######################################################
 
-FROM nginx:1.27-alpine-slim AS data-dictionary-ui
+FROM nginx:1.30-alpine-slim AS data-dictionary-ui
 
 ARG APP_USER
 ARG WORKDIR
@@ -147,7 +147,7 @@ CMD ["nginx", "-g", "daemon off;"]
 # Submission UI Server
 #######################################################
 
-FROM nginx:1.27-alpine-slim AS submission-ui
+FROM nginx:1.30-alpine-slim AS submission-ui
 
 ARG APP_USER
 ARG WORKDIR
