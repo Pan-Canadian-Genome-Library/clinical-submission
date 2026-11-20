@@ -81,3 +81,34 @@ This application is a wrapper around the [@overture-stack/lyric](https://github.
 | `VALKEY_PORT`               | The port number on which the Valkey server is listening.                                                                                                                                                                                                                                                                                                      | 6379                                   |
 | `VALKEY_USER`               | The username for authenticating with the Valkey server.                                                                                                                                                                                                                                                                                                       | 'default'                              |
 | `VALKEY_PASSWORD`           | The password for authenticating with the Valkey server.                                                                                                                                                                                                                                                                                                       | 'valkeypass'                           |
+
+### Internal ID Generation
+
+When data is committed, each inserted record of an entity listed in `ID_MANAGER_CONFIG` gets a PCGL ID. The ID is stored against an HMAC (keyed with `ID_MANAGER_SECRET`) of the entity name, the study ID and the record's submitter value. The same submitter value therefore gets its own PCGL ID in each entity and each study.
+
+- Data read endpoints add the PCGL ID next to every configured submitter ID field, including copies of it in other entities (e.g. `submitter_participant_id` in a specimen gets the participant's PCGL ID), using the study of the top-level record.
+- `GET /data/study/{studyId}/entity/{entityName}/{externalId}/exists` only reports IDs generated in that study.
+
+### Update/Create DUO Permissions in Study Table
+
+The study table has two closely related fields: duo_permission and disease_specific_modifier. The following rules govern their relationship:
+
+- duo_permission is `absent` & disease_specific_modifier is provided → Invalid. disease_specific_modifier must not exist when duo_permission is not provided.
+  - example: `{ "diseaseSpecificModifier": ["MONDO:0000001"] }`
+
+- duo_permission is DUO:0000007 (Disease Specific Research) & disease_specific_modifier is `absent or empty` → Invalid. disease_specific_modifier must be a non-empty array of MONDO values.
+  - example: `{ "duoPermission": "DUO:0000007", "diseaseSpecificModifier": [] }`
+
+- duo_permission is DUO:0000007 (Disease Specific Research) & disease_specific_modifier `contains invalid values` → Invalid. All entries must match the MONDO code format(`/^MONDO:\d{7}$/`).
+  - example: `{ "duoPermission": "DUO:0000007", "diseaseSpecificModifier": ["INVALID:123"] }`
+
+- duo_permission is `any non-disease DUO code` & disease_specific_modifier `is absent` → Invalid. disease_specific_modifier must be provided as an empty array [].
+  - example: `{ "duoPermission": "DUO:0000004" }`
+
+- duo_permission `is any non-disease DUO code` & disease_specific_modifier `contains values` → Invalid. disease_specific_modifier must be an empty array [] when the permission is not disease-specific.
+  - example: `{ "duoPermission": "DUO:0000004", "diseaseSpecificModifier": ["MONDO:0000001"] }`
+
+#### Valid Examples:
+
+- `{ "duoPermission": "DUO:0000007", "diseaseSpecificModifier": ["MONDO:0000001"] }`
+- `{ "duoPermission": "DUO:0000004", "diseaseSpecificModifier": [] }`

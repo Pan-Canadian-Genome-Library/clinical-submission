@@ -1,11 +1,12 @@
-/data/entity/{entityName}/{externalId}/exists:
+/data/study/{studyId}/entity/{entityName}/{externalId}/exists:
   get:
     summary: Retrieve boolean if record exists
+    description: Returns `true` when a PCGL ID has been generated for the external ID of this entity in the given study, and `false` otherwise, including when the entity has no ID configuration.
     tags:
       - Data
     parameters:
-      - name: externalId
-        description: External Id which represents the PHI value. (e.g. a participant ID "ABC1234")
+      - name: studyId
+        description: ID of the study the record was submitted to. PCGL IDs are generated per entity and per study, so the same external ID can exist in one study and not in another.
         in: path
         schema:
           type: string
@@ -16,13 +17,12 @@
         schema:
           type: string
         required: true
-        # TODO: Feature to be added
-      # - name: parentId
-      #   description: Internal ID. The PCGL sequential ID for its parent. (e.g. a study ID "S00000001")
-      #   in: query
-      #   schema:
-      #     type: string
-      #   required: false
+      - name: externalId
+        description: External Id which represents the PHI value. (e.g. a participant ID "ABC1234")
+        in: path
+        schema:
+          type: string
+        required: true
     responses:
       200:
         description: Successful response indicating a boolean result
@@ -166,6 +166,10 @@
 /data/category/{categoryId}/organization/{organization}/query:
   post:
     summary: Retrieve Submitted Data filtered by search parameters provided in the request body
+    description: |
+      Filter submitted data with a SQON, a JSON object that combines conditions on entity fields using operators such as `and`, `or`, `not`, `in`, `gt` and `lt`. See the request body examples.
+
+      Users with only READ access to the study receive responses without personal information: `sociodemographic` records and the submitter ID fields are removed. The submitter ID fields are `submitter_participant_id` and every field configured in the ID manager, such as `submitter_treatment_id`; their PCGL system IDs, such as `pcgl_treatment_id`, are kept. Requests from these users are rejected with a 400 if the filter uses a submitter ID field or a field that only exists in `sociodemographic`.
     tags:
       - Data
     security:

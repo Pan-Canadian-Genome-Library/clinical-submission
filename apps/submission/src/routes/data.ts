@@ -28,7 +28,7 @@ export const dataRouter: Router = (() => {
 	router.use(urlencoded({ extended: false }));
 
 	// Public endpoints – do not require authentication
-	router.get('/entity/:entityName/:externalId/exists', dataController.getDataIdExists);
+	router.get('/study/:studyId/entity/:entityName/:externalId/exists', dataController.getDataIdExists);
 
 	// Restricted endpoints - Admin or Submitter access required
 	router.get('/category/:categoryId', authMiddleware(), dataController.getCategoryById);

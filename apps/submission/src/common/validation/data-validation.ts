@@ -23,24 +23,22 @@ import { z } from 'zod';
 
 import { RequestValidation } from '@/middleware/requestValidation.js';
 
-import { stringNotEmpty, stringNotEmptyOptional } from './common.js';
+import { stringNotEmpty } from './common.js';
 
 interface DataIdParams extends ParamsDictionary {
-	externalId: string;
+	studyId: string;
 	entityName: string;
+	externalId: string;
 }
 
-interface DataIdExistsQuery extends ParsedQs {
-	parentId?: string;
-}
-
-export const getDataById: RequestValidation<object, DataIdExistsQuery, DataIdParams> = {
+/**
+ * Request validation for checking whether a PCGL ID was generated for an external ID. It requires the `studyId`,
+ * `entityName` and `externalId` path parameters, none of which may be empty.
+ */
+export const getDataById: RequestValidation<object, ParsedQs, DataIdParams> = {
 	pathParams: z.object({
-		externalId: stringNotEmpty,
+		studyId: stringNotEmpty,
 		entityName: stringNotEmpty,
-		parentId: stringNotEmptyOptional,
-	}),
-	query: z.object({
-		parentId: stringNotEmptyOptional,
+		externalId: stringNotEmpty,
 	}),
 };

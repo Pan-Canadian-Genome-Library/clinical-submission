@@ -20,8 +20,8 @@
 import { AppConfig, provider } from '@overture-stack/lyric';
 
 import { env } from '@/config/envConfig.js';
+import { onFinishCommitCallback } from '@/internal/id-manager/commitHook.js';
 import { lyricAuthMiddleware } from '@/middleware/auth.js';
-import { onFinishCommitCallback } from '@/middleware/idManager.js';
 
 const appConfig: AppConfig = {
 	db: {
@@ -56,7 +56,7 @@ const appConfig: AppConfig = {
 	schemaService: {
 		url: env.LECTERN_URL,
 	},
-	validator: env.VALIDATOR_CONFIG,
+	validator: [],
 	submissionService: {
 		maxFileSize: 0, // Set to 0 to disable file size limit in lyricProvider
 	},

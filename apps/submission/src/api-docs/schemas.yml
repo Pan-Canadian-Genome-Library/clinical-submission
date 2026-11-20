@@ -333,19 +333,16 @@ components:
         categoryName:
           type: string
           description: Name of the Category
-        dictionary:
-          type: object
-          description: Schema of the Dictionary
+        dictionaryName:
+          type: string
+          description: Name of the Dictionary
+        dictionaryVersion:
+          type: string
+          description: Version of the Dictionary
         migrationId:
           type: string
           description: ID of the Migration if applicable
           allowEmptyValue: true
-        name:
-          type: string
-          description: Name of the Dictionary
-        version:
-          type: string
-          description: Version of the Dictionary
 
     StudyResult:
       type: object

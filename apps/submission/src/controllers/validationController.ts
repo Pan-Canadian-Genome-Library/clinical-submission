@@ -25,6 +25,7 @@ import { logger } from '@/common/logger.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
 import { type RequestValidation, validateRequest } from '@/middleware/requestValidation.js';
+import { isRestrictedEntityName } from '@/service/accessRestrictionService.js';
 import { studyService as getStudyService } from '@/service/studyService.js';
 
 interface PropertyExistsPathParamSchema extends ParamsDictionary {
@@ -61,6 +62,13 @@ export const validateProperty = validateRequest(validatePropertyRequestSchema, a
 	const { study: studyId, value: fieldValue } = request.query;
 
 	logger.debug(`External validation check: ${{ entityName, fieldName, fieldValue, studyId }}`);
+
+	// This endpoint is public, so it can't tell whether the caller is restricted. Records of a
+	// restricted entity are never reported as found, and no query is made for them. Answer the same
+	// way as a missing record so the entity can't be told apart from a record that doesn't exist.
+	if (isRestrictedEntityName(entityName)) {
+		return next(new lyricProvider.utils.errors.NotFound(`No matching record found.`));
+	}
 
 	const studyService = getStudyService(getDbInstance());
 	const study = await studyService.getStudyById(studyId);

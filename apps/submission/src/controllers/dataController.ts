@@ -30,9 +30,19 @@ import { getDataById } from '@/common/validation/data-validation.js';
 import { env } from '@/config/envConfig.js';
 import { lyricProvider } from '@/core/provider.js';
 import { getDbInstance } from '@/db/index.js';
+import type { IDGenerationConfigRecord } from '@/db/types.js';
 import { hasAllowedAccess } from '@/external/pcglAuthZClient.js';
-import { generateHash } from '@/internal/id-manager/utils.js';
+import { generateEntityHash } from '@/internal/id-manager/utils.js';
 import { validateRequest } from '@/middleware/requestValidation.js';
+import {
+	excludeRestrictedEntityNames,
+	findRestrictedFilterFields,
+	getRestrictedFieldNames,
+	isRestrictedEntityName,
+	type SchemaFields,
+	shouldRestrictStudyData,
+	stripRestrictedData,
+} from '@/service/accessRestrictionService.js';
 import iimService from '@/service/idManagerService.js';
 import { studyService } from '@/service/studyService.js';
 
@@ -40,33 +50,67 @@ const defaultPage = 1;
 const defaultPageSize = 20;
 const defaultView = VIEW_TYPE.Values.flat;
 
+/**
+ * Fetches the schemas of the category's active Data Dictionary.
+ *
+ * @param categoryId The category ID of the dictionary to fetch.
+ * @returns An array of the dictionary's schemas, or an empty array if the category has no active dictionary.
+ */
+const getActiveDictionarySchemas = async (categoryId: number): Promise<SchemaFields[]> => {
+	const currentDictionary = await lyricProvider.services.dictionary.getActiveDictionaryByCategory(categoryId);
+	return currentDictionary?.dictionary ?? [];
+};
+
+/**
+ * Adds internal PCGL system IDs, then strips restricted entities/fields when `restrict` is true.
+ * The restricted fields are every submitter ID field in the ID manager config, plus
+ * `submitter_participant_id`.
+ * Order matters: stripping must run after sanitizing, since sanitizing still needs to read the
+ * original value of a restricted field (e.g. `submitter_participant_id`) to look up its
+ * generated ID before that field is removed.
+ */
+const sanitizeAndStripRestricted = async (
+	records: SubmittedDataResponse[],
+	restrict: boolean,
+	loadedIimConfigs?: IDGenerationConfigRecord[],
+): Promise<SubmittedDataResponse[]> => {
+	// Reuse the configs when the handler already loaded them for the same request
+	const iimConfigs = loadedIimConfigs ?? (await iimService(getDbInstance()).getAllIIMConfigs());
+	const sanitizedResult = await SanitizeLyricIdsWithInternal(records, iimConfigs);
+	return restrict ? stripRestrictedData(sanitizedResult, getRestrictedFieldNames(iimConfigs)) : sanitizedResult;
+};
+
 const getDataIdExists = validateRequest(getDataById, async (req, res, next) => {
 	const db = getDbInstance();
 	const iimRepo = iimService(db);
 
 	try {
-		const { externalId, entityName } = req.params;
+		const { studyId, entityName, externalId } = req.params;
 
 		const idConfigResult = await iimRepo.getIIMConfig(entityName);
+		const idConfig = idConfigResult[0];
 
 		//  Check if entityName exists
-		if (!idConfigResult[0]) {
+		if (!idConfig) {
 			res.status(200).send(false);
 			return;
 		}
 
-		const idmHash = generateHash(String(externalId), env.ID_MANAGER_SECRET);
+		const idmHash = generateEntityHash(
+			{ entityName: idConfig.entityName, studyId, value: String(externalId) },
+			env.ID_MANAGER_SECRET,
+		);
 
 		const generatedIdentifierResult = await iimRepo.getIDByHash(idmHash);
 
-		// Check if the hash has been generated for ANY entity
+		// Check if an ID has been generated for this value in this study
 		if (!generatedIdentifierResult[0]) {
 			res.status(200).send(false);
 			return;
 		}
 
-		// Check if both the idConfigResult id matches the configId in the generatedIdentifierResult
-		if (generatedIdentifierResult[0]?.configId !== idConfigResult[0]?.id) {
+		// Check if the generated ID belongs to the config of the requested entity
+		if (generatedIdentifierResult[0].configId !== idConfig.id) {
 			res.status(200).send(false);
 			return;
 		}
@@ -87,7 +131,6 @@ const getCategoryById = validateRequest(
 
 			// request params
 			const categoryIdOrAlias = req.params.categoryId;
-			const entityName = asArray(req.query.entityName || []);
 			const page = parseInt(String(req.query.page)) || defaultPage;
 			const pageSize = parseInt(String(req.query.pageSize)) || defaultPageSize;
 			const view = convertToViewType(req.query.view) || defaultView;
@@ -106,10 +149,30 @@ const getCategoryById = validateRequest(
 				throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${category.id}".`);
 			}
 
-			if (!hasAllowedAccess(studyByCategory.study_id, 'READ', user)) {
+			const hasReadAccess = hasAllowedAccess(studyByCategory.study_id, 'READ', user);
+			if (!hasReadAccess) {
 				throw new lyricProvider.utils.errors.Forbidden(
 					'User is not authorized to read submitted data for this organization',
 				);
+			}
+
+			const hasWriteAccess = hasAllowedAccess(studyByCategory.study_id, 'WRITE', user);
+			const restrict = shouldRestrictStudyData(hasReadAccess, hasWriteAccess);
+
+			const schemas = restrict ? await getActiveDictionarySchemas(category.id) : [];
+			const requestedEntityNames = asArray(req.query.entityName || []);
+			const entityName = restrict
+				? excludeRestrictedEntityNames(
+						schemas.map((schema) => schema.name),
+						requestedEntityNames,
+					)
+				: requestedEntityNames;
+
+			if (restrict && entityName.length === 0) {
+				return res.status(200).send({
+					pagination: { currentPage: page, pageSize, totalPages: 0, totalRecords: 0 },
+					records: [],
+				} satisfies SubmittedDataPaginatedResponse);
 			}
 
 			// Send submission data, organized by entity.
@@ -119,8 +182,9 @@ const getCategoryById = validateRequest(
 				{ entityName, view, organizations: [studyByCategory.study_id] },
 			);
 
-			// Reform lyric response to include internal ID's generated by the IIM
-			const formattedResult = await SanitizeLyricIdsWithInternal(submitResult.result);
+			// Reform lyric response to include internal ID's generated by the IIM, and strip
+			// restricted entities/fields if this study's data is restricted for this user.
+			const formattedResult = await sanitizeAndStripRestricted(submitResult.result, restrict);
 
 			const responsePaginated: SubmittedDataPaginatedResponse = {
 				pagination: {
@@ -163,7 +227,8 @@ const getCategoryBySystemId = validateRequest(
 				throw new lyricProvider.utils.errors.NotFound(`No Study found with categoryId "${category.id}".`);
 			}
 
-			if (!hasAllowedAccess(studyByCategory.study_id, 'READ', user)) {
+			const hasReadAccess = hasAllowedAccess(studyByCategory.study_id, 'READ', user);
+			if (!hasReadAccess) {
 				throw new lyricProvider.utils.errors.Forbidden(
 					'User is not authorized to read submitted data for this organization',
 				);
@@ -183,8 +248,21 @@ const getCategoryBySystemId = validateRequest(
 				return;
 			}
 
-			// Reform lyric response to include internal ID's generated by the IIM
-			const formattedResult = await SanitizeLyricIdsWithInternal([submitResult.result]);
+			const hasWriteAccess = hasAllowedAccess(studyByCategory.study_id, 'WRITE', user);
+			const restrict = shouldRestrictStudyData(hasReadAccess, hasWriteAccess);
+
+			// getSubmittedDataBySystemId has no entity-name filter to apply before the read, since
+			// it fetches a single record by its system ID. Deny after the fact rather than leak it;
+			// respond the same way as "not found" above so restricted entities aren't distinguishable
+			// from missing ones.
+			if (restrict && isRestrictedEntityName(submitResult.result.entityName)) {
+				res.status(404).send(submitResult.metadata.errorMessage);
+				return;
+			}
+
+			// Reform lyric response to include internal ID's generated by the IIM, and strip
+			// restricted entities/fields if this study's data is restricted for this user.
+			const formattedResult = await sanitizeAndStripRestricted([submitResult.result], restrict);
 
 			return res.status(200).send(formattedResult[0]);
 		} catch (error) {
@@ -203,7 +281,6 @@ const getCategoryByOrganization = validateRequest(
 			// request parameters
 			const categoryIdOrAlias = req.params.categoryId;
 			const organization = req.params.organization;
-			const entityName = asArray(req.query.entityName || []);
 			const page = parseInt(String(req.query.page)) || defaultPage;
 			const pageSize = parseInt(String(req.query.pageSize)) || defaultPageSize;
 			const view = convertToViewType(String(req.query.view)) || defaultView;
@@ -227,10 +304,30 @@ const getCategoryByOrganization = validateRequest(
 				);
 			}
 
-			if (!hasAllowedAccess(organization, 'READ', user)) {
+			const hasReadAccess = hasAllowedAccess(organization, 'READ', user);
+			if (!hasReadAccess) {
 				throw new lyricProvider.utils.errors.Forbidden(
 					'User is not authorized to read submitted data for this organization',
 				);
+			}
+
+			const hasWriteAccess = hasAllowedAccess(organization, 'WRITE', user);
+			const restrict = shouldRestrictStudyData(hasReadAccess, hasWriteAccess);
+
+			const schemas = restrict ? await getActiveDictionarySchemas(category.id) : [];
+			const requestedEntityNames = asArray(req.query.entityName || []);
+			const entityName = restrict
+				? excludeRestrictedEntityNames(
+						schemas.map((schema) => schema.name),
+						requestedEntityNames,
+					)
+				: requestedEntityNames;
+
+			if (restrict && entityName.length === 0) {
+				return res.status(200).send({
+					pagination: { currentPage: page, pageSize, totalPages: 0, totalRecords: 0 },
+					records: [],
+				} satisfies SubmittedDataPaginatedResponse);
 			}
 
 			// Send submission data, organized by entity.
@@ -248,8 +345,10 @@ const getCategoryByOrganization = validateRequest(
 				res.status(404).send(submitResult.metadata.errorMessage);
 				return;
 			}
-			// Reform lyric response to include internal ID's generated by the IIM
-			const formattedResult = await SanitizeLyricIdsWithInternal(submitResult.result);
+
+			// Reform lyric response to include internal ID's generated by the IIM, and strip
+			// restricted entities/fields if this study's data is restricted for this user.
+			const formattedResult = await sanitizeAndStripRestricted(submitResult.result, restrict);
 
 			const responsePaginated: SubmittedDataPaginatedResponse = {
 				pagination: {
@@ -279,7 +378,6 @@ const getSubmittedDataByQuery = validateRequest(
 			const categoryIdOrAlias = req.params.categoryId;
 			const organization = req.params.organization;
 			const sqon = lyricProvider.utils.convertSqonToQuery.parseSQON(req.body);
-			const entityName = asArray(req.query.entityName || []);
 			const page = parseInt(String(req.query.page)) || defaultPage;
 			const pageSize = parseInt(String(req.query.pageSize)) || defaultPageSize;
 			const view = convertToViewType(String(req.query.view)) || defaultView;
@@ -303,10 +401,42 @@ const getSubmittedDataByQuery = validateRequest(
 				);
 			}
 
-			if (!hasAllowedAccess(organization, 'READ', user)) {
+			const hasReadAccess = hasAllowedAccess(organization, 'READ', user);
+			if (!hasReadAccess) {
 				throw new lyricProvider.utils.errors.Forbidden(
 					'User is not authorized to read submitted data for this organization',
 				);
+			}
+
+			const hasWriteAccess = hasAllowedAccess(organization, 'WRITE', user);
+			const restrict = shouldRestrictStudyData(hasReadAccess, hasWriteAccess);
+
+			const schemas = restrict ? await getActiveDictionarySchemas(category.id) : [];
+			const iimConfigs = await iimService(db).getAllIIMConfigs();
+			const restrictedFieldNames = getRestrictedFieldNames(iimConfigs);
+
+			// A filter on a restricted field would let a user find out the restricted values by what a query
+			// matches, even though the field is removed from the response, so reject it instead of ignoring it
+			const restrictedFilterFields = restrict ? findRestrictedFilterFields(sqon, schemas, restrictedFieldNames) : [];
+			if (restrictedFilterFields.length > 0) {
+				throw new lyricProvider.utils.errors.BadRequest(
+					`Users with READ access only can't filter by: ${restrictedFilterFields.join(', ')}`,
+				);
+			}
+
+			const requestedEntityNames = asArray(req.query.entityName || []);
+			const entityName = restrict
+				? excludeRestrictedEntityNames(
+						schemas.map((schema) => schema.name),
+						requestedEntityNames,
+					)
+				: requestedEntityNames;
+
+			if (restrict && entityName.length === 0) {
+				return res.status(200).send({
+					pagination: { currentPage: page, pageSize, totalPages: 0, totalRecords: 0 },
+					records: [],
+				} satisfies SubmittedDataPaginatedResponse);
 			}
 
 			// Send submission data, organized by entity.
@@ -320,8 +450,9 @@ const getSubmittedDataByQuery = validateRequest(
 				{ sqon, entityName, view },
 			);
 
-			// Reform lyric response to include internal ID's generated by the IIM
-			const formattedResult = await SanitizeLyricIdsWithInternal(submitResult.result);
+			// Reform lyric response to include internal ID's generated by the IIM, and strip
+			// restricted entities/fields if this study's data is restricted for this user.
+			const formattedResult = await sanitizeAndStripRestricted(submitResult.result, restrict, iimConfigs);
 
 			const responsePaginated: SubmittedDataPaginatedResponse = {
 				pagination: {
@@ -353,6 +484,8 @@ const getSubmittedDataStream = validateRequest(
 				throw new lyricProvider.utils.errors.NotFound(`No Category with ID or Alias - ${categoryIdOrAlias} found.`);
 			}
 
+			const iimConfigs = await iimService(getDbInstance()).getAllIIMConfigs();
+
 			res.setHeader('Transfer-Encoding', 'chunked');
 			res.setHeader('Content-Type', 'application/x-ndjson');
 
@@ -361,7 +494,7 @@ const getSubmittedDataStream = validateRequest(
 				entityName,
 			})) {
 				// Reform lyric response to include internal ID's generated by the IIM
-				const result = await SanitizeLyricIdsWithInternal([data]);
+				const result = await SanitizeLyricIdsWithInternal([data], iimConfigs);
 
 				res.write(JSON.stringify(result[0]) + '\n');
 			}
@@ -375,18 +508,24 @@ const getSubmittedDataStream = validateRequest(
 
 /**
  *	Function that takes in lyric SubmittedDataResponse[] and applies the transformer to all its array values
+ * @param iimConfigs The ID manager config rows, whose `fieldName`s determine which fields get an internal ID
  * @returns SubmittedDataResponse replacing "data" with the sanitized sensitive fields with `internalId`
  */
 const SanitizeLyricIdsWithInternal = async (
 	submittedResult: SubmittedDataResponse[],
+	iimConfigs: ReadonlyArray<IDGenerationConfigRecord>,
 ): Promise<SubmittedDataResponse[]> => {
 	const db = getDbInstance();
 	const iimRepo = iimService(db);
-	const iimConfigs = await iimRepo.getAllIIMConfigs();
-	const fieldNamesToAdd = new Set(iimConfigs.map((config) => config.fieldName));
+	const configsByFieldName = new Map(iimConfigs.map((config) => [config.fieldName, config]));
 
 	const formatSubmittedResult = submittedResult.map(async (result) => {
-		return { ...result, data: await TransformerFunction(result.data, fieldNamesToAdd, iimRepo) };
+		// Records nested in a compound view belong to the same study as the top-level record, so the top-level
+		// organization scopes the hash of every configured field in the record
+		return {
+			...result,
+			data: await TransformerFunction(result.data, result.organization, configsByFieldName, iimRepo),
+		};
 	});
 
 	return Promise.all(formatSubmittedResult);
@@ -395,15 +534,17 @@ const SanitizeLyricIdsWithInternal = async (
 /**
  *	Recursive function that takes in DataRecordNested and adds the generated internal id's of entities determined from the the IIM config that was generated from the IIM service
  * @param dataRecord
- * @param fieldNames Fieldname values to replace with internalId
+ * @param studyId Study ID of the record, which scopes the hash of every configured field
+ * @param configsByFieldName ID configs keyed by the field name whose value has a generated ID
  * @param iimRepo iim service to query for internalId's
  * @returns Mutated Promise of DataRecordNested with field `internalId` injected with original entities
  */
 const TransformerFunction = async (
 	dataRecord: DataRecordNested,
-	fieldNamesToAdd: Set<string>,
+	studyId: string,
+	configsByFieldName: ReadonlyMap<string, IDGenerationConfigRecord>,
 	iimRepo: ReturnType<typeof iimService>,
-) => {
+): Promise<DataRecordNested> => {
 	const processInternalValue = async (dataRecordValue: DataRecordNested): Promise<DataRecordNested> => {
 		// The first call will always be DataRecordNested object
 		// the conditions in the Object.entries loop will check if other key/value pairs are isDataRecordValue or an DataRecordNested[] before recursive call
@@ -411,12 +552,21 @@ const TransformerFunction = async (
 
 		for (const [key, currentValue] of Object.entries(dataRecordValue)) {
 			// if current key of dataRecordValue is a key that has a generated ID, then start internal id inject logic
-			if (fieldNamesToAdd.has(key)) {
-				const hashedFieldName = generateHash(`${dataRecordValue[key]}`, env.ID_MANAGER_SECRET);
+			const idConfig = configsByFieldName.get(key);
+			if (idConfig) {
+				// The hash uses the entity of the field's config, not of the record holding it, so a copy of a
+				// submitter ID in another entity (e.g. `submitter_participant_id` in a specimen) resolves to the ID
+				// of the entity it refers to
+				const hashedFieldName = generateEntityHash(
+					{ entityName: idConfig.entityName, studyId, value: `${currentValue}` },
+					env.ID_MANAGER_SECRET,
+				);
 				const generatedIdResult = await iimRepo.getIDByHash(hashedFieldName);
+				const generatedIdRecord = generatedIdResult[0];
 
-				if (generatedIdResult[0] && generatedIdResult[0].internalId) {
-					result[generatedIdResult[0].internalId] = generatedIdResult[0]?.generatedId; // Add PCGL internal id
+				// A row generated for another config is not the ID of this field, so nothing is added for it
+				if (generatedIdRecord && generatedIdRecord.configId === idConfig.id && idConfig.internalId) {
+					result[idConfig.internalId] = generatedIdRecord.generatedId; // Add PCGL internal id
 					result[key] = currentValue; // Persist original id
 					continue;
 				}
